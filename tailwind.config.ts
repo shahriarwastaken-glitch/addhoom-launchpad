@@ -8,9 +8,7 @@ export default {
     container: {
       center: true,
       padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
+      screens: { "2xl": "1400px" },
     },
     extend: {
       colors: {
@@ -47,6 +45,17 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        brand: {
+          orange: "hsl(var(--brand-orange))",
+          "orange-light": "hsl(var(--brand-orange-light))",
+          green: "hsl(var(--brand-green))",
+          "green-light": "hsl(var(--brand-green-light))",
+          yellow: "hsl(var(--brand-yellow))",
+          purple: "hsl(var(--brand-purple))",
+          cream: "hsl(var(--brand-cream))",
+          warm: "hsl(var(--brand-warm))",
+          elevated: "hsl(var(--brand-elevated))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -58,6 +67,13 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      fontFamily: {
+        'heading-en': ['Syne', 'sans-serif'],
+        'heading-bn': ['Hind Siliguri', 'sans-serif'],
+        'body-en': ['Plus Jakarta Sans', 'sans-serif'],
+        'body-bn': ['Noto Sans Bengali', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -65,20 +81,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
