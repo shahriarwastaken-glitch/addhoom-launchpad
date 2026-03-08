@@ -9,7 +9,7 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
 } from '@/components/ui/sidebar';
-import { Target, Video, Calendar, MessageSquare, Search, Stethoscope, PartyPopper, BarChart3, Settings, Shield, Zap } from 'lucide-react';
+import { Target, Video, Calendar, MessageSquare, Search, Stethoscope, PartyPopper, BarChart3, Settings, Shield, Zap, Wand2 } from 'lucide-react';
 
 const items = [
   { icon: Target, bn: 'হোম', en: 'Home', url: '/dashboard' },
