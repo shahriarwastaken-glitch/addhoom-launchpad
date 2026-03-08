@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Copy, RefreshCw, Star, ChevronDown, Image as ImageIcon, Check, Rocket, Zap, BarChart3, RotateCcw, Lightbulb, Flame, TrendingUp, Download } from 'lucide-react';
+import { Copy, RefreshCw, Star, ChevronDown, Image as ImageIcon, Check, Rocket, Zap, BarChart3, RotateCcw, Lightbulb, Flame, TrendingUp, Download, Clock, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { AdResult, GeneratorMode } from './types';
 import { LOADING_TIPS, LOADING_TIPS_EN } from './types';
+import { getImageHistory, type ImageHistoryEntry } from './AdGeneratorPage';
 
 const toBengali = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
 
