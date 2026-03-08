@@ -34,26 +34,21 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
   const [dragOver, setDragOver] = useState(false);
   const [voiceoverOpen, setVoiceoverOpen] = useState(false);
   const [playingMusic, setPlayingMusic] = useState<string | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const oscillatorRef = useRef<OscillatorNode | null>(null);
-  const gainNodeRef = useRef<GainNode | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const playTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Music preview frequencies/styles per track
-  const MUSIC_PREVIEWS: Record<string, { frequency: number; type: OscillatorType; tempo: number }> = {
-    energetic: { frequency: 440, type: 'square', tempo: 8 },
-    soft: { frequency: 330, type: 'sine', tempo: 4 },
-    trendy: { frequency: 392, type: 'sawtooth', tempo: 6 },
-    corporate: { frequency: 349, type: 'triangle', tempo: 3 },
+  const MUSIC_URLS: Record<string, string> = {
+    energetic: 'https://njjwqmwnsfskaobegvng.supabase.co/storage/v1/object/public/video-assets/music-previews/energetic.mp3',
+    soft: 'https://njjwqmwnsfskaobegvng.supabase.co/storage/v1/object/public/video-assets/music-previews/soft.mp3',
+    trendy: 'https://njjwqmwnsfskaobegvng.supabase.co/storage/v1/object/public/video-assets/music-previews/trendy.mp3',
+    corporate: 'https://njjwqmwnsfskaobegvng.supabase.co/storage/v1/object/public/video-assets/music-previews/corporate.mp3',
   };
 
   const stopMusicPreview = useCallback(() => {
-    if (oscillatorRef.current) {
-      try { oscillatorRef.current.stop(); } catch {}
-      oscillatorRef.current = null;
-    }
-    if (gainNodeRef.current) {
-      gainNodeRef.current = null;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
     }
     if (playTimerRef.current) {
       clearTimeout(playTimerRef.current);
@@ -69,54 +64,33 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
     }
     stopMusicPreview();
 
-    const config = MUSIC_PREVIEWS[trackValue];
-    if (!config) return;
+    const url = MUSIC_URLS[trackValue];
+    if (!url) return;
 
-    const ctx = audioContextRef.current || new AudioContext();
-    audioContextRef.current = ctx;
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = config.type;
-    osc.frequency.setValueAtTime(config.frequency, ctx.currentTime);
-    gain.gain.setValueAtTime(0.15, ctx.currentTime);
-
-    // Create a rhythmic pattern
-    const now = ctx.currentTime;
-    for (let i = 0; i < config.tempo * 5; i++) {
-      const t = now + (i / config.tempo);
-      gain.gain.setValueAtTime(0.15, t);
-      gain.gain.setValueAtTime(0.02, t + (0.5 / config.tempo));
-      // Slight pitch variation for musicality
-      osc.frequency.setValueAtTime(config.frequency * (1 + (i % 4 === 2 ? 0.125 : 0)), t);
-    }
-
-    // Fade out at end
-    gain.gain.setValueAtTime(0.15, now + 4.5);
-    gain.gain.linearRampToValueAtTime(0, now + 5);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(now + 5);
-
-    oscillatorRef.current = osc;
-    gainNodeRef.current = gain;
+    const audio = new Audio(url);
+    audio.volume = 0.4;
+    audioRef.current = audio;
     setPlayingMusic(trackValue);
 
-    playTimerRef.current = setTimeout(() => {
+    audio.play().catch(() => {
       setPlayingMusic(null);
-      oscillatorRef.current = null;
+    });
+
+    // Auto-stop after 5 seconds
+    playTimerRef.current = setTimeout(() => {
+      stopMusicPreview();
     }, 5000);
+
+    // Also stop when audio ends naturally
+    audio.addEventListener('ended', () => {
+      setPlayingMusic(null);
+    });
   }, [playingMusic, stopMusicPreview]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       stopMusicPreview();
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
     };
   }, [stopMusicPreview]);
 
