@@ -281,12 +281,21 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
 
         {/* Body (prompt) - show truncated for image ads */}
         {ad.image_url ? (
-          <details className="mb-2">
-            <summary className="text-[13px] text-muted-foreground font-heading-bn cursor-pointer hover:text-foreground transition-colors">
-              {t('প্রম্পট দেখুন', 'View prompt')}
-            </summary>
-            <p className="text-[13px] font-heading-bn text-muted-foreground leading-[1.6] mt-2 whitespace-pre-line px-1">{ad.body}</p>
-          </details>
+          ad.body ? (
+            <div className="mb-2">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  const el = (e.currentTarget as HTMLElement).nextElementSibling;
+                  if (el) el.classList.toggle('hidden');
+                }}
+                className="text-[13px] text-muted-foreground font-heading-bn cursor-pointer hover:text-foreground transition-colors flex items-center gap-1"
+              >
+                <ChevronDown size={12} /> {t('প্রম্পট দেখুন', 'View prompt')}
+              </button>
+              <p className="hidden text-[13px] font-heading-bn text-muted-foreground leading-[1.6] mt-2 whitespace-pre-line px-1">{ad.body}</p>
+            </div>
+          ) : null
         ) : (
           <p className="text-[15px] font-heading-bn text-muted-foreground leading-[1.7] mb-2 whitespace-pre-line px-1">{ad.body}</p>
         )}

@@ -101,6 +101,11 @@ const AdGeneratorPage = () => {
           return;
         }
 
+        // Build headline with price if available
+        const adHeadline = form.price 
+          ? `${form.productName} — মাত্র ৳${form.price}`
+          : form.productName;
+
         const { data, error } = await supabase.functions.invoke('generate-ad-image', {
           body: {
             workspace_id: activeWorkspace.id,
@@ -110,6 +115,8 @@ const AdGeneratorPage = () => {
             style: form.imageStyle,
             brand_color_primary: form.brandColorPrimary,
             brand_color_secondary: form.brandColorSecondary,
+            ad_headline: adHeadline,
+            ad_body: form.productDesc,
             language: form.language,
             num_variations: form.numVariations,
             product_image_base64,

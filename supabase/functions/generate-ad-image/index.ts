@@ -136,28 +136,34 @@ serve(async (req) => {
 
     // --- Build prompt ---
     const styleText = buildStyleInstructions(style, brand_color_primary, brand_color_secondary);
-    const headlineInstruction = ad_headline
-      ? `Include this text as an overlay in Bengali: "${ad_headline}"`
-      : "No text overlay needed — just the visual.";
+    const { ad_body = "" } = input;
 
-    const prompt = `You are creating a professional advertisement image for a Bangladeshi e-commerce product.
+    const textOverlayInstruction = ad_headline
+      ? `IMPORTANT: Include this text prominently as a text overlay on the image in Bengali: "${ad_headline}". Make the text large, readable, and well-positioned. Use brand colors for the text.`
+      : "Include the product name as text overlay on the image.";
 
-This exact product is shown in the reference image I'm providing.
-Maintain the product's appearance, colors, and key features exactly.
+    const descriptionInstruction = ad_body
+      ? `Also include a brief product description text: "${ad_body.substring(0, 80)}"`
+      : "";
 
-Create a ${styleText} advertisement image.
+    const prompt = `Create a professional advertisement image for a Bangladeshi e-commerce product.
+
+The reference image shows the exact product. Keep the product's appearance, colors, and features recognizable.
+
+${styleText}
 
 Requirements:
 - Format: ${FORMAT_INSTRUCTIONS[format] || FORMAT_INSTRUCTIONS.square}
-- Style: ${style}
-- Brand colors to use: ${brand_color_primary} (primary), ${brand_color_secondary} (secondary)
-- ${headlineInstruction}
+- Brand colors: ${brand_color_primary} (primary), ${brand_color_secondary} (secondary)
+- ${textOverlayInstruction}
+- ${descriptionInstruction}
+- Include price and product details as prominent text overlays
 - High quality, professional, suitable for Facebook/Instagram ads
 - Clean, polished, commercial photography aesthetic
-- No watermarks, no logos other than subtle brand color usage
-- Product must remain recognizable from the reference image
+- Text must be in Bengali script and clearly readable
+- Product must be the central focus of the image
 
-The result should look like a high-converting Bangladeshi e-commerce advertisement.`;
+The result should look like a high-converting Bangladeshi e-commerce advertisement with clear product info and pricing.`;
 
     // --- Generate images via Lovable AI Gateway ---
     const count = Math.min(num_variations, 3);
