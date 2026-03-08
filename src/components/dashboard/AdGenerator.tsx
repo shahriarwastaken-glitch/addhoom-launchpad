@@ -91,6 +91,10 @@ const AdGenerator = () => {
   const [adaptedAds, setAdaptedAds] = useState<AdResult[]>([]);
   const [showWhyItWorks, setShowWhyItWorks] = useState(false);
 
+  // Remix state
+  const [remixingId, setRemixingId] = useState<string | null>(null);
+  const [showRemixDropdown, setShowRemixDropdown] = useState<string | null>(null);
+
   // Results state
   const [generating, setGenerating] = useState(false);
   const [results, setResults] = useState<AdResult[]>([]);
