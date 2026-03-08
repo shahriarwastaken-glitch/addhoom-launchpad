@@ -121,6 +121,10 @@ const AdGeneratorPage = () => {
             num_variations: form.numVariations,
             product_image_base64,
             product_image_mime_type,
+            framework: form.framework,
+            occasion: form.occasion,
+            tone: form.tone,
+            platforms: form.platforms,
           },
         });
 

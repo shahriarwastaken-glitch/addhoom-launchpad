@@ -76,6 +76,10 @@ serve(async (req) => {
       language = "bn",
       num_variations = 1,
       creative_id,
+      framework = "AIDA",
+      occasion = "general",
+      tone = "friendly",
+      platforms = ["facebook"],
     } = input;
 
     if (!workspace_id || !product_name) {
@@ -138,6 +142,40 @@ NON-NEGOTIABLE TEXT ENFORCEMENT:
 ${isBanglaHeadline ? "- This request includes Bangla text. Exact Bangla fidelity is mandatory." : ""}
 `;
 
+    // Framework-specific visual direction
+    const frameworkVisuals: Record<string, string> = {
+      FOMO: "Create URGENCY visually — use bold countdown-style elements, limited-stock badges, or 'Almost Gone' visual cues. High energy, dynamic angles.",
+      PAS: "Show the PROBLEM visually (e.g., frustration, mess) then the SOLUTION (the product as hero). Contrast between chaos and clean.",
+      AIDA: "Eye-catching hero composition. The product must GRAB attention instantly. Use dramatic lighting and bold framing.",
+      social_proof: "Include visual trust signals — star ratings, '1000+ sold' badge style, testimonial-style layout. Clean and trustworthy.",
+      before_after: "Split composition or transformation feel — show contrast between 'without' and 'with' the product.",
+      offer_first: "Lead with the DEAL visually — price/discount should be the most prominent visual element after the product.",
+    };
+
+    // Occasion-specific visual direction
+    const occasionVisuals: Record<string, string> = {
+      general: "Standard commercial product photography.",
+      eid_fitr: "Eid festive theme — gold accents, crescent moon motifs, green tones, celebratory and gift-giving mood.",
+      eid_adha: "Eid ul-Adha theme — rich warm tones, premium feel, family/sharing mood.",
+      boishakh: "Pohela Boishakh — red and white theme, alpona patterns, Bengali New Year festive energy.",
+      december16: "Victory Day — red and green patriotic colors, national pride elements.",
+      valentine: "Romantic mood — soft pinks, reds, hearts, elegant gift presentation.",
+      mothers_day: "Warm, emotional, caring mood — soft lighting, gentle colors, gratitude theme.",
+      new_year: "Fresh start energy — bright, clean, celebratory.",
+      ramadan: "Ramadan theme — serene, spiritual, gold and deep blue/green tones, iftar mood.",
+      black_friday: "SALE energy — bold red/black/yellow, explosive burst elements, maximum urgency.",
+      product_launch: "Premium launch feel — spotlight lighting, reveal/unveiling composition, tech-forward.",
+    };
+
+    // Tone visual mapping
+    const toneVisuals: Record<string, string> = {
+      friendly: "Warm, approachable, soft lighting, inviting colors.",
+      professional: "Clean, premium, structured composition, neutral-cool palette.",
+      aggressive: "Bold, high-contrast, dynamic angles, intense colors, maximum impact.",
+    };
+
+    const platformTarget = (Array.isArray(platforms) ? platforms : [platforms]).join(", ");
+
     const prompt = `${masterPrompt}
 
 ═══════════════════════════════════════════════
@@ -148,7 +186,18 @@ Product Name: ${product_name}
 ${product_description ? `Product Description: ${product_description}` : ""}
 Style: ${style.toUpperCase()}
 Format: ${FORMAT_INSTRUCTIONS[format] || FORMAT_INSTRUCTIONS.square}
+Target Platforms: ${platformTarget}
 Brand Colors: Primary ${brand_color_primary}, Secondary ${brand_color_secondary}
+
+FRAMEWORK VISUAL DIRECTION (${framework}):
+${frameworkVisuals[framework] || frameworkVisuals.AIDA}
+
+OCCASION/SEASON THEME (${occasion}):
+${occasionVisuals[occasion] || occasionVisuals.general}
+
+TONE & MOOD (${tone}):
+${toneVisuals[tone] || toneVisuals.friendly}
+
 ${textInstruction}
 ${descInstruction}
 ${hardTextGuardrails}
