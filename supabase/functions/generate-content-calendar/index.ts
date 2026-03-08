@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
-  corsHeaders, checkPlanLimit, logUsage,
+  corsHeaders, callGemini, checkPlanLimit, logUsage,
   errorResponse, jsonResponse, ADDHOOM_SYSTEM_PROMPT,
 } from "../_shared/addhoom.ts";
 

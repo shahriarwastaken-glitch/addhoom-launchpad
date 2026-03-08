@@ -1,29 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { ADDHOOM_SYSTEM_PROMPT } from "./systemPrompt.ts";
 
-const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
-
-async function getGeminiKey(): Promise<string> {
-  try {
-    const sb = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-    const { data } = await sb
-      .from("api_keys")
-      .select("key_value")
-      .eq("service_name", "GEMINI_API_KEY")
-      .eq("status", "active")
-      .maybeSingle();
-    if (data?.key_value) return data.key_value;
-  } catch (e) {
-    console.warn("Could not read api_keys table, falling back to env:", e);
-  }
-  const envVal = Deno.env.get("GEMINI_API_KEY");
-  if (!envVal) throw new Error("GEMINI_API_KEY not set");
-  return envVal;
-}
-
 // Get system prompt from database or fallback to default
 export async function getSystemPrompt(): Promise<string> {
   try {
@@ -50,26 +27,32 @@ export async function callGemini(
   jsonMode: boolean = false
 ): Promise<string | null> {
   try {
-    const apiKey = await getGeminiKey();
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const response = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        contents: [{
-          role: "user",
-          parts: [{ text: systemPrompt + "\n\n" + prompt }]
-        }],
-        generationConfig: {
-          temperature: 0.85,
-          maxOutputTokens: 4096,
-          topP: 0.95
-        }
-      })
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: prompt },
+        ],
+      }),
     });
 
+    if (!response.ok) {
+      const err = await response.text();
+      console.error("Lovable AI Gateway error:", response.status, err);
+      return null;
+    }
+
     const data = await response.json();
-    let text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
+    let text = data.choices?.[0]?.message?.content ?? null;
 
     if (text && jsonMode) {
       text = text.replace(/```json/g, "").replace(/```/g, "").trim();
@@ -87,31 +70,37 @@ export async function callGeminiChat(
   systemPrompt: string
 ): Promise<string | null> {
   try {
-    const apiKey = await getGeminiKey();
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const contents = [
-      { role: "user", parts: [{ text: systemPrompt }] },
-      ...messages.map((m) => ({
-        role: m.role === "model" ? "model" : "user",
-        parts: [{ text: m.content }]
-      }))
-    ];
+    const openaiMessages = messages.map((m) => ({
+      role: m.role === "model" ? "assistant" as const : "user" as const,
+      content: m.content,
+    }));
 
-    const response = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        contents,
-        generationConfig: {
-          temperature: 0.85,
-          maxOutputTokens: 4096,
-          topP: 0.95
-        }
-      })
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...openaiMessages,
+        ],
+      }),
     });
 
+    if (!response.ok) {
+      const err = await response.text();
+      console.error("Lovable AI Gateway error:", response.status, err);
+      return null;
+    }
+
     const data = await response.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
+    return data.choices?.[0]?.message?.content ?? null;
   } catch (error) {
     console.error("callGeminiChat error:", error);
     return null;
