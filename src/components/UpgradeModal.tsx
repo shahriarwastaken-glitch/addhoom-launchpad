@@ -19,7 +19,7 @@ const content: Record<UpgradeType, { icon: string; title_bn: string; title_en: s
     desc_en: 'Pro plan allows 2 video ads per month. Upgrade to Agency for unlimited videos.',
   },
   general: {
-    icon: '⚡',
+    icon: 'zap',
     title_bn: 'ফিচার লিমিট শেষ হয়েছে',
     title_en: 'Feature Limit Reached',
     desc_bn: 'এই ফিচারের লিমিট শেষ হয়ে গেছে। আরও ব্যবহারের জন্য আপগ্রেড করুন।',
