@@ -45,6 +45,13 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
     ? [t('চিন্তা করছি...', 'Thinking...'), t('লিখছি...', 'Writing...'), t('স্কোর করছি...', 'Scoring...')]
     : [t('প্রম্পট তৈরি হচ্ছে...', 'Creating prompt...'), t('AI ছবি আঁকছে...', 'AI drawing...'), t('ফিনিশিং টাচ...', 'Finishing touches...')];
 
+  // Listen for toggle-image-history event from InputPanel
+  useEffect(() => {
+    const handler = () => setShowHistory(prev => !prev);
+    window.addEventListener('toggle-image-history', handler);
+    return () => window.removeEventListener('toggle-image-history', handler);
+  }, []);
+
   useEffect(() => {
     if (!generating) { setProgress(0); setShowTip(false); return; }
     setProgress(0);
