@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Copy, RefreshCw, Star, ChevronDown, Image as ImageIcon, Check, Rocket, Zap, BarChart3, RotateCcw, Lightbulb, Flame, TrendingUp, Download, Clock, Trash2 } from 'lucide-react';
+import { Copy, RefreshCw, Star, ChevronDown, Image as ImageIcon, Check, Rocket, Zap, BarChart3, RotateCcw, Lightbulb, Flame, TrendingUp, Download, Clock, Trash2, FolderPlus, FolderOpen, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import type { AdResult, GeneratorMode } from './types';
 import { LOADING_TIPS, LOADING_TIPS_EN } from './types';
 import { getImageHistory, type ImageHistoryEntry } from './AdGeneratorPage';
@@ -19,9 +20,17 @@ interface ResultsPanelProps {
   onSwitchToImage: (ad: AdResult) => void;
   onRemix: (ad: AdResult) => void;
   onLoadHistory?: (results: AdResult[]) => void;
+  projectId?: string | null;
 }
 
-const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix, onLoadHistory }: ResultsPanelProps) => {
+interface ProjectOption {
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+}
+
+const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix, onLoadHistory, projectId }: ResultsPanelProps) => {
   const { t, lang } = useLanguage();
   const [progress, setProgress] = useState(0);
   const [showTip, setShowTip] = useState(false);
@@ -265,18 +274,19 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
       {/* Ad Cards */}
       <div className="space-y-4">
         {results.map((ad, i) => (
-          <AdCopyCard
-            key={ad.id || i}
-            ad={ad}
-            rank={i + 1}
-            copiedId={copiedId}
-            onCopy={() => copySingle(ad)}
-            onWinner={() => toggleWinner(ad)}
-            onRemix={() => onRemix(ad)}
-            onSwitchToImage={() => onSwitchToImage(ad)}
-            onDownload={() => ad.image_url && downloadImage(ad.image_url, `ad-${ad.id || i + 1}`)}
-            delay={i * 0.1}
-          />
+            <AdCopyCard
+              key={ad.id || i}
+              ad={ad}
+              rank={i + 1}
+              copiedId={copiedId}
+              onCopy={() => copySingle(ad)}
+              onWinner={() => toggleWinner(ad)}
+              onRemix={() => onRemix(ad)}
+              onSwitchToImage={() => onSwitchToImage(ad)}
+              onDownload={() => ad.image_url && downloadImage(ad.image_url, `ad-${ad.id || i + 1}`)}
+              delay={i * 0.1}
+              projectId={projectId}
+            />
         ))}
       </div>
     </div>
@@ -284,16 +294,53 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
 };
 
 // Single ad card component
-const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToImage, onDownload, delay }: {
+const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToImage, onDownload, delay, projectId }: {
   ad: AdResult; rank: number; copiedId: string | null;
   onCopy: () => void; onWinner: () => void; onRemix: () => void;
   onSwitchToImage: () => void; onDownload: () => void; delay: number;
+  projectId?: string | null;
 }) => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const { activeWorkspace } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const [promptVisible, setPromptVisible] = useState(false);
+  const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
+  const [projects, setProjects] = useState<ProjectOption[]>([]);
+  const [assignedProject, setAssignedProject] = useState<ProjectOption | null>(null);
+  const [loadingProjects, setLoadingProjects] = useState(false);
   const isWinner = ad.is_winner;
   const isCopied = copiedId === ad.id;
+
+  const fetchProjects = async () => {
+    if (!activeWorkspace || projects.length > 0) return;
+    setLoadingProjects(true);
+    const { data } = await supabase
+      .from('projects')
+      .select('id, name, emoji, color')
+      .eq('workspace_id', activeWorkspace.id)
+      .eq('is_archived', false)
+      .order('updated_at', { ascending: false });
+    if (data) setProjects(data);
+    setLoadingProjects(false);
+  };
+
+  const assignToProject = async (project: ProjectOption) => {
+    if (!ad.id) return;
+    const table = ad.image_url ? 'ad_images' : 'ad_creatives';
+    // ad_images doesn't have project_id, only ad_creatives does
+    if (ad.image_url) {
+      toast.error(t('ইমেজ এডগুলো এখনো প্রজেক্টে যোগ করা যায় না', 'Image ads cannot be added to projects yet'));
+      return;
+    }
+    const { error } = await supabase.from('ad_creatives').update({ project_id: project.id }).eq('id', ad.id);
+    if (!error) {
+      setAssignedProject(project);
+      setProjectDropdownOpen(false);
+      toast.success(t(`"${project.name}" প্রজেক্টে যোগ হয়েছে`, `Added to "${project.name}"`));
+    } else {
+      toast.error(t('যোগ করতে সমস্যা হয়েছে', 'Failed to add'));
+    }
+  };
 
   const rankColors = [
     'bg-gradient-to-br from-[#FFB800] to-[#FF8C00]',
@@ -489,6 +536,46 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
             </>
           )}
         </div>
+
+        {/* Add to Project - only when no project context */}
+        {!projectId && !assignedProject && ad.id && !ad.image_url && (
+          <div className="relative mt-3">
+            <button
+              onClick={() => { setProjectDropdownOpen(!projectDropdownOpen); if (!projectDropdownOpen) fetchProjects(); }}
+              className="text-[13px] font-heading-bn text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+            >
+              <FolderPlus size={13} /> {t('+ প্রজেক্টে যোগ করুন', '+ Add to Project')}
+              <ChevronDown size={12} className={`transition-transform ${projectDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {projectDropdownOpen && (
+              <div className="absolute left-0 bottom-full mb-1 z-20 w-64 bg-popover border border-border rounded-xl shadow-lg p-1.5 max-h-48 overflow-y-auto">
+                {loadingProjects ? (
+                  <p className="text-xs text-muted-foreground p-2 text-center">{t('লোড হচ্ছে...', 'Loading...')}</p>
+                ) : projects.length === 0 ? (
+                  <p className="text-xs text-muted-foreground p-2 text-center">{t('কোনো প্রজেক্ট নেই', 'No projects yet')}</p>
+                ) : projects.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => assignToProject(p)}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left hover:bg-secondary transition-colors"
+                  >
+                    <FolderOpen size={14} style={{ color: p.color }} />
+                    <span className="text-sm font-heading-bn text-foreground truncate">{p.emoji} {p.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Assigned project badge */}
+        {assignedProject && (
+          <div className="mt-3 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary text-xs font-heading-bn">
+            <CheckCircle2 size={13} className="text-brand-green" />
+            <FolderOpen size={13} style={{ color: assignedProject.color }} />
+            <span className="text-foreground">{assignedProject.emoji} {assignedProject.name}</span>
+          </div>
+        )}
       </div>
     </motion.div>
   );

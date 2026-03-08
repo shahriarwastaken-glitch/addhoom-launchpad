@@ -288,6 +288,7 @@ const AdGeneratorPage = () => {
             onSwitchToImage={handleSwitchToImage}
             onRemix={ad => setRemixAd(ad)}
             onLoadHistory={setResults}
+            projectId={projectId}
           />
         </div>
 
@@ -342,6 +343,7 @@ const AdGeneratorPage = () => {
             onSwitchToImage={handleSwitchToImage}
             onRemix={ad => setRemixAd(ad)}
             onLoadHistory={setResults}
+            projectId={projectId}
           />
         )}
       </div>
