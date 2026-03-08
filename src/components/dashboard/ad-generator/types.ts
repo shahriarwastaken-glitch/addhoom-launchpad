@@ -32,7 +32,7 @@ export interface GeneratorFormData {
   productDesc: string;
   price: string;
   platforms: string[];
-  language: 'bn' | 'banglish';
+  language: 'bn' | 'en';
   framework: string;
   occasion: string;
   tone: string;

@@ -204,7 +204,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
           <div className="flex gap-2">
             {[
               { label: 'বাংলা', labelEn: 'Bengali', value: 'bn' as const, icon: <Globe size={14} /> },
-              { label: 'Banglish', labelEn: 'Banglish', value: 'banglish' as const, icon: <Type size={14} /> },
+              { label: 'English', labelEn: 'English', value: 'en' as const, icon: <Type size={14} /> },
             ].map(l => (
               <button
                 key={l.value}
