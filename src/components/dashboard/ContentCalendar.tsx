@@ -637,29 +637,43 @@ function MonthView({ entries, setEntries, t, lang, navigate, isMobile }: {
                 }`}>
                   {lang === 'bn' ? toBn(day) : day}
                 </div>
-                {/* Content pills — draggable */}
-                <div className="flex flex-col gap-0.5 flex-1 overflow-hidden">
-                  {dayEntries.slice(0, 3).map(e => {
-                    const tc = TYPE_COLORS[e.content_type] || { bg: 'bg-secondary', text: 'text-foreground' };
-                    const isSkipped = e.status === 'skipped';
-                    const isDragging = draggingId === e.id;
-                    return (
-                      <div key={e.id}
-                        draggable
-                        onDragStart={ev => { ev.stopPropagation(); handleDragStart(ev, e.id); }}
-                        onDragEnd={handleDragEnd}
-                        className={`text-[10px] leading-tight rounded-md px-1 py-0.5 truncate cursor-grab active:cursor-grabbing select-none transition-opacity ${tc.bg} ${tc.text} ${
-                          isSkipped ? 'opacity-30 line-through' : ''
-                        } ${isDragging ? 'opacity-40' : ''}`}>
-                        {e.status === 'confirmed' && <Check size={8} className="inline mr-0.5" />}
-                        {e.title || t('কনটেন্ট', 'Content')}
-                      </div>
-                    );
-                  })}
-                  {dayEntries.length > 3 && (
-                    <span className="text-[9px] text-muted-foreground">+{lang === 'bn' ? toBn(dayEntries.length - 3) : dayEntries.length - 3} {t('আরো', 'more')}</span>
-                  )}
-                </div>
+                {/* Content indicators */}
+                {isMobile ? (
+                  /* Mobile: colored dots only */
+                  <div className="flex flex-wrap gap-[3px] mt-auto">
+                    {dayEntries.slice(0, 4).map(e => {
+                      const tc = TYPE_COLORS[e.content_type] || { bg: 'bg-secondary', text: 'text-foreground' };
+                      return (
+                        <div key={e.id} className={`w-[6px] h-[6px] rounded-full ${tc.bg} ${e.status === 'skipped' ? 'opacity-30' : ''}`} />
+                      );
+                    })}
+                    {dayEntries.length > 4 && <div className="w-[6px] h-[6px] rounded-full bg-muted-foreground/30" />}
+                  </div>
+                ) : (
+                  /* Desktop: full pills, draggable */
+                  <div className="flex flex-col gap-0.5 flex-1 overflow-hidden">
+                    {dayEntries.slice(0, 3).map(e => {
+                      const tc = TYPE_COLORS[e.content_type] || { bg: 'bg-secondary', text: 'text-foreground' };
+                      const isSkipped = e.status === 'skipped';
+                      const isDragging = draggingId === e.id;
+                      return (
+                        <div key={e.id}
+                          draggable
+                          onDragStart={ev => { ev.stopPropagation(); handleDragStart(ev, e.id); }}
+                          onDragEnd={handleDragEnd}
+                          className={`text-[10px] leading-tight rounded-md px-1 py-0.5 truncate cursor-grab active:cursor-grabbing select-none transition-opacity ${tc.bg} ${tc.text} ${
+                            isSkipped ? 'opacity-30 line-through' : ''
+                          } ${isDragging ? 'opacity-40' : ''}`}>
+                          {e.status === 'confirmed' && <Check size={8} className="inline mr-0.5" />}
+                          {e.title || t('কনটেন্ট', 'Content')}
+                        </div>
+                      );
+                    })}
+                    {dayEntries.length > 3 && (
+                      <span className="text-[9px] text-muted-foreground">+{lang === 'bn' ? toBn(dayEntries.length - 3) : dayEntries.length - 3} {t('আরো', 'more')}</span>
+                    )}
+                  </div>
+                )}
                 {dayEntries.some(e => e.status === 'overdue') && (
                   <div className="absolute top-0 left-0 w-[3px] h-full rounded-l-xl bg-destructive" />
                 )}
