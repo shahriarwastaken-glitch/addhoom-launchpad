@@ -227,7 +227,7 @@ const AIChat = () => {
           >
             <Menu size={18} className="text-muted-foreground" />
           </button>
-          <div className="w-9 h-9 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">⚡</div>
+          <div className="w-9 h-9 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0"><Zap size={18} /></div>
           <div className="min-w-0">
             <h3 className="text-sm font-bold text-foreground font-heading-bn">AdDhoom AI</h3>
             <p className="text-[10px] text-muted-foreground font-body-bn truncate">
