@@ -194,15 +194,15 @@ export default function AdminSettings() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                🤖 AI সিস্টেম প্রম্পট
+                🤖 AI Copy Master Prompt
                 {usingDefault && (
-                  <span className="text-xs bg-muted px-2 py-0.5 rounded-full font-normal">ডিফল্ট ব্যবহার হচ্ছে</span>
+                   <span className="text-xs bg-muted px-2 py-0.5 rounded-full font-normal">Using Default</span>
                 )}
               </CardTitle>
               <CardDescription>
-                AdDhoom AI এর ব্যক্তিত্ব এবং আচরণ নির্ধারণ করে
+                Controls AdDhoom AI's copywriting persona, frameworks, and BD market rules
                 {lastUpdated && !usingDefault && (
-                  <span className="ml-2 text-xs">• শেষ আপডেট: {new Date(lastUpdated).toLocaleDateString('bn-BD')}</span>
+                  <span className="ml-2 text-xs">• Last updated: {new Date(lastUpdated).toLocaleDateString('en-US')}</span>
                 )}
               </CardDescription>
             </div>
