@@ -104,9 +104,32 @@ export async function logUsage(
   });
 }
 
+async function getApiKey(keyName: string): Promise<string> {
+  // Try reading from api_keys table first (admin-managed)
+  try {
+    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+    const sb = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const { data } = await sb
+      .from("api_keys")
+      .select("key_value")
+      .eq("key_name", keyName)
+      .eq("is_active", true)
+      .maybeSingle();
+    if (data?.key_value) return data.key_value;
+  } catch (e) {
+    console.warn("Could not read api_keys table, falling back to env:", e);
+  }
+  // Fallback to env var
+  const envVal = Deno.env.get(keyName);
+  if (!envVal) throw new Error(`${keyName} not configured`);
+  return envVal;
+}
+
 export async function callGemini(prompt: string, systemPrompt: string = ADDHOOM_SYSTEM_PROMPT): Promise<string> {
-  const apiKey = Deno.env.get("GEMINI_API_KEY");
-  if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
+  const apiKey = await getApiKey("GEMINI_API_KEY");
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
@@ -139,8 +162,7 @@ export async function callGeminiMultiturn(
   messages: Array<{ role: string; parts: Array<{ text: string }> }>,
   systemPrompt: string = ADDHOOM_SYSTEM_PROMPT
 ): Promise<string> {
-  const apiKey = Deno.env.get("GEMINI_API_KEY");
-  if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
+  const apiKey = await getApiKey("GEMINI_API_KEY");
 
   // Prepend system instruction as first user message if not already there
   const contents = [
