@@ -79,7 +79,7 @@ const Auth = forwardRef<HTMLDivElement>((_, ref) => {
         });
         if (error) throw error;
         toast({
-          title: t('অ্যাকাউন্ট তৈরি হয়েছে! 🎉', 'Account created! 🎉'),
+          title: t('অ্যাকাউন্ট তৈরি হয়েছে!', 'Account created!'),
           description: t('ইমেইল ভেরিফাই করুন।', 'Please verify your email.'),
         });
       }
