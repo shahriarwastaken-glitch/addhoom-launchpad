@@ -637,4 +637,58 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
   );
 };
 
+// CONNECTION 5: Inline project assignment prompt
+const ProjectPromptInline = ({ t, workspaceId, onAssign, onDismiss }: {
+  t: any;
+  workspaceId?: string;
+  onAssign?: (projectId: string, projectName: string) => void;
+  onDismiss?: () => void;
+}) => {
+  const [projects, setProjects] = useState<{ id: string; name: string; emoji: string }[]>([]);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!workspaceId || !open) return;
+    supabase.from('projects').select('id, name, emoji')
+      .eq('workspace_id', workspaceId)
+      .eq('is_archived', false)
+      .order('updated_at', { ascending: false })
+      .then(({ data }) => { if (data) setProjects(data); });
+  }, [workspaceId, open]);
+
+  return (
+    <div className="mb-4 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/[0.04] border border-primary/10">
+      <Lightbulb size={14} className="text-primary shrink-0" />
+      <span className="text-xs font-heading-bn text-foreground flex-1">
+        {t('এই বিজ্ঞাপনগুলো কোনো প্রজেক্টে সংরক্ষণ করবেন?', 'Save these ads to a project?')}
+      </span>
+      {!open ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-[11px] font-heading-bn font-semibold hover:bg-primary/20 transition-colors"
+        >
+          {t('নির্বাচন করুন', 'Select')}
+        </button>
+      ) : (
+        <select
+          onChange={e => {
+            const p = projects.find(pr => pr.id === e.target.value);
+            if (p && onAssign) onAssign(p.id, p.name);
+          }}
+          className="text-xs border border-input rounded-lg px-2 py-1 bg-card font-heading-bn"
+          defaultValue=""
+        >
+          <option value="" disabled>{t('প্রজেক্ট বাছুন', 'Choose project')}</option>
+          {projects.map(p => (
+            <option key={p.id} value={p.id}>{p.emoji} {p.name}</option>
+          ))}
+        </select>
+      )}
+      <button onClick={onDismiss} className="text-muted-foreground hover:text-foreground text-xs ml-1">
+        <X size={14} />
+      </button>
+    </div>
+  );
+};
+
 export default ResultsPanel;
