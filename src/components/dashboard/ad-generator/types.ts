@@ -14,6 +14,7 @@ export interface AdResult {
   is_winner?: boolean;
   improvement_note?: string;
   remixed_from_id?: string;
+  image_url?: string;
 }
 
 export interface ImageResult {

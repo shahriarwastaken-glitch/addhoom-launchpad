@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Copy, RefreshCw, Star, ChevronDown, Image as ImageIcon, Check, Rocket, Zap, BarChart3, RotateCcw, Lightbulb, Flame, TrendingUp } from 'lucide-react';
+import { Copy, RefreshCw, Star, ChevronDown, Image as ImageIcon, Check, Rocket, Zap, BarChart3, RotateCcw, Lightbulb, Flame, TrendingUp, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -262,13 +262,34 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
           </div>
         </div>
 
+        {/* Generated Image */}
+        {ad.image_url && (
+          <div className="mb-4 rounded-xl overflow-hidden border border-border">
+            <img
+              src={ad.image_url}
+              alt={ad.headline}
+              className="w-full h-auto object-cover"
+              loading="lazy"
+            />
+          </div>
+        )}
+
         {/* Headline */}
         <div className="bg-primary/[0.04] border-l-[3px] border-primary rounded-r-lg px-3.5 py-2.5 mb-3">
           <h4 className="text-[17px] font-bold font-heading-bn text-foreground leading-relaxed">{ad.headline}</h4>
         </div>
 
-        {/* Body */}
-        <p className="text-[15px] font-heading-bn text-muted-foreground leading-[1.7] mb-2 whitespace-pre-line px-1">{ad.body}</p>
+        {/* Body (prompt) - show truncated for image ads */}
+        {ad.image_url ? (
+          <details className="mb-2">
+            <summary className="text-[13px] text-muted-foreground font-heading-bn cursor-pointer hover:text-foreground transition-colors">
+              {t('প্রম্পট দেখুন', 'View prompt')}
+            </summary>
+            <p className="text-[13px] font-heading-bn text-muted-foreground leading-[1.6] mt-2 whitespace-pre-line px-1">{ad.body}</p>
+          </details>
+        ) : (
+          <p className="text-[15px] font-heading-bn text-muted-foreground leading-[1.7] mb-2 whitespace-pre-line px-1">{ad.body}</p>
+        )}
 
         {/* CTA */}
         {ad.cta && (
@@ -318,28 +339,54 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
 
         {/* Action buttons */}
         <div className="flex flex-wrap gap-2 pt-4 mt-4 border-t border-border">
-          <button
-            onClick={onCopy}
-            className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
-          >
-            {isCopied ? <><Check size={12} className="text-brand-green" /> {t('কপি হয়েছে', 'Copied')}</> : <><Copy size={12} /> {t('কপি করুন', 'Copy')}</>}
-          </button>
-          <button onClick={onRemix} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1">
-            <RefreshCw size={12} /> {t('রিমিক্স', 'Remix')}
-          </button>
-          <button
-            onClick={onWinner}
-            className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
-          >
-            <Star size={12} className={isWinner ? 'fill-[#FFB800] text-[#FFB800]' : ''} />
-            {isWinner ? t('বিজয়ী', 'Winner') : t('বিজয়ী চিহ্নিত করুন', 'Mark Winner')}
-          </button>
-          <button
-            onClick={onSwitchToImage}
-            className="px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/[0.08] text-primary text-xs font-heading-bn hover:bg-primary/15 transition-all active:scale-95 flex items-center gap-1"
-          >
-            <ImageIcon size={12} /> {t('এই কপি দিয়ে ছবি বানান', 'Make image from this')}
-          </button>
+          {ad.image_url ? (
+            <>
+              <a
+                href={ad.image_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                download
+                className="px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/[0.08] text-primary text-xs font-heading-bn hover:bg-primary/15 transition-all active:scale-95 flex items-center gap-1"
+              >
+                <Download size={12} /> {t('ডাউনলোড', 'Download')}
+              </a>
+              <button onClick={onCopy} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1">
+                {isCopied ? <><Check size={12} className="text-brand-green" /> {t('কপি হয়েছে', 'Copied')}</> : <><Copy size={12} /> {t('প্রম্পট কপি', 'Copy Prompt')}</>}
+              </button>
+              <button
+                onClick={onWinner}
+                className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
+              >
+                <Star size={12} className={isWinner ? 'fill-[#FFB800] text-[#FFB800]' : ''} />
+                {isWinner ? t('বিজয়ী', 'Winner') : t('বিজয়ী চিহ্নিত করুন', 'Mark Winner')}
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={onCopy}
+                className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
+              >
+                {isCopied ? <><Check size={12} className="text-brand-green" /> {t('কপি হয়েছে', 'Copied')}</> : <><Copy size={12} /> {t('কপি করুন', 'Copy')}</>}
+              </button>
+              <button onClick={onRemix} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1">
+                <RefreshCw size={12} /> {t('রিমিক্স', 'Remix')}
+              </button>
+              <button
+                onClick={onWinner}
+                className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
+              >
+                <Star size={12} className={isWinner ? 'fill-[#FFB800] text-[#FFB800]' : ''} />
+                {isWinner ? t('বিজয়ী', 'Winner') : t('বিজয়ী চিহ্নিত করুন', 'Mark Winner')}
+              </button>
+              <button
+                onClick={onSwitchToImage}
+                className="px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/[0.08] text-primary text-xs font-heading-bn hover:bg-primary/15 transition-all active:scale-95 flex items-center gap-1"
+              >
+                <ImageIcon size={12} /> {t('এই কপি দিয়ে ছবি বানান', 'Make image from this')}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </motion.div>
