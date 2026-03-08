@@ -206,6 +206,7 @@ const VideoAd = () => {
   }, [script, form, plan, usageUsed, usageLimit, user, activeWorkspace, showUpgrade]);
 
   const handleCancel = () => {
+    cancelledRef.current = true;
     if (elapsedRef.current) clearInterval(elapsedRef.current);
     goToStage(1);
     setProcessingSteps(prev => prev.map(s => ({ ...s, status: 'waiting' as const })));
