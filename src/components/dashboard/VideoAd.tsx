@@ -29,7 +29,7 @@ const VideoAd = () => {
         {t('🎬 AI ভিডিও বিজ্ঞাপন', '🎬 AI Video Ads')}
       </h2>
 
-      <div className="bg-card rounded-[20px] shadow-warm p-8 space-y-6">
+      <div className="bg-card rounded-[20px] shadow-warm p-4 sm:p-8 space-y-6">
         {/* Upload */}
         <div className="border-2 border-dashed border-primary/30 rounded-xl p-10 text-center cursor-pointer hover:bg-primary/5 transition-colors">
           <Upload className="mx-auto mb-3 text-primary" size={32} />
