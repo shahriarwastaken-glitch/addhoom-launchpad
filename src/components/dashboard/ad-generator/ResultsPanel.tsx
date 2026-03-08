@@ -130,10 +130,8 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
     return d.toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
-  // EMPTY STATE
-  if (!generating && results.length === 0) {
-    // If image history toggle is open, show history panel (even if empty)
-    if (showHistory) {
+  // IMAGE HISTORY VIEW (shown regardless of results)
+  if (!generating && showHistory) {
       return (
         <div className="h-full overflow-y-auto flex flex-col items-center justify-center text-center px-8">
           <div className="w-full max-w-md text-left">
