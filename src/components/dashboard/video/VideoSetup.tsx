@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, X, GripVertical, Play, Square, Rocket, ChevronDown, ChevronUp, Mic } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
