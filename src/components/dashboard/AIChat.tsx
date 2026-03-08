@@ -218,7 +218,7 @@ const AIChat = () => {
                   {msg.role === 'model' && (
                     <div className="w-8 h-8 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground text-xs font-bold mr-2 flex-shrink-0 mt-1">⚡</div>
                   )}
-                  <div className={`max-w-[75%] ${msg.role === 'user' ? '' : ''}`}>
+                  <div className={`max-w-[85%] sm:max-w-[75%]`}>
                     <div className={`rounded-2xl px-4 py-3 text-sm font-body-bn ${
                       msg.role === 'user'
                         ? 'bg-gradient-cta text-primary-foreground rounded-br-md'

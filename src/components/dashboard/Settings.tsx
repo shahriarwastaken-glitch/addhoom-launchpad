@@ -101,7 +101,7 @@ const Settings = () => {
       </div>
 
       {/* Subscription */}
-      <div className="bg-card rounded-[20px] shadow-warm p-6 mb-6">
+      <div className="bg-card rounded-[20px] shadow-warm p-4 sm:p-6 mb-6">
         <h3 className="font-heading-bn font-semibold text-foreground mb-4">{t('সাবস্ক্রিপশন', 'Subscription')}</h3>
         <div className="flex items-center justify-between">
           <div>

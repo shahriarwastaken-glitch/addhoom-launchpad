@@ -493,7 +493,7 @@ const AdGenerator = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 sm:gap-6">
             {/* LEFT PANEL — Source Ad */}
             <div className="md:col-span-2">
               <h3 className="text-lg font-heading-bn font-semibold mb-4">{t('🔍 মূল বিজ্ঞাপন', '🔍 Source Ad')}</h3>

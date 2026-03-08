@@ -81,14 +81,14 @@ const CompetitorIntel = () => {
       </h2>
 
       {/* Input Section */}
-      <div className="bg-card rounded-[20px] shadow-warm p-6 space-y-4 mb-8">
-        <div className="flex gap-3">
+      <div className="bg-card rounded-[20px] shadow-warm p-4 sm:p-6 space-y-4 mb-8">
+        <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
             <input
               value={competitorName}
               onChange={e => setCompetitorName(e.target.value)}
-              placeholder={t('প্রতিযোগীর Facebook পেজের নাম — যেমন: Aarong, Yellow, Chaldal', 'Competitor Facebook page name — e.g. Aarong, Yellow, Chaldal')}
+              placeholder={t('প্রতিযোগীর Facebook পেজের নাম', 'Competitor Facebook page name')}
               className="w-full p-3 pl-10 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-body-bn"
               onKeyDown={e => e.key === 'Enter' && handleAnalyze()}
             />
@@ -96,7 +96,7 @@ const CompetitorIntel = () => {
           <button
             onClick={handleAnalyze}
             disabled={loading || !competitorName.trim()}
-            className="bg-gradient-cta text-primary-foreground rounded-xl px-6 font-semibold hover:scale-[1.02] transition-transform disabled:opacity-70 font-body-bn flex items-center gap-2 whitespace-nowrap"
+            className="bg-gradient-cta text-primary-foreground rounded-xl px-6 py-3 sm:py-0 font-semibold hover:scale-[1.02] transition-transform disabled:opacity-70 font-body-bn flex items-center justify-center gap-2 whitespace-nowrap"
           >
             {loading ? <Loader2 className="animate-spin" size={18} /> : <Search size={18} />}
             {loading ? t('বিশ্লেষণ হচ্ছে...', 'Analyzing...') : t('বিশ্লেষণ করুন 🔍', 'Analyze 🔍')}

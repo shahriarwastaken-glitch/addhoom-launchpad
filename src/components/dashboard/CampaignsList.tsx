@@ -112,7 +112,7 @@ const CampaignsList = () => {
       ) : (
         <div className="space-y-4">
           {campaigns.map(c => (
-            <div key={c.id} className="bg-card rounded-2xl shadow-warm p-5 flex items-center justify-between">
+            <div key={c.id} className="bg-card rounded-2xl shadow-warm p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="font-heading-bn font-semibold text-foreground">{c.name}</h3>
                 <div className="flex gap-2 mt-1">

@@ -194,7 +194,7 @@ const DhoomScoreChecker = () => {
               className="space-y-4"
             >
               {/* Grade Badge */}
-              <div className="flex items-center gap-6">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}

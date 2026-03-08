@@ -332,7 +332,7 @@ function MonthView({
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            className="w-full lg:w-96 bg-card rounded-[20px] shadow-warm p-6 self-start"
+            className="w-full lg:w-96 bg-card rounded-[20px] shadow-warm p-4 sm:p-6 self-start"
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-heading-bn font-bold text-foreground text-sm">

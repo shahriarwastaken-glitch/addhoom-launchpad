@@ -64,7 +64,7 @@ const VideoAd = () => {
         </div>
 
         {/* Language & Mood */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-semibold text-foreground font-body-bn mb-2 block">{t('ভাষা', 'Language')}</label>
             <div className="flex flex-col gap-2">
