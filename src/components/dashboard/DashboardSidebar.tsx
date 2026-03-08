@@ -50,7 +50,7 @@ const DashboardSidebar = () => {
           <Link to="/" className="text-lg font-bold font-heading-en">
             <span className="text-foreground">Ad</span>
             <span className="text-primary">Dhoom</span>
-            {!collapsed && <span className="text-brand-yellow">⚡</span>}
+            {!collapsed && <Zap size={16} className="text-brand-yellow" />}
           </Link>
         </div>
         <SidebarGroup>
