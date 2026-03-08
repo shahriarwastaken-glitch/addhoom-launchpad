@@ -128,6 +128,7 @@ const AIChat = () => {
   const [editingConvId, setEditingConvId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [menuConvId, setMenuConvId] = useState<string | null>(null);
+  const [hasSummary, setHasSummary] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
