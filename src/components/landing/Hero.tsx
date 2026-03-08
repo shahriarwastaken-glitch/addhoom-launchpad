@@ -182,16 +182,9 @@ const Hero = () => {
               <div className="flex-1 text-center text-xs text-muted-foreground font-mono">addhoom.com/dashboard</div>
             </div>
             <div className="relative h-[300px] md:h-[400px] bg-background overflow-hidden">
-              {dashScreens.map((screen, i) => (
-                <div key={i} className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-700 ${i === activeScreen ? 'opacity-100' : 'opacity-0'}`}>
-                  <div className="text-6xl mb-4">{['🎯', '💬', '🩺'][i]}</div>
-                  <div className="text-xl font-heading-bn font-bold text-foreground">{screen}</div>
-                  <div className="mt-4 flex gap-3">
-                    {[1, 2, 3].map(j => (
-                      <div key={j} className="w-24 h-16 rounded-xl bg-secondary animate-pulse" />
-                    ))}
-                  </div>
-                </div>
+              {[mockup1, mockup2, mockup3].map((img, i) => (
+                <img key={i} src={img} alt={dashScreens[i]}
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === activeScreen ? 'opacity-100' : 'opacity-0'}`} />
               ))}
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                 {dashScreens.map((_, i) => (
