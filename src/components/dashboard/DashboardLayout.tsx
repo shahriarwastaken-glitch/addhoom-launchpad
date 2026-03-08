@@ -201,32 +201,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             </div>
           </header>
 
-          {/* Pull-to-refresh indicator */}
-          <AnimatePresence>
-            {pullDistance > 0 && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: pullDistance, opacity: pullDistance > 20 ? 1 : 0 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="flex items-center justify-center bg-background overflow-hidden md:hidden"
-              >
-                <RefreshCw
-                  size={20}
-                  className={`text-primary transition-transform ${isRefreshing ? 'animate-spin' : ''}`}
-                  style={{ transform: `rotate(${pullDistance * 3}deg)` }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <main
-            ref={mainRef}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            className="flex-1 bg-background p-3 sm:p-6 md:p-8 overflow-auto pb-20 md:pb-8"
-          >
+          <main className="flex-1 bg-background p-3 sm:p-6 md:p-8 overflow-auto pb-20 md:pb-8">
             {children}
           </main>
         </div>
