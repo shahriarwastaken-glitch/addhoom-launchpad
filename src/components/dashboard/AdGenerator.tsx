@@ -149,7 +149,7 @@ const AdGenerator = () => {
           framework: ad.framework_used || 'AIDA',
           id: `adapted-${i}`,
         })));
-        toast.success(t('বিজ্ঞাপন বিশ্লেষণ সম্পন্ন ⚡', 'Ad analysis complete ⚡'));
+        toast.success(t('বিজ্ঞাপন বিশ্লেষণ সম্পন্ন', 'Ad analysis complete'));
       } else {
         // Product mode — auto-fill form
         const p = data.product;
