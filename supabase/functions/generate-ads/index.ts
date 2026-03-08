@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { callGemini } from "../_shared/gemini.ts";
-import { ADDHOOM_SYSTEM_PROMPT } from "../_shared/systemPrompt.ts";
+import { callGemini, getSystemPrompt } from "../_shared/gemini.ts";
 import { serverError, aiError, unauthorizedError } from "../_shared/errors.ts";
 
 const corsHeaders = {
