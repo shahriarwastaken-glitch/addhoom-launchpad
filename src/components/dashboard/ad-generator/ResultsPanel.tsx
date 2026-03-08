@@ -589,7 +589,6 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
                   <Calendar size={12} /> {t('শিডিউল', 'Schedule')}
                 </button>
               )}
-              </button>
             </>
           )}
         </div>
