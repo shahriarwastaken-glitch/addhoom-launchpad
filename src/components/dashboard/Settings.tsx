@@ -7,7 +7,7 @@ import { Settings as SettingsIcon, Save, Globe, Type } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Settings = () => {
-  const { t } = useLanguage();
+  const { t, lang, toggle } = useLanguage();
   const { user, profile, activeWorkspace, refreshProfile } = useAuth();
   const { showUpgrade } = useUpgrade();
   const [fullName, setFullName] = useState('');
