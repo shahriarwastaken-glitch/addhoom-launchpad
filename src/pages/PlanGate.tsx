@@ -60,20 +60,12 @@ const PlanGate = () => {
       if (data?.gateway_url) {
         window.location.href = data.gateway_url;
       } else if (data?.dev_mode) {
-        // Dev mode — simulate payment success
-        toast.success(t('ডেভ মোড: পেমেন্ট সিমুলেট হয়েছে', 'Dev mode: Payment simulated'));
-        // Manually update profile for dev
-        const { error: updateErr } = await supabase.from('profiles').update({
-          plan: planId,
-          subscription_status: 'active',
-          subscription_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        }).eq('id', (await supabase.auth.getUser()).data.user?.id || '');
-        
-        if (!updateErr) {
-          window.location.reload();
-        }
+        toast.success(t('প্ল্যান সক্রিয় হয়েছে!', 'Plan activated!'));
+        // Reload to refresh profile and bypass plan gate
+        setTimeout(() => window.location.reload(), 500);
       }
     } catch (e: any) {
+      console.error('Payment error:', e);
       toast.error(e.message || t('পেমেন্ট ব্যর্থ', 'Payment failed'));
     } finally {
       setLoading(null);
