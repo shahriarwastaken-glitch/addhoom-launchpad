@@ -50,6 +50,9 @@ const Navbar = () => {
             ))}
           </div>
           <div className="flex items-center gap-3">
+            <button onClick={toggleTheme} className="p-2 rounded-full bg-secondary text-foreground hover:bg-secondary/80 transition-colors" aria-label="Toggle theme">
+              {dark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
             <button onClick={toggle} className="flex items-center bg-secondary rounded-full px-3 py-1.5 text-xs font-semibold">
               <span className={lang === 'en' ? 'text-primary' : 'text-muted-foreground'}>EN</span>
               <span className="text-muted-foreground mx-1">|</span>
