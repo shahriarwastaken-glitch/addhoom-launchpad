@@ -57,7 +57,8 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'AdDhoom Admin <noreply@addhoom.com>',
+        // Using Resend's default sender until addhoom.com domain is verified
+        from: 'AdDhoom Admin <onboarding@resend.dev>',
         to: admin.email,
         subject: `🔐 AdDhoom Admin Verification Code - ${actionLabel}`,
         html: `
