@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import AdGenerator from '@/components/dashboard/AdGenerator';
+import AdGeneratorPage from '@/components/dashboard/ad-generator/AdGeneratorPage';
 import VideoAd from '@/components/dashboard/VideoAd';
 import ContentCalendar from '@/components/dashboard/ContentCalendar';
 import AIChat from '@/components/dashboard/AIChat';
@@ -16,6 +17,7 @@ const Dashboard = () => {
     <DashboardLayout>
       <Routes>
         <Route index element={<AdGenerator />} />
+        <Route path="generate" element={<AdGeneratorPage />} />
         <Route path="video" element={<VideoAd />} />
         <Route path="calendar" element={<ContentCalendar />} />
         <Route path="chat" element={<AIChat />} />

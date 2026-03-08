@@ -13,6 +13,7 @@ import { Target, Video, Calendar, MessageSquare, Search, Stethoscope, PartyPoppe
 
 const items = [
   { icon: Target, bn: 'AI বিজ্ঞাপন', en: 'AI Ads', url: '/dashboard' },
+  { icon: Target, bn: 'অ্যাড জেনারেটর', en: 'Ad Generator', url: '/dashboard/generate' },
   { icon: Video, bn: 'ভিডিও অ্যাড', en: 'Video Ads', url: '/dashboard/video' },
   { icon: Calendar, bn: 'ক্যালেন্ডার', en: 'Calendar', url: '/dashboard/calendar' },
   { icon: MessageSquare, bn: 'AI চ্যাট', en: 'AI Chat', url: '/dashboard/chat' },
