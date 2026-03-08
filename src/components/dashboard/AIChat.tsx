@@ -386,49 +386,6 @@ const AIChat = () => {
     }
   };
 
-  // Export conversation
-  const exportTxt = () => {
-    const lines = [`AdDhoom Chat Export\nShop: ${activeWorkspace?.shop_name || 'Unknown'}\nDate: ${new Date().toLocaleDateString()}\n${'─'.repeat(40)}\n`];
-    messages.forEach(m => {
-      const label = m.role === 'user' ? 'You' : 'ধুম AI';
-      lines.push(`[${label}] ${formatTime(m.timestamp)}\n${m.content}\n`);
-    });
-    const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `addhoom-chat-${new Date().toISOString().slice(0, 10)}.txt`;
-    a.click();
-    toast.success(t('এক্সপোর্ট হয়েছে', 'Exported'));
-  };
-
-  const exportPdf = () => {
-    const doc = new jsPDF();
-    let y = 20;
-    doc.setFontSize(18);
-    doc.text('AdDhoom Chat Export', 20, y); y += 10;
-    doc.setFontSize(10);
-    doc.text(`Shop: ${activeWorkspace?.shop_name || 'Unknown'} | Date: ${new Date().toLocaleDateString()}`, 20, y); y += 12;
-    doc.setDrawColor(200); doc.line(20, y, 190, y); y += 8;
-
-    messages.forEach(m => {
-      if (y > 270) { doc.addPage(); y = 20; }
-      doc.setFontSize(9);
-      doc.setTextColor(100);
-      doc.text(`${m.role === 'user' ? 'You' : 'ধুম AI'} • ${formatTime(m.timestamp)}`, 20, y); y += 5;
-      doc.setFontSize(11);
-      doc.setTextColor(30);
-      const lines = doc.splitTextToSize(m.content, 160);
-      lines.forEach((line: string) => {
-        if (y > 280) { doc.addPage(); y = 20; }
-        doc.text(line, 20, y); y += 5;
-      });
-      y += 4;
-    });
-
-    doc.save(`addhoom-chat-${new Date().toISOString().slice(0, 10)}.pdf`);
-    toast.success(t('PDF এক্সপোর্ট হয়েছে', 'PDF exported'));
-  };
-
   // Search in conversation
   const searchMatches = searchQuery.trim()
     ? messages.reduce<number[]>((acc, m, i) => {
