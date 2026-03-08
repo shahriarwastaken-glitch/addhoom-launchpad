@@ -205,11 +205,11 @@ const ContentCalendar = () => {
         ) : entries.length === 0 ? (
           <EmptyState t={t} onGenerate={() => setShowGenModal(true)} />
         ) : view === 'month' ? (
-          <MonthView entries={entries} setEntries={setEntries} t={t} lang={lang} navigate={navigate} />
+          <MonthView entries={entries} setEntries={setEntries} t={t} lang={lang} navigate={navigate} isMobile={isMobile} />
         ) : view === 'swipe' ? (
-          <SwipeView entries={entries} setEntries={setEntries} t={t} lang={lang} navigate={navigate} />
+          <SwipeView entries={entries} setEntries={setEntries} t={t} lang={lang} navigate={navigate} isMobile={isMobile} />
         ) : (
-          <ListView entries={entries} setEntries={setEntries} t={t} lang={lang} navigate={navigate} />
+          <ListView entries={entries} setEntries={setEntries} t={t} lang={lang} navigate={navigate} isMobile={isMobile} />
         )}
       </div>
 
