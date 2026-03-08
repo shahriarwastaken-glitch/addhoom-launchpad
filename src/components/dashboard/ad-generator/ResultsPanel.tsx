@@ -195,6 +195,7 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
 }) => {
   const { t } = useLanguage();
   const [expanded, setExpanded] = useState(false);
+  const [promptVisible, setPromptVisible] = useState(false);
   const isWinner = ad.is_winner;
   const isCopied = copiedId === ad.id;
 
@@ -284,16 +285,14 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
           ad.body ? (
             <div className="mb-2">
               <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  const el = (e.currentTarget as HTMLElement).nextElementSibling;
-                  if (el) el.classList.toggle('hidden');
-                }}
+                onClick={() => setPromptVisible(v => !v)}
                 className="text-[13px] text-muted-foreground font-heading-bn cursor-pointer hover:text-foreground transition-colors flex items-center gap-1"
               >
-                <ChevronDown size={12} /> {t('প্রম্পট দেখুন', 'View prompt')}
+                <ChevronDown size={12} className={`transition-transform ${promptVisible ? 'rotate-180' : ''}`} /> {t('প্রম্পট দেখুন', 'View prompt')}
               </button>
-              <p className="hidden text-[13px] font-heading-bn text-muted-foreground leading-[1.6] mt-2 whitespace-pre-line px-1">{ad.body}</p>
+              {promptVisible && (
+                <p className="text-[13px] font-heading-bn text-muted-foreground leading-[1.6] mt-2 whitespace-pre-line px-1">{ad.body}</p>
+              )}
             </div>
           ) : null
         ) : (
