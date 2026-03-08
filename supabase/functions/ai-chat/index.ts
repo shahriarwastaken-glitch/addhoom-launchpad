@@ -1,8 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
-  corsHeaders, ADDHOOM_SYSTEM_PROMPT, callGeminiMultiturn, logUsage,
-  errorResponse, jsonResponse,
+  corsHeaders, callGeminiMultiturn, logUsage,
+  errorResponse, jsonResponse, getSystemPrompt,
 } from "../_shared/addhoom.ts";
 
 serve(async (req) => {
