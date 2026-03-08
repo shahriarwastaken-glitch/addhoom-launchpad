@@ -137,10 +137,29 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
               <button onClick={toggle} className="sm:hidden p-1.5 rounded-full bg-secondary text-foreground text-xs font-bold">
                 {lang === 'bn' ? 'EN' : 'বাং'}
               </button>
-              <button className="relative p-1.5 sm:p-2 text-muted-foreground hover:text-foreground">
-                <Bell size={16} />
-                <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-primary rounded-full" />
-              </button>
+              <div className="relative">
+                <button onClick={() => setShowNotifications(!showNotifications)} className="relative p-1.5 sm:p-2 text-muted-foreground hover:text-foreground transition-colors">
+                  <Bell size={16} />
+                  <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-primary rounded-full" />
+                </button>
+                {showNotifications && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
+                    <div className="absolute top-full right-0 mt-1 z-50 bg-card border border-border rounded-xl shadow-warm-lg w-72 sm:w-80">
+                      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                        <h4 className="text-sm font-semibold text-foreground">{t('নোটিফিকেশন', 'Notifications')}</h4>
+                        <button onClick={() => setShowNotifications(false)} className="text-muted-foreground hover:text-foreground">
+                          <X size={14} />
+                        </button>
+                      </div>
+                      <div className="p-4 text-center">
+                        <Bell size={24} className="text-muted-foreground mx-auto mb-2" />
+                        <p className="text-xs text-muted-foreground font-body-bn">{t('নতুন কোনো নোটিফিকেশন নেই', 'No new notifications')}</p>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
 
               {/* User menu */}
               <div className="relative">
