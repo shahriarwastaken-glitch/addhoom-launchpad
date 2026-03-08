@@ -29,11 +29,7 @@ const navItems = [
 
 export default function AdminSidebar({ isSuperAdmin }: AdminSidebarProps) {
   const { profile } = useAuth();
-  const { theme, setTheme } = useTheme();
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
+  const { dark, toggleTheme } = useTheme();
 
   return (
     <aside className="w-60 min-h-screen bg-sidebar-background border-r border-sidebar-border text-sidebar-foreground flex flex-col">
