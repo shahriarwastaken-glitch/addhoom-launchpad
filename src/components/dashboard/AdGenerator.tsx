@@ -69,7 +69,9 @@ const VARIATIONS_AGENCY = [5, 10, 20, 50];
 
 const AdGenerator = () => {
   const { t, lang } = useLanguage();
-  const { activeWorkspace } = useAuth();
+  const { activeWorkspace, profile } = useAuth();
+  const userPlan = profile?.plan || 'pro';
+  const VARIATIONS = userPlan === 'agency' ? VARIATIONS_AGENCY : VARIATIONS_PRO;
 
   // Form state
   const [step, setStep] = useState(1);
