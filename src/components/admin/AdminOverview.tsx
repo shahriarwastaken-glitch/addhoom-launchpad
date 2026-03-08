@@ -87,11 +87,11 @@ export default function AdminOverview() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold">ওভারভিউ</h1>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="space-y-4 md:space-y-6">
+        <h1 className="text-xl md:text-2xl font-bold">ওভারভিউ</h1>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {[...Array(8)].map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-xl" />
+            <Skeleton key={i} className="h-20 md:h-24 rounded-xl" />
           ))}
         </div>
       </div>
