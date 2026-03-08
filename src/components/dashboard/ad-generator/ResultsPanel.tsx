@@ -47,7 +47,11 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
   };
 
   const copySingle = (ad: AdResult) => {
-    navigator.clipboard.writeText(`${ad.headline}\n\n${ad.body}\n\n${ad.cta}`);
+    // For image ads, copy the actual prompt (stored in body = sd_prompt), not the "Version X" headline
+    const textToCopy = ad.image_url
+      ? (ad.body || ad.headline)
+      : `${ad.headline}\n\n${ad.body}\n\n${ad.cta}`;
+    navigator.clipboard.writeText(textToCopy);
     setCopiedId(ad.id || '');
     setTimeout(() => setCopiedId(null), 2000);
   };
@@ -55,10 +59,36 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
   const toggleWinner = async (ad: AdResult) => {
     if (!ad.id) return;
     const newVal = !ad.is_winner;
-    const { error } = await supabase.from('ad_creatives').update({ is_winner: newVal } as any).eq('id', ad.id);
+    // Update in the correct table based on whether it's an image or copy ad
+    const table = ad.image_url ? 'ad_images' : 'ad_creatives';
+    const { error } = await supabase.from(table).update({ is_winner: newVal } as any).eq('id', ad.id);
     if (!error) {
-      setResults(prev => prev.map(a => a.id === ad.id ? { ...a, is_winner: newVal } : a));
-      toast.success(newVal ? t('বিজয়ী চিহ্নিত করা হয়েছে', 'Marked as winner') : t('বিজয়ী সরানো হয়েছে', 'Removed winner'));
+      setResults(prev => {
+        const updated = prev.map(a => a.id === ad.id ? { ...a, is_winner: newVal } : a);
+        // Sort winners to the top
+        return updated.sort((a, b) => (b.is_winner ? 1 : 0) - (a.is_winner ? 1 : 0));
+      });
+      toast.success(newVal
+        ? t('🏆 বিজয়ী চিহ্নিত! রিমিক্সে এই প্যাটার্ন ব্যবহার হবে।', '🏆 Marked as winner! Remix will use this pattern.')
+        : t('বিজয়ী সরানো হয়েছে', 'Removed winner'));
+    }
+  };
+
+  const downloadImage = async (url: string, name: string) => {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${name}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+      toast.success(t('ডাউনলোড হচ্ছে...', 'Downloading...'));
+    } catch {
+      toast.error(t('ডাউনলোড ব্যর্থ হয়েছে', 'Download failed'));
     }
   };
 
@@ -179,6 +209,7 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
             onWinner={() => toggleWinner(ad)}
             onRemix={() => onRemix(ad)}
             onSwitchToImage={() => onSwitchToImage(ad)}
+            onDownload={() => ad.image_url && downloadImage(ad.image_url, `ad-${ad.id || i + 1}`)}
             delay={i * 0.1}
           />
         ))}
@@ -188,10 +219,10 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
 };
 
 // Single ad card component
-const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToImage, delay }: {
+const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToImage, onDownload, delay }: {
   ad: AdResult; rank: number; copiedId: string | null;
   onCopy: () => void; onWinner: () => void; onRemix: () => void;
-  onSwitchToImage: () => void; delay: number;
+  onSwitchToImage: () => void; onDownload: () => void; delay: number;
 }) => {
   const { t } = useLanguage();
   const [expanded, setExpanded] = useState(false);
@@ -349,15 +380,12 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
         <div className="flex flex-wrap gap-2 pt-4 mt-4 border-t border-border">
           {ad.image_url ? (
             <>
-              <a
-                href={ad.image_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                download
+              <button
+                onClick={onDownload}
                 className="px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/[0.08] text-primary text-xs font-heading-bn hover:bg-primary/15 transition-all active:scale-95 flex items-center gap-1"
               >
                 <Download size={12} /> {t('ডাউনলোড', 'Download')}
-              </a>
+              </button>
               <button onClick={onCopy} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1">
                 {isCopied ? <><Check size={12} className="text-brand-green" /> {t('কপি হয়েছে', 'Copied')}</> : <><Copy size={12} /> {t('প্রম্পট কপি', 'Copy Prompt')}</>}
               </button>
