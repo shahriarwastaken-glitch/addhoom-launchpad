@@ -563,24 +563,6 @@ const AIChat = () => {
               <Search size={16} />
             </button>
             <div className="relative">
-              <button onClick={() => setShowExportMenu(!showExportMenu)} className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground">
-                <FileText size={16} />
-              </button>
-              {showExportMenu && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)} />
-                  <div className="absolute right-0 top-full mt-1 z-50 bg-card border border-border rounded-lg shadow-lg py-1 min-w-[160px]">
-                    <button onClick={() => { exportTxt(); setShowExportMenu(false); }} className="w-full text-left px-3 py-2 text-xs hover:bg-secondary text-foreground">
-                      {t('টেক্সট ফাইল (.txt)', 'Text File (.txt)')}
-                    </button>
-                    <button onClick={() => { exportPdf(); setShowExportMenu(false); }} className="w-full text-left px-3 py-2 text-xs hover:bg-secondary text-foreground">
-                      PDF
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-            <div className="relative">
               <button onClick={() => setShowHeaderMenu(!showHeaderMenu)} className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground">
                 <MoreVertical size={16} />
               </button>
