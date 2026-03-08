@@ -71,24 +71,36 @@ const SessionManager = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Bridge UpgradeContext into the api module
+const UpgradeBridge = ({ children }: { children: React.ReactNode }) => {
+  const { useUpgrade } = require('@/contexts/UpgradeContext');
+  const { showUpgrade } = useUpgrade();
+  useEffect(() => { setUpgradeHandler(showUpgrade); }, [showUpgrade]);
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <AuthProvider>
         <SessionManager>
           <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/admin" element={<ProtectedRoute skipPlanCheck><AdminDashboard /></ProtectedRoute>} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+            <UpgradeProvider>
+              <UpgradeBridge>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                    <Route path="/admin" element={<ProtectedRoute skipPlanCheck><AdminDashboard /></ProtectedRoute>} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </UpgradeBridge>
+            </UpgradeProvider>
           </TooltipProvider>
         </SessionManager>
       </AuthProvider>
