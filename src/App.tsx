@@ -16,6 +16,7 @@ import ResetPassword from "./pages/ResetPassword";
 import AdminDashboardNew from "./pages/AdminDashboardNew";
 import NotFound from "./pages/NotFound";
 import PlanGate from "./pages/PlanGate";
+import Onboarding from "./pages/Onboarding";
 import ShopDNASetup from "./components/dashboard/ShopDNASetup";
 
 const queryClient = new QueryClient();
@@ -41,16 +42,9 @@ const ProtectedRoute = ({ children, skipPlanCheck }: { children: React.ReactNode
     }
   }
 
-  // Show onboarding if not complete
-  if (onboardingDone === false && !skipPlanCheck && activeWorkspace) {
-    return (
-      <ShopDNASetup
-        onComplete={() => {
-          setOnboardingDone(true);
-          refreshProfile();
-        }}
-      />
-    );
+  // Show onboarding if not complete — redirect to /onboarding
+  if (onboardingDone === false && !skipPlanCheck && activeWorkspace && !activeWorkspace.shop_url) {
+    return <Navigate to="/onboarding" replace />;
   }
   
   return <>{children}</>;
@@ -93,6 +87,7 @@ const App = () => (
                     <Route path="/" element={<Index />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/onboarding" element={<Onboarding />} />
                     <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                     <Route path="/admin/*" element={<AdminDashboardNew />} />
                     <Route path="*" element={<NotFound />} />
