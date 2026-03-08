@@ -65,7 +65,8 @@ serve(async (req) => {
       if (conv) history = conv.messages || [];
     }
 
-    // STEP 3 — Build context-aware system prompt
+    // STEP 3 — Build context-aware system prompt (fetch custom from DB)
+    const basePrompt = await getSystemPrompt();
     let shopContext = "";
     if (workspace) {
       shopContext = `
@@ -86,7 +87,7 @@ When recommending budgets, always use BDT (৳).
 When recommending timing, reference Bangladesh market patterns.`;
     }
 
-    const FULL_SYSTEM_PROMPT = ADDHOOM_SYSTEM_PROMPT + "\n\n" + shopContext;
+    const FULL_SYSTEM_PROMPT = basePrompt + "\n\n" + shopContext;
 
     // STEP 4 — Call Gemini with conversation history
     const geminiMessages = history.map((m: any) => ({
