@@ -605,12 +605,18 @@ export type Database = {
           created_at: string | null
           date: string
           day_of_week: string | null
+          festival_theme: string | null
+          generated_creative_id: string | null
           hook: string | null
           id: string
           occasion: string | null
           platform: string | null
           priority: string | null
+          recommended_framework: string | null
+          recommended_tone: string | null
           status: string | null
+          swipe_action: string | null
+          swiped_at: string | null
           title: string | null
           workspace_id: string
         }
@@ -621,12 +627,18 @@ export type Database = {
           created_at?: string | null
           date: string
           day_of_week?: string | null
+          festival_theme?: string | null
+          generated_creative_id?: string | null
           hook?: string | null
           id?: string
           occasion?: string | null
           platform?: string | null
           priority?: string | null
+          recommended_framework?: string | null
+          recommended_tone?: string | null
           status?: string | null
+          swipe_action?: string | null
+          swiped_at?: string | null
           title?: string | null
           workspace_id: string
         }
@@ -637,16 +649,29 @@ export type Database = {
           created_at?: string | null
           date?: string
           day_of_week?: string | null
+          festival_theme?: string | null
+          generated_creative_id?: string | null
           hook?: string | null
           id?: string
           occasion?: string | null
           platform?: string | null
           priority?: string | null
+          recommended_framework?: string | null
+          recommended_tone?: string | null
           status?: string | null
+          swipe_action?: string | null
+          swiped_at?: string | null
           title?: string | null
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "content_calendar_generated_creative_id_fkey"
+            columns: ["generated_creative_id"]
+            isOneToOne: false
+            referencedRelation: "ad_creatives"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "content_calendar_workspace_id_fkey"
             columns: ["workspace_id"]
