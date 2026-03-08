@@ -314,6 +314,7 @@ const AdGeneratorPage = () => {
             onRegenerate={handleGenerate}
             onSwitchToImage={handleSwitchToImage}
             onRemix={ad => setRemixAd(ad)}
+            onLoadHistory={setResults}
           />
         )}
       </div>
