@@ -536,6 +536,46 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
             </>
           )}
         </div>
+
+        {/* Add to Project - only when no project context */}
+        {!projectId && !assignedProject && ad.id && !ad.image_url && (
+          <div className="relative mt-3">
+            <button
+              onClick={() => { setProjectDropdownOpen(!projectDropdownOpen); if (!projectDropdownOpen) fetchProjects(); }}
+              className="text-[13px] font-heading-bn text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+            >
+              <FolderPlus size={13} /> {t('+ প্রজেক্টে যোগ করুন', '+ Add to Project')}
+              <ChevronDown size={12} className={`transition-transform ${projectDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {projectDropdownOpen && (
+              <div className="absolute left-0 bottom-full mb-1 z-20 w-64 bg-popover border border-border rounded-xl shadow-lg p-1.5 max-h-48 overflow-y-auto">
+                {loadingProjects ? (
+                  <p className="text-xs text-muted-foreground p-2 text-center">{t('লোড হচ্ছে...', 'Loading...')}</p>
+                ) : projects.length === 0 ? (
+                  <p className="text-xs text-muted-foreground p-2 text-center">{t('কোনো প্রজেক্ট নেই', 'No projects yet')}</p>
+                ) : projects.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => assignToProject(p)}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left hover:bg-secondary transition-colors"
+                  >
+                    <FolderOpen size={14} style={{ color: p.color }} />
+                    <span className="text-sm font-heading-bn text-foreground truncate">{p.emoji} {p.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Assigned project badge */}
+        {assignedProject && (
+          <div className="mt-3 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary text-xs font-heading-bn">
+            <CheckCircle2 size={13} className="text-brand-green" />
+            <FolderOpen size={13} style={{ color: assignedProject.color }} />
+            <span className="text-foreground">{assignedProject.emoji} {assignedProject.name}</span>
+          </div>
+        )}
       </div>
     </motion.div>
   );
