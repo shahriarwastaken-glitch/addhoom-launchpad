@@ -274,18 +274,19 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
       {/* Ad Cards */}
       <div className="space-y-4">
         {results.map((ad, i) => (
-          <AdCopyCard
-            key={ad.id || i}
-            ad={ad}
-            rank={i + 1}
-            copiedId={copiedId}
-            onCopy={() => copySingle(ad)}
-            onWinner={() => toggleWinner(ad)}
-            onRemix={() => onRemix(ad)}
-            onSwitchToImage={() => onSwitchToImage(ad)}
-            onDownload={() => ad.image_url && downloadImage(ad.image_url, `ad-${ad.id || i + 1}`)}
-            delay={i * 0.1}
-          />
+            <AdCopyCard
+              key={ad.id || i}
+              ad={ad}
+              rank={i + 1}
+              copiedId={copiedId}
+              onCopy={() => copySingle(ad)}
+              onWinner={() => toggleWinner(ad)}
+              onRemix={() => onRemix(ad)}
+              onSwitchToImage={() => onSwitchToImage(ad)}
+              onDownload={() => ad.image_url && downloadImage(ad.image_url, `ad-${ad.id || i + 1}`)}
+              delay={i * 0.1}
+              projectId={projectId}
+            />
         ))}
       </div>
     </div>
