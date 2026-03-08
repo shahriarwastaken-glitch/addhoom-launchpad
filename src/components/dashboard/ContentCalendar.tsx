@@ -276,9 +276,9 @@ function MonthView({
           <button onClick={nextMonth} className="p-2 rounded-lg hover:bg-secondary"><ChevronRight size={20} /></button>
         </div>
 
-        <div className="grid grid-cols-7 gap-1 mb-2">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
           {weekdays.map((d: string) => (
-            <div key={d} className="text-center text-xs text-muted-foreground font-body-bn py-1">{d}</div>
+            <div key={d} className="text-center text-[10px] sm:text-xs text-muted-foreground font-body-bn py-1">{d}</div>
           ))}
         </div>
 
