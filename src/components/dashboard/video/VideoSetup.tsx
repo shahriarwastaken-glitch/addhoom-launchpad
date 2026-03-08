@@ -347,14 +347,20 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
                   }`}
                 >
                   {fmt.badge && (
-                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-brand-green/10 text-brand-green text-[10px] font-bold whitespace-nowrap">
-                      {t(fmt.badge, fmt.badgeEn || fmt.badge)}
+                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-brand-green/10 text-brand-green text-[10px] font-bold whitespace-nowrap">
+                      <Zap size={10} /> {t(fmt.badge, fmt.badgeEn || fmt.badge)}
                     </span>
                   )}
                   <div className="flex justify-center mb-2">
                     <div className={`bg-border rounded-sm ${fmt.value === 'feed' ? 'w-10 h-10' : 'w-6 h-10'}`} />
                   </div>
-                  <div className="text-lg mb-1">{fmt.icons.join(' ')}</div>
+                  <div className="flex justify-center gap-1.5 mb-1">
+                    {fmt.iconNames.map(name => {
+                      const IconMap: Record<string, any> = { facebook: Facebook, instagram: Instagram, music: Music };
+                      const Icon = IconMap[name];
+                      return Icon ? <Icon key={name} size={14} className="text-muted-foreground" /> : null;
+                    })}
+                  </div>
                   <p className="text-sm font-semibold font-heading-bn text-foreground">{t(fmt.label, fmt.labelEn)}</p>
                   <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{fmt.dimensions}</p>
                   <p className="text-[11px] text-muted-foreground font-heading-bn mt-0.5">{t(fmt.desc, fmt.descEn)}</p>
