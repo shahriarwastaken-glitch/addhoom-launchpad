@@ -740,7 +740,7 @@ const AdGenerator = () => {
                       {t('AI আপনার বিজ্ঞাপন লিখছে...', 'AI is writing your ads...')}
                     </>
                   ) : (
-                    <>⚡ {t('বিজ্ঞাপন তৈরি করুন', 'Generate Ads')}</>
+                    <><Zap size={20} /> {t('বিজ্ঞাপন তৈরি করুন', 'Generate Ads')}</>
                   )}
                 </button>
               </div>
