@@ -116,30 +116,45 @@ serve(async (req) => {
     // Fetch the master prompt from DB (or fallback to default)
     const masterPrompt = await getImageMasterPrompt();
 
-    // Build the specific instructions for this generation
-    const normalizedHeadline = (ad_headline || "")
-      .replace(/[₹₨]/g, "৳")
-      .replace(/\bRs\.?\b/gi, "৳")
-      .replace(/মাএ|মাত্রা|মাত্ৰ|মাত্|মাত্ৰ/g, "মাত্র")
+    // ── Force-convert ALL text to English for reliable AI rendering ──
+    // The AI model cannot reliably render Bengali script, so we convert:
+    //   ৳/₹/₨/Rs → "BDT"
+    //   মাত্র (and misspellings) → "Only"
+    //   Bengali numerals → English numerals
+    //   Any remaining Bengali → drop the headline (text-free image)
+    const sanitizedHeadline = (ad_headline || "")
+      .replace(/[₹₨৳]/g, "BDT ")
+      .replace(/\bRs\.?\s?/gi, "BDT ")
+      .replace(/টাকা\s?/g, "BDT ")
+      .replace(/মাত্র|মাএ|মাত্রা|মাত্ৰ|মাত্/g, "Only")
+      .replace(/[০-৯]/g, (ch) => String(ch.charCodeAt(0) - 0x09E6))
+      .replace(/\s+/g, " ")
       .trim();
 
-    const isBanglaHeadline = /[\u0980-\u09FF]/.test(normalizedHeadline);
+    // If headline still contains Bengali characters after sanitization, drop it
+    const hasBangla = /[\u0980-\u09FF]/.test(sanitizedHeadline);
+    const finalHeadline = hasBangla ? "" : sanitizedHeadline;
 
-    const textInstruction = normalizedHeadline
-      ? `HEADLINE TO OVERLAY (COPY EXACTLY, CHARACTER-BY-CHARACTER): "${normalizedHeadline}"\nDo NOT paraphrase, transliterate, restyle, or replace any character in this headline.`
-      : "NO TEXT OVERLAY REQUESTED — generate a completely text-free image. Leave clean space for programmatic text overlay later.";
+    const textInstruction = finalHeadline
+      ? `HEADLINE TEXT (ENGLISH ONLY — RENDER EXACTLY AS WRITTEN):
+"${finalHeadline}"
+- Use bold modern sans-serif English font. High contrast.
+- Currency is ALWAYS "BDT" followed by the number (e.g. "BDT 999").
+- NEVER render ₹, Rs, ₨, ৳, or any Bengali script in the image.`
+      : "NO TEXT OVERLAY — generate a completely text-free image. Leave clean negative space for programmatic text overlay later.";
 
     const descInstruction = ad_body
       ? `PRODUCT DESCRIPTION: "${ad_body.substring(0, 120)}"`
       : "";
 
     const hardTextGuardrails = `
-NON-NEGOTIABLE TEXT ENFORCEMENT:
-- The word "মাত্র" must be spelled exactly as: মাত্র
-- Bangladesh currency symbol must be exactly: ৳ (U+09F3)
-- NEVER use: ₹, ₨, Rs, or INR symbols/text
-- If you cannot render Bangla text perfectly, leave text area empty instead of generating wrong text
-${isBanglaHeadline ? "- This request includes Bangla text. Exact Bangla fidelity is mandatory." : ""}
+═══ MANDATORY TEXT RULES (VIOLATION = FAILURE) ═══
+1. ALL visible text in the image MUST be in ENGLISH. Zero Bengali/Bangla script allowed.
+2. Currency: Always write "BDT" before price numbers (e.g. "BDT 999", "BDT 1,499").
+   BANNED symbols — using ANY of these is an automatic failure: ₹ ₨ Rs INR ৳ টাকা
+3. The word "Only" replaces "মাত্র". Never attempt to write মাত্র in the image.
+4. If uncertain about rendering ANY text correctly, leave that area blank.
+5. Font: Bold modern sans-serif, maximum contrast against background.
 `;
 
     // Framework-specific visual direction
