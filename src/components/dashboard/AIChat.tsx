@@ -137,9 +137,9 @@ const AIChat = () => {
   const isWelcome = messages.length === 0;
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] gap-4 max-w-6xl mx-auto">
+    <div className="flex h-[calc(100vh-10rem)] sm:h-[calc(100vh-8rem)] gap-4 max-w-6xl mx-auto">
       {/* LEFT PANEL — Conversation List */}
-      <div className="hidden md:flex flex-col w-72 bg-card rounded-2xl shadow-warm overflow-hidden flex-shrink-0">
+      <div className="hidden lg:flex flex-col w-72 bg-card rounded-2xl shadow-warm overflow-hidden flex-shrink-0">
         <div className="p-4 border-b border-border">
           <button
             onClick={startNewChat}
