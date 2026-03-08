@@ -179,21 +179,45 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
               <div className="relative">
                 <button onClick={() => setShowNotifications(!showNotifications)} className="relative p-1.5 sm:p-2 text-muted-foreground hover:text-foreground transition-colors">
                   <Bell size={16} />
-                  <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-primary rounded-full" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center bg-primary text-primary-foreground text-[9px] font-bold rounded-full px-1">
+                      {unreadCount}
+                    </span>
+                  )}
                 </button>
                 {showNotifications && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
-                    <div className="absolute top-full right-0 mt-1 z-50 bg-card border border-border rounded-xl shadow-warm-lg w-72 sm:w-80">
+                    <div className="absolute top-full right-0 mt-1 z-50 bg-card border border-border rounded-xl shadow-warm-lg w-72 sm:w-80 max-h-[400px] overflow-hidden flex flex-col">
                       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                         <h4 className="text-sm font-semibold text-foreground">{t('নোটিফিকেশন', 'Notifications')}</h4>
                         <button onClick={() => setShowNotifications(false)} className="text-muted-foreground hover:text-foreground">
                           <X size={14} />
                         </button>
                       </div>
-                      <div className="p-4 text-center">
-                        <Bell size={24} className="text-muted-foreground mx-auto mb-2" />
-                        <p className="text-xs text-muted-foreground font-body-bn">{t('নতুন কোনো নোটিফিকেশন নেই', 'No new notifications')}</p>
+                      <div className="overflow-y-auto flex-1">
+                        {notifications.length === 0 ? (
+                          <div className="p-4 text-center">
+                            <Bell size={24} className="text-muted-foreground mx-auto mb-2" />
+                            <p className="text-xs text-muted-foreground font-body-bn">{t('নতুন কোনো নোটিফিকেশন নেই', 'No new notifications')}</p>
+                          </div>
+                        ) : (
+                          notifications.map(n => (
+                            <button
+                              key={n.id}
+                              onClick={() => markAsRead(n.id)}
+                              className={`w-full text-left px-4 py-3 border-b border-border/50 hover:bg-secondary/50 transition-colors ${!readIds.has(n.id) ? 'bg-primary/5' : ''}`}
+                            >
+                              <div className="flex items-start gap-2">
+                                {!readIds.has(n.id) && <span className="mt-1.5 w-2 h-2 rounded-full bg-primary flex-shrink-0" />}
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm font-medium text-foreground">{n.title}</p>
+                                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
+                                </div>
+                              </div>
+                            </button>
+                          ))
+                        )}
                       </div>
                     </div>
                   </>
