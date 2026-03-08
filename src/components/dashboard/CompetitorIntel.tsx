@@ -531,7 +531,7 @@ const CompetitorIntel = () => {
 
 // ─── DETAIL VIEW COMPONENT ───
 const DetailView = ({
-  data, allCompetitors, onBack, onReanalyze, onCreateAd, loading, t, lang, copyText,
+  data, allCompetitors, onBack, onReanalyze, onCreateAd, loading, t, lang, copyText, workspaceName,
 }: {
   data: DetailData;
   allCompetitors: HistoryItem[];
@@ -542,6 +542,7 @@ const DetailView = ({
   t: (bn: string, en: string) => string;
   lang: string;
   copyText: (text: string) => void;
+  workspaceName: string;
 }) => {
   const ai = data.ai_analysis;
   const uniqueCompetitors = allCompetitors.filter(
