@@ -5,9 +5,11 @@ import { api } from '@/lib/api';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import RocketLoader from '@/components/loaders/RocketLoader';
+import CompetitorCharts from '@/components/dashboard/CompetitorCharts';
+import { exportCompetitorPDF } from '@/utils/exportCompetitorPDF';
 import {
   Search, CheckCircle, XCircle, Swords, ChevronDown, ChevronUp, Copy,
-  Loader2, ArrowLeft, RefreshCw, ArrowRight, Clock
+  Loader2, ArrowLeft, RefreshCw, ArrowRight, Clock, FileText
 } from 'lucide-react';
 import { toast } from 'sonner';
 
