@@ -734,8 +734,8 @@ function ContentItemCard({ entry, t, lang, onAction }: { entry: CalendarEntry; t
 }
 
 // ── SWIPE VIEW ──
-function SwipeView({ entries, setEntries, t, lang, navigate }: {
-  entries: CalendarEntry[]; setEntries: any; t: any; lang: string; navigate: any;
+function SwipeView({ entries, setEntries, t, lang, navigate, isMobile }: {
+  entries: CalendarEntry[]; setEntries: any; t: any; lang: string; navigate: any; isMobile: boolean;
 }) {
   const pendingEntries = useMemo(() => entries.filter(e => e.status === 'planned' || e.status === 'overdue'), [entries]);
   const [currentIdx, setCurrentIdx] = useState(0);
