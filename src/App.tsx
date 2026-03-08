@@ -5,8 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { UpgradeProvider, useUpgrade as useUpgradeCtx } from "@/contexts/UpgradeContext";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { setUpgradeHandler } from "@/lib/api";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
@@ -69,24 +71,35 @@ const SessionManager = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Bridge UpgradeContext into the api module
+const UpgradeBridge = ({ children }: { children: React.ReactNode }) => {
+  const { showUpgrade } = useUpgradeCtx();
+  useEffect(() => { setUpgradeHandler(showUpgrade); }, [showUpgrade]);
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <AuthProvider>
         <SessionManager>
           <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/admin" element={<ProtectedRoute skipPlanCheck><AdminDashboard /></ProtectedRoute>} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+            <UpgradeProvider>
+              <UpgradeBridge>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                    <Route path="/admin" element={<ProtectedRoute skipPlanCheck><AdminDashboard /></ProtectedRoute>} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </UpgradeBridge>
+            </UpgradeProvider>
           </TooltipProvider>
         </SessionManager>
       </AuthProvider>
