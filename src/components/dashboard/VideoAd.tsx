@@ -110,7 +110,8 @@ const VideoAd = () => {
     }
   }, [activeWorkspace, form, t]);
 
-  const startVideoGeneration = useCallback(async () => {
+  const startVideoGeneration = useCallback(async (overrideScript?: VideoScript) => {
+    const activeScript = overrideScript || script;
     if (plan === 'pro' && usageUsed >= usageLimit) {
       showUpgrade('video');
       return;
