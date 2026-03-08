@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ALTER COLUMN plan SET DEFAULT 'free';
