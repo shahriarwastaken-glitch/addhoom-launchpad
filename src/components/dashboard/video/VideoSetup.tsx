@@ -554,7 +554,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
               className="flex items-center gap-2 text-sm font-semibold font-heading-bn text-foreground hover:text-primary transition-colors"
             >
               <Mic size={16} />
-              {t('🎙️ ভয়েসওভার যোগ করুন (ঐচ্ছিক)', '🎙️ Add Voiceover (optional)')}
+              {t('ভয়েসওভার যোগ করুন (ঐচ্ছিক)', 'Add Voiceover (optional)')}
               {voiceoverOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
 
