@@ -31,8 +31,9 @@ const STEP_SLIDE = {
   initial: (dir: number) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
   animate: { x: 0, opacity: 1 },
   exit: (dir: number) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
-  transition: { duration: 0.35, ease: 'easeInOut' },
 };
+
+const STEP_TRANSITION = { duration: 0.35, ease: [0.4, 0, 0.2, 1] as const };
 
 const Onboarding = () => {
   const navigate = useNavigate();
