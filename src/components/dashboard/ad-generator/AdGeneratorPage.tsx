@@ -114,6 +114,7 @@ const AdGeneratorPage = () => {
             platform: form.platforms[0] || 'facebook',
             framework: form.framework,
             is_winner: false,
+            image_url: img.image_url || '',
           }));
           setResults(imageAds);
           toast.success(t(`${data.images.length}টি ইমেজ তৈরি হয়েছে`, `${data.images.length} images generated`));
