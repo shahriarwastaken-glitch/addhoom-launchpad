@@ -94,6 +94,7 @@ serve(async (req) => {
       FOMO: "Lead with what they'll MISS if they don't act. Include scarcity (limited stock or time). Social proof. Urgent CTA.",
       before_after: "Headline = their current painful situation (Before). Body = paint the dream outcome (After). Then bridge: this product is HOW they get there.",
       social_proof: "Lead with a customer result or testimonial angle. Build credibility. Then present the offer.",
+      offer_first: "Lead with the deal/price/discount in the headline. Make the offer irresistible upfront. Then explain the product. CTA = grab the deal now.",
     };
 
     const occasionContext: Record<string, string> = {
