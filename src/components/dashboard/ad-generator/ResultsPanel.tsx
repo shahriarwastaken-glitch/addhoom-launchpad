@@ -32,12 +32,14 @@ interface ProjectOption {
 
 const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix, onLoadHistory, projectId }: ResultsPanelProps) => {
   const { t, lang } = useLanguage();
+  const { activeWorkspace } = useAuth();
   const [progress, setProgress] = useState(0);
   const [showTip, setShowTip] = useState(false);
   const [tipIdx] = useState(() => Math.floor(Math.random() * LOADING_TIPS.length));
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [imageHistory, setImageHistory] = useState<ImageHistoryEntry[]>(() => getImageHistory());
+  const [showHistory, setShowHistory] = useState(false);
 
   const loadingMsgs = mode === 'copy'
     ? [t('চিন্তা করছি...', 'Thinking...'), t('লিখছি...', 'Writing...'), t('স্কোর করছি...', 'Scoring...')]
@@ -252,6 +254,14 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
           {t(`${toBengali(results.length)}টি বিজ্ঞাপন তৈরি হয়েছে`, `${results.length} ads generated`)}
         </h3>
         <div className="flex gap-2">
+          {imageHistory.length > 0 && (
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              className={`px-3 py-1.5 rounded-lg border text-xs font-heading-bn transition-colors flex items-center gap-1 ${showHistory ? 'border-primary text-primary bg-primary/5' : 'border-input text-foreground hover:bg-secondary'}`}
+            >
+              <Clock size={12} /> {t('হিস্ট্রি', 'History')}
+            </button>
+          )}
           <button onClick={copyAll} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn text-foreground hover:bg-secondary transition-colors">
             {t('সব কপি করুন', 'Copy All')}
           </button>
@@ -260,6 +270,54 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
           </button>
         </div>
       </div>
+
+      {/* Collapsible History Panel */}
+      <AnimatePresence>
+        {showHistory && imageHistory.length > 0 && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden mb-5"
+          >
+            <div className="bg-card border border-border rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-semibold font-heading-bn text-foreground flex items-center gap-1.5">
+                  <Clock size={14} className="text-muted-foreground" />
+                  {t('সাম্প্রতিক ইমেজ', 'Recent Images')}
+                </h4>
+                <button
+                  onClick={() => { localStorage.removeItem('dhoom_image_history'); setImageHistory([]); setShowHistory(false); toast.success(t('হিস্ট্রি মুছে ফেলা হয়েছে', 'History cleared')); }}
+                  className="text-xs text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1"
+                >
+                  <Trash2 size={12} /> {t('মুছুন', 'Clear')}
+                </button>
+              </div>
+              <div className="space-y-2">
+                {imageHistory.map(entry => (
+                  <button
+                    key={entry.id}
+                    onClick={() => { if (onLoadHistory) onLoadHistory(entry.results); else setResults(entry.results); setShowHistory(false); toast.success(t('হিস্ট্রি থেকে লোড হয়েছে', 'Loaded from history')); }}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/50 hover:bg-secondary transition-all text-left group"
+                  >
+                    {entry.results[0]?.image_url && (
+                      <img src={entry.results[0].image_url} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0 border border-border" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold font-heading-bn text-foreground truncate">{entry.productName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {entry.results.length} {t('ভার্শন', 'versions')} · {formatTime(entry.timestamp)}
+                      </p>
+                    </div>
+                    <RotateCcw size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Platform tags */}
       <div className="flex flex-wrap gap-1.5 mb-5">
