@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Star, Copy, RefreshCw, Pencil, Check, X, Rocket, ArrowLeft, ArrowRight, Filter, Link2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
+import { Star, Copy, RefreshCw, Pencil, Check, X, Rocket, ArrowLeft, ArrowRight, Filter, Link2, ChevronDown, ChevronUp, AlertTriangle, Zap, Award, RotateCw, Search } from 'lucide-react';
 import RocketLoader from '@/components/loaders/RocketLoader';
 
 const toBengali = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
@@ -346,8 +346,8 @@ const AdGenerator = () => {
             <div className="flex flex-wrap gap-2 mb-2">
               <span className="text-[10px] uppercase tracking-wider bg-secondary text-muted-foreground rounded px-2 py-0.5">{ad.platform}</span>
               <span className="text-[10px] uppercase tracking-wider bg-primary/10 text-primary rounded px-2 py-0.5">{ad.framework}</span>
-              {ad.is_winner && <span className="text-[10px] bg-yellow-500/20 text-yellow-600 rounded px-2 py-0.5">⭐ Winner</span>}
-              {ad.remixed_from_id && <span className="text-[10px] bg-accent text-accent-foreground rounded px-2 py-0.5">🔄 Remixed</span>}
+              {ad.is_winner && <span className="text-[10px] bg-yellow-500/20 text-yellow-600 rounded px-2 py-0.5 flex items-center gap-0.5"><Award size={10} /> Winner</span>}
+              {ad.remixed_from_id && <span className="text-[10px] bg-accent text-accent-foreground rounded px-2 py-0.5 flex items-center gap-0.5"><RotateCw size={10} /> Remixed</span>}
             </div>
 
             {isEditing ? (
@@ -493,14 +493,14 @@ const AdGenerator = () => {
           <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 flex items-center gap-3">
             <AlertTriangle size={20} className="text-yellow-600 flex-shrink-0" />
             <p className="text-sm font-body-bn text-yellow-700">
-              {t('⚠️ [PRODUCT] এর জায়গায় আপনার পণ্যের নাম বসান — Edit বাটনে ক্লিক করুন', '⚠️ Replace [PRODUCT] with your product name — click Edit')}
+              {t('[PRODUCT] এর জায়গায় আপনার পণ্যের নাম বসান — Edit বাটনে ক্লিক করুন', 'Replace [PRODUCT] with your product name — click Edit')}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 sm:gap-6">
             {/* LEFT PANEL — Source Ad */}
             <div className="md:col-span-2">
-              <h3 className="text-lg font-heading-bn font-semibold mb-4">{t('🔍 মূল বিজ্ঞাপন', '🔍 Source Ad')}</h3>
+              <h3 className="text-lg font-heading-bn font-semibold mb-4 flex items-center gap-2"><Search size={18} className="text-primary" /> {t('মূল বিজ্ঞাপন', 'Source Ad')}</h3>
               <div className="bg-card rounded-2xl shadow-warm p-6 space-y-4 sticky top-4">
                 <span className="inline-block bg-primary/10 text-primary text-xs font-semibold rounded-full px-3 py-1 font-body-bn">{sourceAd.brand}</span>
 
@@ -740,7 +740,7 @@ const AdGenerator = () => {
                       {t('AI আপনার বিজ্ঞাপন লিখছে...', 'AI is writing your ads...')}
                     </>
                   ) : (
-                    <>⚡ {t('বিজ্ঞাপন তৈরি করুন', 'Generate Ads')}</>
+                    <><Zap size={20} /> {t('বিজ্ঞাপন তৈরি করুন', 'Generate Ads')}</>
                   )}
                 </button>
               </div>

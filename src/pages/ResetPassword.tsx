@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import { Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff, Zap } from 'lucide-react';
 
 const ResetPassword = forwardRef<HTMLDivElement>((_, ref) => {
   const { t } = useLanguage();
@@ -77,7 +77,7 @@ const ResetPassword = forwardRef<HTMLDivElement>((_, ref) => {
           <h1 className="text-3xl font-bold font-heading-en">
             <span className="text-foreground">Ad</span>
             <span className="text-primary">Dhoom</span>
-            <span className="text-brand-yellow">⚡</span>
+            <Zap size={20} className="text-brand-yellow" />
           </h1>
         </div>
 

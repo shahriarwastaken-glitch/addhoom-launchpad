@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Rocket } from 'lucide-react';
 
 const messages_bn = ['AI ভাবছে...', 'কপি লেখা হচ্ছে...', 'প্রায় হয়ে এলো...'];
 const messages_en = ['AI is thinking...', 'Writing copy...', 'Almost done...'];
@@ -24,7 +25,7 @@ const RocketLoader = () => {
 
   return (
     <div className="flex flex-col items-center gap-4 py-8">
-      <span className="text-4xl animate-bounce">🚀</span>
+      <Rocket size={36} className="text-primary animate-bounce" />
       <p className="text-sm font-medium text-foreground animate-pulse">{messages[idx]}</p>
       <div className="w-48 h-1.5 rounded-full bg-secondary overflow-hidden">
         <div

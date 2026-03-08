@@ -1,5 +1,6 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Link } from 'react-router-dom';
+import { Zap } from 'lucide-react';
 
 const Footer = () => {
   const { t } = useLanguage();
@@ -28,7 +29,7 @@ const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="text-xl font-bold font-heading-en">
-              <span className="text-foreground">Ad</span><span className="text-primary">Dhoom</span><span className="text-brand-yellow">⚡</span>
+              <span className="text-foreground">Ad</span><span className="text-primary">Dhoom</span><Zap size={16} className="text-brand-yellow inline" />
             </Link>
             <p className="text-sm text-muted-foreground mt-3 font-body-bn">
               {t('বাংলাদেশের ই-কমার্সের জন্য AI মার্কেটিং', 'AI Marketing for Bangladesh E-commerce')}

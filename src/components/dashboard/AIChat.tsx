@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Send, Plus, MessageSquare, Clock, Menu, X } from 'lucide-react';
+import { Send, Plus, MessageSquare, Clock, Menu, X, Zap, Hand } from 'lucide-react';
 import ThinkingLoader from '@/components/loaders/ThinkingLoader';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
@@ -227,7 +227,7 @@ const AIChat = () => {
           >
             <Menu size={18} className="text-muted-foreground" />
           </button>
-          <div className="w-9 h-9 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">⚡</div>
+          <div className="w-9 h-9 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0"><Zap size={18} /></div>
           <div className="min-w-0">
             <h3 className="text-sm font-bold text-foreground font-heading-bn">AdDhoom AI</h3>
             <p className="text-[10px] text-muted-foreground font-body-bn truncate">
@@ -240,9 +240,9 @@ const AIChat = () => {
         <div className="flex-1 p-3 sm:p-5 overflow-y-auto space-y-4">
           {isWelcome ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-2">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-brand flex items-center justify-center text-primary-foreground text-xl sm:text-2xl mb-4 shadow-lg">⚡</div>
-              <h2 className="text-lg sm:text-xl font-heading-bn font-bold text-foreground mb-1">
-                {t('নমস্কার! আমি AdDhoom AI 👋', 'Hello! I\'m AdDhoom AI 👋')}
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-brand flex items-center justify-center text-primary-foreground text-xl sm:text-2xl mb-4 shadow-lg"><Zap size={28} /></div>
+              <h2 className="text-lg sm:text-xl font-heading-bn font-bold text-foreground mb-1 flex items-center gap-2">
+                {t('নমস্কার! আমি AdDhoom AI', 'Hello! I\'m AdDhoom AI')} <Hand size={20} className="text-brand-yellow" />
               </h2>
               <p className="text-sm text-muted-foreground font-body-bn mb-6">
                 {t('আপনার মার্কেটিং নিয়ে যেকোনো প্রশ্ন করুন', 'Ask me anything about your marketing')}
@@ -264,7 +264,7 @@ const AIChat = () => {
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {msg.role === 'model' && (
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground text-xs font-bold mr-2 flex-shrink-0 mt-1">⚡</div>
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground text-xs font-bold mr-2 flex-shrink-0 mt-1"><Zap size={14} /></div>
                   )}
                   <div className="max-w-[88%] sm:max-w-[75%]">
                     <div className={`rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 text-sm font-body-bn ${
@@ -288,7 +288,7 @@ const AIChat = () => {
               ))}
               {typing && (
                 <div className="flex justify-start">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground text-xs font-bold mr-2">⚡</div>
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground text-xs font-bold mr-2"><Zap size={14} /></div>
                   <div className="bg-secondary rounded-2xl rounded-bl-md">
                     <ThinkingLoader />
                   </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/hooks/useTheme';
 import { Link } from 'react-router-dom';
-import { Menu, X, Moon, Sun } from 'lucide-react';
+import { Menu, X, Moon, Sun, Zap } from 'lucide-react';
 
 const Navbar = () => {
   const { lang, toggle, t } = useLanguage();
@@ -40,7 +40,7 @@ const Navbar = () => {
           <Link to="/" className="flex items-center gap-0.5 text-xl font-bold font-heading-en">
             <span className="text-foreground">Ad</span>
             <span className="text-primary">Dhoom</span>
-            <span className="text-brand-yellow">⚡</span>
+            <Zap size={18} className="text-brand-yellow" />
           </Link>
           <div className="hidden md:flex items-center gap-6">
             {navItems.map(item => (
@@ -72,7 +72,7 @@ const Navbar = () => {
           <Link to="/" className="text-2xl font-bold font-heading-en mb-8">
             <span className="text-foreground">Ad</span>
             <span className="text-primary">Dhoom</span>
-            <span className="text-brand-yellow">⚡</span>
+            <Zap size={20} className="text-brand-yellow" />
           </Link>
           {navItems.map((item, i) => (
             <a key={item.en} href={item.href} onClick={e => handleAnchor(e, item.href)}

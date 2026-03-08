@@ -3,14 +3,14 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
-import { PartyPopper, Sparkles, Loader2 } from 'lucide-react';
+import { PartyPopper, Sparkles, Loader2, Moon, Drama, Flame, Flag, Zap, ClipboardCopy } from 'lucide-react';
 import { toast } from 'sonner';
 
 const festivals = [
-  { id: 'eid', emoji: '🌙', bn: 'ঈদ ক্যাম্পেইন', en: 'Eid Campaign', descBn: 'ঈদুল ফিতর ও ঈদুল আযহার জন্য রেডিমেড টেমপ্লেট।', descEn: 'Ready-made templates for Eid.', gradient: 'from-[hsl(19,100%,50%)] to-[hsl(43,100%,50%)]' },
-  { id: 'boishakh', emoji: '🎭', bn: 'পহেলা বৈশাখ', en: 'Pohela Boishakh', descBn: 'বাংলা নববর্ষের জন্য বিশেষ ক্যাম্পেইন।', descEn: 'Bengali New Year campaigns.', gradient: 'from-[hsl(43,100%,50%)] to-[hsl(19,100%,62%)]' },
-  { id: 'puja', emoji: '🪔', bn: 'দুর্গাপূজা', en: 'Durga Puja', descBn: 'পূজার মৌসুমে বিক্রি বাড়ান।', descEn: 'Boost sales during Puja.', gradient: 'from-[hsl(253,79%,58%)] to-[hsl(280,80%,65%)]' },
-  { id: 'victory', emoji: '🇧🇩', bn: '১৬ ডিসেম্বর', en: '16 December', descBn: 'বিজয় দিবসের বিশেষ ক্যাম্পেইন।', descEn: 'Victory Day campaigns.', gradient: 'from-[hsl(155,100%,36%)] to-[hsl(155,100%,42%)]' },
+  { id: 'eid', icon: Moon, bn: 'ঈদ ক্যাম্পেইন', en: 'Eid Campaign', descBn: 'ঈদুল ফিতর ও ঈদুল আযহার জন্য রেডিমেড টেমপ্লেট।', descEn: 'Ready-made templates for Eid.', gradient: 'from-[hsl(19,100%,50%)] to-[hsl(43,100%,50%)]' },
+  { id: 'boishakh', icon: Drama, bn: 'পহেলা বৈশাখ', en: 'Pohela Boishakh', descBn: 'বাংলা নববর্ষের জন্য বিশেষ ক্যাম্পেইন।', descEn: 'Bengali New Year campaigns.', gradient: 'from-[hsl(43,100%,50%)] to-[hsl(19,100%,62%)]' },
+  { id: 'puja', icon: Flame, bn: 'দুর্গাপূজা', en: 'Durga Puja', descBn: 'পূজার মৌসুমে বিক্রি বাড়ান।', descEn: 'Boost sales during Puja.', gradient: 'from-[hsl(253,79%,58%)] to-[hsl(280,80%,65%)]' },
+  { id: 'victory', icon: Flag, bn: '১৬ ডিসেম্বর', en: '16 December', descBn: 'বিজয় দিবসের বিশেষ ক্যাম্পেইন।', descEn: 'Victory Day campaigns.', gradient: 'from-[hsl(155,100%,36%)] to-[hsl(155,100%,42%)]' },
 ];
 
 const FestivalTemplates = () => {
@@ -72,7 +72,7 @@ const FestivalTemplates = () => {
             <div className={`bg-gradient-to-r ${f.gradient} p-5 text-white`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl">{f.emoji}</span>
+                  <f.icon size={28} />
                   <div>
                     <h3 className="text-lg font-bold">{t(f.bn, f.en)}</h3>
                   </div>
@@ -92,7 +92,7 @@ const FestivalTemplates = () => {
                       </div>
                       <p className="text-sm font-semibold">{ad.headline}</p>
                       <p className="text-xs text-muted-foreground mt-1">{ad.body?.slice(0, 80)}...</p>
-                      <button onClick={() => copyAd(ad)} className="text-xs text-primary hover:underline mt-1">📋 {t('কপি', 'Copy')}</button>
+                      <button onClick={() => copyAd(ad)} className="text-xs text-primary hover:underline mt-1 flex items-center gap-1"><ClipboardCopy size={12} /> {t('কপি', 'Copy')}</button>
                     </div>
                   ))}
                 </div>
@@ -102,7 +102,7 @@ const FestivalTemplates = () => {
                   {generatingId === f.id ? (
                     <><Loader2 size={14} className="animate-spin" /> {t('তৈরি হচ্ছে...', 'Generating...')}</>
                   ) : (
-                    <>{t('⚡ AI টেমপ্লেট তৈরি করুন', '⚡ Generate AI Templates')}</>
+                    <><Zap size={14} /> {t('AI টেমপ্লেট তৈরি করুন', 'Generate AI Templates')}</>
                   )}
                 </button>
               )}

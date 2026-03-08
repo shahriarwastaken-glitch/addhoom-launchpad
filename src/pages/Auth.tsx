@@ -4,7 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Zap, PartyPopper } from 'lucide-react';
 import { z } from 'zod';
 
 const loginSchema = z.object({
@@ -79,7 +79,7 @@ const Auth = forwardRef<HTMLDivElement>((_, ref) => {
         });
         if (error) throw error;
         toast({
-          title: t('অ্যাকাউন্ট তৈরি হয়েছে! 🎉', 'Account created! 🎉'),
+          title: t('অ্যাকাউন্ট তৈরি হয়েছে!', 'Account created!'),
           description: t('ইমেইল ভেরিফাই করুন।', 'Please verify your email.'),
         });
       }
@@ -129,7 +129,7 @@ const Auth = forwardRef<HTMLDivElement>((_, ref) => {
           <Link to="/" className="text-3xl font-bold font-heading-en inline-block">
             <span className="text-foreground">Ad</span>
             <span className="text-primary">Dhoom</span>
-            <span className="text-brand-yellow">⚡</span>
+            <Zap size={20} className="text-brand-yellow" />
           </Link>
           <p className="mt-2 text-muted-foreground">
             {t('আপনার AI মার্কেটিং অ্যাসিস্ট্যান্ট', 'Your AI Marketing Assistant')}

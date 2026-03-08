@@ -1,6 +1,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Zap } from 'lucide-react';
 
 type UpgradeType = 'video' | 'general';
 
@@ -19,7 +20,7 @@ const content: Record<UpgradeType, { icon: string; title_bn: string; title_en: s
     desc_en: 'Pro plan allows 2 video ads per month. Upgrade to Agency for unlimited videos.',
   },
   general: {
-    icon: '⚡',
+    icon: 'zap',
     title_bn: 'ফিচার লিমিট শেষ হয়েছে',
     title_en: 'Feature Limit Reached',
     desc_bn: 'এই ফিচারের লিমিট শেষ হয়ে গেছে। আরও ব্যবহারের জন্য আপগ্রেড করুন।',
@@ -56,7 +57,7 @@ const UpgradeModal = ({ open, onClose, type = 'general' }: UpgradeModalProps) =>
           >
             {/* Top gradient strip */}
             <div className="bg-gradient-brand px-6 py-4 text-center">
-              <h2 className="text-lg font-bold text-primary-foreground">⚡ {t('আপগ্রেড করুন', 'Upgrade')}</h2>
+              <h2 className="text-lg font-bold text-primary-foreground flex items-center justify-center gap-2"><Zap size={18} /> {t('আপগ্রেড করুন', 'Upgrade')}</h2>
             </div>
 
             <div className="p-6 space-y-5">
