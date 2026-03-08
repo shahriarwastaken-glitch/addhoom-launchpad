@@ -113,13 +113,30 @@ serve(async (req) => {
     const masterPrompt = await getImageMasterPrompt();
 
     // Build the specific instructions for this generation
-    const textInstruction = ad_headline
-      ? `HEADLINE TO OVERLAY: "${ad_headline}" — render this text prominently in the image following Section 3 rules.`
+    const normalizedHeadline = (ad_headline || "")
+      .replace(/[₹₨]/g, "৳")
+      .replace(/\bRs\.?\b/gi, "৳")
+      .replace(/মাএ|মাত্রা|মাত্ৰ|মাত্|মাত্ৰ/g, "মাত্র")
+      .trim();
+
+    const isBanglaHeadline = /[\u0980-\u09FF]/.test(normalizedHeadline);
+
+    const textInstruction = normalizedHeadline
+      ? `HEADLINE TO OVERLAY (COPY EXACTLY, CHARACTER-BY-CHARACTER): "${normalizedHeadline}"\nDo NOT paraphrase, transliterate, restyle, or replace any character in this headline.`
       : "NO TEXT OVERLAY REQUESTED — generate a completely text-free image. Leave clean space for programmatic text overlay later.";
 
     const descInstruction = ad_body
       ? `PRODUCT DESCRIPTION: "${ad_body.substring(0, 120)}"`
       : "";
+
+    const hardTextGuardrails = `
+NON-NEGOTIABLE TEXT ENFORCEMENT:
+- The word "মাত্র" must be spelled exactly as: মাত্র
+- Bangladesh currency symbol must be exactly: ৳ (U+09F3)
+- NEVER use: ₹, ₨, Rs, or INR symbols/text
+- If you cannot render Bangla text perfectly, leave text area empty instead of generating wrong text
+${isBanglaHeadline ? "- This request includes Bangla text. Exact Bangla fidelity is mandatory." : ""}
+`;
 
     const prompt = `${masterPrompt}
 
@@ -134,6 +151,7 @@ Format: ${FORMAT_INSTRUCTIONS[format] || FORMAT_INSTRUCTIONS.square}
 Brand Colors: Primary ${brand_color_primary}, Secondary ${brand_color_secondary}
 ${textInstruction}
 ${descInstruction}
+${hardTextGuardrails}
 
 The attached reference image shows the exact product. Maintain absolute fidelity to it.
 Generate the advertisement image now.`;
