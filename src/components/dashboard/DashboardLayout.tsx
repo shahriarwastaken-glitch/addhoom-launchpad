@@ -211,35 +211,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             <span className="text-[10px] font-medium truncate">{t(item.bn, item.en)}</span>
           </NavLink>
         ))}
-        {/* More menu */}
-        <div className="relative flex-1">
-          <button
-            onClick={() => setShowMoreMenu(!showMoreMenu)}
-            className={`flex flex-col items-center gap-0.5 px-2 py-2.5 w-full ${showMoreMenu ? 'text-primary' : 'text-muted-foreground'}`}
-          >
-            <MoreHorizontal size={20} />
-            <span className="text-[10px] font-medium">{t('আরো', 'More')}</span>
-          </button>
-          {showMoreMenu && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
-              <div className="absolute bottom-full right-0 mb-2 z-50 bg-card border border-border rounded-xl shadow-warm-lg py-2 min-w-[200px]">
-                {moreItems.map(item => (
-                  <NavLink
-                    key={item.en}
-                    to={item.url}
-                    onClick={() => setShowMoreMenu(false)}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary transition-colors"
-                    activeClassName="text-primary bg-primary/5"
-                  >
-                    <item.icon size={16} />
-                    <span className="font-body-bn">{t(item.bn, item.en)}</span>
-                  </NavLink>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
       </nav>
     </SidebarProvider>
   );
