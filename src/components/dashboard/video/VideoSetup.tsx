@@ -193,7 +193,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
                 <p className="text-primary font-heading-bn font-semibold text-lg">{t('ছেড়ে দিন!', 'Drop here!')}</p>
               ) : (
                 <>
-                  <span className="text-[40px] mb-2">🎬</span>
+                  <Video size={40} className="text-muted-foreground mb-2" />
                   <p className="text-base text-muted-foreground font-heading-bn">{t('ছবি টেনে আনুন অথবা ক্লিক করুন', 'Drag images or click to upload')}</p>
                   <p className="text-xs text-muted-foreground mt-1">{t('সর্বোচ্চ ৫টি ছবি • PNG, JPG • প্রতিটি সর্বোচ্চ 8MB', 'Max 5 images • PNG, JPG • Max 8MB each')}</p>
                   <p className="text-xs text-primary italic mt-1">{t('ভালো ফলাফলের জন্য ৩-৫টি ছবি দিন', 'Use 3-5 images for best results')}</p>
