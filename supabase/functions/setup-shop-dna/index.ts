@@ -25,11 +25,26 @@ serve(async (req) => {
       });
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    console.log("ENV check:", { 
+      hasUrl: !!supabaseUrl, 
+      hasAnon: !!supabaseAnonKey, 
+      hasService: !!supabaseServiceKey 
+    });
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error("Missing SUPABASE_URL or SUPABASE_ANON_KEY");
+      return new Response(JSON.stringify({ success: false, code: 500, message: "Server configuration error" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
 
     const {
       data: { user },
@@ -42,7 +57,9 @@ serve(async (req) => {
       });
     }
 
-    const { workspace_id, shop_url } = await req.json();
+    const body = await req.json();
+    const { workspace_id, shop_url } = body;
+    console.log("Request received:", { workspace_id, shop_url: shop_url?.substring(0, 50) });
 
     if (!workspace_id || !shop_url) {
       return new Response(
