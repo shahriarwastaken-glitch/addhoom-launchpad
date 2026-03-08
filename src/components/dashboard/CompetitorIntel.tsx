@@ -531,7 +531,7 @@ const DetailView = ({
 
       {/* Section 1: Strategy Overview */}
       <div className="bg-card rounded-[20px] shadow-warm p-5 sm:p-6 mb-6">
-        <h3 className="font-heading-bn font-bold text-foreground mb-4">{t('🎯 স্ট্র্যাটেজি ওভারভিউ', '🎯 Strategy Overview')}</h3>
+        <h3 className="font-heading-bn font-bold text-foreground mb-4">{t('স্ট্র্যাটেজি ওভারভিউ', 'Strategy Overview')}</h3>
         <span className="inline-block bg-gradient-cta text-primary-foreground font-bold rounded-full px-5 py-2 text-sm mb-5">{ai?.strategy_type}</span>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
