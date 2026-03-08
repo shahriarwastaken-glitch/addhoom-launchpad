@@ -380,15 +380,12 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
         <div className="flex flex-wrap gap-2 pt-4 mt-4 border-t border-border">
           {ad.image_url ? (
             <>
-              <a
-                href={ad.image_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                download
+              <button
+                onClick={onDownload}
                 className="px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/[0.08] text-primary text-xs font-heading-bn hover:bg-primary/15 transition-all active:scale-95 flex items-center gap-1"
               >
                 <Download size={12} /> {t('ডাউনলোড', 'Download')}
-              </a>
+              </button>
               <button onClick={onCopy} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1">
                 {isCopied ? <><Check size={12} className="text-brand-green" /> {t('কপি হয়েছে', 'Copied')}</> : <><Copy size={12} /> {t('প্রম্পট কপি', 'Copy Prompt')}</>}
               </button>
