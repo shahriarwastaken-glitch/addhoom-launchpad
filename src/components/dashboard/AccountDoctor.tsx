@@ -31,6 +31,8 @@ const getActionForItem = (item: any): ActionRoute => {
 
 const AccountDoctor = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+
   const { activeWorkspace } = useAuth();
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState<any>(null);
