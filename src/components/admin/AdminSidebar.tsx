@@ -15,7 +15,8 @@ import {
   Key,
   Menu,
   X,
-  Crown
+  Crown,
+  Bell
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -30,6 +31,7 @@ const navItems = [
   { icon: Users, label: 'ব্যবহারকারী', path: '/admin/users' },
   { icon: DollarSign, label: 'রাজস্ব', path: '/admin/revenue' },
   { icon: Bot, label: 'AI পারফরম্যান্স', path: '/admin/ai' },
+  { icon: Bell, label: 'নোটিফিকেশন', path: '/admin/notifications' },
   { icon: Key, label: 'API কী', path: '/admin/api-keys' },
   { icon: Settings, label: 'সেটিংস', path: '/admin/settings' },
 ];

@@ -9,6 +9,7 @@ import AdminAIPerformance from '@/components/admin/AdminAIPerformance';
 import AdminSettings from '@/components/admin/AdminSettings';
 import AdminManageAdmins from '@/components/admin/AdminManageAdmins';
 import AdminApiKeys from '@/components/admin/AdminApiKeys';
+import AdminNotifications from '@/components/admin/AdminNotifications';
 
 export default function AdminDashboardNew() {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -21,6 +22,7 @@ export default function AdminDashboardNew() {
           <Route path="users" element={<AdminUsers />} />
           <Route path="revenue" element={<AdminRevenue />} />
           <Route path="ai" element={<AdminAIPerformance />} />
+          <Route path="notifications" element={<AdminNotifications />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="api-keys" element={<AdminApiKeys />} />
           {isSuperAdmin && (

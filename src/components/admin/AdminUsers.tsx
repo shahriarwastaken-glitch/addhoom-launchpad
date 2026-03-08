@@ -38,6 +38,7 @@ interface UserData {
   id: string;
   email: string;
   full_name: string;
+  phone: string | null;
   plan: string;
   created_at: string;
   ads_count: number;
@@ -302,6 +303,7 @@ export default function AdminUsers() {
                   <div>
                     <div className="font-medium text-sm">{user.full_name || 'N/A'}</div>
                     <div className="text-xs text-muted-foreground">{user.email}</div>
+                    {user.phone && <div className="text-[10px] text-muted-foreground/70">{user.phone}</div>}
                   </div>
                 </div>
                 <Badge variant="outline" className={getPlanBadgeClass(user.plan)}>
@@ -371,6 +373,7 @@ export default function AdminUsers() {
                         <div>
                           <div className="font-medium text-sm">{user.full_name || 'N/A'}</div>
                           <div className="text-xs text-muted-foreground">{user.email}</div>
+                          {user.phone && <div className="text-[10px] text-muted-foreground/70">{user.phone}</div>}
                         </div>
                       </div>
                     </td>

@@ -593,6 +593,73 @@ export type Database = {
           },
         ]
       }
+      notification_reads: {
+        Row: {
+          id: string
+          notification_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          notification_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          notification_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_reads_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          sent_by: string | null
+          target_type: string
+          target_user_ids: string[] | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          sent_by?: string | null
+          target_type?: string
+          target_user_ids?: string[] | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          sent_by?: string | null
+          target_type?: string
+          target_user_ids?: string[] | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount_bdt: number

@@ -1,20 +1,29 @@
-import { ReactNode, useState, useRef, useCallback } from 'react';
+import { ReactNode, useState, useRef, useCallback, useEffect } from 'react';
 import DashboardSidebar from './DashboardSidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/contexts/AuthContext';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { Bell, Moon, Sun, Target, Video, Calendar, MessageSquare, Stethoscope, LogOut, ChevronDown, Store, RefreshCw, Zap, X } from 'lucide-react';
+import { Bell, Moon, Sun, Target, Video, Calendar, MessageSquare, Stethoscope, LogOut, ChevronDown, Store, RefreshCw, Zap, X, MoreHorizontal, Search, PartyPopper, BarChart3, Settings } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
 
 const mobileItems = [
   { icon: Target, bn: 'অ্যাড', en: 'Ads', url: '/dashboard' },
   { icon: Video, bn: 'ভিডিও', en: 'Video', url: '/dashboard/video' },
   { icon: Calendar, bn: 'ক্যালেন্ডার', en: 'Calendar', url: '/dashboard/calendar' },
   { icon: MessageSquare, bn: 'চ্যাট', en: 'Chat', url: '/dashboard/chat' },
+];
+
+const moreItems = [
+  { icon: Search, bn: 'প্রতিযোগী', en: 'Competitors', url: '/dashboard/competitors' },
   { icon: Stethoscope, bn: 'ডাক্তার', en: 'Doctor', url: '/dashboard/doctor' },
+  { icon: PartyPopper, bn: 'উৎসব', en: 'Festival', url: '/dashboard/festival' },
+  { icon: Zap, bn: 'ধুম স্কোর', en: 'Dhoom Score', url: '/dashboard/dhoom-score' },
+  { icon: BarChart3, bn: 'ক্যাম্পেইন', en: 'Campaigns', url: '/dashboard/campaigns' },
+  { icon: Settings, bn: 'সেটিংস', en: 'Settings', url: '/dashboard/settings' },
 ];
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
@@ -26,6 +35,9 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const [showWorkspaces, setShowWorkspaces] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [readIds, setReadIds] = useState<Set<string>>(new Set());
 
   // Pull-to-refresh state
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -69,6 +81,33 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
     }
     isPulling.current = false;
   }, [pullDistance, isRefreshing]);
+
+  // Load notifications
+  useEffect(() => {
+    if (!user) return;
+    const loadNotifications = async () => {
+      const { data: notifs } = await supabase
+        .from('notifications')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      setNotifications(notifs || []);
+      const { data: reads } = await supabase
+        .from('notification_reads')
+        .select('notification_id')
+        .eq('user_id', user.id);
+      setReadIds(new Set((reads || []).map((r: any) => r.notification_id)));
+    };
+    loadNotifications();
+  }, [user]);
+
+  const unreadCount = notifications.filter(n => !readIds.has(n.id)).length;
+
+  const markAsRead = async (notifId: string) => {
+    if (readIds.has(notifId) || !user) return;
+    await supabase.from('notification_reads').insert({ notification_id: notifId, user_id: user.id });
+    setReadIds(prev => new Set([...prev, notifId]));
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -140,21 +179,45 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
               <div className="relative">
                 <button onClick={() => setShowNotifications(!showNotifications)} className="relative p-1.5 sm:p-2 text-muted-foreground hover:text-foreground transition-colors">
                   <Bell size={16} />
-                  <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-primary rounded-full" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center bg-primary text-primary-foreground text-[9px] font-bold rounded-full px-1">
+                      {unreadCount}
+                    </span>
+                  )}
                 </button>
                 {showNotifications && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
-                    <div className="absolute top-full right-0 mt-1 z-50 bg-card border border-border rounded-xl shadow-warm-lg w-72 sm:w-80">
+                    <div className="absolute top-full right-0 mt-1 z-50 bg-card border border-border rounded-xl shadow-warm-lg w-72 sm:w-80 max-h-[400px] overflow-hidden flex flex-col">
                       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                         <h4 className="text-sm font-semibold text-foreground">{t('নোটিফিকেশন', 'Notifications')}</h4>
                         <button onClick={() => setShowNotifications(false)} className="text-muted-foreground hover:text-foreground">
                           <X size={14} />
                         </button>
                       </div>
-                      <div className="p-4 text-center">
-                        <Bell size={24} className="text-muted-foreground mx-auto mb-2" />
-                        <p className="text-xs text-muted-foreground font-body-bn">{t('নতুন কোনো নোটিফিকেশন নেই', 'No new notifications')}</p>
+                      <div className="overflow-y-auto flex-1">
+                        {notifications.length === 0 ? (
+                          <div className="p-4 text-center">
+                            <Bell size={24} className="text-muted-foreground mx-auto mb-2" />
+                            <p className="text-xs text-muted-foreground font-body-bn">{t('নতুন কোনো নোটিফিকেশন নেই', 'No new notifications')}</p>
+                          </div>
+                        ) : (
+                          notifications.map(n => (
+                            <button
+                              key={n.id}
+                              onClick={() => markAsRead(n.id)}
+                              className={`w-full text-left px-4 py-3 border-b border-border/50 hover:bg-secondary/50 transition-colors ${!readIds.has(n.id) ? 'bg-primary/5' : ''}`}
+                            >
+                              <div className="flex items-start gap-2">
+                                {!readIds.has(n.id) && <span className="mt-1.5 w-2 h-2 rounded-full bg-primary flex-shrink-0" />}
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm font-medium text-foreground">{n.title}</p>
+                                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
+                                </div>
+                              </div>
+                            </button>
+                          ))
+                        )}
                       </div>
                     </div>
                   </>
@@ -231,6 +294,35 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             <span className="text-[10px] font-medium truncate">{t(item.bn, item.en)}</span>
           </NavLink>
         ))}
+        {/* More menu */}
+        <div className="relative flex-1">
+          <button
+            onClick={() => setShowMoreMenu(!showMoreMenu)}
+            className={`flex flex-col items-center gap-0.5 px-2 py-2.5 w-full ${showMoreMenu ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            <MoreHorizontal size={20} />
+            <span className="text-[10px] font-medium">{t('আরো', 'More')}</span>
+          </button>
+          {showMoreMenu && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
+              <div className="absolute bottom-full right-0 mb-2 z-50 bg-card border border-border rounded-xl shadow-warm-lg py-2 min-w-[200px]">
+                {moreItems.map(item => (
+                  <NavLink
+                    key={item.en}
+                    to={item.url}
+                    onClick={() => setShowMoreMenu(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary transition-colors"
+                    activeClassName="text-primary bg-primary/5"
+                  >
+                    <item.icon size={16} />
+                    <span className="font-body-bn">{t(item.bn, item.en)}</span>
+                  </NavLink>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </nav>
     </SidebarProvider>
   );
