@@ -51,6 +51,41 @@ const avatarColors = [
   'bg-[hsl(var(--brand-yellow))]', 'bg-destructive',
 ];
 
+// PDF Export Button helper
+const PDFExportButton = ({ analysisId, competitorName, t, workspaceName }: {
+  analysisId: string; competitorName: string; t: (bn: string, en: string) => string; workspaceName: string;
+}) => {
+  const [exporting, setExporting] = useState(false);
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-competitor-detail?analysis_id=${analysisId}&workspace_id=any`;
+      const resp = await fetch(url, {
+        headers: { Authorization: `Bearer ${session?.access_token}`, apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+      });
+      const result = await resp.json();
+      if (result.success) {
+        await exportCompetitorPDF(result.analysis, workspaceName);
+        toast.success(t('PDF রিপোর্ট ডাউনলোড হয়েছে', 'PDF report downloaded'));
+      } else {
+        toast.error(t('রিপোর্ট তৈরি ব্যর্থ', 'Report generation failed'));
+      }
+    } catch {
+      toast.error(t('PDF তৈরি ব্যর্থ', 'PDF generation failed'));
+    } finally {
+      setExporting(false);
+    }
+  };
+  return (
+    <button onClick={handleExport} disabled={exporting}
+      className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors disabled:opacity-50">
+      {exporting ? <Loader2 size={12} className="animate-spin" /> : <FileText size={12} />}
+      {exporting ? t('তৈরি হচ্ছে...', 'Generating...') : t('PDF রিপোর্ট', 'PDF Report')}
+    </button>
+  );
+};
+
 const CompetitorIntel = () => {
   const { t, lang } = useLanguage();
   const { activeWorkspace } = useAuth();
