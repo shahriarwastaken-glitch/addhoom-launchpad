@@ -128,6 +128,7 @@ const AIChat = () => {
   const [editingConvId, setEditingConvId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [menuConvId, setMenuConvId] = useState<string | null>(null);
+  const [hasSummary, setHasSummary] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -162,6 +163,7 @@ const AIChat = () => {
       });
       if (data?.conversation) {
         setConversationId(convId);
+        setHasSummary(!!data.conversation.summary);
         const msgs = (data.conversation.messages || []).map((m: any) => {
           const { cleanText, adCopy } = parseAdCopy(m.content);
           return { ...m, content: cleanText, ad_copy: adCopy };
@@ -204,6 +206,7 @@ const AIChat = () => {
     setConversationId(null);
     setMessages([]);
     setInput('');
+    setHasSummary(false);
     setDrawerOpen(false);
   };
 
@@ -721,6 +724,19 @@ const AIChat = () => {
           ) : (
             /* ─── Message Bubbles ─── */
             <>
+              {/* Summary divider */}
+              {hasSummary && (
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="flex-1 h-px bg-border" />
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/80 border border-border">
+                    <Sparkles size={12} className="text-primary" />
+                    <span className="text-[11px] text-muted-foreground font-body-bn">
+                      {t('আগের কথোপকথন সারসংক্ষেপ করা হয়েছে', 'Previous messages summarized')}
+                    </span>
+                  </div>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+              )}
               {messages.map((msg, i) => {
                 const isHighlighted = searchQuery && searchMatches.includes(i);
                 return (
