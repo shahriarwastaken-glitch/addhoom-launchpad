@@ -30,45 +30,147 @@ serve(async (req) => {
     const limitCheck = await checkPlanLimit(supabase, user.id, "competitor_intel", profile?.plan || "pro");
     if (!limitCheck.allowed) return errorResponse(402, limitCheck.message_bn!, limitCheck.message_en!);
 
-    const { workspace_id, competitor_url, competitor_name } = await req.json();
-    if (!workspace_id || !competitor_url) {
-      return errorResponse(400, "প্রতিযোগীর URL দিন।", "Competitor URL is required.");
+    const { workspace_id, competitor_name, competitor_page_url, language } = await req.json();
+    if (!workspace_id || !competitor_name) {
+      return errorResponse(400, "প্রতিযোগীর নাম দিন।", "Competitor name is required.");
     }
 
-    const prompt = `Analyze this competitor in Bangladesh e-commerce: ${competitor_name || "Unknown"} (${competitor_url}).
+    // Fetch workspace shop DNA
+    const { data: workspace } = await supabase
+      .from("workspaces").select("*").eq("id", workspace_id).single();
 
-Based on common patterns for Bangladesh e-commerce competitors, analyze:
-1. Their likely main marketing strategy
-2. Common copywriting patterns they would use
-3. Their probable targeting approach
-4. Strengths and weaknesses
-5. Suggest 3 specific counter-strategies for a competing shop
+    const lang = language || "bn";
 
-Respond in Bangla. Return valid JSON:
-{"analysis":"...detailed analysis...", "counter_strategy":"...3 counter strategies...", "top_patterns":["pattern1","pattern2","pattern3"]}`;
+    // STEP 2 — Try Meta Ad Library API
+    let ads: any[] = [];
+    let adsFetched = false;
+
+    try {
+      const encodedName = encodeURIComponent(competitor_name);
+      const adsApiUrl = `https://www.facebook.com/ads/library/api/?search_terms=${encodedName}&ad_type=ALL&ad_reached_countries=['BD']&limit=20&fields=ad_creative_body,ad_creative_link_caption,ad_creative_link_title,ad_delivery_start_time,page_name`;
+
+      console.log("Fetching Meta Ad Library:", adsApiUrl);
+      const adsResponse = await fetch(adsApiUrl);
+
+      if (adsResponse.ok) {
+        const adsData = await adsResponse.json();
+        if (Array.isArray(adsData?.data) && adsData.data.length > 0) {
+          ads = adsData.data;
+          adsFetched = true;
+          console.log(`Found ${ads.length} ads from Meta Ad Library`);
+        }
+      } else {
+        console.warn("Meta Ad Library returned status:", adsResponse.status);
+      }
+    } catch (e) {
+      console.warn("Meta Ad Library fetch failed, using fallback:", e);
+    }
+
+    // STEP 3 — Build analysis prompt
+    const shopContext = workspace ? `
+MY SHOP:
+Name: ${workspace.shop_name || "N/A"}
+Industry: ${workspace.industry || "N/A"}
+Target audience: ${workspace.target_audience || "N/A"}
+Unique selling point: ${workspace.unique_selling || "N/A"}
+Key products: ${workspace.key_products || "N/A"}
+Price range: ${workspace.price_range || "N/A"}` : "";
+
+    let adsContext = "";
+    if (adsFetched && ads.length > 0) {
+      adsContext = `\n\nTHEIR ACTIVE ADS:\n${ads.slice(0, 10).map((ad: any, i: number) => `
+Ad ${i + 1} (Running since: ${ad.ad_delivery_start_time || "Unknown"}):
+Page: ${ad.page_name || "N/A"}
+Headline: ${ad.ad_creative_link_title || "N/A"}
+Body: ${ad.ad_creative_body || "N/A"}
+Caption: ${ad.ad_creative_link_caption || "N/A"}`).join("\n")}`;
+    } else {
+      adsContext = `\n\nNOTE: Could not fetch live ads. Analyze based on your knowledge of this competitor and their likely strategies in the Bangladesh e-commerce market. The competitor page URL is: ${competitor_page_url || "not provided"}.`;
+    }
+
+    const prompt = `Analyze the following competitor in Bangladesh e-commerce and provide a detailed counter-strategy for my shop.
+${shopContext}
+
+COMPETITOR: ${competitor_name}
+${adsContext}
+
+PROVIDE A COMPLETE ANALYSIS:
+
+1. THEIR STRATEGY: What copywriting approach are they likely using? (FOMO? Price anchoring? Social proof? Authority?)
+2. THEIR STRENGTHS: What are they doing well?
+3. THEIR WEAKNESSES: Where are they leaving money on the table?
+4. TOP PATTERNS: The 3 most common patterns across their ads
+5. THREE COUNTER-STRATEGIES for my shop — each must be specific, actionable, and different from what the competitor is doing. Include example hook text.
+
+Language: ${lang === "bn" ? "Respond in Bangla" : "Respond in English"}
+
+Return ONLY valid JSON:
+{
+  "strategy_type": "what overall strategy the competitor uses",
+  "strengths": ["array of 2-3 things they do well"],
+  "weaknesses": ["array of 2-3 gaps or weaknesses"],
+  "top_patterns": ["array of 3 identified patterns with brief explanation each"],
+  "counter_strategies": [
+    {
+      "title": "strategy name",
+      "description": "what to do and why it will beat the competitor",
+      "example_hook": "example opening line for an ad using this strategy"
+    }
+  ],
+  "ads_analyzed": ${ads.length}
+}`;
 
     const aiResponse = await callGemini(prompt);
 
     let parsed: any;
     try {
       const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-      parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : { analysis: aiResponse, counter_strategy: "", top_patterns: [] };
+      parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : {
+        strategy_type: "Unknown",
+        strengths: [],
+        weaknesses: [],
+        top_patterns: [],
+        counter_strategies: [],
+        ads_analyzed: 0,
+      };
     } catch {
-      parsed = { analysis: aiResponse, counter_strategy: "", top_patterns: [] };
+      parsed = {
+        strategy_type: "Unknown",
+        strengths: [],
+        weaknesses: [],
+        top_patterns: [],
+        counter_strategies: [],
+        ads_analyzed: 0,
+      };
     }
 
+    // Format ads for storage and frontend
+    const formattedAds = ads.slice(0, 10).map((ad: any) => ({
+      page_name: ad.page_name || competitor_name,
+      headline: ad.ad_creative_link_title || "",
+      body: ad.ad_creative_body || "",
+      caption: ad.ad_creative_link_caption || "",
+      running_since: ad.ad_delivery_start_time || "",
+    }));
+
+    // STEP 4 — Save
     const { data: saved } = await supabase.from("competitor_analyses").insert({
       workspace_id,
-      competitor_name: competitor_name || "Unknown",
-      competitor_url,
-      ai_analysis: parsed.analysis,
-      counter_strategy: parsed.counter_strategy,
-      ads_found: parsed.top_patterns || [],
+      competitor_name,
+      competitor_url: competitor_page_url || null,
+      ai_analysis: JSON.stringify(parsed),
+      counter_strategy: JSON.stringify(parsed.counter_strategies || []),
+      ads_found: formattedAds,
     }).select().single();
 
     await logUsage(supabase, user.id, workspace_id, "competitor_intel");
 
-    return jsonResponse({ analysis: saved || parsed });
+    return jsonResponse({
+      analysis: parsed,
+      ads: formattedAds,
+      ads_fetched: adsFetched,
+      saved_id: saved?.id,
+    });
   } catch (e) {
     console.error("competitor-intel error:", e);
     return errorResponse(500, "কিছু একটা সমস্যা হয়েছে।", "Something went wrong.");
