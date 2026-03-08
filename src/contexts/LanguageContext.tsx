@@ -6,7 +6,7 @@ const LanguageContext = createContext<{
   lang: Language;
   toggle: () => void;
   t: (bn: string, en: string) => string;
-}>({ lang: 'bn', toggle: () => {}, t: (bn) => bn });
+}>({ lang: 'en', toggle: () => {}, t: (_bn, en) => en });
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Language>(() => {
