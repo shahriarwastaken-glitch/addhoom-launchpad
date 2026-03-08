@@ -865,6 +865,16 @@ export type Database = {
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      upsert_api_usage_stats: {
+        Args: {
+          p_calls_failed?: number
+          p_calls_made?: number
+          p_response_ms?: number
+          p_service_name: string
+          p_stat_date: string
+        }
+        Returns: undefined
+      }
       workspace_owner_id: { Args: { _workspace_id: string }; Returns: string }
     }
     Enums: {
