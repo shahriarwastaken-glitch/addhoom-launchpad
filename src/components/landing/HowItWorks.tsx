@@ -28,7 +28,7 @@ const HowItWorks = () => {
             <div key={i} className={`relative flex flex-col items-center text-center transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
               style={{ transitionDelay: `${i * 0.15}s` }}>
               <span className="absolute -top-4 text-8xl font-heading-en font-extrabold text-primary/[0.06] select-none">{step.num}</span>
-              <div className="relative z-10 w-16 h-16 rounded-2xl bg-card shadow-warm flex items-center justify-center text-3xl mb-4">{step.emoji}</div>
+              <div className="relative z-10 w-16 h-16 rounded-2xl bg-card shadow-warm flex items-center justify-center mb-4"><step.icon size={28} className="text-primary" /></div>
               <h3 className="text-lg font-heading-bn font-bold text-foreground mb-2">{t(step.title.bn, step.title.en)}</h3>
               <p className="text-sm text-muted-foreground font-body-bn leading-relaxed">{t(step.desc.bn, step.desc.en)}</p>
             </div>

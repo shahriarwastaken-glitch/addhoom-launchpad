@@ -106,7 +106,7 @@ const CampaignsList = () => {
         <div className="text-center py-12 text-muted-foreground font-body-bn">{t('লোড হচ্ছে...', 'Loading...')}</div>
       ) : campaigns.length === 0 ? (
         <div className="bg-card rounded-[20px] shadow-warm p-12 text-center">
-          <div className="text-5xl mb-4">📊</div>
+          <BarChart3 size={48} className="text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground font-body-bn">{t('এখনো কোনো ক্যাম্পেইন নেই', 'No campaigns yet')}</p>
         </div>
       ) : (

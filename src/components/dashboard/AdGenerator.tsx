@@ -615,9 +615,9 @@ const AdGenerator = () => {
 
                 {/* Hint pills */}
                 <div className="flex flex-wrap gap-2">
-                  <span className="text-[10px] bg-secondary text-muted-foreground rounded-full px-3 py-1 font-body-bn">📦 Daraz {t('লিংক', 'link')}</span>
-                  <span className="text-[10px] bg-secondary text-muted-foreground rounded-full px-3 py-1 font-body-bn">🌐 {t('শপের লিংক', 'Shop link')}</span>
-                  <span className="text-[10px] bg-secondary text-muted-foreground rounded-full px-3 py-1 font-body-bn">🎯 FB Ad Library {t('লিংক', 'link')}</span>
+                  <span className="text-[10px] bg-secondary text-muted-foreground rounded-full px-3 py-1 font-body-bn">Daraz {t('লিংক', 'link')}</span>
+                  <span className="text-[10px] bg-secondary text-muted-foreground rounded-full px-3 py-1 font-body-bn">{t('শপের লিংক', 'Shop link')}</span>
+                  <span className="text-[10px] bg-secondary text-muted-foreground rounded-full px-3 py-1 font-body-bn">FB Ad Library {t('লিংক', 'link')}</span>
                 </div>
               </div>
 

@@ -257,7 +257,7 @@ export default function AdminAIPerformance() {
           </h3>
           <div className="space-y-3 max-h-64 overflow-auto">
             {data.worst_ads.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">কোনো দুর্বল বিজ্ঞাপন নেই 🎉</div>
+              <div className="text-center py-4 text-muted-foreground">কোনো দুর্বল বিজ্ঞাপন নেই</div>
             ) : (
               data.worst_ads.map((ad) => (
                 <div key={ad.id} className="bg-muted/50 rounded-lg p-3">
