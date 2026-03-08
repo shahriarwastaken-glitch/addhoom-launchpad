@@ -18,6 +18,7 @@ interface ResultsPanelProps {
   onRegenerate: () => void;
   onSwitchToImage: (ad: AdResult) => void;
   onRemix: (ad: AdResult) => void;
+  onLoadHistory?: (results: AdResult[]) => void;
 }
 
 const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix }: ResultsPanelProps) => {
