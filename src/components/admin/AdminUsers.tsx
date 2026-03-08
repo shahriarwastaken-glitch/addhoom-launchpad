@@ -38,6 +38,7 @@ interface UserData {
   id: string;
   email: string;
   full_name: string;
+  phone: string | null;
   plan: string;
   created_at: string;
   ads_count: number;
