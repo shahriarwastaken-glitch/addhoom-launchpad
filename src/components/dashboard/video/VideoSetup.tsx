@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, GripVertical, Play, Square, Rocket, ChevronDown, ChevronUp, Mic } from 'lucide-react';
+import { Upload, X, GripVertical, Play, Square, Rocket, ChevronDown, ChevronUp, Mic, History } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
