@@ -146,6 +146,66 @@ export type Database = {
           },
         ]
       }
+      ad_images: {
+        Row: {
+          created_at: string
+          creative_id: string | null
+          dhoom_score: number | null
+          format: string
+          gemini_prompt: string | null
+          id: string
+          image_url: string | null
+          is_winner: boolean | null
+          product_name: string | null
+          sd_prompt: string | null
+          style: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          creative_id?: string | null
+          dhoom_score?: number | null
+          format?: string
+          gemini_prompt?: string | null
+          id?: string
+          image_url?: string | null
+          is_winner?: boolean | null
+          product_name?: string | null
+          sd_prompt?: string | null
+          style?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          creative_id?: string | null
+          dhoom_score?: number | null
+          format?: string
+          gemini_prompt?: string | null
+          id?: string
+          image_url?: string | null
+          is_winner?: boolean | null
+          product_name?: string | null
+          sd_prompt?: string | null
+          style?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_images_creative_id_fkey"
+            columns: ["creative_id"]
+            isOneToOne: false
+            referencedRelation: "ad_creatives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_images_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_actions: {
         Row: {
           action: string
