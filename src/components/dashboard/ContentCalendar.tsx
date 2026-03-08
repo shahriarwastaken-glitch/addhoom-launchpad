@@ -481,6 +481,8 @@ function MonthView({ entries, setEntries, t, lang, navigate }: {
 }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [dragOverDate, setDragOverDate] = useState<string | null>(null);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -511,6 +513,54 @@ function MonthView({ entries, setEntries, t, lang, navigate }: {
     setEntries((prev: CalendarEntry[]) => prev.map(e =>
       e.id === id ? { ...e, status: action === 'confirm' ? 'confirmed' : 'skipped' } : e
     ));
+  };
+
+  // Drag-and-drop handlers
+  const handleDragStart = (e: React.DragEvent, entryId: string) => {
+    e.dataTransfer.setData('text/plain', entryId);
+    e.dataTransfer.effectAllowed = 'move';
+    setDraggingId(entryId);
+  };
+
+  const handleDragOver = (e: React.DragEvent, dateStr: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverDate(dateStr);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverDate(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetDate: string) => {
+    e.preventDefault();
+    setDragOverDate(null);
+    setDraggingId(null);
+    const entryId = e.dataTransfer.getData('text/plain');
+    if (!entryId) return;
+    const entry = entries.find((en: CalendarEntry) => en.id === entryId);
+    if (!entry || entry.date === targetDate) return;
+
+    // Optimistic update
+    setEntries((prev: CalendarEntry[]) => prev.map(en =>
+      en.id === entryId ? { ...en, date: targetDate } : en
+    ));
+    toast.success(t('তারিখ পরিবর্তন হয়েছে', 'Date updated'));
+
+    // Persist to backend
+    const res = await api.updateCalendarItem({ item_id: entryId, date: targetDate });
+    if (res.error) {
+      // Revert on failure
+      setEntries((prev: CalendarEntry[]) => prev.map(en =>
+        en.id === entryId ? { ...en, date: entry.date } : en
+      ));
+      toast.error(t(res.error.message_bn, res.error.message_en));
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggingId(null);
+    setDragOverDate(null);
   };
 
   return (
@@ -550,12 +600,17 @@ function MonthView({ entries, setEntries, t, lang, navigate }: {
             const isPast = dateStr < todayStr;
             const festival = getFestivalForDate(dateStr);
             const isWeekend = new Date(dateStr + 'T00:00:00').getDay() === 5 || new Date(dateStr + 'T00:00:00').getDay() === 6;
+            const isDragOver = dragOverDate === dateStr;
 
             return (
               <div
                 key={day}
                 onClick={() => setSelectedDate(isSelected ? null : dateStr)}
+                onDragOver={e => handleDragOver(e, dateStr)}
+                onDragLeave={handleDragLeave}
+                onDrop={e => handleDrop(e, dateStr)}
                 className={`rounded-xl border cursor-pointer transition-all min-h-[80px] p-1.5 relative flex flex-col ${
+                  isDragOver ? 'border-primary border-dashed bg-primary/10 ring-2 ring-primary/30' :
                   isSelected ? 'border-primary bg-primary/5 ring-1 ring-primary/20' :
                   isToday ? 'border-primary/30 bg-primary/[0.04]' :
                   isPast ? 'border-border/50 bg-muted/30' :
@@ -577,16 +632,20 @@ function MonthView({ entries, setEntries, t, lang, navigate }: {
                 }`}>
                   {lang === 'bn' ? toBn(day) : day}
                 </div>
-                {/* Content pills */}
+                {/* Content pills — draggable */}
                 <div className="flex flex-col gap-0.5 flex-1 overflow-hidden">
                   {dayEntries.slice(0, 3).map(e => {
                     const tc = TYPE_COLORS[e.content_type] || { bg: 'bg-secondary', text: 'text-foreground' };
                     const isSkipped = e.status === 'skipped';
+                    const isDragging = draggingId === e.id;
                     return (
                       <div key={e.id}
-                        className={`text-[10px] leading-tight rounded-md px-1 py-0.5 truncate ${tc.bg} ${tc.text} ${
-                          isSkipped ? 'opacity-30 line-through' : e.status === 'confirmed' || e.status === 'completed' ? '' : ''
-                        }`}>
+                        draggable
+                        onDragStart={ev => { ev.stopPropagation(); handleDragStart(ev, e.id); }}
+                        onDragEnd={handleDragEnd}
+                        className={`text-[10px] leading-tight rounded-md px-1 py-0.5 truncate cursor-grab active:cursor-grabbing select-none transition-opacity ${tc.bg} ${tc.text} ${
+                          isSkipped ? 'opacity-30 line-through' : ''
+                        } ${isDragging ? 'opacity-40' : ''}`}>
                         {e.status === 'confirmed' && <Check size={8} className="inline mr-0.5" />}
                         {e.title || t('কনটেন্ট', 'Content')}
                       </div>
