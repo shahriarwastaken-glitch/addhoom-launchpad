@@ -328,6 +328,7 @@ Generate the advertisement image now.`;
           format, style,
           dhoom_score: dhoomScore,
           variation_number: i + 1,
+          sd_prompt: prompt,
         });
       } catch (err) {
         console.error("Image generation error for variation", i + 1, err);
