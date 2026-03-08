@@ -146,24 +146,36 @@ serve(async (req) => {
       ? `Also include a brief product description text: "${ad_body.substring(0, 80)}"`
       : "";
 
-    const prompt = `Create a professional advertisement image for a Bangladeshi e-commerce product.
+    const prompt = `You are a world-class graphic designer creating a professional advertisement image for a Bangladeshi e-commerce product.
 
-The reference image shows the exact product. Keep the product's appearance, colors, and features recognizable.
+The reference image shows the exact product. Maintain the product's appearance, colors, shape, and key features exactly as shown.
 
 ${styleText}
 
-Requirements:
+CRITICAL TEXT & TYPOGRAPHY RULES:
+- All text on the image MUST be in English (NOT Bengali, NOT Banglish).
+- Double-check every single word for correct spelling before rendering.
+- Use premium, modern fonts: Montserrat Bold for headlines, Open Sans for body text. Never use default system fonts.
+- Text must be crisp, high-contrast, and easily readable on mobile screens.
+- Text should have proper hierarchy: headline largest, price prominent, CTA secondary.
+- Add subtle text shadows or background panels behind text for readability.
+
+LAYOUT & COMPOSITION:
 - Format: ${FORMAT_INSTRUCTIONS[format] || FORMAT_INSTRUCTIONS.square}
 - Brand colors: ${brand_color_primary} (primary), ${brand_color_secondary} (secondary)
 - ${textOverlayInstruction}
 - ${descriptionInstruction}
-- Include price and product details as prominent text overlays
+- Product must be the central hero of the image, taking up at least 40% of the composition.
+- Leave breathing room around the product — don't crowd it.
+
+VISUAL QUALITY:
 - High quality, professional, suitable for Facebook/Instagram ads
 - Clean, polished, commercial photography aesthetic
-- Text must be in Bengali script and clearly readable
-- Product must be the central focus of the image
+- Subtle gradient or solid brand-colored background — not cluttered
+- No watermarks, no stock photo logos
+- The final result should look like it was designed by a professional agency
 
-The result should look like a high-converting Bangladeshi e-commerce advertisement with clear product info and pricing.`;
+The result must look like a premium, high-converting e-commerce advertisement.`;
 
     // --- Generate images via Lovable AI Gateway ---
     const count = Math.min(num_variations, 3);
