@@ -61,6 +61,7 @@ interface InputPanelProps {
   onGenerate: () => void;
   generating: boolean;
   onToggleImageHistory?: () => void;
+  generateBtnRef?: React.RefObject<HTMLButtonElement>;
 }
 
 const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onToggleImageHistory }: InputPanelProps) => {
