@@ -9,6 +9,7 @@ import AccountDoctor from '@/components/dashboard/AccountDoctor';
 import FestivalTemplates from '@/components/dashboard/FestivalTemplates';
 import CampaignsList from '@/components/dashboard/CampaignsList';
 import Settings from '@/components/dashboard/Settings';
+import DhoomScoreChecker from '@/components/dashboard/DhoomScoreChecker';
 
 const Dashboard = () => {
   return (
@@ -22,6 +23,7 @@ const Dashboard = () => {
         <Route path="doctor" element={<AccountDoctor />} />
         <Route path="festival" element={<FestivalTemplates />} />
         <Route path="campaigns" element={<CampaignsList />} />
+        <Route path="dhoom-score" element={<DhoomScoreChecker />} />
         <Route path="settings" element={<Settings />} />
       </Routes>
     </DashboardLayout>

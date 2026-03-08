@@ -9,7 +9,7 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
 } from '@/components/ui/sidebar';
-import { Target, Video, Calendar, MessageSquare, Search, Stethoscope, PartyPopper, BarChart3, Settings, Shield } from 'lucide-react';
+import { Target, Video, Calendar, MessageSquare, Search, Stethoscope, PartyPopper, BarChart3, Settings, Shield, Zap } from 'lucide-react';
 
 const items = [
   { icon: Target, bn: 'AI বিজ্ঞাপন', en: 'AI Ads', url: '/dashboard' },
@@ -19,6 +19,7 @@ const items = [
   { icon: Search, bn: 'প্রতিযোগী', en: 'Competitors', url: '/dashboard/competitors' },
   { icon: Stethoscope, bn: 'অ্যাকাউন্ট ডাক্তার', en: 'Doctor', url: '/dashboard/doctor' },
   { icon: PartyPopper, bn: 'উৎসব', en: 'Festival', url: '/dashboard/festival' },
+  { icon: Zap, bn: 'ধুম স্কোর', en: 'Dhoom Score', url: '/dashboard/dhoom-score' },
   { icon: BarChart3, bn: 'ক্যাম্পেইন', en: 'Campaigns', url: '/dashboard/campaigns' },
   { icon: Settings, bn: 'সেটিংস', en: 'Settings', url: '/dashboard/settings' },
 ];

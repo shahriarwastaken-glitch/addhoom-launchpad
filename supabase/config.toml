@@ -38,3 +38,6 @@ verify_jwt = false
 
 [functions.extract-from-url]
 verify_jwt = false
+
+[functions.evaluate-ad]
+verify_jwt = false
