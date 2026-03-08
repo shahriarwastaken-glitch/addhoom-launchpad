@@ -72,6 +72,8 @@ const AdGeneratorPage = () => {
   const [remixing, setRemixing] = useState(false);
   const [mobileTab, setMobileTab] = useState<'input' | 'results'>('input');
   const [projectInfo, setProjectInfo] = useState<{ name: string; emoji: string; color: string } | null>(null);
+  const [imageHistoryOpen, setImageHistoryOpen] = useState(false);
+  const toggleImageHistory = useCallback(() => setImageHistoryOpen(prev => !prev), []);
 
   // Fetch project info if project_id is present
   useEffect(() => {
