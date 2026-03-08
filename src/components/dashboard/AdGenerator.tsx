@@ -343,6 +343,7 @@ const AdGenerator = () => {
               <span className="text-[10px] uppercase tracking-wider bg-secondary text-muted-foreground rounded px-2 py-0.5">{ad.platform}</span>
               <span className="text-[10px] uppercase tracking-wider bg-primary/10 text-primary rounded px-2 py-0.5">{ad.framework}</span>
               {ad.is_winner && <span className="text-[10px] bg-yellow-500/20 text-yellow-600 rounded px-2 py-0.5">⭐ Winner</span>}
+              {ad.remixed_from_id && <span className="text-[10px] bg-accent text-accent-foreground rounded px-2 py-0.5">🔄 Remixed</span>}
             </div>
 
             {isEditing ? (
