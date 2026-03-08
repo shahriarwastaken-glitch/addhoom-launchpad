@@ -207,7 +207,7 @@ const AdGenerator = () => {
       if (data?.success && data.ads) {
         setResults(data.ads);
         setStep(4);
-        toast.success(t(`${data.count}টি বিজ্ঞাপন তৈরি হয়েছে ⚡`, `${data.count} ads generated ⚡`));
+        toast.success(t(`${data.count}টি বিজ্ঞাপন তৈরি হয়েছে`, `${data.count} ads generated`));
       } else {
         toast.error(data?.message || t('সমস্যা হয়েছে', 'Something went wrong'));
       }
