@@ -436,7 +436,7 @@ const AIChat = () => {
   const [showExportMenu, setShowExportMenu] = useState(false);
 
   return (
-    <div className="flex h-[calc(100dvh-8rem)] md:h-[calc(100dvh-6.5rem)] max-w-7xl mx-auto gap-0">
+    <div className="flex h-[calc(100dvh-3.5rem-3.5rem)] md:h-[calc(100dvh-3.5rem)] w-full gap-0">
       {/* ─── LEFT SIDEBAR ─── */}
       <div className="hidden lg:flex flex-col w-[280px] bg-card border-r border-border flex-shrink-0">
         {/* Sidebar Header */}
