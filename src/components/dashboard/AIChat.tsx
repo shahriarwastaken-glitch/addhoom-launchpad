@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Send, Plus, MessageSquare, Clock, Menu, X } from 'lucide-react';
+import ThinkingLoader from '@/components/loaders/ThinkingLoader';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import { AnimatePresence, motion } from 'framer-motion';
