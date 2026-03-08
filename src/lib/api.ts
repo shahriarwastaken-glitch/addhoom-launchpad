@@ -88,4 +88,10 @@ export const api = {
     ad_id: string;
     num_variations?: number;
   }) => callFunction<{ ads: any[] }>('remix-ad', params),
+
+  generateContentCalendar: (params: {
+    workspace_id: string;
+    start_date: string;
+    language?: string;
+  }) => callFunction<{ entries_count: number; batch_id: string; festivals_found: number }>('generate-content-calendar', params),
 };
