@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useUpgrade } from '@/contexts/UpgradeContext';
-import { Settings as SettingsIcon, Save, AlertTriangle, Zap, Video, Clock, XCircle, CheckCircle } from 'lucide-react';
+import { Settings as SettingsIcon, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Settings = () => {
