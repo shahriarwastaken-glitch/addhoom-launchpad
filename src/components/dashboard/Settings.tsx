@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Settings as SettingsIcon, Save } from 'lucide-react';
+import { useUpgrade } from '@/contexts/UpgradeContext';
+import { Settings as SettingsIcon, Save, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Settings = () => {
   const { t } = useLanguage();
   const { user, profile, activeWorkspace, refreshProfile } = useAuth();
+  const { showUpgrade } = useUpgrade();
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [shopName, setShopName] = useState('');
@@ -117,6 +119,47 @@ const Settings = () => {
               {t('আপগ্রেড করুন', 'Upgrade')}
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Dev: Error State Testing */}
+      <div className="bg-card rounded-[20px] shadow-warm p-4 sm:p-6 mb-6 border-2 border-dashed border-border">
+        <h3 className="font-heading-bn font-semibold text-foreground mb-2 flex items-center gap-2">
+          <AlertTriangle size={18} className="text-muted-foreground" />
+          {t('ডেভ টুলস — এরর স্টেট টেস্ট', 'Dev Tools — Error State Test')}
+        </h3>
+        <p className="text-xs text-muted-foreground mb-4">{t('এই বাটনগুলো দিয়ে এরর হ্যান্ডলিং পরীক্ষা করুন', 'Test error handling with these buttons')}</p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => showUpgrade('general')}
+            className="text-xs border border-primary text-primary rounded-lg px-3 py-2 hover:bg-primary/10 transition-colors font-semibold"
+          >
+            ⚡ 402 — Upgrade Modal (General)
+          </button>
+          <button
+            onClick={() => showUpgrade('video')}
+            className="text-xs border border-primary text-primary rounded-lg px-3 py-2 hover:bg-primary/10 transition-colors font-semibold"
+          >
+            🎬 402 — Upgrade Modal (Video)
+          </button>
+          <button
+            onClick={() => toast.info('AI এখন ব্যস্ত। ৩০ সেকেন্ড পরে আবার চেষ্টা করুন।', { duration: 6000 })}
+            className="text-xs border border-[hsl(var(--brand-yellow))] text-[hsl(var(--brand-yellow))] rounded-lg px-3 py-2 hover:bg-[hsl(var(--brand-yellow))]/10 transition-colors font-semibold"
+          >
+            ⏳ 503 — AI Busy Toast
+          </button>
+          <button
+            onClick={() => toast.error('কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।')}
+            className="text-xs border border-destructive text-destructive rounded-lg px-3 py-2 hover:bg-destructive/10 transition-colors font-semibold"
+          >
+            ❌ 500 — Error Toast
+          </button>
+          <button
+            onClick={() => toast.success('১০টি বিজ্ঞাপন তৈরি হয়েছে ✓')}
+            className="text-xs border border-[hsl(var(--brand-green))] text-[hsl(var(--brand-green))] rounded-lg px-3 py-2 hover:bg-[hsl(var(--brand-green))]/10 transition-colors font-semibold"
+          >
+            ✓ Success Toast
+          </button>
         </div>
       </div>
 
