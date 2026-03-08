@@ -200,6 +200,47 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_verification_codes: {
+        Row: {
+          action_payload: Json | null
+          action_type: string
+          admin_id: string
+          code: string
+          created_at: string | null
+          expires_at: string
+          id: string
+          used_at: string | null
+        }
+        Insert: {
+          action_payload?: Json | null
+          action_type: string
+          admin_id: string
+          code: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          used_at?: string | null
+        }
+        Update: {
+          action_payload?: Json | null
+          action_type?: string
+          admin_id?: string
+          code?: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_verification_codes_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_conversations: {
         Row: {
           created_at: string

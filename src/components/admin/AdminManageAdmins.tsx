@@ -22,7 +22,6 @@ import {
 } from '@/components/ui/table';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -31,6 +30,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Plus, Trash2, Shield, ShieldCheck } from 'lucide-react';
+import AdminVerificationModal from './AdminVerificationModal';
 
 interface AdminUser {
   id: string;
@@ -47,6 +47,14 @@ export default function AdminManageAdmins() {
   const [adding, setAdding] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  
+  // Verification modal state
+  const [verificationOpen, setVerificationOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{
+    type: 'add' | 'remove';
+    payload: any;
+    label: string;
+  } | null>(null);
 
   const fetchAdmins = async () => {
     setLoading(true);
@@ -67,45 +75,66 @@ export default function AdminManageAdmins() {
     fetchAdmins();
   }, []);
 
-  const handleAddAdmin = async () => {
+  const initiateAddAdmin = () => {
     if (!newEmail.trim()) {
       toast.error('ইমেইল প্রয়োজন।');
       return;
     }
-
-    setAdding(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('admin-manage-admins', {
-        body: { action: 'add', email: newEmail.trim(), role: newRole },
-      });
-      if (error) throw error;
-      toast.success(data.message_bn || 'অ্যাডমিন যোগ করা হয়েছে।');
-      setNewEmail('');
-      fetchAdmins();
-    } catch (err: any) {
-      toast.error(err.message || 'অ্যাডমিন যোগ করতে সমস্যা হয়েছে।');
-    } finally {
-      setAdding(false);
-    }
+    
+    setPendingAction({
+      type: 'add',
+      payload: { email: newEmail.trim(), role: newRole },
+      label: `${newEmail.trim()} কে ${newRole} হিসেবে যোগ করুন`,
+    });
+    setVerificationOpen(true);
   };
 
-  const handleRemoveAdmin = async () => {
-    if (!deleteId) return;
+  const initiateRemoveAdmin = (adminId: string) => {
+    const admin = admins.find(a => a.id === adminId);
+    setPendingAction({
+      type: 'remove',
+      payload: { admin_id: adminId },
+      label: `${admin?.email || 'এই অ্যাডমিন'} কে সরান`,
+    });
+    setVerificationOpen(true);
+    setDeleteId(null);
+  };
 
-    setDeleting(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('admin-manage-admins', {
-        body: { action: 'remove', admin_id: deleteId },
-      });
-      if (error) throw error;
-      toast.success(data.message_bn || 'অ্যাডমিন সরানো হয়েছে।');
-      setDeleteId(null);
-      fetchAdmins();
-    } catch (err: any) {
-      toast.error(err.message || 'অ্যাডমিন সরাতে সমস্যা হয়েছে।');
-    } finally {
-      setDeleting(false);
+  const handleVerifiedAction = async (payload: any) => {
+    if (!pendingAction) return;
+
+    if (pendingAction.type === 'add') {
+      setAdding(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('admin-manage-admins', {
+          body: { action: 'add', ...payload },
+        });
+        if (error) throw error;
+        toast.success(data.message_bn || 'অ্যাডমিন যোগ করা হয়েছে।');
+        setNewEmail('');
+        fetchAdmins();
+      } catch (err: any) {
+        toast.error(err.message || 'অ্যাডমিন যোগ করতে সমস্যা হয়েছে।');
+      } finally {
+        setAdding(false);
+      }
+    } else if (pendingAction.type === 'remove') {
+      setDeleting(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('admin-manage-admins', {
+          body: { action: 'remove', ...payload },
+        });
+        if (error) throw error;
+        toast.success(data.message_bn || 'অ্যাডমিন সরানো হয়েছে।');
+        fetchAdmins();
+      } catch (err: any) {
+        toast.error(err.message || 'অ্যাডমিন সরাতে সমস্যা হয়েছে।');
+      } finally {
+        setDeleting(false);
+      }
     }
+
+    setPendingAction(null);
   };
 
   return (
@@ -131,13 +160,13 @@ export default function AdminManageAdmins() {
               <SelectItem value="super_admin">Super Admin</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={handleAddAdmin} disabled={adding}>
+          <Button onClick={initiateAddAdmin} disabled={adding}>
             <Plus className="h-4 w-4 mr-2" />
             যোগ করুন
           </Button>
         </div>
         <p className="text-sm text-muted-foreground mt-2">
-          নোট: ব্যবহারকারীর প্রথমে AdDhoom অ্যাকাউন্ট থাকতে হবে।
+          নোট: ব্যবহারকারীর প্রথমে AdDhoom অ্যাকাউন্ট থাকতে হবে। যোগ করার জন্য ইমেইল ভেরিফিকেশন প্রয়োজন।
         </p>
       </div>
 
@@ -195,7 +224,7 @@ export default function AdminManageAdmins() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
                       onClick={() => setDeleteId(admin.id)}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -215,20 +244,31 @@ export default function AdminManageAdmins() {
             <AlertDialogTitle>অ্যাডমিন সরান?</AlertDialogTitle>
             <AlertDialogDescription>
               আপনি কি নিশ্চিত যে এই অ্যাডমিনকে সরাতে চান? তারা আর অ্যাডমিন প্যানেলে প্রবেশ করতে পারবে না।
+              এই পরিবর্তনের জন্য ইমেইল ভেরিফিকেশন প্রয়োজন হবে।
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>বাতিল</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleRemoveAdmin}
-              className="bg-red-500 hover:bg-red-600"
+            <Button
+              variant="destructive"
+              onClick={() => deleteId && initiateRemoveAdmin(deleteId)}
               disabled={deleting}
             >
-              {deleting ? 'সরানো হচ্ছে...' : 'সরান'}
-            </AlertDialogAction>
+              {deleting ? 'সরানো হচ্ছে...' : 'ভেরিফাই করে সরান'}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Verification Modal */}
+      <AdminVerificationModal
+        open={verificationOpen}
+        onOpenChange={setVerificationOpen}
+        actionType={pendingAction?.type === 'add' ? 'add_admin' : 'remove_admin'}
+        actionPayload={pendingAction?.payload}
+        actionLabel={pendingAction?.label || ''}
+        onVerified={handleVerifiedAction}
+      />
     </div>
   );
 }
