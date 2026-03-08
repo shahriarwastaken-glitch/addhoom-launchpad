@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Send, Plus, MessageSquare, Clock, Menu, X, Zap, Search,
-  FileText, MoreVertical, Trash2, Edit3, Lightbulb, BarChart3,
+  MoreVertical, Trash2, Edit3, Lightbulb, BarChart3,
   Calendar, Wallet, Target, Flame, Copy, ClipboardList, Sparkles, Store,
   Loader2,
 } from 'lucide-react';
