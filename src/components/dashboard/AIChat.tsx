@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Send, Plus, MessageSquare, Clock, Menu, X, Zap, Search,
-  FileText, MoreVertical, Trash2, Edit3, Lightbulb, BarChart3,
+  MoreVertical, Trash2, Edit3, Lightbulb, BarChart3,
   Calendar, Wallet, Target, Flame, Copy, ClipboardList, Sparkles, Store,
   Loader2,
 } from 'lucide-react';
@@ -12,7 +12,7 @@ import ThinkingLoader from '@/components/loaders/ThinkingLoader';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import { AnimatePresence, motion } from 'framer-motion';
-import { jsPDF } from 'jspdf';
+
 
 // ─── Types ───
 interface ChatMessage {
@@ -386,49 +386,6 @@ const AIChat = () => {
     }
   };
 
-  // Export conversation
-  const exportTxt = () => {
-    const lines = [`AdDhoom Chat Export\nShop: ${activeWorkspace?.shop_name || 'Unknown'}\nDate: ${new Date().toLocaleDateString()}\n${'─'.repeat(40)}\n`];
-    messages.forEach(m => {
-      const label = m.role === 'user' ? 'You' : 'ধুম AI';
-      lines.push(`[${label}] ${formatTime(m.timestamp)}\n${m.content}\n`);
-    });
-    const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `addhoom-chat-${new Date().toISOString().slice(0, 10)}.txt`;
-    a.click();
-    toast.success(t('এক্সপোর্ট হয়েছে', 'Exported'));
-  };
-
-  const exportPdf = () => {
-    const doc = new jsPDF();
-    let y = 20;
-    doc.setFontSize(18);
-    doc.text('AdDhoom Chat Export', 20, y); y += 10;
-    doc.setFontSize(10);
-    doc.text(`Shop: ${activeWorkspace?.shop_name || 'Unknown'} | Date: ${new Date().toLocaleDateString()}`, 20, y); y += 12;
-    doc.setDrawColor(200); doc.line(20, y, 190, y); y += 8;
-
-    messages.forEach(m => {
-      if (y > 270) { doc.addPage(); y = 20; }
-      doc.setFontSize(9);
-      doc.setTextColor(100);
-      doc.text(`${m.role === 'user' ? 'You' : 'ধুম AI'} • ${formatTime(m.timestamp)}`, 20, y); y += 5;
-      doc.setFontSize(11);
-      doc.setTextColor(30);
-      const lines = doc.splitTextToSize(m.content, 160);
-      lines.forEach((line: string) => {
-        if (y > 280) { doc.addPage(); y = 20; }
-        doc.text(line, 20, y); y += 5;
-      });
-      y += 4;
-    });
-
-    doc.save(`addhoom-chat-${new Date().toISOString().slice(0, 10)}.pdf`);
-    toast.success(t('PDF এক্সপোর্ট হয়েছে', 'PDF exported'));
-  };
-
   // Search in conversation
   const searchMatches = searchQuery.trim()
     ? messages.reduce<number[]>((acc, m, i) => {
@@ -439,7 +396,7 @@ const AIChat = () => {
 
   const isWelcome = messages.length === 0;
   const [showHeaderMenu, setShowHeaderMenu] = useState(false);
-  const [showExportMenu, setShowExportMenu] = useState(false);
+  
 
   return (
     <div className="flex h-[calc(100dvh-3.5rem-3.5rem)] md:h-[calc(100dvh-3.5rem)] w-full gap-0">
@@ -605,24 +562,6 @@ const AIChat = () => {
             <button onClick={() => setSearchOpen(!searchOpen)} className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground">
               <Search size={16} />
             </button>
-            <div className="relative">
-              <button onClick={() => setShowExportMenu(!showExportMenu)} className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground">
-                <FileText size={16} />
-              </button>
-              {showExportMenu && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)} />
-                  <div className="absolute right-0 top-full mt-1 z-50 bg-card border border-border rounded-lg shadow-lg py-1 min-w-[160px]">
-                    <button onClick={() => { exportTxt(); setShowExportMenu(false); }} className="w-full text-left px-3 py-2 text-xs hover:bg-secondary text-foreground">
-                      {t('টেক্সট ফাইল (.txt)', 'Text File (.txt)')}
-                    </button>
-                    <button onClick={() => { exportPdf(); setShowExportMenu(false); }} className="w-full text-left px-3 py-2 text-xs hover:bg-secondary text-foreground">
-                      PDF
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
             <div className="relative">
               <button onClick={() => setShowHeaderMenu(!showHeaderMenu)} className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground">
                 <MoreVertical size={16} />
