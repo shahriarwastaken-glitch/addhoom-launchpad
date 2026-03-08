@@ -338,7 +338,6 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
   const { t, lang } = useLanguage();
   const { activeWorkspace } = useAuth();
   const [expanded, setExpanded] = useState(false);
-  const [promptVisible, setPromptVisible] = useState(false);
   const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
   const [projects, setProjects] = useState<ProjectOption[]>([]);
   const [assignedProject, setAssignedProject] = useState<ProjectOption | null>(null);
@@ -458,21 +457,9 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
           <h4 className="text-[17px] font-bold font-heading-bn text-foreground leading-relaxed">{ad.headline}</h4>
         </div>
 
-        {/* Body (prompt) - show truncated for image ads */}
+        {/* Body - for image ads, hide prompt entirely */}
         {ad.image_url ? (
-          ad.body ? (
-            <div className="mb-2">
-              <button
-                onClick={() => setPromptVisible(v => !v)}
-                className="text-[13px] text-muted-foreground font-heading-bn cursor-pointer hover:text-foreground transition-colors flex items-center gap-1"
-              >
-                <ChevronDown size={12} className={`transition-transform ${promptVisible ? 'rotate-180' : ''}`} /> {t('প্রম্পট দেখুন', 'View prompt')}
-              </button>
-              {promptVisible && (
-                <p className="text-[13px] font-heading-bn text-muted-foreground leading-[1.6] mt-2 whitespace-pre-line px-1">{ad.body}</p>
-              )}
-            </div>
-          ) : null
+          null
         ) : (
           <p className="text-[15px] font-heading-bn text-muted-foreground leading-[1.7] mb-2 whitespace-pre-line px-1">{ad.body}</p>
         )}
