@@ -581,8 +581,8 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
                       <>
                         <div className="flex gap-2">
                           {([
-                            { val: 'male' as const, label: '👨 পুরুষ কণ্ঠ', labelEn: '👨 Male' },
-                            { val: 'female' as const, label: '👩 মহিলা কণ্ঠ', labelEn: '👩 Female' },
+                            { val: 'male' as const, label: 'পুরুষ কণ্ঠ', labelEn: 'Male' },
+                            { val: 'female' as const, label: 'মহিলা কণ্ঠ', labelEn: 'Female' },
                           ]).map(v => (
                             <button
                               key={v.val}
