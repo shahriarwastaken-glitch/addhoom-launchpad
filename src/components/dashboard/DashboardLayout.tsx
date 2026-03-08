@@ -40,48 +40,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
 
-  // Pull-to-refresh state
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [pullDistance, setPullDistance] = useState(0);
-  const mainRef = useRef<HTMLElement>(null);
-  const touchStartY = useRef(0);
-  const isPulling = useRef(false);
-
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const main = mainRef.current;
-    if (main && main.scrollTop <= 0) {
-      touchStartY.current = e.touches[0].clientY;
-      isPulling.current = true;
-    }
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isPulling.current) return;
-    const main = mainRef.current;
-    if (!main || main.scrollTop > 0) {
-      isPulling.current = false;
-      setPullDistance(0);
-      return;
-    }
-    const diff = e.touches[0].clientY - touchStartY.current;
-    if (diff > 0) {
-      setPullDistance(Math.min(diff * 0.4, 80));
-    }
-  }, []);
-
-  const handleTouchEnd = useCallback(() => {
-    if (pullDistance > 50 && !isRefreshing) {
-      setIsRefreshing(true);
-      setPullDistance(50);
-      // Reload the page content
-      setTimeout(() => {
-        window.location.reload();
-      }, 600);
-    } else {
-      setPullDistance(0);
-    }
-    isPulling.current = false;
-  }, [pullDistance, isRefreshing]);
 
   // Load notifications
   useEffect(() => {
