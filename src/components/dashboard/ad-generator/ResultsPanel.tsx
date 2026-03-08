@@ -311,6 +311,37 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
   const isWinner = ad.is_winner;
   const isCopied = copiedId === ad.id;
 
+  const fetchProjects = async () => {
+    if (!activeWorkspace || projects.length > 0) return;
+    setLoadingProjects(true);
+    const { data } = await supabase
+      .from('projects')
+      .select('id, name, emoji, color')
+      .eq('workspace_id', activeWorkspace.id)
+      .eq('is_archived', false)
+      .order('updated_at', { ascending: false });
+    if (data) setProjects(data);
+    setLoadingProjects(false);
+  };
+
+  const assignToProject = async (project: ProjectOption) => {
+    if (!ad.id) return;
+    const table = ad.image_url ? 'ad_images' : 'ad_creatives';
+    // ad_images doesn't have project_id, only ad_creatives does
+    if (ad.image_url) {
+      toast.error(t('ইমেজ এডগুলো এখনো প্রজেক্টে যোগ করা যায় না', 'Image ads cannot be added to projects yet'));
+      return;
+    }
+    const { error } = await supabase.from('ad_creatives').update({ project_id: project.id }).eq('id', ad.id);
+    if (!error) {
+      setAssignedProject(project);
+      setProjectDropdownOpen(false);
+      toast.success(t(`"${project.name}" প্রজেক্টে যোগ হয়েছে`, `Added to "${project.name}"`));
+    } else {
+      toast.error(t('যোগ করতে সমস্যা হয়েছে', 'Failed to add'));
+    }
+  };
+
   const rankColors = [
     'bg-gradient-to-br from-[#FFB800] to-[#FF8C00]',
     'bg-gradient-to-br from-[#C0C0C0] to-[#A0A0A0]',
