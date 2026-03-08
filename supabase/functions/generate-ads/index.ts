@@ -44,6 +44,12 @@ serve(async (req) => {
       occasion, tone, num_variations, source_url,
     } = input;
 
+    // Enforce plan limits on variations
+    const { data: profile } = await supabase
+      .from("profiles").select("plan").eq("id", user.id).single();
+    const maxVariations = (profile?.plan === "agency") ? 50 : 10;
+    const requestedVariations = Math.min(num_variations || 5, maxVariations);
+
     if (!workspace_id || !product_name) {
       return new Response(
         JSON.stringify({ success: false, code: 400, message: "পণ্যের নাম আবশ্যক" }),
@@ -80,7 +86,7 @@ serve(async (req) => {
     const adFramework = framework || "AIDA";
     const adOccasion = occasion || "general";
     const adTone = tone || brandTone;
-    const adCount = num_variations || 5;
+    const adCount = requestedVariations;
 
     // Framework instructions
     const frameworkInstructions: Record<string, string> = {
