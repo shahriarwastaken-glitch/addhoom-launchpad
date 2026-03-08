@@ -118,11 +118,11 @@ export default function AdminOverview() {
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">ওভারভিউ</h1>
+    <div className="space-y-4 md:space-y-6">
+      <h1 className="text-xl md:text-2xl font-bold">ওভারভিউ</h1>
 
       {/* KPI Cards Row 1 - User Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <KPICard
           title="মোট ব্যবহারকারী"
           value={data.users.total.toLocaleString()}
