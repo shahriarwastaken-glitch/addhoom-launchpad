@@ -258,7 +258,7 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
         <div className="flex gap-2">
           {imageHistory.length > 0 && (
             <button
-              onClick={() => setShowHistory(!showHistory)}
+              onClick={() => onToggleImageHistory?.()}
               className={`px-3 py-1.5 rounded-lg border text-xs font-heading-bn transition-colors flex items-center gap-1 ${showHistory ? 'border-primary text-primary bg-primary/5' : 'border-input text-foreground hover:bg-secondary'}`}
             >
               <Clock size={12} /> {t('হিস্ট্রি', 'History')}
