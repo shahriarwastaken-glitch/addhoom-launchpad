@@ -240,9 +240,9 @@ const AIChat = () => {
         <div className="flex-1 p-3 sm:p-5 overflow-y-auto space-y-4">
           {isWelcome ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-2">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-brand flex items-center justify-center text-primary-foreground text-xl sm:text-2xl mb-4 shadow-lg">⚡</div>
-              <h2 className="text-lg sm:text-xl font-heading-bn font-bold text-foreground mb-1">
-                {t('নমস্কার! আমি AdDhoom AI 👋', 'Hello! I\'m AdDhoom AI 👋')}
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-brand flex items-center justify-center text-primary-foreground text-xl sm:text-2xl mb-4 shadow-lg"><Zap size={28} /></div>
+              <h2 className="text-lg sm:text-xl font-heading-bn font-bold text-foreground mb-1 flex items-center gap-2">
+                {t('নমস্কার! আমি AdDhoom AI', 'Hello! I\'m AdDhoom AI')} <Hand size={20} className="text-brand-yellow" />
               </h2>
               <p className="text-sm text-muted-foreground font-body-bn mb-6">
                 {t('আপনার মার্কেটিং নিয়ে যেকোনো প্রশ্ন করুন', 'Ask me anything about your marketing')}
