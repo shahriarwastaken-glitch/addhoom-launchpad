@@ -493,7 +493,7 @@ const AdGenerator = () => {
           <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 flex items-center gap-3">
             <AlertTriangle size={20} className="text-yellow-600 flex-shrink-0" />
             <p className="text-sm font-body-bn text-yellow-700">
-              {t('⚠️ [PRODUCT] এর জায়গায় আপনার পণ্যের নাম বসান — Edit বাটনে ক্লিক করুন', '⚠️ Replace [PRODUCT] with your product name — click Edit')}
+              {t('[PRODUCT] এর জায়গায় আপনার পণ্যের নাম বসান — Edit বাটনে ক্লিক করুন', 'Replace [PRODUCT] with your product name — click Edit')}
             </p>
           </div>
 
