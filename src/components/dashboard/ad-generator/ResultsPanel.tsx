@@ -566,16 +566,36 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
               >
                 {isCopied ? <><Check size={12} className="text-brand-green" /> {t('কপি হয়েছে', 'Copied')}</> : <><Copy size={12} /> {t('কপি করুন', 'Copy')}</>}
               </button>
-              <button onClick={onRemix} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1">
-                <RefreshCw size={12} /> {t('রিমিক্স', 'Remix')}
-              </button>
-              <button
-                onClick={onWinner}
-                className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
-              >
-                <Star size={12} className={isWinner ? 'fill-[#FFB800] text-[#FFB800]' : ''} />
-                {isWinner ? t('বিজয়ী', 'Winner') : t('বিজয়ী চিহ্নিত করুন', 'Mark Winner')}
-              </button>
+              {rank === 1 ? (
+                <FeatureTooltip tooltipKey="remix_button" position="bottom">
+                  <button onClick={onRemix} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1">
+                    <RefreshCw size={12} /> {t('রিমিক্স', 'Remix')}
+                  </button>
+                </FeatureTooltip>
+              ) : (
+                <button onClick={onRemix} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1">
+                  <RefreshCw size={12} /> {t('রিমিক্স', 'Remix')}
+                </button>
+              )}
+              {rank === 1 ? (
+                <FeatureTooltip tooltipKey="winner_star" position="bottom">
+                  <button
+                    onClick={onWinner}
+                    className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
+                  >
+                    <Star size={12} className={isWinner ? 'fill-[#FFB800] text-[#FFB800]' : ''} />
+                    {isWinner ? t('বিজয়ী', 'Winner') : t('বিজয়ী চিহ্নিত করুন', 'Mark Winner')}
+                  </button>
+                </FeatureTooltip>
+              ) : (
+                <button
+                  onClick={onWinner}
+                  className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
+                >
+                  <Star size={12} className={isWinner ? 'fill-[#FFB800] text-[#FFB800]' : ''} />
+                  {isWinner ? t('বিজয়ী', 'Winner') : t('বিজয়ী চিহ্নিত করুন', 'Mark Winner')}
+                </button>
+              )}
               <button
                 onClick={onSwitchToImage}
                 className="px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/[0.08] text-primary text-xs font-heading-bn hover:bg-primary/15 transition-all active:scale-95 flex items-center gap-1"
