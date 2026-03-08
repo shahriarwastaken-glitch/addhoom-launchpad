@@ -12,7 +12,8 @@ import {
 import { Target, Video, Calendar, MessageSquare, Search, Stethoscope, PartyPopper, BarChart3, Settings, Shield, Zap } from 'lucide-react';
 
 const items = [
-  { icon: Target, bn: 'অ্যাড জেনারেটর', en: 'Ad Generator', url: '/dashboard' },
+  { icon: Target, bn: 'হোম', en: 'Home', url: '/dashboard' },
+  { icon: Wand2, bn: 'অ্যাড তৈরি', en: 'Create Ad', url: '/dashboard/generate' },
   { icon: Video, bn: 'ভিডিও অ্যাড', en: 'Video Ads', url: '/dashboard/video' },
   { icon: Calendar, bn: 'ক্যালেন্ডার', en: 'Calendar', url: '/dashboard/calendar' },
   { icon: MessageSquare, bn: 'AI চ্যাট', en: 'AI Chat', url: '/dashboard/chat' },
