@@ -265,7 +265,7 @@ const AdGenerator = () => {
     if (!error) {
       setResults(prev => prev.map(a => a.id === editingId ? { ...a, ...editData } : a));
       setEditingId(null);
-      toast.success(t('সংরক্ষিত ✅', 'Saved ✅'));
+      toast.success(t('সংরক্ষিত', 'Saved'));
     }
   };
 
