@@ -97,13 +97,17 @@ serve(async (req) => {
     };
 
     const occasionContext: Record<string, string> = {
-      eid: "This is for Eid season — the biggest shopping event in Bangladesh. Use celebratory, gift-giving, family-centered messaging. 'ঈদ স্পেশাল অফার' hooks perform best. Urgency: stock runs out before Eid.",
-      boishakh: "Pohela Boishakh — Bengali New Year. Cultural pride, new beginnings, celebration. Red and white theme.",
-      puja: "Durga Puja season. Festive, joyful, celebratory tone.",
-      december16: "Victory Day — national pride. Patriotic messaging, red and green colors.",
       general: "Standard campaign — focus purely on product benefits and conversion.",
+      eid_fitr: "Eid ul-Fitr season — the biggest shopping event in Bangladesh. Celebratory, gift-giving, family-centered messaging. 'ঈদ স্পেশাল অফার' hooks perform best. Urgency: stock runs out before Eid.",
+      eid_adha: "Eid ul-Adha — sacrifice, sharing, family gatherings. Premium products, meat/kitchen items, and fashion do well. Gift-giving angle.",
+      boishakh: "Pohela Boishakh — Bengali New Year. Cultural pride, new beginnings, celebration. Red and white theme.",
+      december16: "Victory Day — national pride. Patriotic messaging, red and green colors.",
       valentine: "Valentine's Day — gifts, love, relationships. Romantic but subtle for BD context.",
       mothers_day: "Mother's Day — emotional, gratitude, care. Very high-converting for beauty and fashion.",
+      new_year: "New Year — fresh start, resolution, celebration. Great for lifestyle and self-improvement products.",
+      ramadan: "Ramadan — spiritual, family iftar, sehri essentials, charity angle. Serene and respectful tone. Evening/night shopping peaks.",
+      black_friday: "Black Friday / Sale Season — maximum urgency, deep discounts, doorbuster deals. Aggressive pricing hooks and countdown urgency.",
+      product_launch: "Product Launch — excitement, novelty, first-mover advantage. 'নতুন এসেছে' hooks. Build curiosity and exclusivity.",
     };
 
     const langInstruction = adLang === "bn"
