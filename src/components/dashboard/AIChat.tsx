@@ -163,6 +163,7 @@ const AIChat = () => {
       });
       if (data?.conversation) {
         setConversationId(convId);
+        setHasSummary(!!data.conversation.summary);
         const msgs = (data.conversation.messages || []).map((m: any) => {
           const { cleanText, adCopy } = parseAdCopy(m.content);
           return { ...m, content: cleanText, ad_copy: adCopy };
