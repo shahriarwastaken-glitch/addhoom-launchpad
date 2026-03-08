@@ -92,7 +92,7 @@ const FestivalTemplates = () => {
                       </div>
                       <p className="text-sm font-semibold">{ad.headline}</p>
                       <p className="text-xs text-muted-foreground mt-1">{ad.body?.slice(0, 80)}...</p>
-                      <button onClick={() => copyAd(ad)} className="text-xs text-primary hover:underline mt-1">📋 {t('কপি', 'Copy')}</button>
+                      <button onClick={() => copyAd(ad)} className="text-xs text-primary hover:underline mt-1 flex items-center gap-1"><ClipboardCopy size={12} /> {t('কপি', 'Copy')}</button>
                     </div>
                   ))}
                 </div>
