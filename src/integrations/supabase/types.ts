@@ -307,6 +307,7 @@ export type Database = {
           id: string
           language: string
           messages: Json
+          summary: string | null
           title: string | null
           updated_at: string
           workspace_id: string
@@ -316,6 +317,7 @@ export type Database = {
           id?: string
           language?: string
           messages?: Json
+          summary?: string | null
           title?: string | null
           updated_at?: string
           workspace_id: string
@@ -325,6 +327,7 @@ export type Database = {
           id?: string
           language?: string
           messages?: Json
+          summary?: string | null
           title?: string | null
           updated_at?: string
           workspace_id?: string

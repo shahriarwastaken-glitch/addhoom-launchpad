@@ -179,21 +179,60 @@ serve(async (req) => {
 
     if (convId) {
       const { data: conv } = await supabase
-        .from("ai_conversations").select("messages").eq("id", convId).single();
-      if (conv) existingMessages = conv.messages || [];
+        .from("ai_conversations").select("messages, summary").eq("id", convId).single();
+      if (conv) {
+        existingMessages = conv.messages || [];
+        summary = conv.summary || null;
+      }
     }
 
-    // STEP 3 — Build OpenAI-format message history from stored messages
+    // STEP 3 — Summarize if history too long (>20 messages)
+    if (existingMessages.length > 20) {
+      const oldMessages = existingMessages.slice(0, existingMessages.length - 10);
+      const recentMessages = existingMessages.slice(existingMessages.length - 10);
+
+      try {
+        const sumResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash-lite",
+            messages: [{
+              role: "user",
+              content: `Summarize these conversation messages into 3-5 key points about what was discussed and what decisions were made. Focus on: strategies decided, products discussed, advice given that was accepted. Be concise. In the same language as the conversation.\n\n${summary ? "Previous summary:\n" + summary + "\n\n" : ""}New messages to summarize:\n${oldMessages.map((m: any) => `[${m.role}]: ${m.content}`).join("\n")}`,
+            }],
+            max_tokens: 300,
+          }),
+        });
+        if (sumResp.ok) {
+          const sumData = await sumResp.json();
+          const newSummary = sumData.choices?.[0]?.message?.content?.trim();
+          if (newSummary) {
+            summary = newSummary;
+            existingMessages = recentMessages;
+            // Persist trimmed messages + summary
+            await supabase.from("ai_conversations").update({
+              messages: recentMessages,
+              summary: newSummary,
+            }).eq("id", convId);
+          }
+        }
+      } catch (e) {
+        console.warn("Summarization failed, continuing with full history:", e);
+      }
+    }
+
+    // STEP 4 — Build OpenAI-format message history
     const messageHistory = existingMessages.map((m: any) => ({
       role: m.role === "user" ? "user" as const : "assistant" as const,
       content: m.content,
     }));
     messageHistory.push({ role: "user" as const, content: message });
 
-    // STEP 4 — Build system prompt
+    // STEP 5 — Build system prompt (now includes summary from Layer 3)
     const systemPrompt = buildSystemPrompt(workspace, summary);
 
-    // STEP 5 — Call AI Gateway with streaming
+    // STEP 6 — Call AI Gateway with streaming
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
