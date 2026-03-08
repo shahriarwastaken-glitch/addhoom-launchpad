@@ -7,6 +7,27 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { VideoResult as VResult, VideoScript, VideoFormat, VideoStyle, MusicTrack } from './types';
 
+// Script-based preview when no actual video URL is available
+const ScriptPreview = ({ script, isReels }: { script: VideoScript; isReels: boolean }) => (
+  <div className={`w-full ${isReels ? 'aspect-[9/16]' : 'aspect-square'} bg-gradient-to-b from-[#1C1B1A] to-[#2A2520] flex flex-col items-center justify-center p-4 relative overflow-hidden`}>
+    {/* Animated gradient overlay */}
+    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-[#FFB800]/10 animate-pulse" />
+    <div className="relative z-10 text-center space-y-3 max-w-[90%]">
+      <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-2">
+        <Play size={20} className="text-primary ml-0.5" />
+      </div>
+      {script.slides.slice(0, 3).map((slide, i) => (
+        <p key={i} className={`font-heading-bn text-white/90 leading-snug ${i === 0 ? 'text-sm font-bold' : 'text-xs text-white/60'}`}>
+          {slide.headline_text}
+        </p>
+      ))}
+      <p className="text-[10px] text-white/40 font-heading-bn mt-2">
+        {script.slides.length} slides · 15s
+      </p>
+    </div>
+  </div>
+);
+
 interface VideoResultProps {
   result: VResult;
   plan: string;
@@ -42,22 +63,28 @@ const VideoResultView = ({ result, plan, usageUsed, usageLimit, onReset, onRegen
   };
 
   const handleDownload = async () => {
+    if (!result.videoUrl) {
+      toast.info(t('ভিডিও রেন্ডারিং এখনো সংযুক্ত হয়নি। শীঘ্রই আসছে!', 'Video rendering not yet connected. Coming soon!'));
+      return;
+    }
     try {
-      if (result.videoUrl) {
-        const a = document.createElement('a');
-        a.href = result.videoUrl;
-        a.download = `addhoom-video-${result.productName}-${new Date().toISOString().slice(0,10)}.mp4`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        toast.success(t('ডাউনলোড শুরু হচ্ছে...', 'Download starting...'));
-      }
+      const a = document.createElement('a');
+      a.href = result.videoUrl;
+      a.download = `addhoom-video-${result.productName}-${new Date().toISOString().slice(0,10)}.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      toast.success(t('ডাউনলোড শুরু হচ্ছে...', 'Download starting...'));
     } catch {
       toast.error(t('ডাউনলোড ব্যর্থ', 'Download failed'));
     }
   };
 
   const copyUrl = () => {
+    if (!result.videoUrl) {
+      toast.info(t('ভিডিও URL এখনো তৈরি হয়নি', 'Video URL not yet available'));
+      return;
+    }
     navigator.clipboard.writeText(result.videoUrl);
     toast.success(t('URL কপি হয়েছে!', 'URL copied!'));
   };
@@ -119,30 +146,31 @@ const VideoResultView = ({ result, plan, usageUsed, usageLimit, onReset, onRegen
                 <div className="rounded-[30px] border-[3px] border-foreground/10 p-1.5 bg-foreground/5">
                   <div className="w-20 h-1.5 rounded-full bg-foreground/10 mx-auto mb-1" />
                   <div className="rounded-[22px] overflow-hidden bg-[#1C1B1A] relative">
-                    <video
-                      ref={videoRef}
-                      className="w-full aspect-[9/16] object-cover"
-                      poster={result.videoUrl ? undefined : '/placeholder.svg'}
-                      loop
-                      muted={muted}
-                      playsInline
-                      onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
-                      onPlay={() => setPlaying(true)}
-                      onPause={() => setPlaying(false)}
-                    >
-                      {result.videoUrl && <source src={result.videoUrl} type="video/mp4" />}
-                    </video>
+                    {result.videoUrl ? (
+                      <video
+                        ref={videoRef}
+                        className="w-full aspect-[9/16] object-cover"
+                        loop muted={muted} playsInline
+                        onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
+                        onPlay={() => setPlaying(true)}
+                        onPause={() => setPlaying(false)}
+                      >
+                        <source src={result.videoUrl} type="video/mp4" />
+                      </video>
+                    ) : (
+                      <ScriptPreview script={result.script} isReels={true} />
+                    )}
                     {/* Custom controls */}
                     <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-3">
                       <div className="flex items-center gap-2">
-                        <button onClick={togglePlay} className="text-white">
+                        <button onClick={togglePlay} className="text-white" disabled={!result.videoUrl}>
                           {playing ? <Pause size={20} /> : <Play size={20} />}
                         </button>
                         <div className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
                           <div className="h-full bg-primary rounded-full" style={{ width: `${(currentTime / 15) * 100}%` }} />
                         </div>
                         <span className="text-white text-[11px] font-mono">{Math.floor(currentTime)}s/15s</span>
-                        <button onClick={() => setMuted(!muted)} className="text-white">
+                        <button onClick={() => setMuted(!muted)} className="text-white" disabled={!result.videoUrl}>
                           {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
                         </button>
                       </div>
@@ -153,26 +181,30 @@ const VideoResultView = ({ result, plan, usageUsed, usageLimit, onReset, onRegen
 
               {!isReels && (
                 <div className="rounded-[20px] overflow-hidden bg-[#1C1B1A] shadow-[0_24px_80px_rgba(0,0,0,0.2)] relative">
-                  <video
-                    ref={videoRef}
-                    className="w-full aspect-square object-cover"
-                    loop
-                    muted={muted}
-                    playsInline
-                    onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
-                    onPlay={() => setPlaying(true)}
-                    onPause={() => setPlaying(false)}
-                  >
-                    {result.videoUrl && <source src={result.videoUrl} type="video/mp4" />}
-                  </video>
+                  {result.videoUrl ? (
+                    <video
+                      ref={videoRef}
+                      className="w-full aspect-square object-cover"
+                      loop muted={muted} playsInline
+                      onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
+                      onPlay={() => setPlaying(true)}
+                      onPause={() => setPlaying(false)}
+                    >
+                      <source src={result.videoUrl} type="video/mp4" />
+                    </video>
+                  ) : (
+                    <ScriptPreview script={result.script} isReels={false} />
+                  )}
                   <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-3">
                     <div className="flex items-center gap-2">
-                      <button onClick={togglePlay} className="text-white"><Play size={20} /></button>
+                      <button onClick={togglePlay} className="text-white" disabled={!result.videoUrl}>
+                        {playing ? <Pause size={20} /> : <Play size={20} />}
+                      </button>
                       <div className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
                         <div className="h-full bg-primary rounded-full" style={{ width: `${(currentTime / 15) * 100}%` }} />
                       </div>
                       <span className="text-white text-[11px] font-mono">{Math.floor(currentTime)}s/15s</span>
-                      <button onClick={() => setMuted(!muted)} className="text-white">
+                      <button onClick={() => setMuted(!muted)} className="text-white" disabled={!result.videoUrl}>
                         {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
                       </button>
                     </div>
