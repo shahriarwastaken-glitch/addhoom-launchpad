@@ -181,20 +181,22 @@ const ContentCalendar = () => {
             </button>
           )}
         </div>
-        <button
-          onClick={() => setShowGenModal(true)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
-            hasExisting
-              ? 'border border-border text-foreground hover:bg-secondary'
-              : 'bg-gradient-cta text-primary-foreground shadow-orange-glow hover:scale-[1.02]'
-          }`}
-        >
-          <Sparkles size={16} />
-          {hasExisting
-            ? t('পুনরায় তৈরি করুন', 'Regenerate')
-            : t('৯০ দিনের পরিকল্পনা তৈরি করুন', 'Generate 90-Day Plan')
-          }
-        </button>
+        <FeatureTooltip tooltipKey="calendar_generate" position="bottom">
+          <button
+            onClick={() => setShowGenModal(true)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+              hasExisting
+                ? 'border border-border text-foreground hover:bg-secondary'
+                : 'bg-gradient-cta text-primary-foreground shadow-orange-glow hover:scale-[1.02]'
+            }`}
+          >
+            <Sparkles size={16} />
+            {hasExisting
+              ? t('পুনরায় তৈরি করুন', 'Regenerate')
+              : t('৯০ দিনের পরিকল্পনা তৈরি করুন', 'Generate 90-Day Plan')
+            }
+          </button>
+        </FeatureTooltip>
       </div>
 
       {/* Content */}
