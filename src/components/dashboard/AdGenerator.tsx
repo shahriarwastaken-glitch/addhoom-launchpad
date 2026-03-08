@@ -500,7 +500,7 @@ const AdGenerator = () => {
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 sm:gap-6">
             {/* LEFT PANEL — Source Ad */}
             <div className="md:col-span-2">
-              <h3 className="text-lg font-heading-bn font-semibold mb-4">{t('🔍 মূল বিজ্ঞাপন', '🔍 Source Ad')}</h3>
+              <h3 className="text-lg font-heading-bn font-semibold mb-4 flex items-center gap-2"><Search size={18} className="text-primary" /> {t('মূল বিজ্ঞাপন', 'Source Ad')}</h3>
               <div className="bg-card rounded-2xl shadow-warm p-6 space-y-4 sticky top-4">
                 <span className="inline-block bg-primary/10 text-primary text-xs font-semibold rounded-full px-3 py-1 font-body-bn">{sourceAd.brand}</span>
 
