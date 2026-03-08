@@ -455,6 +455,7 @@ const CompetitorIntel = () => {
                         >
                           {t('বিস্তারিত দেখুন', 'View details')} <ArrowRight size={12} />
                         </button>
+                        <PDFExportButton analysisId={item.id} competitorName={item.competitor_name} t={t} workspaceName={activeWorkspace?.shop_name || 'AdDhoom'} />
                         <button
                           onClick={() => handleAnalyze(item.competitor_name, item.competitor_url || undefined)}
                           disabled={loading}
