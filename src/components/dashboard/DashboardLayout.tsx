@@ -122,9 +122,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <div className="hidden md:block">
-          <DashboardSidebar />
-        </div>
+        <DashboardSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top Header */}
           <header className="h-14 flex items-center justify-between border-b border-border bg-card px-2 sm:px-4 flex-shrink-0">

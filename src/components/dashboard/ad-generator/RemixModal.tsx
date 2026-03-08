@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, RefreshCw, Smile, Briefcase, Flame } from 'lucide-react';
 import { FRAMEWORKS } from './types';
 import type { AdResult } from './types';
 
@@ -18,6 +18,12 @@ const RemixModal = ({ ad, onClose, onRemix, remixing }: RemixModalProps) => {
   const [framework, setFramework] = useState(ad.framework);
   const [tone, setTone] = useState('friendly');
 
+  const toneOptions = [
+    { value: 'friendly', label: 'বন্ধুত্বপূর্ণ', icon: <Smile size={14} /> },
+    { value: 'professional', label: 'পেশাদার', icon: <Briefcase size={14} /> },
+    { value: 'aggressive', label: 'আক্রমণাত্মক', icon: <Flame size={14} /> },
+  ];
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="fixed inset-0 bg-foreground/50 backdrop-blur-sm" />
@@ -32,7 +38,9 @@ const RemixModal = ({ ad, onClose, onRemix, remixing }: RemixModalProps) => {
           <X size={20} />
         </button>
 
-        <h3 className="text-lg font-bold font-heading-bn text-foreground mb-1">🔄 বিজ্ঞাপন রিমিক্স করুন</h3>
+        <h3 className="text-lg font-bold font-heading-bn text-foreground mb-1 flex items-center gap-2">
+          <RefreshCw size={18} className="text-primary" /> বিজ্ঞাপন রিমিক্স করুন
+        </h3>
         <p className="text-sm text-muted-foreground font-heading-bn mb-4">বিজয়ী বিজ্ঞাপনের প্যাটার্ন শিখে আরো ভালো করুন</p>
 
         {/* Original ad preview */}
@@ -79,15 +87,15 @@ const RemixModal = ({ ad, onClose, onRemix, remixing }: RemixModalProps) => {
               <p className="text-sm font-semibold font-heading-bn text-foreground">টোন পরিবর্তন করুন</p>
               {changeTone && (
                 <div className="flex gap-1.5 mt-2">
-                  {['friendly', 'professional', 'aggressive'].map(t => (
+                  {toneOptions.map(t => (
                     <button
-                      key={t}
-                      onClick={() => setTone(t)}
-                      className={`px-2.5 py-1 rounded-full text-[12px] font-heading-bn border transition-colors ${
-                        tone === t ? 'border-primary bg-primary/10 text-primary' : 'border-input text-foreground'
+                      key={t.value}
+                      onClick={() => setTone(t.value)}
+                      className={`px-2.5 py-1 rounded-full text-[12px] font-heading-bn border transition-colors flex items-center gap-1 ${
+                        tone === t.value ? 'border-primary bg-primary/10 text-primary' : 'border-input text-foreground'
                       }`}
                     >
-                      {t === 'friendly' ? '😊 বন্ধুত্বপূর্ণ' : t === 'professional' ? '💼 পেশাদার' : '🔥 আক্রমণাত্মক'}
+                      {t.icon} {t.label}
                     </button>
                   ))}
                 </div>
@@ -103,9 +111,9 @@ const RemixModal = ({ ad, onClose, onRemix, remixing }: RemixModalProps) => {
             tone: changeTone ? tone : undefined,
           })}
           disabled={remixing}
-          className="w-full h-11 rounded-[14px] bg-primary text-primary-foreground font-bold font-heading-bn text-[15px] hover:brightness-110 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+          className="w-full h-11 rounded-[14px] bg-primary text-primary-foreground font-bold font-heading-bn text-[15px] hover:brightness-110 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          {remixing ? '🔄 রিমিক্স হচ্ছে...' : 'রিমিক্স করুন'}
+          {remixing ? <><RefreshCw size={16} className="animate-spin" /> রিমিক্স হচ্ছে...</> : 'রিমিক্স করুন'}
         </button>
       </motion.div>
     </div>

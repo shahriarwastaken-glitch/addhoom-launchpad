@@ -3,11 +3,52 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
+  PenLine, ImageIcon, Facebook, Instagram, ShoppingBag, Search,
+  Target, AlertTriangle, BookOpen, CheckCircle, Zap, Gift,
+  Smile, Briefcase, Flame, Square, Smartphone, Monitor,
+  Sparkles, Palette, Camera, Upload, Rocket, Globe, Type,
+} from 'lucide-react';
+import {
   GeneratorMode, GeneratorFormData, PLATFORMS, FRAMEWORKS,
   OCCASIONS, TONES, IMAGE_FORMATS, IMAGE_STYLES,
 } from './types';
 
 const toBengali = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
+
+const PLATFORM_ICONS: Record<string, React.ReactNode> = {
+  facebook: <Facebook size={14} />,
+  instagram: <Instagram size={14} />,
+  daraz: <ShoppingBag size={14} />,
+  google: <Search size={14} />,
+};
+
+const FRAMEWORK_ICONS: Record<string, React.ReactNode> = {
+  target: <Target size={14} />,
+  'alert-triangle': <AlertTriangle size={14} />,
+  'book-open': <BookOpen size={14} />,
+  'check-circle': <CheckCircle size={14} />,
+  zap: <Zap size={14} />,
+  gift: <Gift size={14} />,
+};
+
+const TONE_ICONS: Record<string, React.ReactNode> = {
+  smile: <Smile size={14} />,
+  briefcase: <Briefcase size={14} />,
+  flame: <Flame size={14} />,
+};
+
+const FORMAT_ICONS: Record<string, React.ReactNode> = {
+  square: <Square size={14} />,
+  smartphone: <Smartphone size={14} />,
+  monitor: <Monitor size={14} />,
+};
+
+const STYLE_ICONS: Record<string, React.ReactNode> = {
+  sparkles: <Sparkles size={14} />,
+  palette: <Palette size={14} />,
+  camera: <Camera size={14} />,
+  flame: <Flame size={14} />,
+};
 
 interface InputPanelProps {
   mode: GeneratorMode;
@@ -75,13 +116,13 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
             <button
               key={m}
               onClick={() => setMode(m)}
-              className={`flex-1 py-2.5 rounded-[10px] text-sm font-semibold font-heading-bn transition-all duration-200 ${
+              className={`flex-1 py-2.5 rounded-[10px] text-sm font-semibold font-heading-bn transition-all duration-200 flex items-center justify-center gap-1.5 ${
                 mode === m
                   ? 'bg-card text-primary shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {m === 'copy' ? '✍️ কপি জেনারেটর' : '🖼️ ইমেজ জেনারেটর'}
+              {m === 'copy' ? <><PenLine size={15} /> কপি জেনারেটর</> : <><ImageIcon size={15} /> ইমেজ জেনারেটর</>}
             </button>
           ))}
         </div>
@@ -144,7 +185,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
                     color: selected ? p.color : 'hsl(var(--foreground))',
                   }}
                 >
-                  <span>{p.emoji}</span> {p.label}
+                  {PLATFORM_ICONS[p.value]} {p.label}
                 </button>
               );
             })}
@@ -155,19 +196,19 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
         <FieldGroup label="ভাষা">
           <div className="flex gap-2">
             {[
-              { label: '🇧🇩 বাংলা', value: 'bn' as const },
-              { label: '🔤 Banglish', value: 'banglish' as const },
+              { label: 'বাংলা', value: 'bn' as const, icon: <Globe size={14} /> },
+              { label: 'Banglish', value: 'banglish' as const, icon: <Type size={14} /> },
             ].map(l => (
               <button
                 key={l.value}
                 onClick={() => updateField('language', l.value)}
-                className={`flex-1 py-2 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 ${
+                className={`flex-1 py-2 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 flex items-center justify-center gap-1.5 ${
                   form.language === l.value
                     ? 'border-primary bg-primary/10 text-primary'
                     : 'border-input bg-card text-foreground'
                 }`}
               >
-                {l.label}
+                {l.icon} {l.label}
               </button>
             ))}
           </div>
@@ -181,13 +222,13 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
                 <TooltipTrigger asChild>
                   <button
                     onClick={() => updateField('framework', f.value)}
-                    className={`px-3 py-2 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 ${
+                    className={`px-3 py-2 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 flex items-center justify-center gap-1.5 ${
                       form.framework === f.value
                         ? 'border-primary bg-primary/10 text-primary'
                         : 'border-input bg-card text-foreground'
                     }`}
                   >
-                    {f.label}
+                    {FRAMEWORK_ICONS[f.icon]} {f.label}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="bg-foreground text-background text-[11px] font-heading-bn">
@@ -219,13 +260,13 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
               <button
                 key={t.value}
                 onClick={() => updateField('tone', t.value)}
-                className={`flex-1 py-2 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 ${
+                className={`flex-1 py-2 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 flex items-center justify-center gap-1.5 ${
                   form.tone === t.value
                     ? 'border-primary bg-primary/10 text-primary'
                     : 'border-input bg-card text-foreground'
                 }`}
               >
-                {t.label}
+                {TONE_ICONS[t.icon]} {t.label}
               </button>
             ))}
           </div>
@@ -313,7 +354,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
                     </div>
                   ) : (
                     <>
-                      <p className="text-3xl mb-2">📷</p>
+                      <Upload size={28} className="mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm font-heading-bn text-muted-foreground">ছবি টেনে আনুন বা ক্লিক করুন</p>
                       <p className="text-xs text-muted-foreground mt-1">PNG, JPG • সর্বোচ্চ 5MB</p>
                     </>
@@ -328,13 +369,13 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
                     <button
                       key={f.value}
                       onClick={() => updateField('imageFormat', f.value)}
-                      className={`flex-1 py-2.5 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 ${
+                      className={`flex-1 py-2.5 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 flex items-center justify-center gap-1.5 ${
                         form.imageFormat === f.value
                           ? 'border-primary bg-primary/10 text-primary'
                           : 'border-input bg-card text-foreground'
                       }`}
                     >
-                      {f.label}
+                      {FORMAT_ICONS[f.icon]} {f.label}
                     </button>
                   ))}
                 </div>
@@ -347,13 +388,13 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
                     <button
                       key={s.value}
                       onClick={() => updateField('imageStyle', s.value)}
-                      className={`px-3 py-2 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 ${
+                      className={`px-3 py-2 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 flex items-center justify-center gap-1.5 ${
                         form.imageStyle === s.value
                           ? 'border-primary bg-primary/10 text-primary'
                           : 'border-input bg-card text-foreground'
                       }`}
                     >
-                      {s.label}
+                      {STYLE_ICONS[s.icon]} {s.label}
                     </button>
                   ))}
                 </div>
@@ -409,11 +450,13 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
         >
           {generating ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="animate-bounce">🚀</span>
+              <Rocket size={18} className="animate-bounce" />
               <span className="animate-pulse">{loadingTexts[loadingTextIdx % loadingTexts.length]}</span>
             </span>
           ) : (
-            mode === 'copy' ? '✍️ বিজ্ঞাপন কপি তৈরি করুন' : '🖼️ ইমেজ বিজ্ঞাপন তৈরি করুন'
+            <span className="flex items-center justify-center gap-2">
+              {mode === 'copy' ? <><PenLine size={18} /> বিজ্ঞাপন কপি তৈরি করুন</> : <><ImageIcon size={18} /> ইমেজ বিজ্ঞাপন তৈরি করুন</>}
+            </span>
           )}
         </button>
         <p className="text-center text-[11px] text-muted-foreground mt-2 font-heading-bn">সাধারণত ৮-১৫ সেকেন্ড লাগে</p>
