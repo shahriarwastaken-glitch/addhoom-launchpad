@@ -410,7 +410,7 @@ const AdGenerator = () => {
 
         {/* Adaptation Note */}
         {isAdapted && ad.adaptation_note && (
-          <p className="text-xs text-primary/70 mb-3 font-body-bn">💡 {ad.adaptation_note}</p>
+          <p className="text-xs text-primary/70 mb-3 font-body-bn"><Zap size={12} className="inline" /> {ad.adaptation_note}</p>
         )}
 
         {/* Improvement Note (Remix) */}
