@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { api } from '@/lib/api';
 import { Link } from 'react-router-dom';
 
 const toBengali = (n: number) => Math.floor(n).toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
@@ -10,10 +11,32 @@ const ROICalculator = () => {
   const { ref, isVisible } = useScrollReveal();
   const [budget, setBudget] = useState(25000);
   const [hours, setHours] = useState(20);
+  const [platforms, setPlatforms] = useState<string[]>(['facebook']);
+  const [result, setResult] = useState({
+    annual_savings_bdt: 0,
+    monthly_savings_bdt: 0,
+    hours_saved_monthly: 0,
+    roi_pct: 0,
+    roas_boost: 25,
+  });
 
-  const monthlySavings = Math.floor(budget * 0.35 + hours * 200);
-  const annualSavings = monthlySavings * 12;
-  const roiPercent = Math.floor((monthlySavings / (budget || 1)) * 100);
+  const fetchROI = useCallback(async () => {
+    const { data } = await api.calculateRoi({
+      monthly_spend_bdt: budget,
+      hours_weekly: hours,
+      platforms,
+    });
+    if (data) setResult(data);
+  }, [budget, hours, platforms]);
+
+  useEffect(() => {
+    const timer = setTimeout(fetchROI, 300);
+    return () => clearTimeout(timer);
+  }, [fetchROI]);
+
+  const togglePlatform = (p: string) => {
+    setPlatforms(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
+  };
 
   return (
     <section ref={ref} className="py-24 px-4 bg-secondary">
@@ -43,33 +66,36 @@ const ROICalculator = () => {
               </div>
               <div className="flex flex-wrap gap-2">
                 {['Facebook', 'Google', 'Instagram', 'TikTok'].map(p => (
-                  <span key={p} className="text-xs border border-primary/30 text-primary rounded-full px-3 py-1.5 cursor-pointer hover:bg-primary/10 transition-colors">{p}</span>
+                  <button key={p} onClick={() => togglePlatform(p.toLowerCase())}
+                    className={`text-xs border rounded-full px-3 py-1.5 transition-colors ${platforms.includes(p.toLowerCase()) ? 'border-primary bg-primary/10 text-primary' : 'border-primary/30 text-primary hover:bg-primary/10'}`}>
+                    {p}
+                  </button>
                 ))}
               </div>
             </div>
             <div className="bg-gradient-green rounded-2xl p-6 flex flex-col items-center justify-center text-center">
               <span className="text-primary-foreground/80 text-sm font-body-bn mb-2">{t('বার্ষিক সঞ্চয়', 'Annual Savings')}</span>
-              <span className="text-4xl md:text-5xl font-mono font-bold text-primary-foreground mb-4">৳{toBengali(annualSavings)}</span>
+              <span className="text-4xl md:text-5xl font-mono font-bold text-primary-foreground mb-4">৳{toBengali(result.annual_savings_bdt)}</span>
               <div className="grid grid-cols-2 gap-4 w-full text-primary-foreground">
                 <div>
-                  <div className="text-lg font-mono font-bold">৳{toBengali(monthlySavings)}</div>
+                  <div className="text-lg font-mono font-bold">৳{toBengali(result.monthly_savings_bdt)}</div>
                   <div className="text-xs opacity-80 font-body-bn">{t('মাসিক', 'Monthly')}</div>
                 </div>
                 <div>
-                  <div className="text-lg font-mono font-bold">{toBengali(hours * 3)} {t('ঘণ্টা', 'hrs')}</div>
+                  <div className="text-lg font-mono font-bold">{toBengali(result.hours_saved_monthly)} {t('ঘণ্টা', 'hrs')}</div>
                   <div className="text-xs opacity-80 font-body-bn">{t('সাশ্রয়কৃত', 'Saved')}</div>
                 </div>
                 <div>
-                  <div className="text-lg font-mono font-bold">{toBengali(roiPercent)}%</div>
+                  <div className="text-lg font-mono font-bold">{toBengali(result.roi_pct)}%</div>
                   <div className="text-xs opacity-80">ROI</div>
                 </div>
                 <div>
-                  <div className="text-lg font-mono font-bold">{toBengali(Math.min(Math.floor(budget / 6000) + 1, 10))}x</div>
+                  <div className="text-lg font-mono font-bold">{toBengali(result.roas_boost)}%</div>
                   <div className="text-xs opacity-80 font-body-bn">ROAS {t('বৃদ্ধি', 'Boost')}</div>
                 </div>
               </div>
-              <Link to="/dashboard" className="mt-6 bg-card text-foreground rounded-full px-6 py-3 text-sm font-semibold hover:scale-[1.04] transition-transform shadow-warm">
-                {t('বিনামূল্যে শুরু করুন', 'Start for Free')}
+              <Link to="/auth" className="mt-6 bg-card text-foreground rounded-full px-6 py-3 text-sm font-semibold hover:scale-[1.04] transition-transform shadow-warm">
+                {t('শুরু করুন', 'Get Started')}
               </Link>
             </div>
           </div>

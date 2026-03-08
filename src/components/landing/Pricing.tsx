@@ -92,7 +92,7 @@ const Pricing = () => {
                   </div>
                 ))}
               </div>
-              <Link to="/dashboard" className={`block text-center rounded-full py-3 text-sm font-semibold transition-all ${plan.ctaStyle}`}>
+              <Link to="/auth" className={`block text-center rounded-full py-3 text-sm font-semibold transition-all ${plan.ctaStyle}`}>
                 {t(plan.cta.bn, plan.cta.en)}
               </Link>
               <div className="flex items-center justify-center gap-3 mt-4">
