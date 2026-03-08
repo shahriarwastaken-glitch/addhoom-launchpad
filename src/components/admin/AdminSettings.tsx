@@ -186,7 +186,7 @@ export default function AdminSettings() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <h1 className="text-xl md:text-2xl font-bold">প্ল্যাটফর্ম সেটিংস</h1>
+      <h1 className="text-xl md:text-2xl font-bold">Platform Settings</h1>
 
       {/* System Prompt Editor */}
       <Card className="border-primary/20">
@@ -194,15 +194,15 @@ export default function AdminSettings() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                🤖 AI সিস্টেম প্রম্পট
+                🤖 AI Copy Master Prompt
                 {usingDefault && (
-                  <span className="text-xs bg-muted px-2 py-0.5 rounded-full font-normal">ডিফল্ট ব্যবহার হচ্ছে</span>
+                   <span className="text-xs bg-muted px-2 py-0.5 rounded-full font-normal">Using Default</span>
                 )}
               </CardTitle>
               <CardDescription>
-                AdDhoom AI এর ব্যক্তিত্ব এবং আচরণ নির্ধারণ করে
+                Controls AdDhoom AI's copywriting persona, frameworks, and BD market rules
                 {lastUpdated && !usingDefault && (
-                  <span className="ml-2 text-xs">• শেষ আপডেট: {new Date(lastUpdated).toLocaleDateString('bn-BD')}</span>
+                  <span className="ml-2 text-xs">• Last updated: {new Date(lastUpdated).toLocaleDateString('en-US')}</span>
                 )}
               </CardDescription>
             </div>
@@ -222,16 +222,16 @@ export default function AdminSettings() {
                 className="min-h-[300px] font-mono text-sm"
               />
               <div className="flex flex-wrap gap-2">
-                <Button onClick={handleSavePrompt} disabled={savingPrompt || !hasChanges} className="gap-2">
+               <Button onClick={handleSavePrompt} disabled={savingPrompt || !hasChanges} className="gap-2">
                   {savingPrompt ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                  সংরক্ষণ করুন
+                   Save
                 </Button>
                 <Button variant="outline" onClick={handleResetPrompt} disabled={savingPrompt || usingDefault} className="gap-2">
-                  <RotateCcw className="h-4 w-4" /> ডিফল্টে ফিরুন
+                   <RotateCcw className="h-4 w-4" /> Reset to Default
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                💡 টিপ: কাস্টম প্রম্পট না দিলে supabase/functions/_shared/systemPrompt.ts থেকে ডিফল্ট প্রম্পট ব্যবহার হবে।
+                 💡 Tip: Without a custom prompt, the default 11-section master copy prompt from systemPrompt.ts will be used. Covers BD buyer psychology, 6 frameworks, hook rules, CTA rules, platform specs, and Dhoom scoring.
               </p>
             </>
           )}
@@ -244,15 +244,15 @@ export default function AdminSettings() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <ImageIcon className="h-5 w-5 text-orange-500" /> ইমেজ জেনারেশন মাস্টার প্রম্পট
+                <ImageIcon className="h-5 w-5 text-orange-500" /> Image Generation Master Prompt
                 {usingImageDefault && (
-                  <span className="text-xs bg-muted px-2 py-0.5 rounded-full font-normal">ডিফল্ট ব্যবহার হচ্ছে</span>
+                   <span className="text-xs bg-muted px-2 py-0.5 rounded-full font-normal">Using Default</span>
                 )}
               </CardTitle>
               <CardDescription>
-                AI ইমেজ জেনারেটরের আচরণ, কম্পোজিশন, স্টাইল ও মার্কেট রুলস নির্ধারণ করে
+                Controls AI image generator's composition, style, product fidelity, and BD market aesthetics
                 {imageLastUpdated && !usingImageDefault && (
-                  <span className="ml-2 text-xs">• শেষ আপডেট: {new Date(imageLastUpdated).toLocaleDateString('bn-BD')}</span>
+                   <span className="ml-2 text-xs">• Last updated: {new Date(imageLastUpdated).toLocaleDateString('en-US')}</span>
                 )}
               </CardDescription>
             </div>
@@ -268,20 +268,20 @@ export default function AdminSettings() {
               <Textarea
                 value={imagePrompt}
                 onChange={(e) => setImagePrompt(e.target.value)}
-                placeholder="ইমেজ জেনারেশনের জন্য মাস্টার প্রম্পট এখানে লিখুন... ডিফল্ট প্রম্পটে প্রোডাক্ট ফিডেলিটি, টেক্সট রুলস, কম্পোজিশন, স্টাইল, এবং বাংলাদেশী মার্কেট অ্যাসথেটিকস অন্তর্ভুক্ত আছে।"
+                placeholder="Write the master prompt for image generation here... The default covers product fidelity, text rules, composition, style guides, and Bangladeshi market aesthetics."
                 className="min-h-[400px] font-mono text-sm"
               />
               <div className="flex flex-wrap gap-2">
                 <Button onClick={handleSaveImagePrompt} disabled={savingImagePrompt || !hasImageChanges} className="gap-2">
                   {savingImagePrompt ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                  সংরক্ষণ করুন
+                   Save
                 </Button>
                 <Button variant="outline" onClick={handleResetImagePrompt} disabled={savingImagePrompt || usingImageDefault} className="gap-2">
-                  <RotateCcw className="h-4 w-4" /> ডিফল্টে ফিরুন
+                   <RotateCcw className="h-4 w-4" /> Reset to Default
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                💡 টিপ: কাস্টম প্রম্পট না দিলে _shared/imagePrompt.ts থেকে ডিফল্ট মাস্টার প্রম্পট ব্যবহার হবে। প্রম্পটে প্রোডাক্ট ফিডেলিটি, টেক্সট রুলস, কম্পোজিশন, স্টাইল গাইড, এবং বাংলাদেশী মার্কেট অ্যাসথেটিকস নির্দেশনা রাখুন।
+                 💡 Tip: Without a custom prompt, the default 9-section master image prompt from imagePrompt.ts will be used. Covers product fidelity, text rules, composition, style, and BD market aesthetics.
               </p>
             </>
           )}
@@ -291,23 +291,23 @@ export default function AdminSettings() {
       {/* Plan Limits */}
       <Card>
         <CardHeader>
-          <CardTitle>পরিকল্পনার সীমা</CardTitle>
-          <CardDescription>সীমা পরিবর্তন করতে কোড আপডেট প্রয়োজন (planLimits.ts)</CardDescription>
+          <CardTitle>Plan Limits</CardTitle>
+          <CardDescription>Code update required to change limits (planLimits.ts)</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="bg-primary/10 rounded-lg p-4">
               <h4 className="font-semibold text-primary mb-3">Pro Plan</h4>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span>ভিডিও বিজ্ঞাপন/মাস</span><span className="font-medium">{PLAN_LIMITS.pro.video_ads_per_month}</span></div>
-                <div className="flex justify-between"><span>সর্বোচ্চ ভিডিও দৈর্ঘ্য</span><span className="font-medium">{PLAN_LIMITS.pro.max_video_duration}s</span></div>
+                <div className="flex justify-between"><span>Video Ads/Month</span><span className="font-medium">{PLAN_LIMITS.pro.video_ads_per_month}</span></div>
+                <div className="flex justify-between"><span>Max Video Duration</span><span className="font-medium">{PLAN_LIMITS.pro.max_video_duration}s</span></div>
               </div>
             </div>
             <div className="bg-purple-500/10 rounded-lg p-4">
               <h4 className="font-semibold text-purple-600 mb-3">Agency Plan</h4>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span>ভিডিও বিজ্ঞাপন/মাস</span><span className="font-medium">{PLAN_LIMITS.agency.video_ads_per_month}</span></div>
-                <div className="flex justify-between"><span>সর্বোচ্চ ভিডিও দৈর্ঘ্য</span><span className="font-medium">{PLAN_LIMITS.agency.max_video_duration}s</span></div>
+                <div className="flex justify-between"><span>Video Ads/Month</span><span className="font-medium">{PLAN_LIMITS.agency.video_ads_per_month}</span></div>
+                <div className="flex justify-between"><span>Max Video Duration</span><span className="font-medium">{PLAN_LIMITS.agency.max_video_duration}s</span></div>
               </div>
             </div>
           </div>
@@ -317,23 +317,23 @@ export default function AdminSettings() {
       {/* Pricing Info */}
       <Card>
         <CardHeader>
-          <CardTitle>মূল্য তথ্য</CardTitle>
-          <CardDescription>বর্তমান মূল্য কাঠামো</CardDescription>
+          <CardTitle>Pricing Info</CardTitle>
+          <CardDescription>Current pricing structure</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Pro</h4>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span>মাসিক</span><span className="font-medium">৳{PRICING.pro.monthly.toLocaleString()}</span></div>
-                <div className="flex justify-between"><span>বার্ষিক</span><span className="font-medium">৳{PRICING.pro.annual.toLocaleString()} ({PRICING.pro.discount}% ছাড়)</span></div>
+                <div className="flex justify-between"><span>Monthly</span><span className="font-medium">৳{PRICING.pro.monthly.toLocaleString()}</span></div>
+                <div className="flex justify-between"><span>Annual</span><span className="font-medium">৳{PRICING.pro.annual.toLocaleString()} ({PRICING.pro.discount}% off)</span></div>
               </div>
             </div>
             <div className="border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Agency</h4>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span>মাসিক</span><span className="font-medium">৳{PRICING.agency.monthly.toLocaleString()}</span></div>
-                <div className="flex justify-between"><span>বার্ষিক</span><span className="font-medium">৳{PRICING.agency.annual.toLocaleString()} ({PRICING.agency.discount}% ছাড়)</span></div>
+                <div className="flex justify-between"><span>Monthly</span><span className="font-medium">৳{PRICING.agency.monthly.toLocaleString()}</span></div>
+                <div className="flex justify-between"><span>Annual</span><span className="font-medium">৳{PRICING.agency.annual.toLocaleString()} ({PRICING.agency.discount}% off)</span></div>
               </div>
             </div>
           </div>
@@ -343,13 +343,13 @@ export default function AdminSettings() {
       {/* Metrics Cache */}
       <Card>
         <CardHeader>
-          <CardTitle>মেট্রিক্স ক্যাশ</CardTitle>
-          <CardDescription>দ্রুত ড্যাশবোর্ড লোডিংয়ের জন্য প্রাক-গণনাকৃত মেট্রিক্স</CardDescription>
+          <CardTitle>Metrics Cache</CardTitle>
+          <CardDescription>Pre-computed metrics for faster dashboard loading</CardDescription>
         </CardHeader>
         <CardContent>
           <Button onClick={handleRefreshMetrics} disabled={refreshing}>
             <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            এখনই আপডেট করুন
+            Refresh Now
           </Button>
         </CardContent>
       </Card>
