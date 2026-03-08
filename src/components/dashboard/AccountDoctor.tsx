@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
+import { Stethoscope, CheckCircle, AlertTriangle, AlertOctagon, RefreshCw, Search, Loader2 } from 'lucide-react';
 
 const toBengali = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
 
@@ -40,30 +41,31 @@ const AccountDoctor = () => {
   const scoreColor = score >= 71 ? 'stroke-brand-green' : score >= 41 ? 'stroke-brand-yellow' : 'stroke-destructive';
 
   const sections = [
-    { type: 'good', title: { bn: '✅ যা ভালো চলছে', en: "✅ What's Going Well" }, borderColor: 'border-l-brand-green', items: report?.good_items || [] },
-    { type: 'warn', title: { bn: '⚠️ মনোযোগ দিন', en: '⚠️ Needs Attention' }, borderColor: 'border-l-brand-yellow', items: report?.warning_items || [] },
-    { type: 'urgent', title: { bn: '🔴 এখনই ব্যবস্থা নিন', en: '🔴 Take Action Now' }, borderColor: 'border-l-destructive', items: report?.critical_items || [] },
+    { type: 'good', title: { bn: 'যা ভালো চলছে', en: "What's Going Well" }, icon: CheckCircle, iconColor: 'text-brand-green', borderColor: 'border-l-brand-green', items: report?.good_items || [] },
+    { type: 'warn', title: { bn: 'মনোযোগ দিন', en: 'Needs Attention' }, icon: AlertTriangle, iconColor: 'text-brand-yellow', borderColor: 'border-l-brand-yellow', items: report?.warning_items || [] },
+    { type: 'urgent', title: { bn: 'এখনই ব্যবস্থা নিন', en: 'Take Action Now' }, icon: AlertOctagon, iconColor: 'text-destructive', borderColor: 'border-l-destructive', items: report?.critical_items || [] },
   ];
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h2 className="text-2xl font-heading-bn font-bold text-foreground mb-8">
-        {t('🩺 অ্যাকাউন্ট ডাক্তার', '🩺 Account Doctor')}
+      <h2 className="text-2xl font-heading-bn font-bold text-foreground mb-8 flex items-center gap-2">
+        <Stethoscope size={24} className="text-primary" />
+        {t('অ্যাকাউন্ট ডাক্তার', 'Account Doctor')}
       </h2>
 
       {!report ? (
         <div className="bg-card rounded-[20px] shadow-warm p-8 text-center">
-          <div className="text-6xl mb-4">🩺</div>
+          <Stethoscope size={48} className="text-primary mx-auto mb-4" />
           <h3 className="text-lg font-heading-bn font-semibold mb-2">{t('আপনার অ্যাকাউন্ট চেক করুন', 'Check Your Account')}</h3>
           <p className="text-sm text-muted-foreground font-body-bn mb-6">
             {t('AI আপনার ক্যাম্পেইন বিশ্লেষণ করে হেলথ স্কোর ও সাজেশন দেবে।', 'AI will analyze your campaigns and provide a health score & suggestions.')}
           </p>
           <button onClick={runDiagnostics} disabled={loading}
-            className="bg-gradient-cta text-primary-foreground rounded-full px-8 py-3 font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform disabled:opacity-70 font-body-bn">
+            className="bg-gradient-cta text-primary-foreground rounded-full px-8 py-3 font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform disabled:opacity-70 font-body-bn flex items-center gap-2 mx-auto">
             {loading ? (
-              <span className="flex items-center gap-2"><span className="animate-spin">🔍</span> {t('বিশ্লেষণ চলছে...', 'Analyzing...')}</span>
+              <><Loader2 size={16} className="animate-spin" /> {t('বিশ্লেষণ চলছে...', 'Analyzing...')}</>
             ) : (
-              t('🩺 ডায়াগনস্টিক চালান', '🩺 Run Diagnostics')
+              <><Stethoscope size={16} /> {t('ডায়াগনস্টিক চালান', 'Run Diagnostics')}</>
             )}
           </button>
         </div>
@@ -84,8 +86,8 @@ const AccountDoctor = () => {
                 {t('হেলথ স্কোর', 'Health Score')}
               </text>
             </svg>
-            <button onClick={runDiagnostics} disabled={loading} className="mt-4 text-sm text-primary hover:underline font-body-bn">
-              {loading ? t('রিফ্রেশ হচ্ছে...', 'Refreshing...') : t('🔄 আবার চেক করুন', '🔄 Check Again')}
+            <button onClick={runDiagnostics} disabled={loading} className="mt-4 text-sm text-primary hover:underline font-body-bn flex items-center gap-1 mx-auto">
+              <RefreshCw size={14} /> {loading ? t('রিফ্রেশ হচ্ছে...', 'Refreshing...') : t('আবার চেক করুন', 'Check Again')}
             </button>
           </div>
 
@@ -94,7 +96,10 @@ const AccountDoctor = () => {
             {sections.map((section, i) => (
               section.items.length > 0 && (
                 <div key={i}>
-                  <h3 className="font-heading-bn font-bold text-foreground mb-3">{t(section.title.bn, section.title.en)}</h3>
+                  <h3 className="font-heading-bn font-bold text-foreground mb-3 flex items-center gap-2">
+                    <section.icon size={18} className={section.iconColor} />
+                    {t(section.title.bn, section.title.en)}
+                  </h3>
                   <div className="space-y-3">
                     {section.items.map((item: string, j: number) => (
                       <div key={j} className={`bg-card rounded-xl shadow-warm p-4 border-l-4 ${section.borderColor} flex items-center justify-between`}>

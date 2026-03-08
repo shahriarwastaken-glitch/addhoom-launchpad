@@ -9,8 +9,15 @@ const LanguageContext = createContext<{
 }>({ lang: 'bn', toggle: () => {}, t: (bn) => bn });
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Language>('bn');
-  const toggle = () => setLang(l => l === 'bn' ? 'en' : 'bn');
+  const [lang, setLang] = useState<Language>(() => {
+    if (typeof window === 'undefined') return 'bn';
+    return (localStorage.getItem('addhoom-lang') as Language) || 'bn';
+  });
+  const toggle = () => setLang(l => {
+    const next = l === 'bn' ? 'en' : 'bn';
+    localStorage.setItem('addhoom-lang', next);
+    return next;
+  });
   const t = (bn: string, en: string) => lang === 'bn' ? bn : en;
   return (
     <LanguageContext.Provider value={{ lang, toggle, t }}>
