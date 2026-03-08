@@ -11,7 +11,7 @@ const LanguageContext = createContext<{
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Language>(() => {
     if (typeof window === 'undefined') return 'bn';
-    return (localStorage.getItem('addhoom-lang') as Language) || 'bn';
+    return (localStorage.getItem('addhoom-lang') as Language) || 'en';
   });
   const toggle = () => setLang(l => {
     const next = l === 'bn' ? 'en' : 'bn';
