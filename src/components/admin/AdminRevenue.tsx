@@ -262,7 +262,7 @@ export default function AdminRevenue() {
                 <div key={user.user_id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium w-6">
-                      {index === 0 ? '🏆' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                      {index === 0 ? <Trophy className="h-4 w-4 text-amber-500" /> : index === 1 ? <Trophy className="h-4 w-4 text-slate-400" /> : index === 2 ? <Trophy className="h-4 w-4 text-amber-700" /> : `#${index + 1}`}
                     </span>
                     <span className="text-sm truncate max-w-[120px]">{user.email}</span>
                   </div>
