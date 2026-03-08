@@ -439,7 +439,7 @@ const Onboarding = () => {
 
           {/* STEP 2 */}
           {step === 2 && dna && (
-            <motion.div key="step2" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_SLIDE.transition}>
+            <motion.div key="step2" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_TRANSITION}>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 font-bn">ধাপ ২ এর ৪</p>
               <h1 className="text-3xl font-bold text-foreground mb-2 font-bn">AI আপনার শপ বুঝেছে! ✨</h1>
               <p className="text-muted-foreground font-bn mb-8">নিচের তথ্য দেখুন — ঠিক আছে কি?</p>
