@@ -600,7 +600,7 @@ const AdGenerator = () => {
                     {extracting ? (
                       <Rocket size={16} className="animate-bounce" />
                     ) : (
-                      <>⚡ {t('তথ্য আনুন', 'Extract')}</>
+                      <><Zap size={14} /> {t('তথ্য আনুন', 'Extract')}</>
                     )}
                   </button>
                 </div>
