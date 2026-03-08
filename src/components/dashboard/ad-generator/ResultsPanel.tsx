@@ -130,64 +130,66 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
     return d.toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
-  // IMAGE HISTORY VIEW (shown regardless of results)
+  // IMAGE HISTORY VIEW (shown regardless of results when toggled)
   if (!generating && showHistory) {
-      return (
-        <div className="h-full overflow-y-auto flex flex-col items-center justify-center text-center px-8">
-          <div className="w-full max-w-md text-left">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-base font-bold font-heading-bn text-foreground flex items-center gap-2">
-                <Clock size={16} className="text-muted-foreground" />
-                {t('ইমেজ হিস্ট্রি', 'Image History')}
-              </h4>
-              <button
-                onClick={() => onToggleImageHistory?.()}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-            {imageHistory.length > 0 ? (
-              <div className="space-y-2">
-                <div className="flex items-center justify-end mb-2">
-                  <button
-                    onClick={clearHistory}
-                    className="text-xs text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1"
-                  >
-                    <Trash2 size={12} /> {t('মুছুন', 'Clear')}
-                  </button>
-                </div>
-                {imageHistory.map(entry => (
-                  <button
-                    key={entry.id}
-                    onClick={() => loadFromHistory(entry)}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:bg-secondary/80 transition-all text-left group"
-                  >
-                    {entry.results[0]?.image_url && (
-                      <img src={entry.results[0].image_url} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0 border border-border" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold font-heading-bn text-foreground truncate">{entry.productName}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {entry.results.length} {t('ভার্শন', 'versions')} · {formatTime(entry.timestamp)}
-                      </p>
-                    </div>
-                    <RotateCcw size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <Clock size={40} className="mx-auto text-muted-foreground/30 mb-4" />
-                <p className="text-sm font-heading-bn text-muted-foreground mb-1">{t('এখনো কোনো ইমেজ হিস্ট্রি নেই', 'No image history yet')}</p>
-                <p className="text-xs text-muted-foreground/70">{t('ইমেজ জেনারেট করলে এখানে সেভ হবে', 'Generated images will be saved here')}</p>
-              </div>
-            )}
+    return (
+      <div className="h-full overflow-y-auto flex flex-col items-center justify-center text-center px-8">
+        <div className="w-full max-w-md text-left">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-base font-bold font-heading-bn text-foreground flex items-center gap-2">
+              <Clock size={16} className="text-muted-foreground" />
+              {t('ইমেজ হিস্ট্রি', 'Image History')}
+            </h4>
+            <button
+              onClick={() => onToggleImageHistory?.()}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              ✕
+            </button>
           </div>
+          {imageHistory.length > 0 ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-end mb-2">
+                <button
+                  onClick={clearHistory}
+                  className="text-xs text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1"
+                >
+                  <Trash2 size={12} /> {t('মুছুন', 'Clear')}
+                </button>
+              </div>
+              {imageHistory.map(entry => (
+                <button
+                  key={entry.id}
+                  onClick={() => { loadFromHistory(entry); onToggleImageHistory?.(); }}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:bg-secondary/80 transition-all text-left group"
+                >
+                  {entry.results[0]?.image_url && (
+                    <img src={entry.results[0].image_url} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0 border border-border" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold font-heading-bn text-foreground truncate">{entry.productName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {entry.results.length} {t('ভার্শন', 'versions')} · {formatTime(entry.timestamp)}
+                    </p>
+                  </div>
+                  <RotateCcw size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Clock size={40} className="mx-auto text-muted-foreground/30 mb-4" />
+              <p className="text-sm font-heading-bn text-muted-foreground mb-1">{t('এখনো কোনো ইমেজ হিস্ট্রি নেই', 'No image history yet')}</p>
+              <p className="text-xs text-muted-foreground/70">{t('ইমেজ জেনারেট করলে এখানে সেভ হবে', 'Generated images will be saved here')}</p>
+            </div>
+          )}
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
+  // EMPTY STATE
+  if (!generating && results.length === 0) {
     return (
       <div className="h-full overflow-y-auto flex flex-col items-center justify-center text-center px-8">
         <div className="relative mb-6">
@@ -213,48 +215,6 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
             </span>
           ))}
         </div>
-
-        {/* Image History */}
-        {imageHistory.length > 0 && (
-          <div className="w-full max-w-md mt-8 text-left">
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="text-sm font-semibold font-heading-bn text-foreground flex items-center gap-1.5">
-                <Clock size={14} className="text-muted-foreground" />
-                {t('সাম্প্রতিক ইমেজ', 'Recent Images')}
-              </h4>
-              <button
-                onClick={clearHistory}
-                className="text-xs text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1"
-              >
-                <Trash2 size={12} /> {t('মুছুন', 'Clear')}
-              </button>
-            </div>
-            <div className="space-y-2">
-              {imageHistory.map(entry => (
-                <button
-                  key={entry.id}
-                  onClick={() => loadFromHistory(entry)}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:bg-secondary/80 transition-all text-left group"
-                >
-                  {entry.results[0]?.image_url && (
-                    <img
-                      src={entry.results[0].image_url}
-                      alt=""
-                      className="w-12 h-12 rounded-lg object-cover shrink-0 border border-border"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold font-heading-bn text-foreground truncate">{entry.productName}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {entry.results.length} {t('ভার্শন', 'versions')} · {formatTime(entry.timestamp)}
-                    </p>
-                  </div>
-                  <RotateCcw size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     );
   }
