@@ -5,7 +5,7 @@ import { Plus, Minus } from 'lucide-react';
 
 const faqs = [
   { qBn: 'AdDhoom কি সত্যিই বাংলায় বিজ্ঞাপন লিখতে পারে?', qEn: 'Can AdDhoom really write ads in Bengali?', aBn: 'হ্যাঁ, AdDhoom বাংলাদেশের বাজারের জন্য বিশেষভাবে তৈরি। একদম দেশীয় ভাষায়, দেশীয় কায়দায় বিজ্ঞাপন লেখে। Banglish সাপোর্টও আছে।', aEn: 'Yes, specially built for BD market. Writes in authentic local style. Banglish support too.' },
-  { qBn: 'ফ্রি ট্রায়াল আছে কি?', qEn: 'Is there a free trial?', aBn: 'Pro প্ল্যান দিয়ে শুরু করুন — ৭ দিনের মধ্যে সন্তুষ্ট না হলে সম্পূর্ণ অর্থ ফেরত।', aEn: 'Start with Pro — full refund within 7 days if not satisfied.' },
+  { qBn: 'কীভাবে শুরু করব?', qEn: 'How do I get started?', aBn: 'Pro বা Agency প্ল্যান বেছে নিন এবং সাইন আপ করুন। ৩০ সেকেন্ডেই আপনার শপ সেটআপ হয়ে যাবে।', aEn: 'Choose a Pro or Agency plan and sign up. Your shop will be set up in 30 seconds.' },
   { qBn: 'কোন প্ল্যাটফর্মের জন্য কাজ করে?', qEn: 'Which platforms?', aBn: 'Facebook, Instagram, Daraz, Google — এই চারটি প্ল্যাটফর্মের জন্য অপটিমাইজড বিজ্ঞাপন তৈরি করা যায়।', aEn: 'Facebook, Instagram, Daraz, Google — optimized ads for all four.' },
   { qBn: 'পেমেন্ট কীভাবে করব?', qEn: 'How do I pay?', aBn: 'bKash, Nagad, Rocket, ভিসা, মাস্টারকার্ড — SSLCommerz এর মাধ্যমে সম্পূর্ণ নিরাপদ।', aEn: 'bKash, Nagad, Rocket, Visa, Mastercard — fully secure via SSLCommerz.' },
   { qBn: 'Agency প্ল্যানে কতজন ক্লায়েন্ট?', qEn: 'How many clients in Agency?', aBn: '২০টি আলাদা ওয়ার্কস্পেস। প্রতিটিতে আলাদা ব্র্যান্ড ভয়েস ও হোয়াইট লেবেল রিপোর্ট।', aEn: '20 separate workspaces with unique brand voice and white label reports.' },

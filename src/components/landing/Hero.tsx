@@ -53,11 +53,11 @@ const Hero = () => {
             <span className="font-bn text-sm text-muted-foreground">{t('৫০০+ শপ মালিক ব্যবহার করছেন', '500+ shop owners using')}</span>
           </div>
           <div className={`mt-9 flex flex-wrap items-center gap-4 transition-all duration-700 delay-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            <Link to="/auth" className="font-bn text-[17px] font-bold text-primary-foreground bg-primary rounded-full px-9 py-4 shadow-[0_8px_32px_rgba(255,81,0,0.35)] hover:-translate-y-0.5 hover:bg-accent transition-all">{t('বিনামূল্যে শুরু করুন →', 'Start Free →')}</Link>
+            <Link to="/auth" className="font-bn text-[17px] font-bold text-primary-foreground bg-primary rounded-full px-9 py-4 shadow-[0_8px_32px_rgba(255,81,0,0.35)] hover:-translate-y-0.5 hover:bg-accent transition-all">{t('শুরু করুন →', 'Get Started →')}</Link>
             <button className="font-body text-[15px] font-medium text-muted-foreground border border-border rounded-full px-7 py-4 hover:border-primary hover:text-primary transition-all duration-200 flex items-center gap-2"><Play className="w-4 h-4" /> {t('ডেমো দেখুন', 'Watch Demo')}</button>
           </div>
           <div className={`mt-4 flex flex-wrap gap-x-3 gap-y-1 text-xs font-body text-muted-foreground transition-all duration-700 delay-[600ms] ${visible ? 'opacity-100' : 'opacity-0'}`}>
-            <span>✓ {t('ক্রেডিট কার্ড লাগবে না', 'No credit card')}</span><span>·</span><span>✓ {t('৩০ সেকেন্ডে সেটআপ', '30s setup')}</span><span>·</span><span>✓ {t('বাংলায় সম্পূর্ণ', 'Fully in Bengali')}</span>
+            <span>✓ {t('৩০ সেকেন্ডে সেটআপ', '30s setup')}</span><span>·</span><span>✓ {t('বাংলায় সম্পূর্ণ', 'Fully in Bengali')}</span><span>·</span><span>✓ {t('সহজ পেমেন্ট', 'Easy payment')}</span>
           </div>
         </div>
         <div className={`relative transition-all duration-700 delay-300 ${visible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>

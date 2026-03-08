@@ -258,9 +258,9 @@ const ROICalculator = () => {
 
               {/* CTA */}
               <Link to="/auth" className="mt-6 block w-full text-center font-bn text-base font-bold text-primary-foreground bg-gradient-brand rounded-full py-4 shadow-orange-glow hover:scale-[1.02] transition-all duration-200">
-                {t(`বিনামূল্যে শুরু করুন — আজই ৳${toBn(results.monthlySavings)} বাঁচান`, `Start Free — Save ৳${toBn(results.monthlySavings)} today`)}
+                {t(`শুরু করুন — আজই ৳${toBn(results.monthlySavings)} বাঁচান`, `Get Started — Save ৳${toBn(results.monthlySavings)} today`)}
               </Link>
-              <p className="text-center text-[11px] text-muted-foreground mt-2 font-bn">{t('৩০ সেকেন্ডে সেটআপ · কোনো ক্রেডিট কার্ড লাগবে না', '30s setup · No credit card needed')}</p>
+              <p className="text-center text-[11px] text-muted-foreground mt-2 font-bn">{t('৩০ সেকেন্ডে সেটআপ', '30s setup')}</p>
             </div>
           </div>
         </div>
