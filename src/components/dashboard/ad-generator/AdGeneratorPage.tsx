@@ -111,6 +111,7 @@ const AdGeneratorPage = () => {
             occasion: form.occasion,
             tone: form.tone,
             num_variations: form.numVariations,
+            project_id: projectId || undefined,
           },
         });
 

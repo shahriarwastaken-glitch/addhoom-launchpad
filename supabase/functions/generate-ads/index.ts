@@ -222,6 +222,7 @@ Return ONLY a valid JSON array. No explanation. No markdown. No text before or a
       is_winner: false,
       source_url: source_url || null,
       ai_generated: true,
+      project_id: project_id || null,
     }));
 
     const { data: saved, error: saveError } = await supabase
