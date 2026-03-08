@@ -20,6 +20,8 @@ interface AdResult {
   language?: string;
   is_winner?: boolean;
   adaptation_note?: string;
+  improvement_note?: string;
+  remixed_from_id?: string;
 }
 
 interface SourceAd {
