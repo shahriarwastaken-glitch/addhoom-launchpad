@@ -1,12 +1,13 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   PenLine, ImageIcon, Facebook, Instagram, ShoppingBag, Search,
   Target, AlertTriangle, BookOpen, CheckCircle, Zap, Gift,
   Smile, Briefcase, Flame, Square, Smartphone, Monitor,
-  Sparkles, Palette, Camera, Upload, Rocket,
+  Sparkles, Palette, Camera, Upload, Rocket, History,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
@@ -110,7 +111,12 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
     <div className="h-full flex flex-col bg-card">
       <div className="flex-1 overflow-y-auto p-6 lg:p-7 space-y-5">
         {/* Header */}
-        <h2 className="text-xl font-bold font-heading-bn text-foreground">{t('বিজ্ঞাপন তৈরি করুন', 'Create Ad')}</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold font-heading-bn text-foreground">{t('বিজ্ঞাপন তৈরি করুন', 'Create Ad')}</h2>
+          <Link to="/dashboard/ad-history" className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors font-heading-bn">
+            <History size={12} /> {t('ইতিহাস', 'History')}
+          </Link>
+        </div>
 
         {/* Mode toggle */}
         <div className="bg-secondary rounded-xl p-1 flex">
