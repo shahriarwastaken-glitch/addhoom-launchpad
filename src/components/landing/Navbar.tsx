@@ -41,7 +41,7 @@ const Navbar = () => {
           </div>
           <div className="hidden md:flex items-center gap-3">
             <Link to="/auth" className="font-body text-[14px] font-medium text-muted-foreground border border-border rounded-full px-5 py-2 hover:border-primary hover:text-primary transition-all duration-200">{t('লগইন করুন', 'Login')}</Link>
-            <Link to="/auth" className="font-body text-[14px] font-semibold text-primary-foreground bg-primary rounded-full px-6 py-2.5 shadow-orange-glow hover:bg-accent hover:-translate-y-0.5 transition-all duration-200">{t('শুরু করুন বিনামূল্যে', 'Start Free')}</Link>
+            <Link to="/auth" className="font-body text-[14px] font-semibold text-primary-foreground bg-primary rounded-full px-6 py-2.5 shadow-orange-glow hover:bg-accent hover:-translate-y-0.5 transition-all duration-200">{t('শুরু করুন', 'Get Started')}</Link>
           </div>
           <button className="md:hidden p-2" onClick={() => setMobileOpen(true)}><Menu className="w-6 h-6 text-foreground" /></button>
         </div>
