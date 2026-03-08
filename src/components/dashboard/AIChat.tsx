@@ -199,7 +199,7 @@ const AIChat = () => {
               <p className="text-sm text-muted-foreground font-body-bn mb-6">
                 {t('আপনার মার্কেটিং নিয়ে যেকোনো প্রশ্ন করুন', 'Ask me anything about your marketing')}
               </p>
-              <div className="grid grid-cols-2 gap-3 max-w-md w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md w-full">
                 {suggestions.map((s, i) => (
                   <button
                     key={i}
