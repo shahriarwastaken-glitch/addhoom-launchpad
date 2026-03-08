@@ -94,7 +94,7 @@ const App = () => (
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                    <Route path="/admin" element={<ProtectedRoute skipPlanCheck><AdminDashboard /></ProtectedRoute>} />
+                    <Route path="/admin/*" element={<AdminDashboardNew />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </UpgradeBridge>
