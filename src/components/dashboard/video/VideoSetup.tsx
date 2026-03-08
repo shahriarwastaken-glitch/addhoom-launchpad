@@ -642,7 +642,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
               disabled={!form.productName.trim() || form.images.length === 0 || generating}
               className="px-8 py-3 rounded-xl bg-gradient-cta text-primary-foreground text-sm font-heading-bn font-bold shadow-orange-glow hover:scale-[1.02] transition-all disabled:opacity-50 active:scale-95"
             >
-              {t('ভিডিও তৈরি করুন 🚀', 'Create Video 🚀')}
+              {generating ? t('তৈরি হচ্ছে...', 'Generating...') : t('ভিডিও তৈরি করুন', 'Create Video')}
             </button>
           </div>
         </div>
