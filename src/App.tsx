@@ -13,7 +13,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashboardNew from "./pages/AdminDashboardNew";
 import NotFound from "./pages/NotFound";
 import PlanGate from "./pages/PlanGate";
 import ShopDNASetup from "./components/dashboard/ShopDNASetup";
