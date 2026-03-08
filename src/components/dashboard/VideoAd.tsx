@@ -184,7 +184,7 @@ const VideoAd = () => {
         format: form.format,
         style: form.style,
         musicTrack: form.musicTrack,
-        script: script!,
+        script: activeScript!,
         createdAt: new Date().toISOString(),
       });
     }
