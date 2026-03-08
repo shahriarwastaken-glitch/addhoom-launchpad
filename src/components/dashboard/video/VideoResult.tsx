@@ -432,10 +432,17 @@ const VideoResultView = ({ result, plan, usageUsed, usageLimit, onReset, onRegen
               onClick={handleDownload}
               className="w-full py-4 rounded-2xl bg-gradient-cta text-primary-foreground text-[17px] font-bold font-heading-bn shadow-orange-glow hover:scale-[1.01] transition-all active:scale-[0.99]"
             >
-              ⬇️ {t('MP4 ডাউনলোড করুন', 'Download MP4')}
+              {result.videoUrl ? (
+                <>⬇️ {t('MP4 ডাউনলোড করুন', 'Download MP4')}</>
+              ) : (
+                <>📄 {t('স্ক্রিপ্ট PDF ডাউনলোড করুন', 'Download Script PDF')}</>
+              )}
             </button>
             <p className="text-[11px] text-muted-foreground text-center">
-              MP4 · H.264 · {result.format === 'feed' ? '1080×1080' : '1080×1920'} · ~8MB
+              {result.videoUrl 
+                ? `MP4 · H.264 · ${result.format === 'feed' ? '1080×1080' : '1080×1920'} · ~8MB`
+                : t('স্লাইড, ভয়েসওভার স্ক্রিপ্ট ও হ্যাশট্যাগ সহ PDF', 'PDF with slides, voiceover script & hashtags')
+              }
             </p>
 
             {/* Secondary actions */}
