@@ -341,7 +341,7 @@ const CompetitorIntel = () => {
                 )}
                 {analysis.top_patterns?.length > 0 && (
                   <div className="bg-card rounded-[20px] shadow-warm p-6">
-                    <h3 className="font-heading-bn font-bold text-foreground mb-3">{t('📊 শীর্ষ প্যাটার্ন', '📊 Top Patterns')}</h3>
+                    <h3 className="font-heading-bn font-bold text-foreground mb-3">{t('শীর্ষ প্যাটার্ন', 'Top Patterns')}</h3>
                     <ol className="space-y-2 list-decimal list-inside">{analysis.top_patterns.map((p, i) => (<li key={i} className="text-sm text-muted-foreground font-body-bn">{p}</li>))}</ol>
                   </div>
                 )}
