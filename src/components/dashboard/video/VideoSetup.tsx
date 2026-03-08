@@ -233,7 +233,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
                 )}
               </div>
               <p className="text-xs text-muted-foreground font-heading-bn mt-2">
-                📌 {t('ছবির ক্রম ভিডিওর ক্রম নির্ধারণ করে। টেনে সাজিয়ে নিন।', 'Image order determines video order. Drag to rearrange.')}
+                <Pin size={12} className="inline mr-1" />{t('ছবির ক্রম ভিডিওর ক্রম নির্ধারণ করে। টেনে সাজিয়ে নিন।', 'Image order determines video order. Drag to rearrange.')}
               </p>
             </div>
           )}
