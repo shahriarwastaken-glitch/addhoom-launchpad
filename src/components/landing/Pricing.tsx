@@ -57,7 +57,7 @@ const Pricing = () => {
             {t('সহজ মূল্য। লুকানো চার্জ নেই।', 'Simple Pricing. No Hidden Charges.')}
           </h2>
         </div>
-        <div className="flex items-center justify-center gap-2 mb-12">
+        <div className="flex items-center justify-center gap-3 mb-12">
           <div className="inline-flex items-center bg-secondary rounded-full p-1">
             <button onClick={() => setAnnual(false)} className={`text-sm font-semibold px-5 py-2 rounded-full transition-all ${!annual ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
               {t('মাসিক', 'Monthly')}
@@ -66,7 +66,7 @@ const Pricing = () => {
               {t('বার্ষিক', 'Annual')}
             </button>
           </div>
-          <span className="bg-brand-yellow/20 text-brand-yellow border border-brand-yellow/30 text-xs font-bold rounded-full px-3 py-1">
+          <span className="bg-brand-yellow/20 text-brand-yellow border border-brand-yellow/30 text-xs font-bold rounded-full px-3 py-1 leading-none">
             {t('২০% ছাড়', '20% off')}
           </span>
         </div>
