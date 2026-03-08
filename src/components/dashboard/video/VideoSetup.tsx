@@ -432,6 +432,19 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
                     <p className="text-sm font-semibold font-heading-bn text-foreground">{t(m.label, m.labelEn)}</p>
                     <p className="text-[11px] text-muted-foreground font-heading-bn">{t(m.desc, m.descEn)}</p>
                   </div>
+                  {m.value !== 'none' && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); playMusicPreview(m.value); }}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                        playingMusic === m.value
+                          ? 'bg-primary text-primary-foreground scale-110'
+                          : 'bg-secondary text-muted-foreground hover:text-primary hover:bg-primary/10'
+                      }`}
+                      title={playingMusic === m.value ? t('থামান', 'Stop') : t('শুনুন', 'Preview')}
+                    >
+                      {playingMusic === m.value ? <Square size={12} /> : <Play size={12} className="ml-0.5" />}
+                    </button>
+                  )}
                 </button>
               ))}
             </div>
