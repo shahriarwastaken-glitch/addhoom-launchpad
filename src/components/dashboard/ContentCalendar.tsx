@@ -886,7 +886,7 @@ function SwipeView({ entries, setEntries, t, lang, navigate, isMobile }: {
   const festival = entry.festival_theme || (entry.occasion && entry.occasion !== 'general' ? entry.occasion : null);
 
   return (
-    <div className="flex flex-col items-center justify-center h-full">
+    <div className={`flex flex-col items-center h-full ${isMobile ? 'justify-start pt-2' : 'justify-center'}`}>
       {/* Progress */}
       <div className="w-full max-w-md mb-4">
         <p className="text-xs text-muted-foreground text-center mb-2 font-bn">
