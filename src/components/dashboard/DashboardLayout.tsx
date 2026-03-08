@@ -1,8 +1,9 @@
 import { ReactNode } from 'react';
 import DashboardSidebar from './DashboardSidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/hooks/useTheme';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { Bell } from 'lucide-react';
+import { Bell, Moon, Sun } from 'lucide-react';
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const { lang, toggle } = useLanguage();
