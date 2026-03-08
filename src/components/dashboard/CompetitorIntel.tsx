@@ -335,7 +335,7 @@ const CompetitorIntel = () => {
                 )}
                 {analysis.weaknesses?.length > 0 && (
                   <div className="bg-card rounded-[20px] shadow-warm p-6">
-                    <h3 className="font-heading-bn font-bold text-foreground mb-3">{t('❌ তাদের দুর্বলতা', '❌ Their Weaknesses')}</h3>
+                    <h3 className="font-heading-bn font-bold text-foreground mb-3">{t('তাদের দুর্বলতা', 'Their Weaknesses')}</h3>
                     <ul className="space-y-2">{analysis.weaknesses.map((w, i) => (<li key={i} className="flex items-start gap-2"><XCircle className="text-destructive mt-0.5 shrink-0" size={16} /><span className="text-sm text-muted-foreground font-body-bn">{w}</span></li>))}</ul>
                   </div>
                 )}
