@@ -338,7 +338,7 @@ const Onboarding = () => {
         <AnimatePresence mode="wait" custom={direction}>
           {/* STEP 1 */}
           {step === 1 && (
-            <motion.div key="step1" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_SLIDE.transition}>
+            <motion.div key="step1" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_TRANSITION}>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 font-bn">ধাপ ১ এর ৪</p>
               <h1 className="text-3xl font-bold text-foreground mb-2 font-bn">আপনার শপ কোথায়?</h1>
               <p className="text-muted-foreground font-bn mb-8 leading-relaxed">
