@@ -338,7 +338,6 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
   const { t, lang } = useLanguage();
   const { activeWorkspace } = useAuth();
   const [expanded, setExpanded] = useState(false);
-  const [promptVisible, setPromptVisible] = useState(false);
   const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
   const [projects, setProjects] = useState<ProjectOption[]>([]);
   const [assignedProject, setAssignedProject] = useState<ProjectOption | null>(null);
