@@ -102,6 +102,30 @@ const Settings = () => {
         </div>
       </div>
 
+      {/* Language */}
+      <div className="bg-card rounded-[20px] shadow-warm p-4 sm:p-6 mb-6">
+        <h3 className="font-heading-bn font-semibold text-foreground mb-4">{t('ভাষা', 'Language')}</h3>
+        <p className="text-xs text-muted-foreground mb-3">{t('AI বিজ্ঞাপন ও ইন্টারফেসের ভাষা নির্বাচন করুন', 'Select the language for AI ads and interface')}</p>
+        <div className="flex gap-2">
+          {[
+            { label: 'বাংলা', labelEn: 'Bengali', value: 'bn' as const, icon: <Globe size={14} /> },
+            { label: 'English', labelEn: 'English', value: 'en' as const, icon: <Type size={14} /> },
+          ].map(l => (
+            <button
+              key={l.value}
+              onClick={() => { if (lang !== l.value) toggle(); }}
+              className={`flex-1 py-2.5 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 flex items-center justify-center gap-1.5 ${
+                lang === l.value
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-input bg-card text-foreground'
+              }`}
+            >
+              {l.icon} {t(l.label, l.labelEn)}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Subscription */}
       <div className="bg-card rounded-[20px] shadow-warm p-4 sm:p-6 mb-6">
         <h3 className="font-heading-bn font-semibold text-foreground mb-4">{t('সাবস্ক্রিপশন', 'Subscription')}</h3>

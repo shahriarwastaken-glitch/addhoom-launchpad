@@ -16,7 +16,7 @@ const defaultForm: GeneratorFormData = {
   productDesc: '',
   price: '',
   platforms: ['facebook'],
-  language: 'bn',
+  language: 'en',
   framework: 'FOMO',
   occasion: 'general',
   tone: 'friendly',
