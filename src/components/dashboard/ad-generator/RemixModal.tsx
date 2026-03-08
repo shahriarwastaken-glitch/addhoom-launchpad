@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X, RefreshCw, Smile, Briefcase, Flame } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { FRAMEWORKS } from './types';
 import type { AdResult } from './types';
 
@@ -12,6 +13,7 @@ interface RemixModalProps {
 }
 
 const RemixModal = ({ ad, onClose, onRemix, remixing }: RemixModalProps) => {
+  const { t } = useLanguage();
   const [learnFromWinners, setLearnFromWinners] = useState(true);
   const [changeFramework, setChangeFramework] = useState(false);
   const [changeTone, setChangeTone] = useState(false);
@@ -19,9 +21,9 @@ const RemixModal = ({ ad, onClose, onRemix, remixing }: RemixModalProps) => {
   const [tone, setTone] = useState('friendly');
 
   const toneOptions = [
-    { value: 'friendly', label: 'বন্ধুত্বপূর্ণ', icon: <Smile size={14} /> },
-    { value: 'professional', label: 'পেশাদার', icon: <Briefcase size={14} /> },
-    { value: 'aggressive', label: 'আক্রমণাত্মক', icon: <Flame size={14} /> },
+    { value: 'friendly', label: t('বন্ধুত্বপূর্ণ', 'Friendly'), icon: <Smile size={14} /> },
+    { value: 'professional', label: t('পেশাদার', 'Professional'), icon: <Briefcase size={14} /> },
+    { value: 'aggressive', label: t('আক্রমণাত্মক', 'Aggressive'), icon: <Flame size={14} /> },
   ];
 
   return (
@@ -39,9 +41,9 @@ const RemixModal = ({ ad, onClose, onRemix, remixing }: RemixModalProps) => {
         </button>
 
         <h3 className="text-lg font-bold font-heading-bn text-foreground mb-1 flex items-center gap-2">
-          <RefreshCw size={18} className="text-primary" /> বিজ্ঞাপন রিমিক্স করুন
+          <RefreshCw size={18} className="text-primary" /> {t('বিজ্ঞাপন রিমিক্স করুন', 'Remix Ad')}
         </h3>
-        <p className="text-sm text-muted-foreground font-heading-bn mb-4">বিজয়ী বিজ্ঞাপনের প্যাটার্ন শিখে আরো ভালো করুন</p>
+        <p className="text-sm text-muted-foreground font-heading-bn mb-4">{t('বিজয়ী বিজ্ঞাপনের প্যাটার্ন শিখে আরো ভালো করুন', 'Learn from winning ad patterns to improve')}</p>
 
         {/* Original ad preview */}
         <div className="bg-secondary rounded-xl p-3 mb-4">
@@ -54,15 +56,15 @@ const RemixModal = ({ ad, onClose, onRemix, remixing }: RemixModalProps) => {
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" checked={learnFromWinners} onChange={e => setLearnFromWinners(e.target.checked)} className="mt-1 accent-[hsl(var(--primary))]" />
             <div>
-              <p className="text-sm font-semibold font-heading-bn text-foreground">বিজয়ী বিজ্ঞাপন থেকে শিখুন</p>
-              <p className="text-xs text-muted-foreground font-heading-bn">আপনার সেরা বিজ্ঞাপনগুলোর প্যাটার্ন ব্যবহার করবে</p>
+              <p className="text-sm font-semibold font-heading-bn text-foreground">{t('বিজয়ী বিজ্ঞাপন থেকে শিখুন', 'Learn from winners')}</p>
+              <p className="text-xs text-muted-foreground font-heading-bn">{t('আপনার সেরা বিজ্ঞাপনগুলোর প্যাটার্ন ব্যবহার করবে', 'Will use patterns from your best performing ads')}</p>
             </div>
           </label>
 
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" checked={changeFramework} onChange={e => setChangeFramework(e.target.checked)} className="mt-1 accent-[hsl(var(--primary))]" />
             <div>
-              <p className="text-sm font-semibold font-heading-bn text-foreground">ফ্রেমওয়ার্ক পরিবর্তন করুন</p>
+              <p className="text-sm font-semibold font-heading-bn text-foreground">{t('ফ্রেমওয়ার্ক পরিবর্তন করুন', 'Change framework')}</p>
               {changeFramework && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {FRAMEWORKS.map(f => (
@@ -73,7 +75,7 @@ const RemixModal = ({ ad, onClose, onRemix, remixing }: RemixModalProps) => {
                         framework === f.value ? 'border-primary bg-primary/10 text-primary' : 'border-input text-foreground'
                       }`}
                     >
-                      {f.label}
+                      {t(f.label, f.labelEn)}
                     </button>
                   ))}
                 </div>
@@ -84,18 +86,18 @@ const RemixModal = ({ ad, onClose, onRemix, remixing }: RemixModalProps) => {
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" checked={changeTone} onChange={e => setChangeTone(e.target.checked)} className="mt-1 accent-[hsl(var(--primary))]" />
             <div>
-              <p className="text-sm font-semibold font-heading-bn text-foreground">টোন পরিবর্তন করুন</p>
+              <p className="text-sm font-semibold font-heading-bn text-foreground">{t('টোন পরিবর্তন করুন', 'Change tone')}</p>
               {changeTone && (
                 <div className="flex gap-1.5 mt-2">
-                  {toneOptions.map(t => (
+                  {toneOptions.map(tn => (
                     <button
-                      key={t.value}
-                      onClick={() => setTone(t.value)}
+                      key={tn.value}
+                      onClick={() => setTone(tn.value)}
                       className={`px-2.5 py-1 rounded-full text-[12px] font-heading-bn border transition-colors flex items-center gap-1 ${
-                        tone === t.value ? 'border-primary bg-primary/10 text-primary' : 'border-input text-foreground'
+                        tone === tn.value ? 'border-primary bg-primary/10 text-primary' : 'border-input text-foreground'
                       }`}
                     >
-                      {t.icon} {t.label}
+                      {tn.icon} {tn.label}
                     </button>
                   ))}
                 </div>
@@ -113,7 +115,7 @@ const RemixModal = ({ ad, onClose, onRemix, remixing }: RemixModalProps) => {
           disabled={remixing}
           className="w-full h-11 rounded-[14px] bg-primary text-primary-foreground font-bold font-heading-bn text-[15px] hover:brightness-110 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          {remixing ? <><RefreshCw size={16} className="animate-spin" /> রিমিক্স হচ্ছে...</> : 'রিমিক্স করুন'}
+          {remixing ? <><RefreshCw size={16} className="animate-spin" /> {t('রিমিক্স হচ্ছে...', 'Remixing...')}</> : t('রিমিক্স করুন', 'Remix')}
         </button>
       </motion.div>
     </div>
