@@ -392,6 +392,9 @@ const CompetitorIntel = () => {
             </div>
           ) : (
             <>
+              {/* Comparison Charts */}
+              <CompetitorCharts competitors={allCompetitors} />
+
               {/* Search + Sort */}
               <div className="flex flex-col sm:flex-row gap-3 mb-4">
                 <div className="relative flex-1">
