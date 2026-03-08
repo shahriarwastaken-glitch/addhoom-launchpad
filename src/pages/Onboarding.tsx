@@ -614,7 +614,7 @@ const Onboarding = () => {
 
           {/* STEP 4 */}
           {step === 4 && bestAd && (
-            <motion.div key="step4" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_SLIDE.transition}>
+            <motion.div key="step4" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_TRANSITION}>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 font-bn">ধাপ ৪ এর ৪</p>
               <h1 className="text-3xl font-bold text-foreground mb-6 font-bn">🎉 আপনার প্রথম বিজ্ঞাপন তৈরি হয়েছে!</h1>
 
