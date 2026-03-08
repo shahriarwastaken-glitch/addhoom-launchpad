@@ -73,8 +73,7 @@ const SessionManager = ({ children }: { children: React.ReactNode }) => {
 
 // Bridge UpgradeContext into the api module
 const UpgradeBridge = ({ children }: { children: React.ReactNode }) => {
-  const { useUpgrade } = require('@/contexts/UpgradeContext');
-  const { showUpgrade } = useUpgrade();
+  const { showUpgrade } = useUpgradeCtx();
   useEffect(() => { setUpgradeHandler(showUpgrade); }, [showUpgrade]);
   return <>{children}</>;
 };
