@@ -1,0 +1,1 @@
+ALTER TABLE public.ai_conversations ADD COLUMN IF NOT EXISTS summary text DEFAULT null;
