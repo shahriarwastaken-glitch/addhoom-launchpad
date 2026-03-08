@@ -87,8 +87,18 @@ const AdGeneratorPage = () => {
       } else {
         // Convert product image to base64 if present
         let product_image_base64: string | undefined;
+        let product_image_mime_type = "image/jpeg";
         if (form.productImagePreview) {
           product_image_base64 = form.productImagePreview;
+          // Extract mime type from data URI
+          const mimeMatch = form.productImagePreview.match(/^data:(image\/\w+);base64,/);
+          if (mimeMatch) product_image_mime_type = mimeMatch[1];
+        }
+
+        if (!product_image_base64) {
+          toast.error(t('পণ্যের ছবি আপলোড করুন', 'Upload a product image'));
+          setGenerating(false);
+          return;
         }
 
         const { data, error } = await supabase.functions.invoke('generate-ad-image', {
@@ -102,9 +112,8 @@ const AdGeneratorPage = () => {
             brand_color_secondary: form.brandColorSecondary,
             language: form.language,
             num_variations: form.numVariations,
-            platforms: form.platforms,
-            framework: form.framework,
             product_image_base64,
+            product_image_mime_type,
           },
         });
 
