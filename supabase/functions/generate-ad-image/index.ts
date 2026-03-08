@@ -64,13 +64,14 @@ serve(async (req) => {
       );
     }
 
-    const formatDimensions: Record<string, { w: number; h: number }> = {
-      square: { w: 1024, h: 1024 },
-      story: { w: 768, h: 1360 },
-      banner: { w: 1360, h: 768 },
+    const formatToAspectRatio: Record<string, string> = {
+      square: "1:1",
+      story: "9:16",
+      banner: "16:9",
     };
 
-    const dims = formatDimensions[format] || formatDimensions.square;
+    const aspectRatio = formatToAspectRatio[format] || "1:1";
+    const dims = { square: { w: 1024, h: 1024 }, story: { w: 768, h: 1360 }, banner: { w: 1360, h: 768 } }[format] || { w: 1024, h: 1024 };
     const count = Math.min(num_variations, 3);
 
     // STEP 1 — Use Gemini to generate image prompts
