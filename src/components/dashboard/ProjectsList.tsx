@@ -478,8 +478,8 @@ const ProjectsList = () => {
                 <div className="flex gap-2">
                   {COLORS.map(c => (
                     <button key={c} onClick={() => setFormColor(c)}
-                      className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center ${formColor === c ? 'scale-115 ring-2 ring-offset-2 ring-offset-card' : 'hover:scale-110'}`}
-                      style={{ background: c, ringColor: c }}>
+                      className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center ${formColor === c ? 'scale-110 ring-2 ring-offset-2 ring-offset-card ring-primary' : 'hover:scale-110'}`}
+                      style={{ background: c }}>
                       {formColor === c && <Check size={14} className="text-white" />}
                     </button>
                   ))}
