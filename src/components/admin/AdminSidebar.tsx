@@ -48,7 +48,7 @@ export default function AdminSidebar({ isSuperAdmin }: AdminSidebarProps) {
             onClick={toggleTheme}
             className="h-8 w-8 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
           >
-            {theme === 'dark' ? (
+            {dark ? (
               <Sun className="h-4 w-4" />
             ) : (
               <Moon className="h-4 w-4" />
