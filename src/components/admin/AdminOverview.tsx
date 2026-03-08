@@ -150,7 +150,7 @@ export default function AdminOverview() {
       </div>
 
       {/* KPI Cards Row 2 - Business Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <KPICard
           title="আজ বিজ্ঞাপন তৈরি"
           value={data.usage.ads_today}
