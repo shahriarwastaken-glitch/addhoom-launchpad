@@ -1,4 +1,27 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+
+async function getGeminiKey(): Promise<string> {
+  try {
+    const sb = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const { data } = await sb
+      .from("api_keys")
+      .select("key_value")
+      .eq("key_name", "GEMINI_API_KEY")
+      .eq("is_active", true)
+      .maybeSingle();
+    if (data?.key_value) return data.key_value;
+  } catch (e) {
+    console.warn("Could not read api_keys table, falling back to env:", e);
+  }
+  const envVal = Deno.env.get("GEMINI_API_KEY");
+  if (!envVal) throw new Error("GEMINI_API_KEY not set");
+  return envVal;
+}
 
 export async function callGemini(
   prompt: string,
@@ -6,8 +29,7 @@ export async function callGemini(
   jsonMode: boolean = false
 ): Promise<string | null> {
   try {
-    const apiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!apiKey) throw new Error("GEMINI_API_KEY not set");
+    const apiKey = await getGeminiKey();
 
     const response = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
       method: "POST",
@@ -44,8 +66,7 @@ export async function callGeminiChat(
   systemPrompt: string
 ): Promise<string | null> {
   try {
-    const apiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!apiKey) throw new Error("GEMINI_API_KEY not set");
+    const apiKey = await getGeminiKey();
 
     const contents = [
       { role: "user", parts: [{ text: systemPrompt }] },
