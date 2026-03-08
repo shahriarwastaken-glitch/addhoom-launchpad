@@ -62,13 +62,13 @@ const CampaignsList = () => {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-8">
         <h2 className="text-2xl font-heading-bn font-bold text-foreground flex items-center gap-2">
           <BarChart3 className="text-primary" size={28} />
           {t('ক্যাম্পেইন', 'Campaigns')}
         </h2>
         <button onClick={() => setShowCreate(!showCreate)}
-          className="bg-gradient-cta text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform font-body-bn flex items-center gap-1">
+          className="bg-gradient-cta text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform font-body-bn flex items-center gap-1 w-full sm:w-auto justify-center">
           <Plus size={16} /> {t('নতুন ক্যাম্পেইন', 'New Campaign')}
         </button>
       </div>
