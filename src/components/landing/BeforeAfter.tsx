@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 const rows = [
   { feature: { bn: 'ক্যাম্পেইন সেটআপ', en: 'Campaign Setup' }, without: { bn: '৪–৬ ঘণ্টা', en: '4-6 hours' }, with_: { bn: '৫ মিনিট', en: '5 minutes' }, gain: { bn: '৫০x দ্রুত', en: '50x faster' } },
   { feature: { bn: 'বিজ্ঞাপন কপি', en: 'Ad Copy' }, without: { bn: 'ফ্রিল্যান্সার ৳৩,০০০+', en: 'Freelancer ৳3,000+' }, with_: { bn: 'AI তাৎক্ষণিক', en: 'AI Instant' }, gain: { bn: '১০০% সাশ্রয়', en: '100% saved' } },
-  { feature: { bn: 'ভিডিও অ্যাড', en: 'Video Ads' }, without: { bn: 'প্রোডাকশন ৳২০,০০০+', en: 'Production ৳20,000+' }, with_: { bn: 'ছবি থেকে AI', en: 'AI from images' }, gain: { bn: 'ইনক্লুডেড', en: 'Included' } },
+  { feature: { bn: 'ভিডিও অ্যাড', en: 'Video Ads' }, without: { bn: 'প্রোডাকশন ৳২০,০০০+', en: 'Production ৳20,000+' }, with_: { bn: 'পণ্যের ছবি থেকে AI', en: 'AI from product photos' }, gain: { bn: 'ইনক্লুডেড', en: 'Included' } },
   { feature: { bn: 'ঈদ ক্যাম্পেইন', en: 'Eid Campaign' }, without: { bn: 'এজেন্সি ৳১৫,০০০', en: 'Agency ৳15,000' }, with_: { bn: 'রেডিমেড টেমপ্লেট', en: 'Ready template' }, gain: { bn: 'ইনক্লুডেড', en: 'Included' } },
   { feature: { bn: 'পারফরম্যান্স প্রেডিকশন', en: 'Prediction' }, without: { bn: 'অনুমান', en: 'Guesswork' }, with_: { bn: 'ধুম স্কোর ৯০%+', en: 'Dhoom Score 90%+' }, gain: { bn: 'তাৎক্ষণিক', en: 'Instant' } },
   { feature: { bn: 'প্রতিযোগী বিশ্লেষণ', en: 'Competitor Analysis' }, without: { bn: 'ঘণ্টার পর ঘণ্টা', en: 'Hours of work' }, with_: { bn: '১ ক্লিকে', en: '1 click' }, gain: { bn: 'তাৎক্ষণিক', en: 'Instant' } },
