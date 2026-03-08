@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -108,6 +109,7 @@ const ContentCalendar = () => {
   const { t, lang } = useLanguage();
   const { activeWorkspace } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [entries, setEntries] = useState<CalendarEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'month' | 'swipe' | 'list'>('month');
@@ -203,11 +205,11 @@ const ContentCalendar = () => {
         ) : entries.length === 0 ? (
           <EmptyState t={t} onGenerate={() => setShowGenModal(true)} />
         ) : view === 'month' ? (
-          <MonthView entries={entries} setEntries={setEntries} t={t} lang={lang} navigate={navigate} />
+          <MonthView entries={entries} setEntries={setEntries} t={t} lang={lang} navigate={navigate} isMobile={isMobile} />
         ) : view === 'swipe' ? (
-          <SwipeView entries={entries} setEntries={setEntries} t={t} lang={lang} navigate={navigate} />
+          <SwipeView entries={entries} setEntries={setEntries} t={t} lang={lang} navigate={navigate} isMobile={isMobile} />
         ) : (
-          <ListView entries={entries} setEntries={setEntries} t={t} lang={lang} navigate={navigate} />
+          <ListView entries={entries} setEntries={setEntries} t={t} lang={lang} navigate={navigate} isMobile={isMobile} />
         )}
       </div>
 
@@ -476,8 +478,8 @@ function GenerateModal({ t, lang, activeWorkspace, hasExisting, onClose, onCompl
 }
 
 // ── MONTH VIEW ──
-function MonthView({ entries, setEntries, t, lang, navigate }: {
-  entries: CalendarEntry[]; setEntries: any; t: any; lang: string; navigate: any;
+function MonthView({ entries, setEntries, t, lang, navigate, isMobile }: {
+  entries: CalendarEntry[]; setEntries: any; t: any; lang: string; navigate: any; isMobile: boolean;
 }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -609,7 +611,7 @@ function MonthView({ entries, setEntries, t, lang, navigate }: {
                 onDragOver={e => handleDragOver(e, dateStr)}
                 onDragLeave={handleDragLeave}
                 onDrop={e => handleDrop(e, dateStr)}
-                className={`rounded-xl border cursor-pointer transition-all min-h-[80px] p-1.5 relative flex flex-col ${
+                className={`rounded-xl border cursor-pointer transition-all ${isMobile ? 'min-h-[52px] p-1' : 'min-h-[80px] p-1.5'} relative flex flex-col ${
                   isDragOver ? 'border-primary border-dashed bg-primary/10 ring-2 ring-primary/30' :
                   isSelected ? 'border-primary bg-primary/5 ring-1 ring-primary/20' :
                   isToday ? 'border-primary/30 bg-primary/[0.04]' :
@@ -618,43 +620,60 @@ function MonthView({ entries, setEntries, t, lang, navigate }: {
                 }`}
                 style={festival ? { animation: 'festivalGlow 3s ease-in-out infinite' } : undefined}
               >
-                {/* Festival banner */}
-                {festival && (
+                {/* Festival banner - hide text on mobile */}
+                {festival && !isMobile && (
                   <div className="text-[9px] text-white text-center rounded-md py-0.5 px-1 mb-1 truncate"
                     style={{ background: `linear-gradient(135deg, ${festival.color}, ${festival.color}88)` }}>
                     {lang === 'bn' ? festival.name : festival.en}
                   </div>
                 )}
+                {festival && isMobile && (
+                  <div className="w-full h-1 rounded-full mb-0.5" style={{ background: festival.color }} />
+                )}
                 {/* Date number */}
-                <div className={`text-xs leading-none mb-1 ${
+                <div className={`leading-none mb-0.5 ${isMobile ? 'text-[10px]' : 'text-xs'} ${
                   isToday ? 'w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold' :
                   isWeekend ? 'text-muted-foreground' : 'text-foreground/70'
                 }`}>
                   {lang === 'bn' ? toBn(day) : day}
                 </div>
-                {/* Content pills — draggable */}
-                <div className="flex flex-col gap-0.5 flex-1 overflow-hidden">
-                  {dayEntries.slice(0, 3).map(e => {
-                    const tc = TYPE_COLORS[e.content_type] || { bg: 'bg-secondary', text: 'text-foreground' };
-                    const isSkipped = e.status === 'skipped';
-                    const isDragging = draggingId === e.id;
-                    return (
-                      <div key={e.id}
-                        draggable
-                        onDragStart={ev => { ev.stopPropagation(); handleDragStart(ev, e.id); }}
-                        onDragEnd={handleDragEnd}
-                        className={`text-[10px] leading-tight rounded-md px-1 py-0.5 truncate cursor-grab active:cursor-grabbing select-none transition-opacity ${tc.bg} ${tc.text} ${
-                          isSkipped ? 'opacity-30 line-through' : ''
-                        } ${isDragging ? 'opacity-40' : ''}`}>
-                        {e.status === 'confirmed' && <Check size={8} className="inline mr-0.5" />}
-                        {e.title || t('কনটেন্ট', 'Content')}
-                      </div>
-                    );
-                  })}
-                  {dayEntries.length > 3 && (
-                    <span className="text-[9px] text-muted-foreground">+{lang === 'bn' ? toBn(dayEntries.length - 3) : dayEntries.length - 3} {t('আরো', 'more')}</span>
-                  )}
-                </div>
+                {/* Content indicators */}
+                {isMobile ? (
+                  /* Mobile: colored dots only */
+                  <div className="flex flex-wrap gap-[3px] mt-auto">
+                    {dayEntries.slice(0, 4).map(e => {
+                      const tc = TYPE_COLORS[e.content_type] || { bg: 'bg-secondary', text: 'text-foreground' };
+                      return (
+                        <div key={e.id} className={`w-[6px] h-[6px] rounded-full ${tc.bg} ${e.status === 'skipped' ? 'opacity-30' : ''}`} />
+                      );
+                    })}
+                    {dayEntries.length > 4 && <div className="w-[6px] h-[6px] rounded-full bg-muted-foreground/30" />}
+                  </div>
+                ) : (
+                  /* Desktop: full pills, draggable */
+                  <div className="flex flex-col gap-0.5 flex-1 overflow-hidden">
+                    {dayEntries.slice(0, 3).map(e => {
+                      const tc = TYPE_COLORS[e.content_type] || { bg: 'bg-secondary', text: 'text-foreground' };
+                      const isSkipped = e.status === 'skipped';
+                      const isDragging = draggingId === e.id;
+                      return (
+                        <div key={e.id}
+                          draggable
+                          onDragStart={ev => { ev.stopPropagation(); handleDragStart(ev, e.id); }}
+                          onDragEnd={handleDragEnd}
+                          className={`text-[10px] leading-tight rounded-md px-1 py-0.5 truncate cursor-grab active:cursor-grabbing select-none transition-opacity ${tc.bg} ${tc.text} ${
+                            isSkipped ? 'opacity-30 line-through' : ''
+                          } ${isDragging ? 'opacity-40' : ''}`}>
+                          {e.status === 'confirmed' && <Check size={8} className="inline mr-0.5" />}
+                          {e.title || t('কনটেন্ট', 'Content')}
+                        </div>
+                      );
+                    })}
+                    {dayEntries.length > 3 && (
+                      <span className="text-[9px] text-muted-foreground">+{lang === 'bn' ? toBn(dayEntries.length - 3) : dayEntries.length - 3} {t('আরো', 'more')}</span>
+                    )}
+                  </div>
+                )}
                 {dayEntries.some(e => e.status === 'overdue') && (
                   <div className="absolute top-0 left-0 w-[3px] h-full rounded-l-xl bg-destructive" />
                 )}
@@ -664,12 +683,12 @@ function MonthView({ entries, setEntries, t, lang, navigate }: {
         </div>
       </div>
 
-      {/* Day detail panel */}
+      {/* Day detail panel — side panel on desktop, bottom sheet on mobile */}
       <AnimatePresence>
-        {selectedDate && (
+        {selectedDate && !isMobile && (
           <motion.div
             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
-            className="w-80 lg:w-96 bg-card rounded-[20px] shadow-warm border border-border p-4 flex flex-col overflow-hidden flex-shrink-0 hidden md:flex"
+            className="w-80 lg:w-96 bg-card rounded-[20px] shadow-warm border border-border p-4 flex flex-col overflow-hidden flex-shrink-0"
           >
             <div className="flex items-center justify-between mb-3 flex-shrink-0">
               <h4 className="font-bold text-foreground text-sm font-bn">
@@ -685,6 +704,41 @@ function MonthView({ entries, setEntries, t, lang, navigate }: {
               ))}
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile bottom sheet */}
+      <AnimatePresence>
+        {selectedDate && isMobile && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/40 z-40"
+              onClick={() => setSelectedDate(null)}
+            />
+            <motion.div
+              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-[20px] shadow-warm-lg max-h-[70vh] flex flex-col"
+            >
+              <div className="flex items-center justify-center pt-2 pb-1">
+                <div className="w-10 h-1 rounded-full bg-muted-foreground/20" />
+              </div>
+              <div className="flex items-center justify-between px-4 pb-2">
+                <h4 className="font-bold text-foreground text-sm font-bn">
+                  {new Date(selectedDate + 'T00:00:00').toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                </h4>
+                <button onClick={() => setSelectedDate(null)} className="p-1 rounded-lg hover:bg-secondary"><X size={14} /></button>
+              </div>
+              <div className="flex-1 overflow-auto px-4 pb-20 space-y-3">
+                {selectedEntries.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8 font-bn">{t('এই দিনে কোনো কনটেন্ট নেই', 'No content for this day')}</p>
+                ) : selectedEntries.map(entry => (
+                  <ContentItemCard key={entry.id} entry={entry} t={t} lang={lang} onAction={handleSwipeAction} />
+                ))}
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>
@@ -732,8 +786,8 @@ function ContentItemCard({ entry, t, lang, onAction }: { entry: CalendarEntry; t
 }
 
 // ── SWIPE VIEW ──
-function SwipeView({ entries, setEntries, t, lang, navigate }: {
-  entries: CalendarEntry[]; setEntries: any; t: any; lang: string; navigate: any;
+function SwipeView({ entries, setEntries, t, lang, navigate, isMobile }: {
+  entries: CalendarEntry[]; setEntries: any; t: any; lang: string; navigate: any; isMobile: boolean;
 }) {
   const pendingEntries = useMemo(() => entries.filter(e => e.status === 'planned' || e.status === 'overdue'), [entries]);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -832,7 +886,7 @@ function SwipeView({ entries, setEntries, t, lang, navigate }: {
   const festival = entry.festival_theme || (entry.occasion && entry.occasion !== 'general' ? entry.occasion : null);
 
   return (
-    <div className="flex flex-col items-center justify-center h-full">
+    <div className={`flex flex-col items-center h-full ${isMobile ? 'justify-start pt-2' : 'justify-center'}`}>
       {/* Progress */}
       <div className="w-full max-w-md mb-4">
         <p className="text-xs text-muted-foreground text-center mb-2 font-bn">
@@ -932,7 +986,7 @@ function SwipeView({ entries, setEntries, t, lang, navigate }: {
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center gap-6 mt-6">
+      <div className={`flex items-center gap-6 ${isMobile ? 'fixed bottom-16 left-0 right-0 justify-center pb-4 pt-3 bg-background/80 backdrop-blur-sm z-30' : 'mt-6'}`}>
         <button onClick={() => handleAction('skip')}
           className="w-14 h-14 rounded-full border-2 border-destructive flex items-center justify-center hover:bg-destructive hover:text-white transition-colors text-destructive">
           <X size={24} />
@@ -974,8 +1028,8 @@ function SwipeView({ entries, setEntries, t, lang, navigate }: {
 }
 
 // ── LIST VIEW ──
-function ListView({ entries, setEntries, t, lang, navigate }: {
-  entries: CalendarEntry[]; setEntries: any; t: any; lang: string; navigate: any;
+function ListView({ entries, setEntries, t, lang, navigate, isMobile }: {
+  entries: CalendarEntry[]; setEntries: any; t: any; lang: string; navigate: any; isMobile: boolean;
 }) {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -1077,69 +1131,105 @@ function ListView({ entries, setEntries, t, lang, navigate }: {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="flex-1 overflow-auto rounded-xl border border-border">
-        <table className="w-full text-sm">
-          <thead className="bg-secondary/50 sticky top-0 z-10">
-            <tr>
-              <th className="w-8 p-2"><input type="checkbox" checked={selected.size === filtered.length && filtered.length > 0} onChange={toggleAll} className="accent-primary" /></th>
-              <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('তারিখ', 'Date')}</th>
-              <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('ধরন', 'Type')}</th>
-              <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('শিরোনাম', 'Title')}</th>
-              <th className="text-left p-2 text-xs font-semibold text-muted-foreground hidden md:table-cell">{t('প্ল্যাটফর্ম', 'Platform')}</th>
-              <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('স্ট্যাটাস', 'Status')}</th>
-              <th className="text-right p-2 text-xs font-semibold text-muted-foreground">{t('অ্যাকশন', 'Actions')}</th>
-            </tr>
-          </thead>
-          <tbody>
+      {/* Content list */}
+      <div className="flex-1 overflow-auto">
+        {isMobile ? (
+          /* Mobile: Card-based list */
+          <div className="space-y-2 pb-44">
             {filtered.map(entry => {
               const tc = TYPE_COLORS[entry.content_type] || { bg: 'bg-secondary', text: 'text-foreground' };
               const st = STATUS_LABELS[entry.status || 'planned'] || STATUS_LABELS.planned;
-              const isExpanded = expandedId === entry.id;
               const isOverdue = entry.status === 'overdue';
-
               return (
-                <Fragment key={entry.id}>
-                  <tr
-                    onClick={() => setExpandedId(isExpanded ? null : entry.id)}
-                    className={`border-b border-border/50 cursor-pointer transition-colors hover:bg-primary/[0.03] ${isOverdue ? 'border-l-2 border-l-destructive' : ''}`}
-                  >
-                    <td className="p-2" onClick={e => e.stopPropagation()}>
-                      <input type="checkbox" checked={selected.has(entry.id)} onChange={() => toggleSelect(entry.id)} className="accent-primary" />
-                    </td>
-                    <td className="p-2 text-xs text-foreground whitespace-nowrap font-body">
-                      {new Date(entry.date + 'T00:00:00').toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short' })}
-                    </td>
-                    <td className="p-2"><span className={`text-[10px] px-2 py-0.5 rounded-full ${tc.bg} ${tc.text}`}>{t(TYPE_LABELS[entry.content_type]?.bn, TYPE_LABELS[entry.content_type]?.en)}</span></td>
-                    <td className="p-2 text-xs font-medium text-foreground truncate max-w-[200px] font-bn">{entry.title}</td>
-                    <td className="p-2 text-xs text-muted-foreground capitalize hidden md:table-cell">{entry.platform}</td>
-                    <td className="p-2"><span className={`text-[10px] px-2 py-0.5 rounded-full ${st.class}`}>{t(st.bn, st.en)}</span></td>
-                    <td className="p-2 text-right" onClick={e => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handleAction(entry.id, 'generate')} className="p-1 rounded hover:bg-primary/10 text-primary" title={t('তৈরি', 'Generate')}><Zap size={14} /></button>
-                        {entry.status !== 'confirmed' && <button onClick={() => handleAction(entry.id, 'confirm')} className="p-1 rounded hover:bg-[hsl(var(--brand-green))]/10 text-[hsl(var(--brand-green))]" title={t('নিশ্চিত', 'Confirm')}><Check size={14} /></button>}
-                        {entry.status !== 'skipped' && <button onClick={() => handleAction(entry.id, 'skip')} className="p-1 rounded hover:bg-destructive/10 text-destructive" title={t('বাদ', 'Skip')}><X size={14} /></button>}
+                <div key={entry.id} className={`bg-card rounded-xl border border-border p-3 ${isOverdue ? 'border-l-2 border-l-destructive' : ''}`}>
+                  <div className="flex items-start gap-2">
+                    <input type="checkbox" checked={selected.has(entry.id)} onChange={() => toggleSelect(entry.id)} className="accent-primary mt-1 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                        <span className="text-[10px] text-muted-foreground font-body">
+                          {new Date(entry.date + 'T00:00:00').toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short' })}
+                        </span>
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${tc.bg} ${tc.text}`}>{t(TYPE_LABELS[entry.content_type]?.bn, TYPE_LABELS[entry.content_type]?.en)}</span>
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${st.class}`}>{t(st.bn, st.en)}</span>
                       </div>
-                    </td>
-                  </tr>
-                  {isExpanded && (
-                    <tr className="bg-secondary/20">
-                      <td colSpan={7} className="p-4">
-                        <p className="text-xs text-muted-foreground font-bn mb-1">{entry.content_idea}</p>
-                        {entry.hook && <p className="text-xs text-primary italic font-bn">"{entry.hook}"</p>}
-                        {entry.recommended_framework && (
-                          <p className="text-[10px] text-muted-foreground mt-1">
-                            {t('ফ্রেমওয়ার্ক', 'Framework')}: {entry.recommended_framework} | {t('টোন', 'Tone')}: {entry.recommended_tone || '-'}
-                          </p>
-                        )}
-                      </td>
-                    </tr>
-                  )}
-                </Fragment>
+                      <p className="text-xs font-medium text-foreground font-bn truncate">{entry.title}</p>
+                    </div>
+                    <div className="flex items-center gap-0.5 flex-shrink-0">
+                      <button onClick={() => handleAction(entry.id, 'generate')} className="p-1.5 rounded hover:bg-primary/10 text-primary"><Zap size={14} /></button>
+                      {entry.status !== 'confirmed' && <button onClick={() => handleAction(entry.id, 'confirm')} className="p-1.5 rounded hover:bg-[hsl(var(--brand-green))]/10 text-[hsl(var(--brand-green))]"><Check size={14} /></button>}
+                      {entry.status !== 'skipped' && <button onClick={() => handleAction(entry.id, 'skip')} className="p-1.5 rounded hover:bg-destructive/10 text-destructive"><X size={14} /></button>}
+                    </div>
+                  </div>
+                </div>
               );
             })}
-          </tbody>
-        </table>
+          </div>
+        ) : (
+          /* Desktop: Table */
+          <div className="rounded-xl border border-border">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary/50 sticky top-0 z-10">
+                <tr>
+                  <th className="w-8 p-2"><input type="checkbox" checked={selected.size === filtered.length && filtered.length > 0} onChange={toggleAll} className="accent-primary" /></th>
+                  <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('তারিখ', 'Date')}</th>
+                  <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('ধরন', 'Type')}</th>
+                  <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('শিরোনাম', 'Title')}</th>
+                  <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('প্ল্যাটফর্ম', 'Platform')}</th>
+                  <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('স্ট্যাটাস', 'Status')}</th>
+                  <th className="text-right p-2 text-xs font-semibold text-muted-foreground">{t('অ্যাকশন', 'Actions')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(entry => {
+                  const tc = TYPE_COLORS[entry.content_type] || { bg: 'bg-secondary', text: 'text-foreground' };
+                  const st = STATUS_LABELS[entry.status || 'planned'] || STATUS_LABELS.planned;
+                  const isExpanded = expandedId === entry.id;
+                  const isOverdue = entry.status === 'overdue';
+
+                  return (
+                    <Fragment key={entry.id}>
+                      <tr
+                        onClick={() => setExpandedId(isExpanded ? null : entry.id)}
+                        className={`border-b border-border/50 cursor-pointer transition-colors hover:bg-primary/[0.03] ${isOverdue ? 'border-l-2 border-l-destructive' : ''}`}
+                      >
+                        <td className="p-2" onClick={e => e.stopPropagation()}>
+                          <input type="checkbox" checked={selected.has(entry.id)} onChange={() => toggleSelect(entry.id)} className="accent-primary" />
+                        </td>
+                        <td className="p-2 text-xs text-foreground whitespace-nowrap font-body">
+                          {new Date(entry.date + 'T00:00:00').toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short' })}
+                        </td>
+                        <td className="p-2"><span className={`text-[10px] px-2 py-0.5 rounded-full ${tc.bg} ${tc.text}`}>{t(TYPE_LABELS[entry.content_type]?.bn, TYPE_LABELS[entry.content_type]?.en)}</span></td>
+                        <td className="p-2 text-xs font-medium text-foreground truncate max-w-[200px] font-bn">{entry.title}</td>
+                        <td className="p-2 text-xs text-muted-foreground capitalize">{entry.platform}</td>
+                        <td className="p-2"><span className={`text-[10px] px-2 py-0.5 rounded-full ${st.class}`}>{t(st.bn, st.en)}</span></td>
+                        <td className="p-2 text-right" onClick={e => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1">
+                            <button onClick={() => handleAction(entry.id, 'generate')} className="p-1 rounded hover:bg-primary/10 text-primary" title={t('তৈরি', 'Generate')}><Zap size={14} /></button>
+                            {entry.status !== 'confirmed' && <button onClick={() => handleAction(entry.id, 'confirm')} className="p-1 rounded hover:bg-[hsl(var(--brand-green))]/10 text-[hsl(var(--brand-green))]" title={t('নিশ্চিত', 'Confirm')}><Check size={14} /></button>}
+                            {entry.status !== 'skipped' && <button onClick={() => handleAction(entry.id, 'skip')} className="p-1 rounded hover:bg-destructive/10 text-destructive" title={t('বাদ', 'Skip')}><X size={14} /></button>}
+                          </div>
+                        </td>
+                      </tr>
+                      {isExpanded && (
+                        <tr className="bg-secondary/20">
+                          <td colSpan={7} className="p-4">
+                            <p className="text-xs text-muted-foreground font-bn mb-1">{entry.content_idea}</p>
+                            {entry.hook && <p className="text-xs text-primary italic font-bn">"{entry.hook}"</p>}
+                            {entry.recommended_framework && (
+                              <p className="text-[10px] text-muted-foreground mt-1">
+                                {t('ফ্রেমওয়ার্ক', 'Framework')}: {entry.recommended_framework} | {t('টোন', 'Tone')}: {entry.recommended_tone || '-'}
+                              </p>
+                            )}
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Bulk actions */}
