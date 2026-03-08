@@ -115,8 +115,8 @@ async function getApiKey(keyName: string): Promise<string> {
     const { data } = await sb
       .from("api_keys")
       .select("key_value")
-      .eq("key_name", keyName)
-      .eq("is_active", true)
+      .eq("service_name", keyName)
+      .eq("status", "active")
       .maybeSingle();
     if (data?.key_value) return data.key_value;
   } catch (e) {
@@ -126,6 +126,26 @@ async function getApiKey(keyName: string): Promise<string> {
   const envVal = Deno.env.get(keyName);
   if (!envVal) throw new Error(`${keyName} not configured`);
   return envVal;
+}
+
+export async function getSystemPrompt(): Promise<string> {
+  try {
+    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+    const sb = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const { data } = await sb
+      .from("api_keys")
+      .select("key_value")
+      .eq("service_name", "system_prompt")
+      .eq("status", "active")
+      .maybeSingle();
+    if (data?.key_value) return data.key_value;
+  } catch (e) {
+    console.warn("Could not read system prompt from db, using default:", e);
+  }
+  return ADDHOOM_SYSTEM_PROMPT;
 }
 
 export async function callGemini(prompt: string, systemPrompt: string = ADDHOOM_SYSTEM_PROMPT): Promise<string> {

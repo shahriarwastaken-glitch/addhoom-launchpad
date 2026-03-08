@@ -34,8 +34,8 @@ export async function getSystemPrompt(): Promise<string> {
     const { data } = await sb
       .from("api_keys")
       .select("key_value")
-      .eq("key_name", "SYSTEM_PROMPT")
-      .eq("is_active", true)
+      .eq("service_name", "system_prompt")
+      .eq("status", "active")
       .maybeSingle();
     if (data?.key_value) return data.key_value;
   } catch (e) {
