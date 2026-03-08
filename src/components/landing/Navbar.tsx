@@ -72,7 +72,7 @@ const Navbar = () => {
           <Link to="/" className="text-2xl font-bold font-heading-en mb-8">
             <span className="text-foreground">Ad</span>
             <span className="text-primary">Dhoom</span>
-            <span className="text-brand-yellow">⚡</span>
+            <Zap size={20} className="text-brand-yellow" />
           </Link>
           {navItems.map((item, i) => (
             <a key={item.en} href={item.href} onClick={e => handleAnchor(e, item.href)}
