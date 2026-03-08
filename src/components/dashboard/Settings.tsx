@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 const Settings = () => {
   const { t } = useLanguage();
   const { user, profile, activeWorkspace, refreshProfile } = useAuth();
+  const { showUpgrade } = useUpgrade();
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [shopName, setShopName] = useState('');
