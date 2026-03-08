@@ -253,9 +253,44 @@ const VideoAd = () => {
                 form={form}
                 setForm={setForm}
                 onPreviewScript={generateScript}
-                onGenerate={() => {
+                onGenerate={async () => {
+                  if (!activeWorkspace) { toast.error(t('প্রথমে শপ তৈরি করুন', 'Create a shop first')); return; }
+                  if (!form.productName.trim()) { toast.error(t('পণ্যের নাম দিন', 'Enter product name')); return; }
+                  if (form.images.length === 0) { toast.error(t('ছবি আপলোড করুন', 'Upload images')); return; }
+
+                  // Auto-generate script if not already generated, then start video
                   if (!script) {
-                    generateScript();
+                    setGenerating(true);
+                    try {
+                      const { data, error } = await supabase.functions.invoke('generate-video-script', {
+                        body: {
+                          workspace_id: activeWorkspace.id,
+                          product_name: form.productName,
+                          key_message: form.keyMessage,
+                          original_price_bdt: form.originalPrice ? parseInt(form.originalPrice) : undefined,
+                          offer_price_bdt: form.offerPrice ? parseInt(form.offerPrice) : undefined,
+                          cta_text: form.ctaText,
+                          style: form.style,
+                          language: form.textLanguage,
+                          num_images: form.images.length,
+                        },
+                      });
+                      if (error) throw error;
+                      if (data?.success && data.script) {
+                        setScript(data.script);
+                        // Script ready — start generation immediately
+                        setGenerating(false);
+                        startVideoGeneration();
+                        return;
+                      } else {
+                        toast.error(data?.error || t('স্ক্রিপ্ট তৈরি ব্যর্থ', 'Script generation failed'));
+                      }
+                    } catch (e: any) {
+                      console.error(e);
+                      toast.error(t('সমস্যা হয়েছে', 'Something went wrong'));
+                    } finally {
+                      setGenerating(false);
+                    }
                   } else {
                     startVideoGeneration();
                   }
