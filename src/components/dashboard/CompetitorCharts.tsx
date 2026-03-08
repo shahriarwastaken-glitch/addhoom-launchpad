@@ -55,6 +55,70 @@ const CompetitorCharts = ({ competitors }: { competitors: HistoryItem[] }) => {
     });
   }, [competitors]);
 
+  // Chart 1: Ad volume
+  const adVolumeData = useMemo(() => unique.map(c => ({
+    name: c.competitor_name.length > 12 ? c.competitor_name.slice(0, 12) + '…' : c.competitor_name,
+    fullName: c.competitor_name,
+    count: c.ads_count,
+  })), [unique]);
+  const maxAds = Math.max(...adVolumeData.map(d => d.count), 0);
+
+  // Chart 2: Radar
+  const radarData = useMemo(() => RADAR_DIMS.map(dim => {
+    const entry: any = { dimension: dim };
+    unique.forEach(c => {
+      entry[c.competitor_name] = c.top_patterns.some(p => matchesDim(p, dim)) ? 1 : 0;
+    });
+    return entry;
+  }), [unique]);
+
+  // Chart 3: Timeline scatter
+  const scatterData = useMemo(() => competitors.map(c => ({
+    x: new Date(c.created_at).getTime(),
+    y: c.ads_count,
+    name: c.competitor_name,
+    date: new Date(c.created_at).toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US'),
+    z: Math.max(c.ads_count * 10, 40),
+  })), [competitors, lang]);
+
+  // Chart 4: Pattern frequency
+  const patternFreq = useMemo(() => {
+    const patternMap = new Map<string, Set<string>>();
+    competitors.forEach(c => {
+      c.top_patterns.forEach(p => {
+        const short = (typeof p === 'string' ? p.split(':')[0].split('—')[0].trim() : '').slice(0, 30);
+        if (!short) return;
+        if (!patternMap.has(short)) patternMap.set(short, new Set());
+        patternMap.get(short)!.add(c.competitor_name);
+      });
+    });
+    return Array.from(patternMap.entries())
+      .map(([pattern, users]) => ({ pattern, count: users.size }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8);
+  }, [competitors]);
+
+  // Generate insight
+  const insight = useMemo(() => {
+    if (adVolumeData.length === 0) return '';
+    const top = adVolumeData.reduce((a, b) => a.count > b.count ? a : b);
+    const avg = adVolumeData.reduce((s, d) => s + d.count, 0) / adVolumeData.length;
+    if (top.count > avg * 2.5 && top.count > 0) {
+      return lang === 'bn'
+        ? `${top.fullName} সবচেয়ে বেশি বিজ্ঞাপন চালাচ্ছে — তারা সম্ভবত সবচেয়ে বেশি বাজেট খরচ করছে।`
+        : `${top.fullName} is running the most ads — they likely have the highest ad budget.`;
+    }
+    if (patternFreq.length > 0) {
+      const topPattern = patternFreq[0].pattern;
+      return lang === 'bn'
+        ? `আপনার বাজারে "${topPattern}" সবচেয়ে বেশি ব্যবহৃত কৌশল। ভিন্ন কৌশল নিয়ে এগিয়ে থাকুন।`
+        : `"${topPattern}" is the most common strategy. Try a different approach to stand out.`;
+    }
+    return lang === 'bn'
+      ? 'সব প্রতিযোগী একই কৌশল ব্যবহার করছে। এটাই আপনার সুযোগ — ভিন্ন কিছু করুন।'
+      : 'All competitors use similar strategies. This is your opportunity — do something different.';
+  }, [adVolumeData, patternFreq, lang]);
+
   if (unique.length < 2) {
     return (
       <div className="bg-card rounded-2xl shadow-warm p-8 text-center mb-6 border border-border">
