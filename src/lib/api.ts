@@ -94,7 +94,7 @@ export const api = {
     workspace_id: string;
     competitor_name: string;
     competitor_page_url?: string;
-  }) => callFunction<{ analysis: any; ads: any[]; ads_fetched: boolean }>('competitor-intel', params),
+  }) => callFunction<{ analysis: any; ads: any[]; ads_fetched: boolean; saved_id?: string }>('competitor-intel', params),
 
   accountDoctor: (params: {
     workspace_id: string;
