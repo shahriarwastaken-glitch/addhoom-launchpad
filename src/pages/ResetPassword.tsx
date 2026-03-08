@@ -46,7 +46,7 @@ const ResetPassword = forwardRef<HTMLDivElement>((_, ref) => {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       toast({
-        title: t('পাসওয়ার্ড আপডেট হয়েছে! ✅', 'Password updated! ✅'),
+        title: t('পাসওয়ার্ড আপডেট হয়েছে!', 'Password updated!'),
         description: t('এখন লগইন করতে পারবেন।', 'You can now log in.'),
       });
       navigate('/dashboard');

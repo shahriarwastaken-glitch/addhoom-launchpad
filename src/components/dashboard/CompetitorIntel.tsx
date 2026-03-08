@@ -174,7 +174,7 @@ const CompetitorIntel = () => {
       } else if (response.data) {
         setAnalysis(response.data.analysis);
         setAds(response.data.ads || []);
-        toast.success(t('নতুন বিশ্লেষণ সম্পন্ন হয়েছে ✓', 'New analysis complete ✓'));
+        toast.success(t('নতুন বিশ্লেষণ সম্পন্ন হয়েছে', 'New analysis complete'));
         setActiveTab('new');
         // Refresh history
         fetchHistory(1);

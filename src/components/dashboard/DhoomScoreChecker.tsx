@@ -179,7 +179,7 @@ const DhoomScoreChecker = () => {
                 {t('বিশ্লেষণ হচ্ছে...', 'Analyzing...')}
               </>
             ) : (
-              <>{t('স্কোর দেখুন', 'Check Score')} ⚡</>
+              <>{t('স্কোর দেখুন', 'Check Score')} <Sparkles size={14} /></>
             )}
           </button>
         </div>
