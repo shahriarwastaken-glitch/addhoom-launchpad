@@ -171,6 +171,7 @@ const AdGeneratorPage = () => {
             image_url: img.image_url || '',
           }));
           setResults(imageAds);
+          saveImageHistory(form.productName, imageAds);
           toast.success(t(`${data.images.length}টি ইমেজ তৈরি হয়েছে`, `${data.images.length} images generated`));
         } else {
           toast.error(data?.message || t('ইমেজ তৈরিতে সমস্যা হয়েছে', 'Image generation failed'));
