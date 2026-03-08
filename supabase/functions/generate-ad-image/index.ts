@@ -64,13 +64,14 @@ serve(async (req) => {
       );
     }
 
-    const formatDimensions: Record<string, { w: number; h: number }> = {
-      square: { w: 1024, h: 1024 },
-      story: { w: 768, h: 1360 },
-      banner: { w: 1360, h: 768 },
+    const formatToAspectRatio: Record<string, string> = {
+      square: "1:1",
+      story: "9:16",
+      banner: "16:9",
     };
 
-    const dims = formatDimensions[format] || formatDimensions.square;
+    const aspectRatio = formatToAspectRatio[format] || "1:1";
+    const dims = { square: { w: 1024, h: 1024 }, story: { w: 768, h: 1360 }, banner: { w: 1360, h: 768 } }[format] || { w: 1024, h: 1024 };
     const count = Math.min(num_variations, 3);
 
     // STEP 1 — Use Gemini to generate image prompts
@@ -135,11 +136,11 @@ Return ONLY a valid JSON array:
       );
     }
 
-    // STEP 2 — Generate images using Lovable AI image generation (Gemini image model)
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
+    // STEP 2 — Generate images using Replicate (google/imagen-4)
+    const REPLICATE_API_KEY = Deno.env.get("REPLICATE_API_KEY");
+    if (!REPLICATE_API_KEY) {
       return new Response(
-        JSON.stringify({ success: false, code: 500, message: "Image generation not configured" }),
+        JSON.stringify({ success: false, code: 500, message: "Image generation not configured (Replicate)" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -149,33 +150,51 @@ Return ONLY a valid JSON array:
     for (let i = 0; i < prompts.length; i++) {
       const p = prompts[i];
       try {
-        const imageResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        // Create prediction
+        const createRes = await fetch("https://api.replicate.com/v1/models/google/imagen-4/predictions", {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            Authorization: `Bearer ${REPLICATE_API_KEY}`,
             "Content-Type": "application/json",
+            Prefer: "wait",
           },
           body: JSON.stringify({
-            model: "google/gemini-3-pro-image-preview",
-            messages: [
-              { role: "user", content: `Generate a professional e-commerce advertisement image: ${p.prompt}` }
-            ],
-            modalities: ["image", "text"],
+            input: {
+              prompt: p.prompt,
+              aspect_ratio: aspectRatio,
+              safety_filter_level: "block_medium_and_above",
+              output_format: "png",
+            },
           }),
         });
 
-        if (!imageResponse.ok) {
-          console.error("Image generation failed:", imageResponse.status, await imageResponse.text());
+        if (!createRes.ok) {
+          console.error("Replicate create failed:", createRes.status, await createRes.text());
           continue;
         }
 
-        const imageData = await imageResponse.json();
-        const imageUrl = imageData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+        let prediction = await createRes.json();
 
-        if (!imageUrl) {
-          console.error("No image URL in response for prompt", i);
+        // If not completed yet, poll
+        if (prediction.status !== "succeeded" && prediction.status !== "failed") {
+          const pollUrl = prediction.urls?.get || `https://api.replicate.com/v1/predictions/${prediction.id}`;
+          for (let attempt = 0; attempt < 30; attempt++) {
+            await new Promise(r => setTimeout(r, 2000));
+            const pollRes = await fetch(pollUrl, {
+              headers: { Authorization: `Bearer ${REPLICATE_API_KEY}` },
+            });
+            prediction = await pollRes.json();
+            if (prediction.status === "succeeded" || prediction.status === "failed") break;
+          }
+        }
+
+        if (prediction.status !== "succeeded" || !prediction.output) {
+          console.error("Replicate prediction failed for prompt", i, prediction.error);
           continue;
         }
+
+        // Imagen-4 returns a single URL string as output
+        const imageUrl = typeof prediction.output === "string" ? prediction.output : prediction.output?.[0];
 
         // Save to database
         const { data: saved, error: saveErr } = await supabase
