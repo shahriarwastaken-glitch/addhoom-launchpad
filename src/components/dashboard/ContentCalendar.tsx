@@ -620,12 +620,15 @@ function MonthView({ entries, setEntries, t, lang, navigate, isMobile }: {
                 }`}
                 style={festival ? { animation: 'festivalGlow 3s ease-in-out infinite' } : undefined}
               >
-                {/* Festival banner */}
-                {festival && (
+                {/* Festival banner - hide text on mobile */}
+                {festival && !isMobile && (
                   <div className="text-[9px] text-white text-center rounded-md py-0.5 px-1 mb-1 truncate"
                     style={{ background: `linear-gradient(135deg, ${festival.color}, ${festival.color}88)` }}>
                     {lang === 'bn' ? festival.name : festival.en}
                   </div>
+                )}
+                {festival && isMobile && (
+                  <div className="w-full h-1 rounded-full mb-0.5" style={{ background: festival.color }} />
                 )}
                 {/* Date number */}
                 <div className={`text-xs leading-none mb-1 ${
