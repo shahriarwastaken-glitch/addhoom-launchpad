@@ -45,6 +45,12 @@ SECTION 3 — TEXT IN IMAGE RULES (CRITICAL)
 
 Text in AI-generated images is the #1 failure point. Follow these rules exactly:
 
+CRITICAL BENGALI TEXT RULES:
+→ The Bengali word for "only" is spelled exactly: মাত্র (matro). It is NOT মাএ, মাত্, মাত্ৰ, মাএ, or any other variation. If you cannot render মাত্র correctly, use the English word "Only" instead.
+→ The Bangladesh Taka currency symbol is ৳ (Unicode U+09F3). It is NOT ₹ (Indian Rupee), NOT Rs, NOT ₨. If you cannot render ৳ correctly, write "BDT" before the number instead (e.g. "BDT 999").
+→ Bengali numerals: ০১২৩৪৫৬৭৮৯ — if unsure about rendering, use English numerals (0-9) with the ৳ or BDT prefix.
+→ GENERAL RULE: If you are uncertain about rendering ANY Bengali character correctly, use the English equivalent instead. Clean English text is infinitely better than broken Bengali text.
+
 IF headline text is provided:
 ✓ Render it in clean, readable sans-serif font
 ✓ Use high contrast — white text on dark areas, dark text on light areas
@@ -65,7 +71,8 @@ NEVER under any circumstances:
 ✗ Mix random letters that look like text but aren't
 ✗ Generate partial words or cut-off letters
 ✗ Add text the user did not ask for
-✗ Write Bengali characters unless explicitly requested AND you are confident in the rendering
+✗ Use ₹ (Indian Rupee symbol) — Bangladesh uses ৳ ONLY
+✗ Misspell মাত্র — if unsure, write "Only" in English
 
 SAFEST APPROACH FOR TEXT:
 If you are uncertain about rendering the text cleanly, leave that space empty rather than rendering bad text. A clean empty space is far better than broken text. The developer will overlay clean text programmatically.
