@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
-  corsHeaders, checkPlanLimit, logUsage,
+  corsHeaders, callGemini, checkPlanLimit, logUsage,
   errorResponse, jsonResponse, ADDHOOM_SYSTEM_PROMPT,
 } from "../_shared/addhoom.ts";
 
@@ -118,35 +118,7 @@ Return ONLY valid JSON array of exactly 90 objects:
   }
 ]`;
 
-    // Use Lovable AI Gateway
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
-
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: ADDHOOM_SYSTEM_PROMPT },
-          { role: "user", content: prompt },
-        ],
-      }),
-    });
-
-    if (!aiResponse.ok) {
-      if (aiResponse.status === 429) return errorResponse(429, "অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন।", "Rate limited. Please try again shortly.");
-      if (aiResponse.status === 402) return errorResponse(402, "AI ক্রেডিট শেষ।", "AI credits exhausted.");
-      const errText = await aiResponse.text();
-      console.error("AI gateway error:", aiResponse.status, errText);
-      throw new Error("AI gateway error");
-    }
-
-    const aiData = await aiResponse.json();
-    const content = aiData.choices?.[0]?.message?.content || "";
+    const content = await callGemini(prompt, ADDHOOM_SYSTEM_PROMPT);
 
     let entries: any[];
     try {
