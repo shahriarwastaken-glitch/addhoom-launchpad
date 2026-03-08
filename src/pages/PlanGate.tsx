@@ -61,8 +61,7 @@ const PlanGate = () => {
         window.location.href = data.gateway_url;
       } else if (data?.dev_mode) {
         toast.success(t('প্ল্যান সক্রিয় হয়েছে!', 'Plan activated!'));
-        // Reload to refresh profile and bypass plan gate
-        setTimeout(() => window.location.reload(), 500);
+        navigate('/dashboard');
       }
     } catch (e: any) {
       console.error('Payment error:', e);

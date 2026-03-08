@@ -124,15 +124,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
               <button onClick={toggleTheme} className="p-1.5 sm:p-2 rounded-full bg-secondary text-foreground hover:bg-secondary/80 transition-colors" aria-label="Toggle theme">
                 {dark ? <Sun size={16} /> : <Moon size={16} />}
               </button>
-              <button onClick={toggle} className="hidden sm:flex items-center bg-secondary rounded-full px-3 py-1 text-xs font-semibold">
-                <span className={lang === 'en' ? 'text-primary' : 'text-muted-foreground'}>EN</span>
-                <span className="text-muted-foreground mx-1">|</span>
-                <span className={lang === 'bn' ? 'text-primary' : 'text-muted-foreground'}>বাং</span>
-              </button>
-              {/* Compact language toggle for mobile */}
-              <button onClick={toggle} className="sm:hidden p-1.5 rounded-full bg-secondary text-foreground text-xs font-bold">
-                {lang === 'bn' ? 'EN' : 'বাং'}
-              </button>
               <div className="relative">
                 <button onClick={() => setShowNotifications(!showNotifications)} className="relative p-1.5 sm:p-2 text-muted-foreground hover:text-foreground transition-colors">
                   <Bell size={16} />
