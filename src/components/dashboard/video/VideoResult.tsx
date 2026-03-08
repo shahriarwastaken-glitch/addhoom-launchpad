@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Copy, Share2, RefreshCw, Edit3, Play, Pause, Volume2, VolumeX, Maximize, Check, Star, ChevronDown } from 'lucide-react';
+import { Download, Copy, Share2, RefreshCw, Edit3, Play, Pause, Volume2, VolumeX, Maximize, Check, Star, ChevronDown, FileText } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { jsPDF } from 'jspdf';
 import type { VideoResult as VResult, VideoScript, VideoFormat, VideoStyle, MusicTrack } from './types';
 
 // Script-based preview when no actual video URL is available
@@ -62,9 +63,105 @@ const VideoResultView = ({ result, plan, usageUsed, usageLimit, onReset, onRegen
     setPlaying(!playing);
   };
 
+  const downloadScriptPDF = () => {
+    try {
+      const doc = new jsPDF();
+      const margin = 20;
+      let y = margin;
+
+      // Title
+      doc.setFontSize(22);
+      doc.setTextColor(40, 40, 40);
+      doc.text('AddHoom Video Script', margin, y);
+      y += 12;
+
+      // Product info
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Product: ${result.productName}`, margin, y);
+      y += 7;
+      doc.text(`Format: ${result.format} | Style: ${result.style} | Music: ${result.musicTrack}`, margin, y);
+      y += 7;
+      doc.text(`Dhoom Score: ${result.dhoomScore}/100`, margin, y);
+      y += 7;
+      doc.text(`Generated: ${new Date(result.createdAt).toLocaleDateString()}`, margin, y);
+      y += 14;
+
+      // Divider
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, y, 190, y);
+      y += 10;
+
+      // Slides
+      doc.setFontSize(16);
+      doc.setTextColor(40, 40, 40);
+      doc.text('Slides', margin, y);
+      y += 10;
+
+      result.script.slides.forEach((slide, i) => {
+        if (y > 260) { doc.addPage(); y = margin; }
+        doc.setFontSize(11);
+        doc.setTextColor(60, 60, 60);
+        doc.text(`Slide ${slide.slide_number} (${slide.time_start}s - ${slide.time_end}s)`, margin, y);
+        y += 6;
+        doc.setFontSize(13);
+        doc.setTextColor(30, 30, 30);
+        const headLines = doc.splitTextToSize(slide.headline_text, 160);
+        doc.text(headLines, margin + 4, y);
+        y += headLines.length * 6;
+        if (slide.sub_text) {
+          doc.setFontSize(10);
+          doc.setTextColor(120, 120, 120);
+          const subLines = doc.splitTextToSize(slide.sub_text, 160);
+          doc.text(subLines, margin + 4, y);
+          y += subLines.length * 5;
+        }
+        y += 6;
+      });
+
+      // Voiceover
+      if (result.script.voiceover_script) {
+        if (y > 240) { doc.addPage(); y = margin; }
+        y += 4;
+        doc.setDrawColor(200, 200, 200);
+        doc.line(margin, y, 190, y);
+        y += 10;
+        doc.setFontSize(16);
+        doc.setTextColor(40, 40, 40);
+        doc.text('Voiceover Script', margin, y);
+        y += 8;
+        doc.setFontSize(11);
+        doc.setTextColor(60, 60, 60);
+        const voLines = doc.splitTextToSize(result.script.voiceover_script, 165);
+        voLines.forEach((line: string) => {
+          if (y > 275) { doc.addPage(); y = margin; }
+          doc.text(line, margin, y);
+          y += 6;
+        });
+      }
+
+      // Hashtags
+      if (result.script.suggested_hashtags?.length) {
+        if (y > 250) { doc.addPage(); y = margin; }
+        y += 8;
+        doc.setFontSize(12);
+        doc.setTextColor(80, 80, 80);
+        doc.text('Suggested Hashtags:', margin, y);
+        y += 7;
+        doc.setFontSize(10);
+        doc.text(result.script.suggested_hashtags.join('  '), margin, y);
+      }
+
+      doc.save(`addhoom-script-${result.productName.replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.pdf`);
+      toast.success(t('স্ক্রিপ্ট PDF ডাউনলোড হচ্ছে!', 'Script PDF downloading!'));
+    } catch {
+      toast.error(t('PDF তৈরি ব্যর্থ', 'Failed to generate PDF'));
+    }
+  };
+
   const handleDownload = async () => {
     if (!result.videoUrl) {
-      toast.info(t('ভিডিও রেন্ডারিং এখনো সংযুক্ত হয়নি। শীঘ্রই আসছে!', 'Video rendering not yet connected. Coming soon!'));
+      downloadScriptPDF();
       return;
     }
     try {
@@ -219,7 +316,7 @@ const VideoResultView = ({ result, plan, usageUsed, usageLimit, onReset, onRegen
                 <Copy size={12} /> {t('URL কপি', 'Copy URL')}
               </button>
               <button onClick={handleDownload} className="px-3 py-1.5 rounded-lg border border-border text-xs font-heading-bn hover:bg-secondary transition-all flex items-center gap-1">
-                <Download size={12} /> {t('ডাউনলোড', 'Download')}
+                {result.videoUrl ? <Download size={12} /> : <FileText size={12} />} {result.videoUrl ? t('ডাউনলোড', 'Download') : t('স্ক্রিপ্ট PDF', 'Script PDF')}
               </button>
             </div>
           </div>
@@ -335,10 +432,17 @@ const VideoResultView = ({ result, plan, usageUsed, usageLimit, onReset, onRegen
               onClick={handleDownload}
               className="w-full py-4 rounded-2xl bg-gradient-cta text-primary-foreground text-[17px] font-bold font-heading-bn shadow-orange-glow hover:scale-[1.01] transition-all active:scale-[0.99]"
             >
-              ⬇️ {t('MP4 ডাউনলোড করুন', 'Download MP4')}
+              {result.videoUrl ? (
+                <>⬇️ {t('MP4 ডাউনলোড করুন', 'Download MP4')}</>
+              ) : (
+                <>📄 {t('স্ক্রিপ্ট PDF ডাউনলোড করুন', 'Download Script PDF')}</>
+              )}
             </button>
             <p className="text-[11px] text-muted-foreground text-center">
-              MP4 · H.264 · {result.format === 'feed' ? '1080×1080' : '1080×1920'} · ~8MB
+              {result.videoUrl 
+                ? `MP4 · H.264 · ${result.format === 'feed' ? '1080×1080' : '1080×1920'} · ~8MB`
+                : t('স্লাইড, ভয়েসওভার স্ক্রিপ্ট ও হ্যাশট্যাগ সহ PDF', 'PDF with slides, voiceover script & hashtags')
+              }
             </p>
 
             {/* Secondary actions */}
