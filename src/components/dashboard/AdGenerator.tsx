@@ -483,7 +483,7 @@ const AdGenerator = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <h2 className="text-2xl font-heading-bn font-bold text-foreground mb-6">
-        {t('আজ কী বানাবেন? ⚡', 'What will you create today? ⚡')}
+        {t('আজ কী বানাবেন?', 'What will you create today?')}
       </h2>
 
       {/* AD LIBRARY RESULTS VIEW */}
