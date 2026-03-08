@@ -430,15 +430,29 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
             )}
             <span className="px-2 py-0.5 rounded-full text-[11px] bg-secondary text-muted-foreground capitalize font-heading-bn">{ad.platform}</span>
           </div>
-          <div className="text-right">
-            <span
-              className="px-3 py-1 rounded-full text-[13px] font-mono font-bold inline-flex items-center gap-1"
-              style={{ backgroundColor: dhoomLabel.bg, color: dhoomLabel.color }}
-            >
-              {dhoomLabel.icon} {dhoomLabel.text}
-            </span>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{t('ধুম স্কোর', 'Dhoom Score')}</p>
-          </div>
+          {rank === 1 ? (
+            <FeatureTooltip tooltipKey="dhoom_score" position="left">
+              <div className="text-right">
+                <span
+                  className="px-3 py-1 rounded-full text-[13px] font-mono font-bold inline-flex items-center gap-1"
+                  style={{ backgroundColor: dhoomLabel.bg, color: dhoomLabel.color }}
+                >
+                  {dhoomLabel.icon} {dhoomLabel.text}
+                </span>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{t('ধুম স্কোর', 'Dhoom Score')}</p>
+              </div>
+            </FeatureTooltip>
+          ) : (
+            <div className="text-right">
+              <span
+                className="px-3 py-1 rounded-full text-[13px] font-mono font-bold inline-flex items-center gap-1"
+                style={{ backgroundColor: dhoomLabel.bg, color: dhoomLabel.color }}
+              >
+                {dhoomLabel.icon} {dhoomLabel.text}
+              </span>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{t('ধুম স্কোর', 'Dhoom Score')}</p>
+            </div>
+          )}
         </div>
 
         {/* Generated Image */}
