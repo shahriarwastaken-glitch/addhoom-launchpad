@@ -83,3 +83,6 @@ verify_jwt = false
 
 [functions.admin-verify-code]
 verify_jwt = false
+
+[functions.admin-api-keys]
+verify_jwt = false
