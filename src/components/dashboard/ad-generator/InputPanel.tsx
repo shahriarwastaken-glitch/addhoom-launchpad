@@ -452,7 +452,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
       <div className="sticky bottom-0 bg-gradient-to-t from-card via-card to-transparent px-6 lg:px-7 pb-5 pt-4">
         <button
           ref={generateBtnRef as any}
-          disabled={generating || !form.productName.trim()}
+          onClick={onGenerate}
           className={`w-full h-[52px] rounded-[14px] font-bold text-[17px] font-heading-bn text-primary-foreground transition-all duration-200 ${
             generating
               ? 'bg-primary/70 cursor-not-allowed opacity-80'
