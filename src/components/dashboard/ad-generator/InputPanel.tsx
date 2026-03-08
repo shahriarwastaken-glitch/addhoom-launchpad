@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -14,6 +14,7 @@ import {
   GeneratorMode, GeneratorFormData, PLATFORMS, FRAMEWORKS,
   OCCASIONS, TONES, IMAGE_FORMATS, IMAGE_STYLES,
 } from './types';
+import { getImageHistory } from './AdGeneratorPage';
 
 const toBengali = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
 
@@ -67,6 +68,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
   const [loadingTextIdx, setLoadingTextIdx] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
+  const historyCount = useMemo(() => getImageHistory().length, []);
 
   const copyLoadingTexts = [t('চিন্তা করছি...', 'Thinking...'), t('লিখছি...', 'Writing...'), t('স্কোর করছি...', 'Scoring...')];
   const imageLoadingTexts = [t('প্রম্পট তৈরি হচ্ছে...', 'Creating prompt...'), t('AI ছবি আঁকছে...', 'AI drawing...'), t('ফিনিশিং টাচ...', 'Finishing touches...')];
@@ -125,6 +127,11 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
               className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors font-heading-bn"
             >
               <History size={12} /> {t('ইমেজ হিস্ট্রি', 'Image History')}
+              {historyCount > 0 && (
+                <span className="ml-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none">
+                  {historyCount}
+                </span>
+              )}
             </button>
           )}
         </div>
