@@ -141,7 +141,7 @@ const DhoomScoreChecker = () => {
               className="w-full rounded-xl border border-input bg-card px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
               <label className="text-sm font-medium mb-1 block">{t('প্ল্যাটফর্ম', 'Platform')}</label>
               <select
