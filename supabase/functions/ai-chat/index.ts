@@ -369,7 +369,7 @@ serve(async (req) => {
         } catch { /* ad parse failed */ }
       }
 
-      await logUsage(supabase, user!.id, workspace_id, "ai_chat");
+      await logUsage(supabase, userId, workspace_id, "ai_chat");
       return convId;
     })();
 
