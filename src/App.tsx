@@ -19,7 +19,15 @@ import ShopDNASetup from "./components/dashboard/ShopDNASetup";
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children, skipPlanCheck }: { children: React.ReactNode; skipPlanCheck?: boolean }) => {
-  const { user, loading, profile } = useAuth();
+  const { user, loading, profile, activeWorkspace, refreshProfile } = useAuth();
+  const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (profile) {
+      setOnboardingDone(profile.onboarding_complete === true);
+    }
+  }, [profile]);
+
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><div className="animate-pulse text-primary text-xl font-bold">AdDhoom ⚡</div></div>;
   if (!user) return <Navigate to="/auth" replace />;
   
@@ -29,6 +37,18 @@ const ProtectedRoute = ({ children, skipPlanCheck }: { children: React.ReactNode
     if (plan === 'free') {
       return <PlanGate />;
     }
+  }
+
+  // Show onboarding if not complete
+  if (onboardingDone === false && !skipPlanCheck && activeWorkspace) {
+    return (
+      <ShopDNASetup
+        onComplete={() => {
+          setOnboardingDone(true);
+          refreshProfile();
+        }}
+      />
+    );
   }
   
   return <>{children}</>;
