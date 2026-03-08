@@ -78,10 +78,10 @@ const CampaignsList = () => {
           <input value={newName} onChange={e => setNewName(e.target.value)}
             placeholder={t('ক্যাম্পেইন নাম', 'Campaign name')}
             className="w-full p-3 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-body-bn" />
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
               <label className="text-xs text-muted-foreground mb-1 block">{t('প্ল্যাটফর্ম', 'Platform')}</label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {['Facebook', 'Google', 'Instagram'].map(p => (
                   <button key={p} onClick={() => setNewPlatform(p)}
                     className={`text-xs rounded-full px-3 py-1.5 transition-colors ${newPlatform === p ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground'}`}>
@@ -90,7 +90,7 @@ const CampaignsList = () => {
                 ))}
               </div>
             </div>
-            <div className="w-32">
+            <div className="w-full sm:w-32">
               <label className="text-xs text-muted-foreground mb-1 block">{t('বাজেট (৳)', 'Budget (৳)')}</label>
               <input value={newBudget} onChange={e => setNewBudget(e.target.value)} placeholder="০"
                 className="w-full p-2 rounded-xl border border-border bg-background text-foreground font-mono text-sm focus:ring-2 focus:ring-primary/20 outline-none" />
