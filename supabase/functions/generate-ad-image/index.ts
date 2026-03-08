@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { serverError, unauthorizedError } from "../_shared/errors.ts";
+import { getImageMasterPrompt } from "../_shared/imagePrompt.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,33 +15,6 @@ const FORMAT_INSTRUCTIONS: Record<string, string> = {
   banner: "16:9 horizontal format, optimized for Facebook cover ads",
 };
 
-function buildStyleInstructions(
-  style: string,
-  brandPrimary: string,
-  brandSecondary: string
-): string {
-  const map: Record<string, string> = {
-    clean: `Clean white or light background.
-Product is the hero, centered and prominent.
-Minimal text overlay. Studio lighting feel.
-Professional e-commerce product photo aesthetic.`,
-    creative: `Bold, eye-catching design.
-Colorful background using brand colors: ${brandPrimary} and ${brandSecondary}.
-Dynamic composition, modern aesthetic.
-The product should be stylized and artistic.`,
-    lifestyle: `Product shown in a realistic lifestyle context.
-Bangladeshi aesthetic — warm, familiar, relatable setting.
-Natural lighting. The product feels like part of real life.
-Aspirational but achievable.`,
-    sale: `Bold promotional design.
-High contrast, attention-grabbing.
-Large prominent area for price/offer text overlay.
-Urgency and excitement in the visual energy.
-Brand colors: ${brandPrimary} dominant.`,
-  };
-  return map[style] || map.clean;
-}
-
 function computeDhoomScore(
   style: string,
   hasHeadline: boolean,
@@ -48,7 +22,7 @@ function computeDhoomScore(
   hasProductRef: boolean
 ): number {
   let score = 65;
-  score += 5; // style completeness
+  score += 5;
   if (hasHeadline) score += 8;
   if (hasBrandColors) score += 5;
   if (hasProductRef) score += 10;
@@ -98,6 +72,7 @@ serve(async (req) => {
       brand_color_primary = "#FF5100",
       brand_color_secondary = "#FFFFFF",
       ad_headline = "",
+      ad_body = "",
       language = "bn",
       num_variations = 1,
       creative_id,
@@ -134,52 +109,37 @@ serve(async (req) => {
       );
     }
 
-    // --- Build prompt ---
-    const styleText = buildStyleInstructions(style, brand_color_primary, brand_color_secondary);
-    const { ad_body = "" } = input;
+    // Fetch the master prompt from DB (or fallback to default)
+    const masterPrompt = await getImageMasterPrompt();
 
-    const textOverlayInstruction = ad_headline
-      ? `IMPORTANT: Include this text prominently as a text overlay on the image in ENGLISH: "${ad_headline}". Use a bold premium font (Montserrat or similar). Make the text large, readable, and well-positioned with proper contrast against the background.`
-      : "Include the product name in English as a text overlay on the image.";
+    // Build the specific instructions for this generation
+    const textInstruction = ad_headline
+      ? `HEADLINE TO OVERLAY: "${ad_headline}" — render this text prominently in the image following Section 3 rules.`
+      : "NO TEXT OVERLAY REQUESTED — generate a completely text-free image. Leave clean space for programmatic text overlay later.";
 
-    const descriptionInstruction = ad_body
-      ? `Also include a brief product description text: "${ad_body.substring(0, 80)}"`
+    const descInstruction = ad_body
+      ? `PRODUCT DESCRIPTION: "${ad_body.substring(0, 120)}"`
       : "";
 
-    const prompt = `You are a world-class graphic designer creating a professional advertisement image for a Bangladeshi e-commerce product.
+    const prompt = `${masterPrompt}
 
-The reference image shows the exact product. Maintain the product's appearance, colors, shape, and key features exactly as shown.
+═══════════════════════════════════════════════
+SPECIFIC GENERATION INSTRUCTIONS
+═══════════════════════════════════════════════
 
-${styleText}
+Product Name: ${product_name}
+${product_description ? `Product Description: ${product_description}` : ""}
+Style: ${style.toUpperCase()}
+Format: ${FORMAT_INSTRUCTIONS[format] || FORMAT_INSTRUCTIONS.square}
+Brand Colors: Primary ${brand_color_primary}, Secondary ${brand_color_secondary}
+${textInstruction}
+${descInstruction}
 
-CRITICAL TEXT & TYPOGRAPHY RULES:
-- All text on the image MUST be in English (NOT Bengali, NOT Banglish).
-- Double-check every single word for correct spelling before rendering.
-- Use premium, modern fonts: Montserrat Bold for headlines, Open Sans for body text. Never use default system fonts.
-- Text must be crisp, high-contrast, and easily readable on mobile screens.
-- Text should have proper hierarchy: headline largest, price prominent, CTA secondary.
-- Add subtle text shadows or background panels behind text for readability.
-
-LAYOUT & COMPOSITION:
-- Format: ${FORMAT_INSTRUCTIONS[format] || FORMAT_INSTRUCTIONS.square}
-- Brand colors: ${brand_color_primary} (primary), ${brand_color_secondary} (secondary)
-- ${textOverlayInstruction}
-- ${descriptionInstruction}
-- Product must be the central hero of the image, taking up at least 40% of the composition.
-- Leave breathing room around the product — don't crowd it.
-
-VISUAL QUALITY:
-- High quality, professional, suitable for Facebook/Instagram ads
-- Clean, polished, commercial photography aesthetic
-- Subtle gradient or solid brand-colored background — not cluttered
-- No watermarks, no stock photo logos
-- The final result should look like it was designed by a professional agency
-
-The result must look like a premium, high-converting e-commerce advertisement.`;
+The attached reference image shows the exact product. Maintain absolute fidelity to it.
+Generate the advertisement image now.`;
 
     // --- Generate images via Lovable AI Gateway ---
     const count = Math.min(num_variations, 3);
-    // Ensure product_image_base64 has data URI prefix for the gateway
     const imageDataUri = product_image_base64.startsWith("data:")
       ? product_image_base64
       : `data:image/jpeg;base64,${product_image_base64}`;
@@ -258,14 +218,12 @@ The result must look like a premium, high-converting e-commerce advertisement.`;
         const { data: publicUrl } = supabase.storage.from("ad-images").getPublicUrl(fileName);
         const imageUrl = publicUrl.publicUrl;
 
-        // Dhoom Score
         const dhoomScore = computeDhoomScore(
           style, !!ad_headline,
           !!(brand_color_primary && brand_color_secondary),
           true
         );
 
-        // Save to ad_images
         const { data: saved, error: saveErr } = await supabase
           .from("ad_images")
           .insert({
