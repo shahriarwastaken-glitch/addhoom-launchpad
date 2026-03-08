@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Settings as SettingsIcon, Save } from 'lucide-react';
+import { useUpgrade } from '@/contexts/UpgradeContext';
+import { Settings as SettingsIcon, Save, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Settings = () => {
