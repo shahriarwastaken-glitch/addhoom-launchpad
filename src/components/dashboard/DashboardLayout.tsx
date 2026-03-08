@@ -1,13 +1,13 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState, useRef, useCallback } from 'react';
 import DashboardSidebar from './DashboardSidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/contexts/AuthContext';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { Bell, Moon, Sun, Target, Video, Calendar, MessageSquare, Stethoscope, LogOut, ChevronDown, Store } from 'lucide-react';
+import { Bell, Moon, Sun, Target, Video, Calendar, MessageSquare, Stethoscope, LogOut, ChevronDown, Store, RefreshCw } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 
 const mobileItems = [
   { icon: Target, bn: 'অ্যাড', en: 'Ads', url: '/dashboard' },
@@ -22,8 +22,52 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const { dark, toggleTheme } = useTheme();
   const { user, profile, activeWorkspace, workspaces, setActiveWorkspaceId, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showWorkspaces, setShowWorkspaces] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Pull-to-refresh state
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const mainRef = useRef<HTMLElement>(null);
+  const touchStartY = useRef(0);
+  const isPulling = useRef(false);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const main = mainRef.current;
+    if (main && main.scrollTop <= 0) {
+      touchStartY.current = e.touches[0].clientY;
+      isPulling.current = true;
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isPulling.current) return;
+    const main = mainRef.current;
+    if (!main || main.scrollTop > 0) {
+      isPulling.current = false;
+      setPullDistance(0);
+      return;
+    }
+    const diff = e.touches[0].clientY - touchStartY.current;
+    if (diff > 0) {
+      setPullDistance(Math.min(diff * 0.4, 80));
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (pullDistance > 50 && !isRefreshing) {
+      setIsRefreshing(true);
+      setPullDistance(50);
+      // Reload the page content
+      setTimeout(() => {
+        window.location.reload();
+      }, 600);
+    } else {
+      setPullDistance(0);
+    }
+    isPulling.current = false;
+  }, [pullDistance, isRefreshing]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -40,19 +84,20 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
         <div className="hidden md:block">
           <DashboardSidebar />
         </div>
-        <div className="flex-1 flex flex-col pb-16 md:pb-0">
-          <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
-            <div className="flex items-center gap-3">
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Top Header */}
+          <header className="h-14 flex items-center justify-between border-b border-border bg-card px-2 sm:px-4 flex-shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <SidebarTrigger className="hidden md:flex" />
               {/* Workspace selector */}
-              <div className="relative">
+              <div className="relative min-w-0">
                 <button
                   onClick={() => setShowWorkspaces(!showWorkspaces)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary hover:bg-secondary/80 text-sm font-medium transition-colors"
+                  className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-secondary hover:bg-secondary/80 text-sm font-medium transition-colors min-w-0"
                 >
-                  <Store size={14} className="text-primary" />
-                  <span className="max-w-[120px] truncate">{activeWorkspace?.shop_name || t('শপ নির্বাচন', 'Select shop')}</span>
-                  <ChevronDown size={14} className="text-muted-foreground" />
+                  <Store size={14} className="text-primary flex-shrink-0" />
+                  <span className="max-w-[80px] sm:max-w-[120px] truncate text-xs sm:text-sm">{activeWorkspace?.shop_name || t('শপ', 'Shop')}</span>
+                  <ChevronDown size={12} className="text-muted-foreground flex-shrink-0" />
                 </button>
                 {showWorkspaces && (
                   <>
@@ -73,30 +118,34 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3">
               {profile?.plan && (
                 <span className="hidden sm:inline-block text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                   {profile.plan}
                 </span>
               )}
-              <button onClick={toggleTheme} className="p-2 rounded-full bg-secondary text-foreground hover:bg-secondary/80 transition-colors" aria-label="Toggle theme">
+              <button onClick={toggleTheme} className="p-1.5 sm:p-2 rounded-full bg-secondary text-foreground hover:bg-secondary/80 transition-colors" aria-label="Toggle theme">
                 {dark ? <Sun size={16} /> : <Moon size={16} />}
               </button>
-              <button onClick={toggle} className="flex items-center bg-secondary rounded-full px-3 py-1 text-xs font-semibold">
+              <button onClick={toggle} className="hidden sm:flex items-center bg-secondary rounded-full px-3 py-1 text-xs font-semibold">
                 <span className={lang === 'en' ? 'text-primary' : 'text-muted-foreground'}>EN</span>
                 <span className="text-muted-foreground mx-1">|</span>
                 <span className={lang === 'bn' ? 'text-primary' : 'text-muted-foreground'}>বাং</span>
               </button>
-              <button className="relative p-2 text-muted-foreground hover:text-foreground">
-                <Bell size={18} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
+              {/* Compact language toggle for mobile */}
+              <button onClick={toggle} className="sm:hidden p-1.5 rounded-full bg-secondary text-foreground text-xs font-bold">
+                {lang === 'bn' ? 'EN' : 'বাং'}
+              </button>
+              <button className="relative p-1.5 sm:p-2 text-muted-foreground hover:text-foreground">
+                <Bell size={16} />
+                <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-primary rounded-full" />
               </button>
 
               {/* User menu */}
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="w-8 h-8 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground text-xs font-bold"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground text-[10px] sm:text-xs font-bold"
                 >
                   {initials}
                 </button>
@@ -120,17 +169,46 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
               </div>
             </div>
           </header>
-          <main className="flex-1 bg-background p-3 sm:p-6 md:p-8 overflow-auto">
+
+          {/* Pull-to-refresh indicator */}
+          <AnimatePresence>
+            {pullDistance > 0 && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: pullDistance, opacity: pullDistance > 20 ? 1 : 0 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center justify-center bg-background overflow-hidden md:hidden"
+              >
+                <RefreshCw
+                  size={20}
+                  className={`text-primary transition-transform ${isRefreshing ? 'animate-spin' : ''}`}
+                  style={{ transform: `rotate(${pullDistance * 3}deg)` }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <main
+            ref={mainRef}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            className="flex-1 bg-background p-3 sm:p-6 md:p-8 overflow-auto pb-20 md:pb-8"
+          >
             {children}
           </main>
         </div>
       </div>
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex items-center justify-around h-16 px-1">
+
+      {/* Mobile Bottom Tab Bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-t border-border flex items-center justify-around px-1 safe-bottom">
         {mobileItems.map(item => (
           <NavLink key={item.en} to={item.url} end={item.url === '/dashboard'}
-            className="flex flex-col items-center gap-0.5 px-2 py-1 text-muted-foreground" activeClassName="text-primary">
+            className="flex flex-col items-center gap-0.5 px-2 py-2.5 text-muted-foreground min-w-0 flex-1"
+            activeClassName="text-primary">
             <item.icon size={20} />
-            <span className="text-[10px] font-medium">{t(item.bn, item.en)}</span>
+            <span className="text-[10px] font-medium truncate">{t(item.bn, item.en)}</span>
           </NavLink>
         ))}
       </nav>
