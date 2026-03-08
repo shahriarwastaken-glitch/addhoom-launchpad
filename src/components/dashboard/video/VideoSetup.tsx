@@ -597,9 +597,9 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
                         </div>
                         <div className="flex gap-2">
                           {([
-                            { val: 'warm' as const, label: '😊 উষ্ণ', labelEn: '😊 Warm' },
-                            { val: 'professional' as const, label: '💼 পেশাদার', labelEn: '💼 Professional' },
-                            { val: 'excited' as const, label: '🔥 উৎসাহী', labelEn: '🔥 Excited' },
+                            { val: 'warm' as const, label: 'উষ্ণ', labelEn: 'Warm' },
+                            { val: 'professional' as const, label: 'পেশাদার', labelEn: 'Professional' },
+                            { val: 'excited' as const, label: 'উৎসাহী', labelEn: 'Excited' },
                           ]).map(v => (
                             <button
                               key={v.val}
