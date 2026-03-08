@@ -286,7 +286,7 @@ const AdGenerator = () => {
         setResults(prev => [...prev, ...data.ads]);
         toast.success(
           data.has_winners
-            ? t('Winner pattern থেকে রিমিক্স তৈরি হয়েছে ⚡', 'Remixed from winner patterns ⚡')
+            ? t('Winner pattern থেকে রিমিক্স তৈরি হয়েছে', 'Remixed from winner patterns')
             : t('রিমিক্স তৈরি হয়েছে!', 'Remix created!')
         );
       } else {
