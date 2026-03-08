@@ -113,9 +113,22 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
         {/* Header */}
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold font-heading-bn text-foreground">{t('বিজ্ঞাপন তৈরি করুন', 'Create Ad')}</h2>
-          <Link to="/dashboard/ad-history" className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors font-heading-bn">
-            <History size={12} /> {t('ইতিহাস', 'History')}
-          </Link>
+          {mode === 'copy' ? (
+            <Link to="/dashboard/ad-history" className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors font-heading-bn">
+              <History size={12} /> {t('ইতিহাস', 'History')}
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                // Dispatch a custom event so ResultsPanel can toggle its history panel
+                window.dispatchEvent(new CustomEvent('toggle-image-history'));
+              }}
+              className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors font-heading-bn"
+            >
+              <History size={12} /> {t('ইমেজ হিস্ট্রি', 'Image History')}
+            </button>
+          )}
         </div>
 
         {/* Mode toggle */}
