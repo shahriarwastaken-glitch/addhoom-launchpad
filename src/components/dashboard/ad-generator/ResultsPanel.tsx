@@ -329,10 +329,10 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
 };
 
 // Single ad card component
-const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToImage, onDownload, delay, projectId }: {
+const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToImage, onDownload, onSchedule, delay, projectId }: {
   ad: AdResult; rank: number; copiedId: string | null;
   onCopy: () => void; onWinner: () => void; onRemix: () => void;
-  onSwitchToImage: () => void; onDownload: () => void; delay: number;
+  onSwitchToImage: () => void; onDownload: () => void; onSchedule?: () => void; delay: number;
   projectId?: string | null;
 }) => {
   const { t, lang } = useLanguage();
