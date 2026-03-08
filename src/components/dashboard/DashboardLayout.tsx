@@ -28,7 +28,7 @@ const moreItems = [
 ];
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
-  const { lang, toggle, t } = useLanguage();
+  const { t } = useLanguage();
   const { dark, toggleTheme } = useTheme();
   const { user, profile, activeWorkspace, workspaces, setActiveWorkspaceId, signOut } = useAuth();
   const navigate = useNavigate();
