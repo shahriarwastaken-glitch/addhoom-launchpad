@@ -6,6 +6,7 @@ import { Menu, X, Moon, Sun } from 'lucide-react';
 
 const Navbar = () => {
   const { lang, toggle, t } = useLanguage();
+  const { dark, toggleTheme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
