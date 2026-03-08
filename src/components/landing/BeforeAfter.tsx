@@ -1,5 +1,6 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { motion } from 'framer-motion';
 
 const rows = [
   { feature: { bn: 'ক্যাম্পেইন সেটআপ', en: 'Campaign Setup' }, without: { bn: '৪–৬ ঘণ্টা', en: '4-6 hours' }, with_: { bn: '৫ মিনিট', en: '5 minutes' }, gain: { bn: '৫০x দ্রুত', en: '50x faster' } },
@@ -23,28 +24,34 @@ const BeforeAfter = () => {
             {t('AdDhoom ছাড়া বনাম AdDhoom দিয়ে', 'Without vs With AdDhoom')}
           </h2>
         </div>
-        <div className={`bg-card rounded-[20px] shadow-warm-lg overflow-x-auto transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+        <motion.div
+          className="bg-card rounded-[20px] shadow-warm-lg overflow-x-auto"
+          initial={{ opacity: 0, y: 30 }}
+          animate={isVisible ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+        >
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border">
                 <th className="p-4 text-left font-heading-bn font-semibold text-foreground">{t('ফিচার', 'Feature')}</th>
-                <th className="p-4 text-left font-heading-bn font-semibold text-foreground">{t('ছাড়া', 'Without')} 🔴</th>
-                <th className="p-4 text-left font-heading-bn font-semibold text-foreground">{t('দিয়ে', 'With')} 🟢</th>
+                <th className="p-4 text-left font-heading-bn font-semibold text-foreground">{t('AdDhoom ছাড়া', 'Without AdDhoom')} 🔴</th>
+                <th className="p-4 text-left font-heading-bn font-semibold text-foreground">{t('AdDhoom দিয়ে', 'With AdDhoom')} 🟢</th>
                 <th className="p-4 text-left font-heading-bn font-semibold text-foreground">{t('পার্থক্য', 'Gain')}</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row, i) => (
-                <tr key={i} className="border-b border-border last:border-0 hover:bg-brand-yellow/5 transition-colors">
+                <motion.tr key={i} className="border-b border-border last:border-0 hover:bg-brand-yellow/5 transition-colors"
+                  initial={{ opacity: 0, x: -20 }} animate={isVisible ? { opacity: 1, x: 0 } : {}} transition={{ delay: 0.1 + i * 0.08 }}>
                   <td className="p-4 font-semibold text-foreground font-body-bn">{t(row.feature.bn, row.feature.en)}</td>
                   <td className="p-4 bg-destructive/5 text-foreground font-body-bn">{t(row.without.bn, row.without.en)}</td>
                   <td className="p-4 bg-brand-green/5 text-foreground font-body-bn">{t(row.with_.bn, row.with_.en)}</td>
                   <td className="p-4"><span className="bg-primary/10 text-primary text-xs font-bold rounded-full px-3 py-1">{t(row.gain.bn, row.gain.en)}</span></td>
-                </tr>
+                </motion.tr>
               ))}
             </tbody>
           </table>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

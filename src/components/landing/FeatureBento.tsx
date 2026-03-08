@@ -1,5 +1,6 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { motion } from 'framer-motion';
 
 const features = [
   { span: 2, accent: 'border-t-primary', emoji: '🎬', badge: '', title: { bn: 'AI ভিডিও বিজ্ঞাপন জেনারেটর', en: 'AI Video Ad Generator' }, desc: { bn: 'পণ্যের ছবি দিন — AI ভিডিও অ্যাড তৈরি করবে। Reels, TikTok, YouTube Shorts সব ফরম্যাটে।', en: 'Give product images — AI creates video ads in all formats.' }, subs: ['Auto captions', 'AI voiceover', 'Multiple formats', 'Scroll-stopping hooks'], link: { bn: 'ভিডিও তৈরি করুন →', en: 'Create Video →' } },
@@ -11,6 +12,14 @@ const features = [
   { span: 1, accent: 'border-t-brand-green', emoji: '🩺', badge: '', title: { bn: 'অ্যাকাউন্ট ডাক্তার', en: 'Account Doctor' }, desc: { bn: 'সাপ্তাহিক অ্যাকাউন্ট হেলথ রিপোর্ট', en: 'Weekly account health report' }, subs: null, link: null },
   { span: 2, accent: 'border-t-brand-yellow', emoji: '🎉', badge: 'NEW', title: { bn: 'উৎসব টেমপ্লেট', en: 'Festival Templates' }, desc: { bn: 'রেডিমেড ক্যাম্পেইন। ঈদের ২ সপ্তাহ আগেই লঞ্চ করুন।', en: 'Ready-made campaigns. Launch 2 weeks before Eid.' }, subs: null, link: null, icons: '🕌 🎭 🪔 🇧🇩' },
 ];
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i: number) => ({
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.08, duration: 0.5, ease: [0.25, 0.1, 0.25, 1] as const },
+  }),
+};
 
 const FeatureBento = () => {
   const { t } = useLanguage();
@@ -30,8 +39,15 @@ const FeatureBento = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {features.map((f, i) => (
-            <div key={i} className={`${f.span === 2 ? 'md:col-span-2' : ''} bg-card rounded-3xl p-6 shadow-warm border-t-4 ${f.accent} hover:-translate-y-1 transition-all duration-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
-              style={{ transitionDelay: `${i * 0.08}s` }}>
+            <motion.div
+              key={i}
+              custom={i}
+              variants={cardVariants}
+              initial="hidden"
+              animate={isVisible ? 'visible' : 'hidden'}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className={`${f.span === 2 ? 'md:col-span-2' : ''} bg-card rounded-3xl p-6 shadow-warm border-t-4 ${f.accent} cursor-default`}
+            >
               {f.badge && <span className="inline-block bg-brand-yellow text-foreground text-xs font-bold rounded-full px-2 py-0.5 mb-2">{f.badge}</span>}
               <div className="text-3xl mb-3">{f.emoji}</div>
               <h3 className="text-lg font-heading-bn font-bold text-foreground mb-2">{t(f.title.bn, f.title.en)}</h3>
@@ -43,7 +59,7 @@ const FeatureBento = () => {
               )}
               {'icons' in f && f.icons && <div className="text-2xl tracking-widest mb-2">{f.icons}</div>}
               {f.link && <a href="#" className="text-sm font-semibold text-primary hover:underline">{t(f.link.bn, f.link.en)}</a>}
-            </div>
+            </motion.div>
           ))}
         </div>
         <div className="text-center mt-10">

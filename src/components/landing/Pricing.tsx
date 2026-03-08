@@ -6,21 +6,6 @@ import { Link } from 'react-router-dom';
 
 const plans = [
   {
-    name: { bn: 'বিনামূল্যে', en: 'Free' },
-    price: { monthly: '০', annual: '০' },
-    badge: null,
-    highlight: false,
-    features: [
-      { bn: '৫টি AI বিজ্ঞাপন/দিন', en: '5 AI ads/day' },
-      { bn: 'ধুম স্কোর (৩টি/দিন)', en: 'Dhoom Score (3/day)' },
-      { bn: 'লিংক থেকে বিজ্ঞাপন (১টি/দিন)', en: 'Link to Ad (1/day)' },
-      { bn: '১টি শপ ওয়ার্কস্পেস', en: '1 Shop Workspace' },
-      { bn: 'Basic analytics', en: 'Basic analytics' },
-    ],
-    cta: { bn: 'শুরু করুন', en: 'Get Started' },
-    ctaStyle: 'border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground',
-  },
-  {
     name: { bn: 'Pro', en: 'Pro' },
     price: { monthly: '২,৯৯৯', annual: '২,৩৯৯' },
     badge: { bn: 'সবচেয়ে জনপ্রিয়', en: 'Most Popular' },
@@ -65,7 +50,7 @@ const Pricing = () => {
 
   return (
     <section ref={ref} id="pricing" className="py-24 px-4">
-      <div className="container mx-auto max-w-5xl">
+      <div className="container mx-auto max-w-4xl">
         <div className="text-center mb-12">
           <span className="section-label">{t('মূল্য', 'Pricing')}</span>
           <h2 className="mt-3 font-heading-bn font-bold text-foreground" style={{ fontSize: 'clamp(28px, 4vw, 52px)' }}>
@@ -81,7 +66,7 @@ const Pricing = () => {
             <span className="bg-brand-yellow text-foreground text-xs font-bold rounded-full px-2 py-0.5">{t('২০% ছাড়', '20% off')}</span>
           </button>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           {plans.map((plan, i) => (
             <div key={i} className={`relative bg-card rounded-3xl p-8 shadow-warm transition-all duration-700 ${plan.highlight ? 'border-2 border-primary shadow-[0_0_40px_rgba(255,81,0,0.1)]' : 'border border-border'} ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
               style={{ transitionDelay: `${i * 0.12}s` }}>
@@ -93,7 +78,7 @@ const Pricing = () => {
               <h3 className="text-xl font-heading-en font-bold text-foreground mb-2">{t(plan.name.bn, plan.name.en)}</h3>
               <div className="flex items-baseline gap-1 mb-6">
                 <span className="text-4xl font-mono font-bold text-foreground">৳{annual ? plan.price.annual : plan.price.monthly}</span>
-                {plan.price.monthly !== '০' && <span className="text-muted-foreground text-sm font-body-bn">/{t('মাস', 'mo')}</span>}
+                <span className="text-muted-foreground text-sm font-body-bn">/{t('মাস', 'mo')}</span>
               </div>
               <div className="space-y-3 mb-8">
                 {plan.features.map((f, j) => (
@@ -106,13 +91,11 @@ const Pricing = () => {
               <Link to="/dashboard" className={`block text-center rounded-full py-3 text-sm font-semibold transition-all ${plan.ctaStyle}`}>
                 {t(plan.cta.bn, plan.cta.en)}
               </Link>
-              {plan.price.monthly !== '০' && (
-                <div className="flex items-center justify-center gap-3 mt-4">
-                  {['bKash', 'Nagad', 'Visa'].map(p => (
-                    <span key={p} className="text-xs text-muted-foreground bg-secondary rounded px-2 py-0.5">{p}</span>
-                  ))}
-                </div>
-              )}
+              <div className="flex items-center justify-center gap-3 mt-4">
+                {['bKash', 'Nagad', 'Visa'].map(p => (
+                  <span key={p} className="text-xs text-muted-foreground bg-secondary rounded px-2 py-0.5">{p}</span>
+                ))}
+              </div>
             </div>
           ))}
         </div>
