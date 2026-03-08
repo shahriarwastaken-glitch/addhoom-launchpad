@@ -100,7 +100,7 @@ const DhoomScoreChecker = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6 px-0">
       <div>
         <h1 className="text-2xl font-bold font-heading-bn flex items-center gap-2">
           <Zap className="text-primary" /> {t('ধুম স্কোর চেক করুন', 'Dhoom Score Checker')}
