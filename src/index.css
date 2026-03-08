@@ -101,6 +101,12 @@
     @apply text-[11px] tracking-[0.18em] uppercase font-semibold;
     color: hsl(var(--brand-orange));
   }
+  .landing-pill {
+    @apply inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-medium;
+    border: 1px solid hsl(var(--brand-yellow));
+    background: hsl(var(--brand-yellow) / 0.08);
+    color: hsl(var(--brand-yellow));
+  }
 }
 
 @layer utilities {
@@ -128,6 +134,30 @@
   .shadow-orange-glow {
     box-shadow: 0 8px 32px rgba(255,81,0,0.3);
   }
+  .font-bn { font-family: 'Hind Siliguri', sans-serif; }
+  .font-en { font-family: 'Syne', sans-serif; }
+  .font-body { font-family: 'Plus Jakarta Sans', sans-serif; }
+}
+
+/* Grain overlay */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Animations */
