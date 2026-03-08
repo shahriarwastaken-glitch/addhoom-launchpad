@@ -79,17 +79,19 @@ export default function AdminNotifications() {
         }
       }
 
-      const { error } = await supabase.from('notifications').insert({
-        title: title.trim(),
-        message: message.trim(),
-        sent_by: user?.id,
-        target_type: targetType,
-        target_user_ids: targetUserIds,
+      const { data: result, error } = await supabase.functions.invoke('send-notification', {
+        body: {
+          title: title.trim(),
+          message: message.trim(),
+          target_type: targetType,
+          target_user_ids: targetUserIds,
+        },
       });
 
       if (error) throw error;
 
-      toast.success('নোটিফিকেশন পাঠানো হয়েছে!');
+      const emailInfo = result?.emails_sent > 0 ? ` (${result.emails_sent}টি ইমেইল পাঠানো হয়েছে)` : '';
+      toast.success(`নোটিফিকেশন পাঠানো হয়েছে!${emailInfo}`);
       setTitle('');
       setMessage('');
       setSpecificEmails('');

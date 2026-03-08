@@ -1,4 +1,5 @@
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Film } from 'lucide-react';
 
 interface VideoLoaderProps {
   progress?: number;
@@ -9,7 +10,7 @@ const VideoLoader = ({ progress }: VideoLoaderProps) => {
 
   return (
     <div className="flex flex-col items-center gap-4 py-8">
-      <span className="text-4xl animate-spin" style={{ animationDuration: '2s' }}>🎬</span>
+      <Film size={36} className="text-primary animate-spin" style={{ animationDuration: '2s' }} />
       <p className="text-sm font-medium text-foreground">
         {t('ভিডিও রেন্ডার হচ্ছে... এটা ১-২ মিনিট সময় নিতে পারে', 'Rendering video... This may take 1-2 minutes')}
       </p>

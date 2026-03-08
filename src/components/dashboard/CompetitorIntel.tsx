@@ -174,7 +174,7 @@ const CompetitorIntel = () => {
       } else if (response.data) {
         setAnalysis(response.data.analysis);
         setAds(response.data.ads || []);
-        toast.success(t('নতুন বিশ্লেষণ সম্পন্ন হয়েছে ✓', 'New analysis complete ✓'));
+        toast.success(t('নতুন বিশ্লেষণ সম্পন্ন হয়েছে', 'New analysis complete'));
         setActiveTab('new');
         // Refresh history
         fetchHistory(1);
@@ -324,24 +324,24 @@ const CompetitorIntel = () => {
               {/* RIGHT — AI Analysis */}
               <div className="space-y-4">
                 <div className="bg-card rounded-[20px] shadow-warm p-6 border-2 border-primary/20">
-                  <h3 className="font-heading-bn font-bold text-foreground mb-2">{t('🎯 তাদের স্ট্র্যাটেজি', '🎯 Their Strategy')}</h3>
+                  <h3 className="font-heading-bn font-bold text-foreground mb-2">{t('তাদের স্ট্র্যাটেজি', 'Their Strategy')}</h3>
                   <span className="inline-block bg-primary/10 text-primary font-bold rounded-full px-4 py-2 text-sm font-body-bn">{analysis.strategy_type}</span>
                 </div>
                 {analysis.strengths?.length > 0 && (
                   <div className="bg-card rounded-[20px] shadow-warm p-6">
-                    <h3 className="font-heading-bn font-bold text-foreground mb-3">{t('✅ তাদের শক্তি', '✅ Their Strengths')}</h3>
+                    <h3 className="font-heading-bn font-bold text-foreground mb-3">{t('তাদের শক্তি', 'Their Strengths')}</h3>
                     <ul className="space-y-2">{analysis.strengths.map((s, i) => (<li key={i} className="flex items-start gap-2"><CheckCircle className="text-[hsl(var(--brand-green))] mt-0.5 shrink-0" size={16} /><span className="text-sm text-muted-foreground font-body-bn">{s}</span></li>))}</ul>
                   </div>
                 )}
                 {analysis.weaknesses?.length > 0 && (
                   <div className="bg-card rounded-[20px] shadow-warm p-6">
-                    <h3 className="font-heading-bn font-bold text-foreground mb-3">{t('❌ তাদের দুর্বলতা', '❌ Their Weaknesses')}</h3>
+                    <h3 className="font-heading-bn font-bold text-foreground mb-3">{t('তাদের দুর্বলতা', 'Their Weaknesses')}</h3>
                     <ul className="space-y-2">{analysis.weaknesses.map((w, i) => (<li key={i} className="flex items-start gap-2"><XCircle className="text-destructive mt-0.5 shrink-0" size={16} /><span className="text-sm text-muted-foreground font-body-bn">{w}</span></li>))}</ul>
                   </div>
                 )}
                 {analysis.top_patterns?.length > 0 && (
                   <div className="bg-card rounded-[20px] shadow-warm p-6">
-                    <h3 className="font-heading-bn font-bold text-foreground mb-3">{t('📊 শীর্ষ প্যাটার্ন', '📊 Top Patterns')}</h3>
+                    <h3 className="font-heading-bn font-bold text-foreground mb-3">{t('শীর্ষ প্যাটার্ন', 'Top Patterns')}</h3>
                     <ol className="space-y-2 list-decimal list-inside">{analysis.top_patterns.map((p, i) => (<li key={i} className="text-sm text-muted-foreground font-body-bn">{p}</li>))}</ol>
                   </div>
                 )}
@@ -531,7 +531,7 @@ const DetailView = ({
 
       {/* Section 1: Strategy Overview */}
       <div className="bg-card rounded-[20px] shadow-warm p-5 sm:p-6 mb-6">
-        <h3 className="font-heading-bn font-bold text-foreground mb-4">{t('🎯 স্ট্র্যাটেজি ওভারভিউ', '🎯 Strategy Overview')}</h3>
+        <h3 className="font-heading-bn font-bold text-foreground mb-4">{t('স্ট্র্যাটেজি ওভারভিউ', 'Strategy Overview')}</h3>
         <span className="inline-block bg-gradient-cta text-primary-foreground font-bold rounded-full px-5 py-2 text-sm mb-5">{ai?.strategy_type}</span>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -612,7 +612,7 @@ const DetailView = ({
       {/* Section 4: Comparison Table */}
       {showComparison && (
         <div className="mb-6">
-          <h3 className="font-heading-bn font-bold text-foreground mb-4">{t('📊 প্রতিযোগী তুলনা', '📊 Competitor Comparison')}</h3>
+          <h3 className="font-heading-bn font-bold text-foreground mb-4">{t('প্রতিযোগী তুলনা', 'Competitor Comparison')}</h3>
           <div className="bg-card rounded-2xl shadow-warm overflow-x-auto border border-border">
             <table className="w-full text-sm">
               <thead>

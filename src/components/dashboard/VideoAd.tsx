@@ -25,8 +25,8 @@ const VideoAd = () => {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h2 className="text-2xl font-heading-bn font-bold text-foreground mb-8">
-        {t('🎬 AI ভিডিও বিজ্ঞাপন', '🎬 AI Video Ads')}
+      <h2 className="text-2xl font-heading-bn font-bold text-foreground mb-8 flex items-center gap-2">
+        <Film className="text-primary" size={28} /> {t('AI ভিডিও বিজ্ঞাপন', 'AI Video Ads')}
       </h2>
 
       <div className="bg-card rounded-[20px] shadow-warm p-4 sm:p-8 space-y-6">
@@ -87,10 +87,10 @@ const VideoAd = () => {
           className="w-full bg-gradient-cta text-primary-foreground rounded-full py-4 text-lg font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform disabled:opacity-70 font-body-bn">
           {generating ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="animate-spin">🎬</span> {t('ভিডিও তৈরি হচ্ছে...', 'Creating video...')}
+              <Film className="animate-spin" size={16} /> {t('ভিডিও তৈরি হচ্ছে...', 'Creating video...')}
             </span>
           ) : (
-            <span>🎬 {t('ভিডিও অ্যাড তৈরি করুন', 'Create Video Ad')}</span>
+            <span className="flex items-center gap-2"><Film size={16} /> {t('ভিডিও অ্যাড তৈরি করুন', 'Create Video Ad')}</span>
           )}
         </button>
       </div>

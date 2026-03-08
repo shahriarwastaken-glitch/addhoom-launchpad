@@ -1,11 +1,12 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { Link2, MousePointerClick, Pencil, Rocket } from 'lucide-react';
 
 const steps = [
-  { num: '০১', title: { bn: 'শপের লিংক দিন', en: 'Paste Your Link' }, desc: { bn: 'Daraz, Facebook বা ওয়েবসাইটের URL দিন। AI আপনার ব্র্যান্ড মিনিটে শিখে নেবে।', en: 'Paste your Daraz, Facebook, or website URL. AI learns your brand in minutes.' }, emoji: '🔗' },
-  { num: '০২', title: { bn: 'আইডিয়া সোয়াইপ করুন', en: 'Swipe Ideas' }, desc: { bn: 'প্রতিদিন নতুন বিজ্ঞাপনের আইডিয়া পাবেন। পছন্দের গুলো সেভ করুন।', en: 'Get fresh ad ideas daily. Save the ones you like.' }, emoji: '👆' },
-  { num: '০৩', title: { bn: 'এডিট করুন', en: 'Edit Anything' }, desc: { bn: 'কপি, টোন, প্ল্যাটফর্ম — যেকোনো কিছু পরিবর্তন করুন।', en: 'Change copy, tone, platform. No design skills needed.' }, emoji: '✏️' },
-  { num: '০৪', title: { bn: 'লঞ্চ করুন', en: 'Launch' }, desc: { bn: 'ডাউনলোড বা সরাসরি পাবলিশ করুন। ১০x বেশি কনটেন্ট, ৭৫% দ্রুত।', en: 'Download or publish directly. 10x more content, 75% faster.' }, emoji: '🚀' },
+  { num: '০১', title: { bn: 'শপের লিংক দিন', en: 'Paste Your Link' }, desc: { bn: 'Daraz, Facebook বা ওয়েবসাইটের URL দিন। AI আপনার ব্র্যান্ড মিনিটে শিখে নেবে।', en: 'Paste your Daraz, Facebook, or website URL. AI learns your brand in minutes.' }, icon: Link2 },
+  { num: '০২', title: { bn: 'আইডিয়া সোয়াইপ করুন', en: 'Swipe Ideas' }, desc: { bn: 'প্রতিদিন নতুন বিজ্ঞাপনের আইডিয়া পাবেন। পছন্দের গুলো সেভ করুন।', en: 'Get fresh ad ideas daily. Save the ones you like.' }, icon: MousePointerClick },
+  { num: '০৩', title: { bn: 'এডিট করুন', en: 'Edit Anything' }, desc: { bn: 'কপি, টোন, প্ল্যাটফর্ম — যেকোনো কিছু পরিবর্তন করুন।', en: 'Change copy, tone, platform. No design skills needed.' }, icon: Pencil },
+  { num: '০৪', title: { bn: 'লঞ্চ করুন', en: 'Launch' }, desc: { bn: 'ডাউনলোড বা সরাসরি পাবলিশ করুন। ১০x বেশি কনটেন্ট, ৭৫% দ্রুত।', en: 'Download or publish directly. 10x more content, 75% faster.' }, icon: Rocket },
 ];
 
 const HowItWorks = () => {
@@ -27,7 +28,7 @@ const HowItWorks = () => {
             <div key={i} className={`relative flex flex-col items-center text-center transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
               style={{ transitionDelay: `${i * 0.15}s` }}>
               <span className="absolute -top-4 text-8xl font-heading-en font-extrabold text-primary/[0.06] select-none">{step.num}</span>
-              <div className="relative z-10 w-16 h-16 rounded-2xl bg-card shadow-warm flex items-center justify-center text-3xl mb-4">{step.emoji}</div>
+              <div className="relative z-10 w-16 h-16 rounded-2xl bg-card shadow-warm flex items-center justify-center mb-4"><step.icon size={28} className="text-primary" /></div>
               <h3 className="text-lg font-heading-bn font-bold text-foreground mb-2">{t(step.title.bn, step.title.en)}</h3>
               <p className="text-sm text-muted-foreground font-body-bn leading-relaxed">{t(step.desc.bn, step.desc.en)}</p>
             </div>

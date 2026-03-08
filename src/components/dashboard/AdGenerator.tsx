@@ -149,7 +149,7 @@ const AdGenerator = () => {
           framework: ad.framework_used || 'AIDA',
           id: `adapted-${i}`,
         })));
-        toast.success(t('বিজ্ঞাপন বিশ্লেষণ সম্পন্ন ⚡', 'Ad analysis complete ⚡'));
+        toast.success(t('বিজ্ঞাপন বিশ্লেষণ সম্পন্ন', 'Ad analysis complete'));
       } else {
         // Product mode — auto-fill form
         const p = data.product;
@@ -161,7 +161,7 @@ const AdGenerator = () => {
           setProductUrl(extractUrl);
         }
         setExtractMode('product');
-        toast.success(t('পণ্যের তথ্য সফলভাবে আনা হয়েছে ✓', 'Product info extracted ✓'));
+        toast.success(t('পণ্যের তথ্য সফলভাবে আনা হয়েছে', 'Product info extracted'));
       }
     } catch (e: any) {
       console.error(e);
@@ -207,7 +207,7 @@ const AdGenerator = () => {
       if (data?.success && data.ads) {
         setResults(data.ads);
         setStep(4);
-        toast.success(t(`${data.count}টি বিজ্ঞাপন তৈরি হয়েছে ⚡`, `${data.count} ads generated ⚡`));
+        toast.success(t(`${data.count}টি বিজ্ঞাপন তৈরি হয়েছে`, `${data.count} ads generated`));
       } else {
         toast.error(data?.message || t('সমস্যা হয়েছে', 'Something went wrong'));
       }
@@ -253,7 +253,7 @@ const AdGenerator = () => {
       setAdaptedAds(prev => prev.map((a, i) => i === editIdx ? { ...a, ...editData } : a));
       setEditingId(null);
       setEditIdx(null);
-      toast.success(t('সংরক্ষিত ✅', 'Saved ✅'));
+      toast.success(t('সংরক্ষিত', 'Saved'));
       return;
     }
     if (!editingId) return;
@@ -265,7 +265,7 @@ const AdGenerator = () => {
     if (!error) {
       setResults(prev => prev.map(a => a.id === editingId ? { ...a, ...editData } : a));
       setEditingId(null);
-      toast.success(t('সংরক্ষিত ✅', 'Saved ✅'));
+      toast.success(t('সংরক্ষিত', 'Saved'));
     }
   };
 
@@ -286,7 +286,7 @@ const AdGenerator = () => {
         setResults(prev => [...prev, ...data.ads]);
         toast.success(
           data.has_winners
-            ? t('Winner pattern থেকে রিমিক্স তৈরি হয়েছে ⚡', 'Remixed from winner patterns ⚡')
+            ? t('Winner pattern থেকে রিমিক্স তৈরি হয়েছে', 'Remixed from winner patterns')
             : t('রিমিক্স তৈরি হয়েছে!', 'Remix created!')
         );
       } else {
@@ -410,7 +410,7 @@ const AdGenerator = () => {
 
         {/* Adaptation Note */}
         {isAdapted && ad.adaptation_note && (
-          <p className="text-xs text-primary/70 mb-3 font-body-bn">💡 {ad.adaptation_note}</p>
+          <p className="text-xs text-primary/70 mb-3 font-body-bn"><Zap size={12} className="inline" /> {ad.adaptation_note}</p>
         )}
 
         {/* Improvement Note (Remix) */}
@@ -483,7 +483,7 @@ const AdGenerator = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <h2 className="text-2xl font-heading-bn font-bold text-foreground mb-6">
-        {t('আজ কী বানাবেন? ⚡', 'What will you create today? ⚡')}
+        {t('আজ কী বানাবেন?', 'What will you create today?')}
       </h2>
 
       {/* AD LIBRARY RESULTS VIEW */}
@@ -600,7 +600,7 @@ const AdGenerator = () => {
                     {extracting ? (
                       <Rocket size={16} className="animate-bounce" />
                     ) : (
-                      <>⚡ {t('তথ্য আনুন', 'Extract')}</>
+                      <><Zap size={14} /> {t('তথ্য আনুন', 'Extract')}</>
                     )}
                   </button>
                 </div>
@@ -615,9 +615,9 @@ const AdGenerator = () => {
 
                 {/* Hint pills */}
                 <div className="flex flex-wrap gap-2">
-                  <span className="text-[10px] bg-secondary text-muted-foreground rounded-full px-3 py-1 font-body-bn">📦 Daraz {t('লিংক', 'link')}</span>
-                  <span className="text-[10px] bg-secondary text-muted-foreground rounded-full px-3 py-1 font-body-bn">🌐 {t('শপের লিংক', 'Shop link')}</span>
-                  <span className="text-[10px] bg-secondary text-muted-foreground rounded-full px-3 py-1 font-body-bn">🎯 FB Ad Library {t('লিংক', 'link')}</span>
+                  <span className="text-[10px] bg-secondary text-muted-foreground rounded-full px-3 py-1 font-body-bn">Daraz {t('লিংক', 'link')}</span>
+                  <span className="text-[10px] bg-secondary text-muted-foreground rounded-full px-3 py-1 font-body-bn">{t('শপের লিংক', 'Shop link')}</span>
+                  <span className="text-[10px] bg-secondary text-muted-foreground rounded-full px-3 py-1 font-body-bn">FB Ad Library {t('লিংক', 'link')}</span>
                 </div>
               </div>
 
