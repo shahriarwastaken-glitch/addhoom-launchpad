@@ -139,8 +139,8 @@ serve(async (req) => {
     const { ad_body = "" } = input;
 
     const textOverlayInstruction = ad_headline
-      ? `IMPORTANT: Include this text prominently as a text overlay on the image in Bengali: "${ad_headline}". Make the text large, readable, and well-positioned. Use brand colors for the text.`
-      : "Include the product name as text overlay on the image.";
+      ? `IMPORTANT: Include this text prominently as a text overlay on the image in ENGLISH: "${ad_headline}". Use a bold premium font (Montserrat or similar). Make the text large, readable, and well-positioned with proper contrast against the background.`
+      : "Include the product name in English as a text overlay on the image.";
 
     const descriptionInstruction = ad_body
       ? `Also include a brief product description text: "${ad_body.substring(0, 80)}"`
