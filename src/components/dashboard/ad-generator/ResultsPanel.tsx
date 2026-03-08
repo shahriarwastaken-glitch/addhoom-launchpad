@@ -30,7 +30,7 @@ interface ProjectOption {
   color: string;
 }
 
-const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix, onLoadHistory }: ResultsPanelProps) => {
+const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix, onLoadHistory, projectId }: ResultsPanelProps) => {
   const { t, lang } = useLanguage();
   const [progress, setProgress] = useState(0);
   const [showTip, setShowTip] = useState(false);
