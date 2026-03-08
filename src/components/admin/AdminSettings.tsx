@@ -186,7 +186,7 @@ export default function AdminSettings() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <h1 className="text-xl md:text-2xl font-bold">প্ল্যাটফর্ম সেটিংস</h1>
+      <h1 className="text-xl md:text-2xl font-bold">Platform Settings</h1>
 
       {/* System Prompt Editor */}
       <Card className="border-primary/20">
