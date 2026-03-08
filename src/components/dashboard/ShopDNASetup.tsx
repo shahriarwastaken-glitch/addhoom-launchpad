@@ -91,7 +91,7 @@ const ShopDNASetup = ({ onComplete }: { onComplete: () => void }) => {
       await refreshProfile();
 
       toast({
-        title: t('সফল! ✅', 'Success! ✅'),
+        title: t('সফল!', 'Success!'),
         description: t('শপের তথ্য সংরক্ষিত হয়েছে', 'Shop DNA saved successfully'),
       });
 

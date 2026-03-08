@@ -57,7 +57,7 @@ const UpgradeModal = ({ open, onClose, type = 'general' }: UpgradeModalProps) =>
           >
             {/* Top gradient strip */}
             <div className="bg-gradient-brand px-6 py-4 text-center">
-              <h2 className="text-lg font-bold text-primary-foreground">⚡ {t('আপগ্রেড করুন', 'Upgrade')}</h2>
+              <h2 className="text-lg font-bold text-primary-foreground flex items-center justify-center gap-2"><Zap size={18} /> {t('আপগ্রেড করুন', 'Upgrade')}</h2>
             </div>
 
             <div className="p-6 space-y-5">
