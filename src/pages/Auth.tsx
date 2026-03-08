@@ -1,10 +1,11 @@
 import { useState, forwardRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable/index';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import { Mail, Lock, User, Eye, EyeOff, Zap, PartyPopper } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Zap } from 'lucide-react';
 import { z } from 'zod';
 
 const loginSchema = z.object({
