@@ -12,7 +12,7 @@ import ThinkingLoader from '@/components/loaders/ThinkingLoader';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import { AnimatePresence, motion } from 'framer-motion';
-import { jsPDF } from 'jspdf';
+
 
 // ─── Types ───
 interface ChatMessage {
