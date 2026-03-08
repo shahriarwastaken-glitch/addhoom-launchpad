@@ -277,6 +277,7 @@ const AdGeneratorPage = () => {
               form={form} setForm={setForm}
               onGenerate={handleGenerate}
               generating={generating}
+              onToggleImageHistory={toggleImageHistory}
             />
           </div>
         </div>
