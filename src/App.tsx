@@ -84,11 +84,11 @@ const App = () => (
       <AuthProvider>
         <SessionManager>
           <TooltipProvider>
-            <UpgradeProvider>
-              <UpgradeBridge>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <UpgradeProvider>
+                <UpgradeBridge>
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/auth" element={<Auth />} />
@@ -97,9 +97,9 @@ const App = () => (
                     <Route path="/admin" element={<ProtectedRoute skipPlanCheck><AdminDashboard /></ProtectedRoute>} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
-                </BrowserRouter>
-              </UpgradeBridge>
-            </UpgradeProvider>
+                </UpgradeBridge>
+              </UpgradeProvider>
+            </BrowserRouter>
           </TooltipProvider>
         </SessionManager>
       </AuthProvider>
