@@ -1,4 +1,4 @@
-import { ReactNode, useState, useRef, useCallback } from 'react';
+import { ReactNode, useState, useRef, useCallback, useEffect } from 'react';
 import DashboardSidebar from './DashboardSidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/hooks/useTheme';
