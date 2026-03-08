@@ -42,16 +42,9 @@ const ProtectedRoute = ({ children, skipPlanCheck }: { children: React.ReactNode
     }
   }
 
-  // Show onboarding if not complete
-  if (onboardingDone === false && !skipPlanCheck && activeWorkspace) {
-    return (
-      <ShopDNASetup
-        onComplete={() => {
-          setOnboardingDone(true);
-          refreshProfile();
-        }}
-      />
-    );
+  // Show onboarding if not complete — redirect to /onboarding
+  if (onboardingDone === false && !skipPlanCheck && activeWorkspace && !activeWorkspace.shop_url) {
+    return <Navigate to="/onboarding" replace />;
   }
   
   return <>{children}</>;
