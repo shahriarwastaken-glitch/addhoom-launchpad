@@ -25,8 +25,8 @@ const VideoAd = () => {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h2 className="text-2xl font-heading-bn font-bold text-foreground mb-8">
-        {t('🎬 AI ভিডিও বিজ্ঞাপন', '🎬 AI Video Ads')}
+      <h2 className="text-2xl font-heading-bn font-bold text-foreground mb-8 flex items-center gap-2">
+        <Film className="text-primary" size={28} /> {t('AI ভিডিও বিজ্ঞাপন', 'AI Video Ads')}
       </h2>
 
       <div className="bg-card rounded-[20px] shadow-warm p-4 sm:p-8 space-y-6">
