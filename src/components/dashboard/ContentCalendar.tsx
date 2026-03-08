@@ -631,7 +631,7 @@ function MonthView({ entries, setEntries, t, lang, navigate, isMobile }: {
                   <div className="w-full h-1 rounded-full mb-0.5" style={{ background: festival.color }} />
                 )}
                 {/* Date number */}
-                <div className={`text-xs leading-none mb-1 ${
+                <div className={`leading-none mb-0.5 ${isMobile ? 'text-[10px]' : 'text-xs'} ${
                   isToday ? 'w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold' :
                   isWeekend ? 'text-muted-foreground' : 'text-foreground/70'
                 }`}>
