@@ -1,7 +1,7 @@
 import UpcomingContentWidget from './UpcomingContentWidget';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Video, Brain, Shield, BarChart3, Calendar } from 'lucide-react';
+import { Sparkles, Video, Brain, Shield, FolderOpen, Calendar } from 'lucide-react';
 
 const DashboardHome = () => {
   const { t } = useLanguage();
