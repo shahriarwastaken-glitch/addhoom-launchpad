@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import FeatureTooltip from '@/components/ui/FeatureTooltip';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
