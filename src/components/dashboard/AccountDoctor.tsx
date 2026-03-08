@@ -125,14 +125,30 @@ const AccountDoctor = () => {
                     {t(section.title.bn, section.title.en)}
                   </h3>
                   <div className="space-y-3">
-                    {section.items.map((item: any, j: number) => (
-                      <div key={j} className={`bg-card rounded-xl shadow-warm p-4 border-l-4 ${section.borderColor}`}>
-                        <p className="text-sm font-semibold text-foreground font-body-bn">{typeof item === 'string' ? item : item.title}</p>
-                        {typeof item === 'object' && item.description && (
-                          <p className="text-xs text-muted-foreground font-body-bn mt-1">{item.description}</p>
-                        )}
-                      </div>
-                    ))}
+                    {section.items.map((item: any, j: number) => {
+                      const action = (section.type === 'urgent' || section.type === 'warn') ? getActionForItem(item) : null;
+                      return (
+                        <div key={j} className={`bg-card rounded-xl shadow-warm p-4 border-l-4 ${section.borderColor}`}>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-foreground font-body-bn">{typeof item === 'string' ? item : item.title}</p>
+                              {typeof item === 'object' && item.description && (
+                                <p className="text-xs text-muted-foreground font-body-bn mt-1">{item.description}</p>
+                              )}
+                            </div>
+                            {action && (
+                              <button
+                                onClick={() => navigate(action.path)}
+                                className="shrink-0 flex items-center gap-1 text-xs font-semibold font-body-bn text-primary-foreground bg-primary hover:bg-primary/90 rounded-full px-3 py-1.5 transition-colors"
+                              >
+                                {t(action.label.bn, action.label.en)}
+                                <ArrowRight size={12} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )
