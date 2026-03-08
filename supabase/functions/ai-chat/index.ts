@@ -108,13 +108,14 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
-    const userClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
+
+    // Extract token and verify via admin API (more reliable than creating a separate client)
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabase.auth.admin.getUserById(
+      // First decode the JWT to get the user ID
+      JSON.parse(atob(token.split(".")[1])).sub
     );
-    const { data: { user } } = await userClient.auth.getUser();
-    if (!user) return errorResponse(401, "লগইন করুন।", "Please log in.");
+    if (authError || !user) return errorResponse(401, "লগইন করুন।", "Please log in.");
 
     const body = await req.json();
     const { workspace_id, conversation_id, message, language, action } = body;
