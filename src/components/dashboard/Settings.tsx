@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/hooks/useTheme';
 import { supabase } from '@/integrations/supabase/client';
 import { useUpgrade } from '@/contexts/UpgradeContext';
-import { Settings as SettingsIcon, Save, Globe, Type } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Globe, Type, Sun, Moon } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Settings = () => {
