@@ -45,7 +45,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto px-0">
       <h2 className="text-2xl font-heading-bn font-bold text-foreground mb-8 flex items-center gap-2">
         <SettingsIcon className="text-primary" size={28} />
         {t('সেটিংস', 'Settings')}
