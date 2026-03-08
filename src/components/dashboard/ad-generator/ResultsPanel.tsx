@@ -23,6 +23,10 @@ interface ResultsPanelProps {
   projectId?: string | null;
   imageHistoryOpen?: boolean;
   onToggleImageHistory?: () => void;
+  onSchedule?: (ad: AdResult) => void;
+  showProjectPrompt?: boolean;
+  onAssignAllToProject?: (projectId: string, projectName: string) => void;
+  onDismissProjectPrompt?: () => void;
 }
 
 interface ProjectOption {
