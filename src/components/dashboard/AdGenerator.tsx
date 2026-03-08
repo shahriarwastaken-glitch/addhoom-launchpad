@@ -253,7 +253,7 @@ const AdGenerator = () => {
       setAdaptedAds(prev => prev.map((a, i) => i === editIdx ? { ...a, ...editData } : a));
       setEditingId(null);
       setEditIdx(null);
-      toast.success(t('সংরক্ষিত ✅', 'Saved ✅'));
+      toast.success(t('সংরক্ষিত', 'Saved'));
       return;
     }
     if (!editingId) return;
