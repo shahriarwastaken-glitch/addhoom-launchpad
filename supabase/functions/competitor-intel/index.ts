@@ -87,9 +87,9 @@ Price range: ${workspace.price_range || "N/A"}` : "";
       adsContext = `\n\nTHEIR ACTIVE ADS:\n${ads.slice(0, 10).map((ad: any, i: number) => `
 Ad ${i + 1} (Running since: ${ad.ad_delivery_start_time || "Unknown"}):
 Page: ${ad.page_name || "N/A"}
-Headline: ${ad.ad_creative_link_title || "N/A"}
-Body: ${ad.ad_creative_body || "N/A"}
-Caption: ${ad.ad_creative_link_caption || "N/A"}`).join("\n")}`;
+Headline: ${(ad.ad_creative_link_titles || [])[0] || "N/A"}
+Body: ${(ad.ad_creative_bodies || [])[0] || "N/A"}
+Caption: ${(ad.ad_creative_link_captions || [])[0] || "N/A"}`).join("\n")}`;
     } else {
       adsContext = `\n\nNOTE: Could not fetch live ads. Analyze based on your knowledge of this competitor and their likely strategies in the Bangladesh e-commerce market. The competitor page URL is: ${competitor_page_url || "not provided"}.`;
     }
