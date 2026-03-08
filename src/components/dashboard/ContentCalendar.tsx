@@ -266,8 +266,8 @@ function MonthView({
   };
 
   return (
-    <div className="flex gap-6 flex-col lg:flex-row">
-      <div className="flex-1 bg-card rounded-[20px] shadow-warm p-6">
+    <div className="flex gap-4 sm:gap-6 flex-col lg:flex-row">
+      <div className="flex-1 bg-card rounded-[20px] shadow-warm p-3 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <button onClick={prevMonth} className="p-2 rounded-lg hover:bg-secondary"><ChevronLeft size={20} /></button>
           <h3 className="font-heading-bn font-bold text-foreground">
@@ -276,13 +276,13 @@ function MonthView({
           <button onClick={nextMonth} className="p-2 rounded-lg hover:bg-secondary"><ChevronRight size={20} /></button>
         </div>
 
-        <div className="grid grid-cols-7 gap-1 mb-2">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
           {weekdays.map((d: string) => (
-            <div key={d} className="text-center text-xs text-muted-foreground font-body-bn py-1">{d}</div>
+            <div key={d} className="text-center text-[10px] sm:text-xs text-muted-foreground font-body-bn py-1">{d}</div>
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
           {Array.from({ length: firstDayOfWeek }, (_, i) => <div key={`e-${i}`} />)}
           {Array.from({ length: daysInMonth }, (_, i) => {
             const day = i + 1;
@@ -332,7 +332,7 @@ function MonthView({
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            className="w-full lg:w-96 bg-card rounded-[20px] shadow-warm p-6 self-start"
+            className="w-full lg:w-96 bg-card rounded-[20px] shadow-warm p-4 sm:p-6 self-start"
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-heading-bn font-bold text-foreground text-sm">

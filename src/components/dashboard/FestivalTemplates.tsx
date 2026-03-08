@@ -65,7 +65,7 @@ const FestivalTemplates = () => {
         <p className="text-muted-foreground mt-1">{t('AI দিয়ে উৎসবের ক্যাম্পেইন তৈরি করুন।', 'Generate festival campaigns with AI.')}</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {festivals.map((f, i) => (
           <motion.div key={f.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
             className="bg-card rounded-2xl shadow-warm border border-border overflow-hidden">

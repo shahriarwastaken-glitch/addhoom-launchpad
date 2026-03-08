@@ -62,13 +62,13 @@ const CampaignsList = () => {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-8">
         <h2 className="text-2xl font-heading-bn font-bold text-foreground flex items-center gap-2">
           <BarChart3 className="text-primary" size={28} />
           {t('ক্যাম্পেইন', 'Campaigns')}
         </h2>
         <button onClick={() => setShowCreate(!showCreate)}
-          className="bg-gradient-cta text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform font-body-bn flex items-center gap-1">
+          className="bg-gradient-cta text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform font-body-bn flex items-center gap-1 w-full sm:w-auto justify-center">
           <Plus size={16} /> {t('নতুন ক্যাম্পেইন', 'New Campaign')}
         </button>
       </div>
@@ -78,10 +78,10 @@ const CampaignsList = () => {
           <input value={newName} onChange={e => setNewName(e.target.value)}
             placeholder={t('ক্যাম্পেইন নাম', 'Campaign name')}
             className="w-full p-3 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-body-bn" />
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
               <label className="text-xs text-muted-foreground mb-1 block">{t('প্ল্যাটফর্ম', 'Platform')}</label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {['Facebook', 'Google', 'Instagram'].map(p => (
                   <button key={p} onClick={() => setNewPlatform(p)}
                     className={`text-xs rounded-full px-3 py-1.5 transition-colors ${newPlatform === p ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground'}`}>
@@ -90,7 +90,7 @@ const CampaignsList = () => {
                 ))}
               </div>
             </div>
-            <div className="w-32">
+            <div className="w-full sm:w-32">
               <label className="text-xs text-muted-foreground mb-1 block">{t('বাজেট (৳)', 'Budget (৳)')}</label>
               <input value={newBudget} onChange={e => setNewBudget(e.target.value)} placeholder="০"
                 className="w-full p-2 rounded-xl border border-border bg-background text-foreground font-mono text-sm focus:ring-2 focus:ring-primary/20 outline-none" />
@@ -112,7 +112,7 @@ const CampaignsList = () => {
       ) : (
         <div className="space-y-4">
           {campaigns.map(c => (
-            <div key={c.id} className="bg-card rounded-2xl shadow-warm p-5 flex items-center justify-between">
+            <div key={c.id} className="bg-card rounded-2xl shadow-warm p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="font-heading-bn font-semibold text-foreground">{c.name}</h3>
                 <div className="flex gap-2 mt-1">

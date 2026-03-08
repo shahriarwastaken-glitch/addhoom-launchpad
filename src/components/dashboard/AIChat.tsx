@@ -137,9 +137,9 @@ const AIChat = () => {
   const isWelcome = messages.length === 0;
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] gap-4 max-w-6xl mx-auto">
+    <div className="flex h-[calc(100vh-10rem)] sm:h-[calc(100vh-8rem)] gap-4 max-w-6xl mx-auto">
       {/* LEFT PANEL — Conversation List */}
-      <div className="hidden md:flex flex-col w-72 bg-card rounded-2xl shadow-warm overflow-hidden flex-shrink-0">
+      <div className="hidden lg:flex flex-col w-72 bg-card rounded-2xl shadow-warm overflow-hidden flex-shrink-0">
         <div className="p-4 border-b border-border">
           <button
             onClick={startNewChat}
@@ -199,7 +199,7 @@ const AIChat = () => {
               <p className="text-sm text-muted-foreground font-body-bn mb-6">
                 {t('আপনার মার্কেটিং নিয়ে যেকোনো প্রশ্ন করুন', 'Ask me anything about your marketing')}
               </p>
-              <div className="grid grid-cols-2 gap-3 max-w-md w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md w-full">
                 {suggestions.map((s, i) => (
                   <button
                     key={i}
@@ -218,7 +218,7 @@ const AIChat = () => {
                   {msg.role === 'model' && (
                     <div className="w-8 h-8 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground text-xs font-bold mr-2 flex-shrink-0 mt-1">⚡</div>
                   )}
-                  <div className={`max-w-[75%] ${msg.role === 'user' ? '' : ''}`}>
+                  <div className={`max-w-[85%] sm:max-w-[75%]`}>
                     <div className={`rounded-2xl px-4 py-3 text-sm font-body-bn ${
                       msg.role === 'user'
                         ? 'bg-gradient-cta text-primary-foreground rounded-br-md'

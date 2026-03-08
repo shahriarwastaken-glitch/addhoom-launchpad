@@ -45,14 +45,14 @@ const Settings = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto px-0">
       <h2 className="text-2xl font-heading-bn font-bold text-foreground mb-8 flex items-center gap-2">
         <SettingsIcon className="text-primary" size={28} />
         {t('সেটিংস', 'Settings')}
       </h2>
 
       {/* Profile */}
-      <div className="bg-card rounded-[20px] shadow-warm p-6 mb-6">
+      <div className="bg-card rounded-[20px] shadow-warm p-4 sm:p-6 mb-6">
         <h3 className="font-heading-bn font-semibold text-foreground mb-4">{t('প্রোফাইল', 'Profile')}</h3>
         <div className="space-y-4">
           <div>
@@ -73,7 +73,7 @@ const Settings = () => {
       </div>
 
       {/* Shop */}
-      <div className="bg-card rounded-[20px] shadow-warm p-6 mb-6">
+      <div className="bg-card rounded-[20px] shadow-warm p-4 sm:p-6 mb-6">
         <h3 className="font-heading-bn font-semibold text-foreground mb-4">{t('শপ তথ্য', 'Shop Info')}</h3>
         <div className="space-y-4">
           <div>
@@ -101,7 +101,7 @@ const Settings = () => {
       </div>
 
       {/* Subscription */}
-      <div className="bg-card rounded-[20px] shadow-warm p-6 mb-6">
+      <div className="bg-card rounded-[20px] shadow-warm p-4 sm:p-6 mb-6">
         <h3 className="font-heading-bn font-semibold text-foreground mb-4">{t('সাবস্ক্রিপশন', 'Subscription')}</h3>
         <div className="flex items-center justify-between">
           <div>

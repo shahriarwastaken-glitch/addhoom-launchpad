@@ -100,7 +100,7 @@ const DhoomScoreChecker = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6 px-0">
       <div>
         <h1 className="text-2xl font-bold font-heading-bn flex items-center gap-2">
           <Zap className="text-primary" /> {t('ধুম স্কোর চেক করুন', 'Dhoom Score Checker')}
@@ -141,7 +141,7 @@ const DhoomScoreChecker = () => {
               className="w-full rounded-xl border border-input bg-card px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
               <label className="text-sm font-medium mb-1 block">{t('প্ল্যাটফর্ম', 'Platform')}</label>
               <select
@@ -194,7 +194,7 @@ const DhoomScoreChecker = () => {
               className="space-y-4"
             >
               {/* Grade Badge */}
-              <div className="flex items-center gap-6">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
