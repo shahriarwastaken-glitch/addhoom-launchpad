@@ -97,10 +97,30 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
 
   const displayNum = (n: number) => lang === 'bn' ? toBengali(n) : n;
 
+  const loadFromHistory = (entry: ImageHistoryEntry) => {
+    if (onLoadHistory) {
+      onLoadHistory(entry.results);
+    } else {
+      setResults(entry.results);
+    }
+    toast.success(t('হিস্ট্রি থেকে লোড হয়েছে', 'Loaded from history'));
+  };
+
+  const clearHistory = () => {
+    localStorage.removeItem('dhoom_image_history');
+    setImageHistory([]);
+    toast.success(t('হিস্ট্রি মুছে ফেলা হয়েছে', 'History cleared'));
+  };
+
+  const formatTime = (ts: number) => {
+    const d = new Date(ts);
+    return d.toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  };
+
   // EMPTY STATE
   if (!generating && results.length === 0) {
     return (
-      <div className="h-full flex flex-col items-center justify-center text-center px-8">
+      <div className="h-full overflow-y-auto flex flex-col items-center justify-center text-center px-8">
         <div className="relative mb-6">
           <div className="w-24 h-28 bg-secondary rounded-lg relative shadow-warm">
             <div className="absolute inset-x-4 top-3 space-y-2">
@@ -124,6 +144,48 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
             </span>
           ))}
         </div>
+
+        {/* Image History */}
+        {imageHistory.length > 0 && (
+          <div className="w-full max-w-md mt-8 text-left">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-semibold font-heading-bn text-foreground flex items-center gap-1.5">
+                <Clock size={14} className="text-muted-foreground" />
+                {t('সাম্প্রতিক ইমেজ', 'Recent Images')}
+              </h4>
+              <button
+                onClick={clearHistory}
+                className="text-xs text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1"
+              >
+                <Trash2 size={12} /> {t('মুছুন', 'Clear')}
+              </button>
+            </div>
+            <div className="space-y-2">
+              {imageHistory.map(entry => (
+                <button
+                  key={entry.id}
+                  onClick={() => loadFromHistory(entry)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:bg-secondary/80 transition-all text-left group"
+                >
+                  {entry.results[0]?.image_url && (
+                    <img
+                      src={entry.results[0].image_url}
+                      alt=""
+                      className="w-12 h-12 rounded-lg object-cover shrink-0 border border-border"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold font-heading-bn text-foreground truncate">{entry.productName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {entry.results.length} {t('ভার্শন', 'versions')} · {formatTime(entry.timestamp)}
+                    </p>
+                  </div>
+                  <RotateCcw size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
