@@ -30,7 +30,7 @@ const defaultForm: GeneratorFormData = {
 
 const AdGeneratorPage = () => {
   const { activeWorkspace } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const isMobile = useIsMobile();
 
   const [mode, setMode] = useState<GeneratorMode>('copy');
