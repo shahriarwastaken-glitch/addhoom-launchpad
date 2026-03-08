@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { api } from '@/lib/api';
-import { ChevronLeft, ChevronRight, Loader2, Star, X, ArrowRight, ArrowLeft, Check, Sparkles, Calendar as CalendarIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Loader2, Star, X, ArrowRight, ArrowLeft, Check, Sparkles, Calendar as CalendarIcon, Target, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 
@@ -61,7 +62,6 @@ const ContentCalendar = () => {
   const [view, setView] = useState<'month' | 'swipe'>('month');
   const [swipeIndex, setSwipeIndex] = useState(0);
 
-  // Fetch entries
   useEffect(() => {
     if (!activeWorkspace) return;
     setLoading(true);
@@ -93,7 +93,6 @@ const ContentCalendar = () => {
         toast.error(t(response.error.message_bn, response.error.message_en));
       } else {
         toast.success(t(`${toBengali(response.data?.entries_count || 90)} দিনের প্ল্যান তৈরি হয়েছে!`, `${response.data?.entries_count || 90}-day plan generated!`));
-        // Refetch
         const { data } = await supabase
           .from('content_calendar')
           .select('*')
@@ -108,7 +107,6 @@ const ContentCalendar = () => {
     }
   };
 
-  // Month view helpers
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -138,15 +136,21 @@ const ContentCalendar = () => {
     setEntries(prev => prev.map(e => e.id === entryId ? { ...e, status: newStatus } : e));
   };
 
+  const moveEntryToDate = useCallback(async (entryId: string, newDate: string) => {
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const newDayOfWeek = dayNames[new Date(newDate + 'T00:00:00').getDay()];
+    await supabase.from('content_calendar').update({ date: newDate, day_of_week: newDayOfWeek }).eq('id', entryId);
+    setEntries(prev => prev.map(e => e.id === entryId ? { ...e, date: newDate, day_of_week: newDayOfWeek } : e));
+    toast.success(t('কনটেন্ট সরানো হয়েছে', 'Content moved'));
+  }, [t]);
+
   return (
     <div className="max-w-5xl mx-auto">
-      {/* TOP BAR */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <h2 className="text-2xl font-heading-bn font-bold text-foreground">
           {t('📅 কনটেন্ট ক্যালেন্ডার', '📅 Content Calendar')}
         </h2>
         <div className="flex items-center gap-3">
-          {/* View Toggle */}
           <div className="flex bg-secondary rounded-xl p-1">
             <button
               onClick={() => setView('month')}
@@ -189,6 +193,7 @@ const ContentCalendar = () => {
           language={language}
           selectedEntries={selectedEntries}
           toggleStatus={toggleStatus}
+          moveEntryToDate={moveEntryToDate}
         />
       ) : (
         <SwipeView
@@ -201,7 +206,6 @@ const ContentCalendar = () => {
         />
       )}
 
-      {/* Legend */}
       <div className="flex gap-4 mt-6 justify-center flex-wrap">
         {Object.entries(TYPE_COLORS).map(([type, color]) => (
           <div key={type} className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -219,14 +223,51 @@ function MonthView({
   year, month, daysInMonth, firstDayOfWeek,
   entriesByDate, selectedDate, setSelectedDate,
   prevMonth, nextMonth, t, language,
-  selectedEntries, toggleStatus,
+  selectedEntries, toggleStatus, moveEntryToDate,
 }: any) {
+  const navigate = useNavigate();
   const weekdays = language === 'bn' ? WEEKDAYS_BN : WEEKDAYS_EN;
+  const [dragEntry, setDragEntry] = useState<CalendarEntry | null>(null);
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
+
+  const buildDateStr = (day: number) =>
+    `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+  const handleDragStart = (entry: CalendarEntry) => {
+    setDragEntry(entry);
+  };
+
+  const handleDragOver = (e: React.DragEvent, dateStr: string) => {
+    e.preventDefault();
+    setDropTarget(dateStr);
+  };
+
+  const handleDragLeave = () => {
+    setDropTarget(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, dateStr: string) => {
+    e.preventDefault();
+    setDropTarget(null);
+    if (dragEntry && dragEntry.date !== dateStr) {
+      moveEntryToDate(dragEntry.id, dateStr);
+    }
+    setDragEntry(null);
+  };
+
+  const handleCreateAd = (entry: CalendarEntry) => {
+    // Navigate to ad generator with hook pre-filled via URL params
+    const params = new URLSearchParams();
+    if (entry.hook) params.set('hook', entry.hook);
+    if (entry.title) params.set('product_name', entry.title);
+    if (entry.occasion && entry.occasion !== 'general') params.set('occasion', entry.occasion);
+    if (entry.platform) params.set('platform', entry.platform);
+    navigate(`/dashboard?${params.toString()}`);
+  };
 
   return (
     <div className="flex gap-6 flex-col lg:flex-row">
       <div className="flex-1 bg-card rounded-[20px] shadow-warm p-6">
-        {/* Month nav */}
         <div className="flex items-center justify-between mb-4">
           <button onClick={prevMonth} className="p-2 rounded-lg hover:bg-secondary"><ChevronLeft size={20} /></button>
           <h3 className="font-heading-bn font-bold text-foreground">
@@ -235,28 +276,33 @@ function MonthView({
           <button onClick={nextMonth} className="p-2 rounded-lg hover:bg-secondary"><ChevronRight size={20} /></button>
         </div>
 
-        {/* Weekday headers */}
         <div className="grid grid-cols-7 gap-1 mb-2">
           {weekdays.map((d: string) => (
             <div key={d} className="text-center text-xs text-muted-foreground font-body-bn py-1">{d}</div>
           ))}
         </div>
 
-        {/* Days grid */}
         <div className="grid grid-cols-7 gap-1">
           {Array.from({ length: firstDayOfWeek }, (_, i) => <div key={`e-${i}`} />)}
           {Array.from({ length: daysInMonth }, (_, i) => {
             const day = i + 1;
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dateStr = buildDateStr(day);
             const dayEntries = entriesByDate[dateStr] || [];
             const isSelected = selectedDate === dateStr;
             const hasHigh = dayEntries.some((e: any) => e.priority === 'high');
+            const isDropTarget = dropTarget === dateStr;
 
             return (
-              <button
+              <div
                 key={day}
+                onDragOver={(e) => handleDragOver(e, dateStr)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, dateStr)}
                 onClick={() => setSelectedDate(isSelected ? null : dateStr)}
-                className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm transition-all hover:bg-secondary relative ${isSelected ? 'bg-primary/10 border border-primary ring-1 ring-primary/30' : ''}`}
+                className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm transition-all hover:bg-secondary relative cursor-pointer
+                  ${isSelected ? 'bg-primary/10 border border-primary ring-1 ring-primary/30' : ''}
+                  ${isDropTarget ? 'bg-primary/20 border-2 border-dashed border-primary scale-105' : ''}
+                `}
               >
                 <span className="font-mono text-foreground text-xs">{language === 'bn' ? toBengali(day) : day}</span>
                 {dayEntries.length > 0 && (
@@ -267,10 +313,16 @@ function MonthView({
                   </div>
                 )}
                 {hasHigh && <Star size={8} className="text-yellow-500 absolute top-1 right-1" fill="currentColor" />}
-              </button>
+              </div>
             );
           })}
         </div>
+
+        {dragEntry && (
+          <p className="text-xs text-muted-foreground text-center mt-3 font-body-bn">
+            {t('📌 যেকোনো দিনে ড্রপ করুন', '📌 Drop on any day to move')}
+          </p>
+        )}
       </div>
 
       {/* Day Detail Panel */}
@@ -280,7 +332,7 @@ function MonthView({
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            className="w-full lg:w-80 bg-card rounded-[20px] shadow-warm p-6 self-start"
+            className="w-full lg:w-96 bg-card rounded-[20px] shadow-warm p-6 self-start"
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-heading-bn font-bold text-foreground text-sm">
@@ -296,8 +348,15 @@ function MonthView({
             ) : (
               <div className="space-y-3">
                 {selectedEntries.map((entry: CalendarEntry) => (
-                  <div key={entry.id} className="p-3 rounded-xl border border-border space-y-2">
+                  <div
+                    key={entry.id}
+                    draggable
+                    onDragStart={() => handleDragStart(entry)}
+                    onDragEnd={() => setDragEntry(null)}
+                    className="p-3 rounded-xl border border-border space-y-2 cursor-grab active:cursor-grabbing hover:border-primary/30 transition-colors group"
+                  >
                     <div className="flex items-center gap-2 flex-wrap">
+                      <GripVertical size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                       <span className={`text-[10px] text-white px-2 py-0.5 rounded-full ${TYPE_COLORS[entry.content_type] || 'bg-muted-foreground'}`}>
                         {t(TYPE_LABELS_BN[entry.content_type], TYPE_LABELS_EN[entry.content_type])}
                       </span>
@@ -311,14 +370,23 @@ function MonthView({
                     {entry.hook && (
                       <p className="text-xs text-primary italic font-body-bn">"{entry.hook}"</p>
                     )}
-                    <div className="flex items-center justify-between pt-1">
+                    <div className="flex items-center gap-2 pt-1 flex-wrap">
                       <button
-                        onClick={() => toggleStatus(entry.id, entry.status === 'done' ? 'pending' : 'done')}
+                        onClick={(e) => { e.stopPropagation(); toggleStatus(entry.id, entry.status === 'done' ? 'pending' : 'done'); }}
                         className={`flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-colors ${entry.status === 'done' ? 'bg-green-500/10 text-green-600' : 'bg-secondary text-muted-foreground hover:bg-primary/10'}`}
                       >
                         <Check size={12} />
                         {entry.status === 'done' ? t('সম্পন্ন', 'Done') : t('সম্পন্ন করুন', 'Mark Done')}
                       </button>
+                      {entry.hook && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleCreateAd(entry); }}
+                          className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-body-bn"
+                        >
+                          <Target size={12} />
+                          {t('বিজ্ঞাপন তৈরি করুন', 'Create Ad')}
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -394,12 +462,10 @@ function SwipeView({ entries, swipeIndex, setSwipeIndex, toggleStatus, t, langua
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           className="w-full max-w-md bg-card rounded-[24px] shadow-warm p-8 cursor-grab active:cursor-grabbing"
         >
-          {/* Date */}
           <p className="text-xs text-muted-foreground mb-1">
             {new Date(entry.date + 'T00:00:00').toLocaleDateString(language === 'bn' ? 'bn-BD' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
 
-          {/* Badges */}
           <div className="flex items-center gap-2 mb-4">
             <span className={`text-xs text-white px-3 py-1 rounded-full ${TYPE_COLORS[entry.content_type] || 'bg-muted-foreground'}`}>
               {t(TYPE_LABELS_BN[entry.content_type], TYPE_LABELS_EN[entry.content_type])}
@@ -414,13 +480,9 @@ function SwipeView({ entries, swipeIndex, setSwipeIndex, toggleStatus, t, langua
             )}
           </div>
 
-          {/* Title */}
           <h3 className="font-heading-bn font-bold text-foreground text-xl mb-3">{entry.title}</h3>
-
-          {/* Content idea */}
           <p className="text-sm text-muted-foreground font-body-bn mb-4">{entry.content_idea}</p>
 
-          {/* Hook */}
           {entry.hook && (
             <div className="bg-primary/5 rounded-xl p-4 mb-4">
               <p className="text-xs text-muted-foreground mb-1">{t('হুক:', 'Hook:')}</p>
@@ -428,7 +490,6 @@ function SwipeView({ entries, swipeIndex, setSwipeIndex, toggleStatus, t, langua
             </div>
           )}
 
-          {/* Occasion */}
           {entry.occasion && entry.occasion !== 'general' && (
             <span className="text-xs bg-yellow-500/10 text-yellow-700 px-3 py-1 rounded-full">
               🎉 {entry.occasion}
@@ -437,7 +498,6 @@ function SwipeView({ entries, swipeIndex, setSwipeIndex, toggleStatus, t, langua
         </motion.div>
       </AnimatePresence>
 
-      {/* Action Buttons */}
       <div className="flex items-center gap-6 mt-8">
         <button
           onClick={handleSkip}
