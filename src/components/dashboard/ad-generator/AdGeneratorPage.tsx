@@ -10,6 +10,33 @@ import ResultsPanel from './ResultsPanel';
 import RemixModal from './RemixModal';
 import type { GeneratorMode, GeneratorFormData, AdResult } from './types';
 
+const IMAGE_HISTORY_KEY = 'dhoom_image_history';
+const MAX_HISTORY = 3;
+
+export interface ImageHistoryEntry {
+  id: string;
+  timestamp: number;
+  productName: string;
+  results: AdResult[];
+}
+
+export const getImageHistory = (): ImageHistoryEntry[] => {
+  try {
+    return JSON.parse(localStorage.getItem(IMAGE_HISTORY_KEY) || '[]');
+  } catch { return []; }
+};
+
+const saveImageHistory = (productName: string, results: AdResult[]) => {
+  const history = getImageHistory();
+  history.unshift({
+    id: crypto.randomUUID(),
+    timestamp: Date.now(),
+    productName,
+    results,
+  });
+  localStorage.setItem(IMAGE_HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
+};
+
 const defaultForm: GeneratorFormData = {
   productName: '',
   productDesc: '',
@@ -144,6 +171,7 @@ const AdGeneratorPage = () => {
             image_url: img.image_url || '',
           }));
           setResults(imageAds);
+          saveImageHistory(form.productName, imageAds);
           toast.success(t(`${data.images.length}টি ইমেজ তৈরি হয়েছে`, `${data.images.length} images generated`));
         } else {
           toast.error(data?.message || t('ইমেজ তৈরিতে সমস্যা হয়েছে', 'Image generation failed'));
@@ -232,6 +260,7 @@ const AdGeneratorPage = () => {
             onRegenerate={handleGenerate}
             onSwitchToImage={handleSwitchToImage}
             onRemix={ad => setRemixAd(ad)}
+            onLoadHistory={setResults}
           />
         </div>
 
@@ -285,6 +314,7 @@ const AdGeneratorPage = () => {
             onRegenerate={handleGenerate}
             onSwitchToImage={handleSwitchToImage}
             onRemix={ad => setRemixAd(ad)}
+            onLoadHistory={setResults}
           />
         )}
       </div>
