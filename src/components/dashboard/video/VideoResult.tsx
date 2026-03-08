@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Copy, Share2, RefreshCw, Edit3, Play, Pause, Volume2, VolumeX, Maximize, Check, Star, ChevronDown } from 'lucide-react';
+import { Download, Copy, Share2, RefreshCw, Edit3, Play, Pause, Volume2, VolumeX, Maximize, Check, Star, ChevronDown, FileText } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { jsPDF } from 'jspdf';
 import type { VideoResult as VResult, VideoScript, VideoFormat, VideoStyle, MusicTrack } from './types';
 
 // Script-based preview when no actual video URL is available
