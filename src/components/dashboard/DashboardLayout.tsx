@@ -11,10 +11,10 @@ import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-mo
 import { supabase } from '@/integrations/supabase/client';
 
 const mobileItems = [
+  { icon: Target, bn: 'হোম', en: 'Home', url: '/dashboard' },
   { icon: Wand2, bn: 'অ্যাড তৈরি', en: 'Create Ad', url: '/dashboard/generate' },
   { icon: Video, bn: 'ভিডিও', en: 'Video', url: '/dashboard/video' },
   { icon: MessageSquare, bn: 'চ্যাট', en: 'Chat', url: '/dashboard/chat' },
-  { icon: Target, bn: 'হোম', en: 'Home', url: '/dashboard' },
 ];
 
 const moreItems = [
