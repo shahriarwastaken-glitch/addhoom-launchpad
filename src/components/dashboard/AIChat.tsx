@@ -396,7 +396,7 @@ const AIChat = () => {
 
   const isWelcome = messages.length === 0;
   const [showHeaderMenu, setShowHeaderMenu] = useState(false);
-  const [showExportMenu, setShowExportMenu] = useState(false);
+  
 
   return (
     <div className="flex h-[calc(100dvh-3.5rem-3.5rem)] md:h-[calc(100dvh-3.5rem)] w-full gap-0">
