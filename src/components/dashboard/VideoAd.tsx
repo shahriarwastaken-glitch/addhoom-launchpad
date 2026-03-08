@@ -110,7 +110,8 @@ const VideoAd = () => {
     }
   }, [activeWorkspace, form, t]);
 
-  const startVideoGeneration = useCallback(async () => {
+  const startVideoGeneration = useCallback(async (overrideScript?: VideoScript) => {
+    const activeScript = overrideScript || script;
     if (plan === 'pro' && usageUsed >= usageLimit) {
       showUpgrade('video');
       return;
@@ -166,8 +167,7 @@ const VideoAd = () => {
         workspace_id: activeWorkspace.id,
         product_name: form.productName,
         status: 'completed',
-        script: script as any,
-        format: form.format,
+        script: activeScript as any,
         style: form.style,
         music_track: form.musicTrack,
         font_style: form.fontStyle,
@@ -184,7 +184,7 @@ const VideoAd = () => {
         format: form.format,
         style: form.style,
         musicTrack: form.musicTrack,
-        script: script!,
+        script: activeScript!,
         createdAt: new Date().toISOString(),
       });
     }
@@ -278,9 +278,8 @@ const VideoAd = () => {
                       if (error) throw error;
                       if (data?.success && data.script) {
                         setScript(data.script);
-                        // Script ready — start generation immediately
                         setGenerating(false);
-                        startVideoGeneration();
+                        startVideoGeneration(data.script);
                         return;
                       } else {
                         toast.error(data?.error || t('স্ক্রিপ্ট তৈরি ব্যর্থ', 'Script generation failed'));
