@@ -343,8 +343,8 @@ export default function AdminSettings() {
       {/* Metrics Cache */}
       <Card>
         <CardHeader>
-          <CardTitle>মেট্রিক্স ক্যাশ</CardTitle>
-          <CardDescription>দ্রুত ড্যাশবোর্ড লোডিংয়ের জন্য প্রাক-গণনাকৃত মেট্রিক্স</CardDescription>
+          <CardTitle>Metrics Cache</CardTitle>
+          <CardDescription>Pre-computed metrics for faster dashboard loading</CardDescription>
         </CardHeader>
         <CardContent>
           <Button onClick={handleRefreshMetrics} disabled={refreshing}>
