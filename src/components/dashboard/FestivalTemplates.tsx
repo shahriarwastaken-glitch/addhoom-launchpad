@@ -7,10 +7,10 @@ import { PartyPopper, Sparkles, Loader2, Moon, Drama, Flame, Flag, Zap, Clipboar
 import { toast } from 'sonner';
 
 const festivals = [
-  { id: 'eid', emoji: '🌙', bn: 'ঈদ ক্যাম্পেইন', en: 'Eid Campaign', descBn: 'ঈদুল ফিতর ও ঈদুল আযহার জন্য রেডিমেড টেমপ্লেট।', descEn: 'Ready-made templates for Eid.', gradient: 'from-[hsl(19,100%,50%)] to-[hsl(43,100%,50%)]' },
-  { id: 'boishakh', emoji: '🎭', bn: 'পহেলা বৈশাখ', en: 'Pohela Boishakh', descBn: 'বাংলা নববর্ষের জন্য বিশেষ ক্যাম্পেইন।', descEn: 'Bengali New Year campaigns.', gradient: 'from-[hsl(43,100%,50%)] to-[hsl(19,100%,62%)]' },
-  { id: 'puja', emoji: '🪔', bn: 'দুর্গাপূজা', en: 'Durga Puja', descBn: 'পূজার মৌসুমে বিক্রি বাড়ান।', descEn: 'Boost sales during Puja.', gradient: 'from-[hsl(253,79%,58%)] to-[hsl(280,80%,65%)]' },
-  { id: 'victory', emoji: '🇧🇩', bn: '১৬ ডিসেম্বর', en: '16 December', descBn: 'বিজয় দিবসের বিশেষ ক্যাম্পেইন।', descEn: 'Victory Day campaigns.', gradient: 'from-[hsl(155,100%,36%)] to-[hsl(155,100%,42%)]' },
+  { id: 'eid', icon: Moon, bn: 'ঈদ ক্যাম্পেইন', en: 'Eid Campaign', descBn: 'ঈদুল ফিতর ও ঈদুল আযহার জন্য রেডিমেড টেমপ্লেট।', descEn: 'Ready-made templates for Eid.', gradient: 'from-[hsl(19,100%,50%)] to-[hsl(43,100%,50%)]' },
+  { id: 'boishakh', icon: Drama, bn: 'পহেলা বৈশাখ', en: 'Pohela Boishakh', descBn: 'বাংলা নববর্ষের জন্য বিশেষ ক্যাম্পেইন।', descEn: 'Bengali New Year campaigns.', gradient: 'from-[hsl(43,100%,50%)] to-[hsl(19,100%,62%)]' },
+  { id: 'puja', icon: Flame, bn: 'দুর্গাপূজা', en: 'Durga Puja', descBn: 'পূজার মৌসুমে বিক্রি বাড়ান।', descEn: 'Boost sales during Puja.', gradient: 'from-[hsl(253,79%,58%)] to-[hsl(280,80%,65%)]' },
+  { id: 'victory', icon: Flag, bn: '১৬ ডিসেম্বর', en: '16 December', descBn: 'বিজয় দিবসের বিশেষ ক্যাম্পেইন।', descEn: 'Victory Day campaigns.', gradient: 'from-[hsl(155,100%,36%)] to-[hsl(155,100%,42%)]' },
 ];
 
 const FestivalTemplates = () => {
