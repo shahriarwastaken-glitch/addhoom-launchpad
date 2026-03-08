@@ -1,5 +1,6 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Link } from 'react-router-dom';
+import { Zap } from 'lucide-react';
 
 const Footer = () => {
   const { t } = useLanguage();
