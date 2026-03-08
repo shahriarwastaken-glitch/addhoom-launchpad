@@ -5,10 +5,10 @@ type TooltipKey = 'dhoom_score' | 'winner_star' | 'remix_button' | 'calendar_gen
 const TOOLTIP_STORAGE_KEY = 'addhoom_feature_tooltips';
 
 const TOOLTIPS: Record<TooltipKey, { emoji: string; text: string }> = {
-  dhoom_score: { emoji: '🎯', text: 'এই স্কোর যত বেশি, বিজ্ঞাপন তত ভালো কাজ করবে' },
-  winner_star: { emoji: '⭐', text: 'ভালো বিজ্ঞাপনে স্টার দিন — AI শিখবে' },
-  remix_button: { emoji: '🔄', text: 'বিজয়ী বিজ্ঞাপন থেকে শিখে আরো ভালো করুন' },
-  calendar_generate: { emoji: '📅', text: '৯০ দিনের পরিকল্পনা একবারে তৈরি করুন' },
+  dhoom_score: { emoji: '🎯', text: 'Higher score = better ad performance.' },
+  winner_star: { emoji: '⭐', text: 'Mark great ads as winners so the AI learns your taste.' },
+  remix_button: { emoji: '🔄', text: 'Remix a winning ad to generate an even better version.' },
+  calendar_generate: { emoji: '📅', text: 'Generate a 90-day content plan in one click.' },
 };
 
 export const useFeatureTooltips = () => {

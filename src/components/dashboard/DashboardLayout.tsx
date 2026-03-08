@@ -1,13 +1,11 @@
 import { ReactNode, useState, useEffect } from 'react';
-import DashboardSidebar from './DashboardSidebar';
+import DashboardNavbar from './DashboardNavbar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/contexts/AuthContext';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Bell, Moon, Sun, Target, Video, MessageSquare, LogOut, ChevronDown, Store, X, Settings, Wand2 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 
 const mobileItems = [
@@ -68,14 +66,12 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
     : user?.email?.[0]?.toUpperCase() || 'A';
 
   return (
-    <SidebarProvider>
+    <>
       <div className="min-h-screen flex w-full">
-        <DashboardSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top Header */}
           <header className="h-14 flex items-center justify-between border-b border-border bg-card px-2 sm:px-4 flex-shrink-0">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <SidebarTrigger className="hidden md:flex" />
               {/* Workspace selector */}
               <div className="relative min-w-0">
                 <button
@@ -105,6 +101,9 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
               </div>
             </div>
 
+            <div className="flex-1 flex justify-center min-w-0">
+              <DashboardNavbar />
+            </div>
             <div className="flex items-center gap-1.5 sm:gap-3">
               {profile?.plan && (
                 <span className="hidden sm:inline-block text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
@@ -212,7 +211,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           </NavLink>
         ))}
       </nav>
-    </SidebarProvider>
+    </>
   );
 };
 
