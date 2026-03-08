@@ -180,6 +180,8 @@ export const DEFAULT_FORM: VideoFormData = {
   format: 'reels',
   style: 'clean',
   musicTrack: 'soft',
+  customMusicFile: null,
+  customMusicPreview: '',
   textLanguage: 'bn',
   fontStyle: 'hind',
   textAnimation: 'slide',
