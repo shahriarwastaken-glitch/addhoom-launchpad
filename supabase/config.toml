@@ -1,1 +1,25 @@
 project_id = "njjwqmwnsfskaobegvng"
+
+[functions.generate-ads]
+verify_jwt = false
+
+[functions.generate-ads-from-url]
+verify_jwt = false
+
+[functions.ai-chat]
+verify_jwt = false
+
+[functions.competitor-intel]
+verify_jwt = false
+
+[functions.account-doctor]
+verify_jwt = false
+
+[functions.calculate-roi]
+verify_jwt = false
+
+[functions.remix-ad]
+verify_jwt = false
+
+[functions.send-emails]
+verify_jwt = false
