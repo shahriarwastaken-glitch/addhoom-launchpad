@@ -409,6 +409,11 @@ const AdGenerator = () => {
           <p className="text-xs text-primary/70 mb-3 font-body-bn">💡 {ad.adaptation_note}</p>
         )}
 
+        {/* Improvement Note (Remix) */}
+        {ad.improvement_note && (
+          <p className="text-xs text-accent-foreground/70 italic mb-3 font-body-bn">🔄 {ad.improvement_note}</p>
+        )}
+
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-2 pt-3 border-t border-border">
           {isEditing ? (
@@ -432,9 +437,37 @@ const AdGenerator = () => {
                 <Copy size={12} /> {t('কপি', 'Copy')}
               </button>
               {!isAdapted && ad.id && (
-                <button onClick={() => handleRemix(ad)} disabled={generating} className="text-xs bg-secondary text-muted-foreground hover:text-foreground rounded-full px-3 py-1.5 flex items-center gap-1 transition-colors disabled:opacity-50">
-                  <RefreshCw size={12} /> Remix
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowRemixDropdown(showRemixDropdown === ad.id ? null : (ad.id || null))}
+                    disabled={remixingId === ad.id}
+                    className="text-xs bg-secondary text-muted-foreground hover:text-foreground rounded-full px-3 py-1.5 flex items-center gap-1 transition-colors disabled:opacity-50"
+                  >
+                    {remixingId === ad.id ? (
+                      <>
+                        <RefreshCw size={12} className="animate-spin" />
+                        {t('Winner pattern থেকে শিখছে...', 'Learning from winners...')}
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw size={12} /> Remix <ChevronDown size={10} />
+                      </>
+                    )}
+                  </button>
+                  {showRemixDropdown === ad.id && (
+                    <div className="absolute bottom-full mb-1 left-0 bg-card border border-border rounded-xl shadow-lg p-1 z-10 min-w-[140px]">
+                      {[5, 10].map(n => (
+                        <button
+                          key={n}
+                          onClick={() => handleRemix(ad, n)}
+                          className="w-full text-left text-xs px-3 py-2 rounded-lg hover:bg-secondary transition-colors font-body-bn"
+                        >
+                          {t(`${toBengali(n)}টি রিমিক্স করুন`, `Remix ${n} variations`)}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
             </>
           )}
