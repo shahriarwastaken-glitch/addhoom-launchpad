@@ -170,10 +170,9 @@ If you cannot extract specific information from the content, make a reasonable i
     }
 
     // Save to workspace using service role for column access
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    const supabaseAdmin = createClient(supabaseUrl!, supabaseServiceKey!);
+
+    console.log("Saving DNA to workspace:", workspace_id);
 
     await supabaseAdmin
       .from("workspaces")
