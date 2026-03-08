@@ -27,7 +27,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const [showWorkspaces, setShowWorkspaces] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
 
