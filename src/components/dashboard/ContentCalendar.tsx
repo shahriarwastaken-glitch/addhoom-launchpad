@@ -478,8 +478,8 @@ function GenerateModal({ t, lang, activeWorkspace, hasExisting, onClose, onCompl
 }
 
 // ── MONTH VIEW ──
-function MonthView({ entries, setEntries, t, lang, navigate }: {
-  entries: CalendarEntry[]; setEntries: any; t: any; lang: string; navigate: any;
+function MonthView({ entries, setEntries, t, lang, navigate, isMobile }: {
+  entries: CalendarEntry[]; setEntries: any; t: any; lang: string; navigate: any; isMobile: boolean;
 }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
