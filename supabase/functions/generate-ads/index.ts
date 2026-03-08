@@ -40,7 +40,7 @@ serve(async (req) => {
     const {
       workspace_id, product_name, description, price_bdt,
       target_audience, platforms, language, framework,
-      occasion, tone, num_variations, source_url,
+      occasion, tone, num_variations, source_url, project_id,
     } = input;
 
     // Enforce plan limits on variations
@@ -222,6 +222,7 @@ Return ONLY a valid JSON array. No explanation. No markdown. No text before or a
       is_winner: false,
       source_url: source_url || null,
       ai_generated: true,
+      project_id: project_id || null,
     }));
 
     const { data: saved, error: saveError } = await supabase

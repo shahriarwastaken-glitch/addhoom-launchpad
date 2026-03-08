@@ -1,10 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { FolderOpen } from 'lucide-react';
 import InputPanel from './InputPanel';
 import ResultsPanel from './ResultsPanel';
 import RemixModal from './RemixModal';
@@ -59,6 +61,8 @@ const AdGeneratorPage = () => {
   const { activeWorkspace } = useAuth();
   const { t, lang } = useLanguage();
   const isMobile = useIsMobile();
+  const [searchParams] = useSearchParams();
+  const projectId = searchParams.get('project_id');
 
   const [mode, setMode] = useState<GeneratorMode>('copy');
   const [form, setForm] = useState<GeneratorFormData>(defaultForm);
@@ -67,6 +71,14 @@ const AdGeneratorPage = () => {
   const [remixAd, setRemixAd] = useState<AdResult | null>(null);
   const [remixing, setRemixing] = useState(false);
   const [mobileTab, setMobileTab] = useState<'input' | 'results'>('input');
+  const [projectInfo, setProjectInfo] = useState<{ name: string; emoji: string; color: string } | null>(null);
+
+  // Fetch project info if project_id is present
+  useEffect(() => {
+    if (!projectId) { setProjectInfo(null); return; }
+    supabase.from('projects').select('name, emoji, color').eq('id', projectId).single()
+      .then(({ data }) => { if (data) setProjectInfo(data); });
+  }, [projectId]);
 
   const handleGenerate = useCallback(async () => {
     if (!activeWorkspace) {
@@ -100,6 +112,7 @@ const AdGeneratorPage = () => {
             occasion: form.occasion,
             tone: form.tone,
             num_variations: form.numVariations,
+            project_id: projectId || undefined,
           },
         });
 
@@ -243,13 +256,27 @@ const AdGeneratorPage = () => {
   if (!isMobile) {
     return (
       <div className="h-[calc(100vh-3.5rem)] flex overflow-hidden -m-3 sm:-m-6 md:-m-8">
-        <div className="w-[38%] min-w-[340px] border-r border-border">
-          <InputPanel
-            mode={mode} setMode={setMode}
-            form={form} setForm={setForm}
-            onGenerate={handleGenerate}
-            generating={generating}
-          />
+        <div className="w-[38%] min-w-[340px] border-r border-border flex flex-col">
+          {projectInfo && (
+            <div className="px-6 pt-4 pb-0">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg border-l-[3px]"
+                style={{ borderColor: projectInfo.color, background: `${projectInfo.color}12` }}>
+                <FolderOpen size={14} style={{ color: projectInfo.color }} />
+                <div>
+                  <span className="text-sm font-semibold text-foreground">{projectInfo.emoji} {projectInfo.name}</span>
+                  <p className="text-[11px] text-muted-foreground">{t('এই প্রজেক্টে সংরক্ষণ হবে', 'Will save to this project')}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="flex-1 min-h-0">
+            <InputPanel
+              mode={mode} setMode={setMode}
+              form={form} setForm={setForm}
+              onGenerate={handleGenerate}
+              generating={generating}
+            />
+          </div>
         </div>
         <div className="flex-1 bg-secondary">
           <ResultsPanel
