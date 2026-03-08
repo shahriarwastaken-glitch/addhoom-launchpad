@@ -41,3 +41,39 @@ verify_jwt = false
 
 [functions.evaluate-ad]
 verify_jwt = false
+
+[functions.generate-content-calendar]
+verify_jwt = false
+
+[functions.setup-shop-dna]
+verify_jwt = false
+
+[functions.get-competitor-detail]
+verify_jwt = false
+
+[functions.get-competitor-history]
+verify_jwt = false
+
+[functions.admin-get-overview]
+verify_jwt = false
+
+[functions.admin-get-users]
+verify_jwt = false
+
+[functions.admin-get-user-detail]
+verify_jwt = false
+
+[functions.admin-get-revenue]
+verify_jwt = false
+
+[functions.admin-get-ai-performance]
+verify_jwt = false
+
+[functions.admin-update-user-plan]
+verify_jwt = false
+
+[functions.admin-compute-metrics]
+verify_jwt = false
+
+[functions.admin-manage-admins]
+verify_jwt = false
