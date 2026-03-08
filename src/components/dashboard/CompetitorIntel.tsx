@@ -612,7 +612,7 @@ const DetailView = ({
       {/* Section 4: Comparison Table */}
       {showComparison && (
         <div className="mb-6">
-          <h3 className="font-heading-bn font-bold text-foreground mb-4">{t('📊 প্রতিযোগী তুলনা', '📊 Competitor Comparison')}</h3>
+          <h3 className="font-heading-bn font-bold text-foreground mb-4">{t('প্রতিযোগী তুলনা', 'Competitor Comparison')}</h3>
           <div className="bg-card rounded-2xl shadow-warm overflow-x-auto border border-border">
             <table className="w-full text-sm">
               <thead>
