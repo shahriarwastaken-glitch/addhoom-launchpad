@@ -8,6 +8,7 @@ import {
   Smile, Briefcase, Flame, Square, Smartphone, Monitor,
   Sparkles, Palette, Camera, Upload, Rocket, Globe, Type,
 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   GeneratorMode, GeneratorFormData, PLATFORMS, FRAMEWORKS,
   OCCASIONS, TONES, IMAGE_FORMATS, IMAGE_STYLES,
@@ -60,12 +61,13 @@ interface InputPanelProps {
 }
 
 const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: InputPanelProps) => {
+  const { t } = useLanguage();
   const [loadingTextIdx, setLoadingTextIdx] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
 
-  const copyLoadingTexts = ['চিন্তা করছি...', 'লিখছি...', 'স্কোর করছি...'];
-  const imageLoadingTexts = ['প্রম্পট তৈরি হচ্ছে...', 'AI ছবি আঁকছে...', 'ফিনিশিং টাচ...'];
+  const copyLoadingTexts = [t('চিন্তা করছি...', 'Thinking...'), t('লিখছি...', 'Writing...'), t('স্কোর করছি...', 'Scoring...')];
+  const imageLoadingTexts = [t('প্রম্পট তৈরি হচ্ছে...', 'Creating prompt...'), t('AI ছবি আঁকছে...', 'AI drawing...'), t('ফিনিশিং টাচ...', 'Finishing touches...')];
   const loadingTexts = mode === 'copy' ? copyLoadingTexts : imageLoadingTexts;
 
   // Cycle loading text
@@ -108,7 +110,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
     <div className="h-full flex flex-col bg-card">
       <div className="flex-1 overflow-y-auto p-6 lg:p-7 space-y-5">
         {/* Header */}
-        <h2 className="text-xl font-bold font-heading-bn text-foreground">বিজ্ঞাপন তৈরি করুন</h2>
+        <h2 className="text-xl font-bold font-heading-bn text-foreground">{t('বিজ্ঞাপন তৈরি করুন', 'Create Ad')}</h2>
 
         {/* Mode toggle */}
         <div className="bg-secondary rounded-xl p-1 flex">
@@ -122,55 +124,60 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {m === 'copy' ? <><PenLine size={15} /> কপি জেনারেটর</> : <><ImageIcon size={15} /> ইমেজ জেনারেটর</>}
+              {m === 'copy'
+                ? <><PenLine size={15} /> {t('কপি জেনারেটর', 'Copy Generator')}</>
+                : <><ImageIcon size={15} /> {t('ইমেজ জেনারেটর', 'Image Generator')}</>}
             </button>
           ))}
         </div>
 
         {/* Product Name */}
-        <FieldGroup label="পণ্যের নাম" required>
+        <FieldGroup label={t('পণ্যের নাম', 'Product Name')} required>
           <input
             type="text"
             value={form.productName}
             onChange={e => updateField('productName', e.target.value)}
             maxLength={100}
-            placeholder="যেমন: হ্যান্ডব্যাগ, স্মার্টফোন, শাড়ি..."
+            placeholder={t('যেমন: হ্যান্ডব্যাগ, স্মার্টফোন, শাড়ি...', 'e.g. Handbag, Smartphone, Saree...')}
             className="w-full rounded-xl border-[1.5px] border-input bg-card px-4 py-3 text-[15px] font-heading-bn text-foreground outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)]"
           />
         </FieldGroup>
 
         {/* Description */}
-        <FieldGroup label="পণ্যের বিবরণ">
+        <FieldGroup label={t('পণ্যের বিবরণ', 'Product Description')}>
           <div className="relative">
             <textarea
               value={form.productDesc}
               onChange={e => updateField('productDesc', e.target.value.slice(0, 500))}
               rows={3}
-              placeholder="পণ্যের বৈশিষ্ট্য, উপকরণ, সুবিধা লিখুন...&#10;যত বেশি তথ্য দেবেন, বিজ্ঞাপন তত ভালো হবে।"
+              placeholder={t(
+                'পণ্যের বৈশিষ্ট্য, উপকরণ, সুবিধা লিখুন...\nযত বেশি তথ্য দেবেন, বিজ্ঞাপন তত ভালো হবে।',
+                'Write product features, materials, benefits...\nMore details = better ads.'
+              )}
               className="w-full rounded-xl border-[1.5px] border-input bg-card px-4 py-3 text-[15px] font-heading-bn text-foreground outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)] resize-none"
             />
             <span className="absolute bottom-2 right-3 text-[11px] text-muted-foreground">
-              {form.productDesc.length}/৫০০
+              {form.productDesc.length}/{t('৫০০', '500')}
             </span>
           </div>
         </FieldGroup>
 
         {/* Price */}
-        <FieldGroup label="মূল্য (ঐচ্ছিক)">
+        <FieldGroup label={t('মূল্য (ঐচ্ছিক)', 'Price (Optional)')}>
           <div className="relative">
             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[15px] font-semibold text-muted-foreground font-heading-bn">৳</span>
             <input
               type="text"
               value={form.price}
               onChange={e => updateField('price', e.target.value.replace(/[^0-9]/g, ''))}
-              placeholder="৯৯৯"
+              placeholder={t('৯৯৯', '999')}
               className="w-full rounded-xl border-[1.5px] border-input bg-card pl-7 pr-4 py-3 text-[15px] font-heading-bn text-foreground outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)]"
             />
           </div>
         </FieldGroup>
 
         {/* Platforms */}
-        <FieldGroup label="কোন প্ল্যাটফর্মের জন্য?" required>
+        <FieldGroup label={t('কোন প্ল্যাটফর্মের জন্য?', 'Which platform?')} required>
           <div className="grid grid-cols-2 gap-2">
             {PLATFORMS.map(p => {
               const selected = form.platforms.includes(p.value);
@@ -185,7 +192,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
                     color: selected ? p.color : 'hsl(var(--foreground))',
                   }}
                 >
-                  {PLATFORM_ICONS[p.value]} {p.label}
+                  {PLATFORM_ICONS[p.value]} {t(p.label, p.labelEn)}
                 </button>
               );
             })}
@@ -193,11 +200,11 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
         </FieldGroup>
 
         {/* Language */}
-        <FieldGroup label="ভাষা">
+        <FieldGroup label={t('ভাষা', 'Language')}>
           <div className="flex gap-2">
             {[
-              { label: 'বাংলা', value: 'bn' as const, icon: <Globe size={14} /> },
-              { label: 'Banglish', value: 'banglish' as const, icon: <Type size={14} /> },
+              { label: 'বাংলা', labelEn: 'Bengali', value: 'bn' as const, icon: <Globe size={14} /> },
+              { label: 'Banglish', labelEn: 'Banglish', value: 'banglish' as const, icon: <Type size={14} /> },
             ].map(l => (
               <button
                 key={l.value}
@@ -208,14 +215,14 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
                     : 'border-input bg-card text-foreground'
                 }`}
               >
-                {l.icon} {l.label}
+                {l.icon} {t(l.label, l.labelEn)}
               </button>
             ))}
           </div>
         </FieldGroup>
 
         {/* Framework */}
-        <FieldGroup label="বিজ্ঞাপনের কৌশল (Framework)">
+        <FieldGroup label={t('বিজ্ঞাপনের কৌশল (Framework)', 'Ad Framework')}>
           <div className="grid grid-cols-2 gap-2">
             {FRAMEWORKS.map(f => (
               <Tooltip key={f.value}>
@@ -228,11 +235,11 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
                         : 'border-input bg-card text-foreground'
                     }`}
                   >
-                    {FRAMEWORK_ICONS[f.icon]} {f.label}
+                    {FRAMEWORK_ICONS[f.icon]} {t(f.label, f.labelEn)}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="bg-foreground text-background text-[11px] font-heading-bn">
-                  {f.tooltip}
+                  {t(f.tooltip, f.tooltipEn)}
                 </TooltipContent>
               </Tooltip>
             ))}
@@ -240,40 +247,40 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
         </FieldGroup>
 
         {/* Occasion */}
-        <FieldGroup label="উপলক্ষ (Occasion)">
+        <FieldGroup label={t('উপলক্ষ (Occasion)', 'Occasion')}>
           <Select value={form.occasion} onValueChange={v => updateField('occasion', v)}>
             <SelectTrigger className="rounded-xl border-[1.5px] border-input h-11 font-heading-bn text-[15px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {OCCASIONS.map(o => (
-                <SelectItem key={o.value} value={o.value} className="font-heading-bn">{o.label}</SelectItem>
+                <SelectItem key={o.value} value={o.value} className="font-heading-bn">{t(o.label, o.labelEn)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </FieldGroup>
 
         {/* Tone */}
-        <FieldGroup label="টোন">
+        <FieldGroup label={t('টোন', 'Tone')}>
           <div className="flex gap-2">
-            {TONES.map(t => (
+            {TONES.map(tn => (
               <button
-                key={t.value}
-                onClick={() => updateField('tone', t.value)}
+                key={tn.value}
+                onClick={() => updateField('tone', tn.value)}
                 className={`flex-1 py-2 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 flex items-center justify-center gap-1.5 ${
-                  form.tone === t.value
+                  form.tone === tn.value
                     ? 'border-primary bg-primary/10 text-primary'
                     : 'border-input bg-card text-foreground'
                 }`}
               >
-                {TONE_ICONS[t.icon]} {t.label}
+                {TONE_ICONS[tn.icon]} {t(tn.label, tn.labelEn)}
               </button>
             ))}
           </div>
         </FieldGroup>
 
         {/* Num Variations */}
-        <FieldGroup label="কতটি ভিন্ন ভার্শন?">
+        <FieldGroup label={t('কতটি ভিন্ন ভার্শন?', 'How many variations?')}>
           <div className="flex gap-2">
             {[1, 2, 3, 4, 5].map(n => (
               <button
@@ -303,12 +310,12 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
             >
               <div className="flex items-center gap-2 pt-2">
                 <div className="flex-1 h-px bg-border" />
-                <span className="text-[12px] uppercase tracking-wider text-muted-foreground font-heading-bn">ইমেজ সেটিংস</span>
+                <span className="text-[12px] uppercase tracking-wider text-muted-foreground font-heading-bn">{t('ইমেজ সেটিংস', 'Image Settings')}</span>
                 <div className="flex-1 h-px bg-border" />
               </div>
 
               {/* Product Image Upload */}
-              <FieldGroup label="পণ্যের ছবি আপলোড">
+              <FieldGroup label={t('পণ্যের ছবি আপলোড', 'Upload Product Image')}>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -348,22 +355,22 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
                           }}
                           className="text-xs text-primary font-heading-bn mt-1"
                         >
-                          পরিবর্তন করুন
+                          {t('পরিবর্তন করুন', 'Change')}
                         </button>
                       </div>
                     </div>
                   ) : (
                     <>
                       <Upload size={28} className="mx-auto mb-2 text-muted-foreground" />
-                      <p className="text-sm font-heading-bn text-muted-foreground">ছবি টেনে আনুন বা ক্লিক করুন</p>
-                      <p className="text-xs text-muted-foreground mt-1">PNG, JPG • সর্বোচ্চ 5MB</p>
+                      <p className="text-sm font-heading-bn text-muted-foreground">{t('ছবি টেনে আনুন বা ক্লিক করুন', 'Drag image or click to upload')}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t('PNG, JPG • সর্বোচ্চ 5MB', 'PNG, JPG • Max 5MB')}</p>
                     </>
                   )}
                 </div>
               </FieldGroup>
 
               {/* Image Format */}
-              <FieldGroup label="ইমেজ ফরম্যাট">
+              <FieldGroup label={t('ইমেজ ফরম্যাট', 'Image Format')}>
                 <div className="flex gap-2">
                   {IMAGE_FORMATS.map(f => (
                     <button
@@ -375,14 +382,14 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
                           : 'border-input bg-card text-foreground'
                       }`}
                     >
-                      {FORMAT_ICONS[f.icon]} {f.label}
+                      {FORMAT_ICONS[f.icon]} {t(f.label, f.labelEn)}
                     </button>
                   ))}
                 </div>
               </FieldGroup>
 
               {/* Image Style */}
-              <FieldGroup label="স্টাইল">
+              <FieldGroup label={t('স্টাইল', 'Style')}>
                 <div className="grid grid-cols-2 gap-2">
                   {IMAGE_STYLES.map(s => (
                     <button
@@ -394,17 +401,17 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
                           : 'border-input bg-card text-foreground'
                       }`}
                     >
-                      {STYLE_ICONS[s.icon]} {s.label}
+                      {STYLE_ICONS[s.icon]} {t(s.label, s.labelEn)}
                     </button>
                   ))}
                 </div>
               </FieldGroup>
 
               {/* Brand Colors */}
-              <FieldGroup label="ব্র্যান্ড রঙ (ঐচ্ছিক)">
+              <FieldGroup label={t('ব্র্যান্ড রঙ (ঐচ্ছিক)', 'Brand Colors (Optional)')}>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <label className="text-xs text-muted-foreground font-heading-bn">প্রাথমিক</label>
+                    <label className="text-xs text-muted-foreground font-heading-bn">{t('প্রাথমিক', 'Primary')}</label>
                     <input
                       type="color"
                       value={form.brandColorPrimary}
@@ -413,7 +420,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <label className="text-xs text-muted-foreground font-heading-bn">মাধ্যমিক</label>
+                    <label className="text-xs text-muted-foreground font-heading-bn">{t('মাধ্যমিক', 'Secondary')}</label>
                     <input
                       type="color"
                       value={form.brandColorSecondary}
@@ -425,7 +432,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
                     onClick={() => { updateField('brandColorPrimary', '#FF5100'); updateField('brandColorSecondary', '#FFFFFF'); }}
                     className="text-xs text-primary font-heading-bn ml-auto"
                   >
-                    ব্র্যান্ড ডিফল্ট
+                    {t('ব্র্যান্ড ডিফল্ট', 'Brand Default')}
                   </button>
                 </div>
               </FieldGroup>
@@ -455,11 +462,13 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
             </span>
           ) : (
             <span className="flex items-center justify-center gap-2">
-              {mode === 'copy' ? <><PenLine size={18} /> বিজ্ঞাপন কপি তৈরি করুন</> : <><ImageIcon size={18} /> ইমেজ বিজ্ঞাপন তৈরি করুন</>}
+              {mode === 'copy'
+                ? <><PenLine size={18} /> {t('বিজ্ঞাপন কপি তৈরি করুন', 'Generate Ad Copy')}</>
+                : <><ImageIcon size={18} /> {t('ইমেজ বিজ্ঞাপন তৈরি করুন', 'Generate Image Ad')}</>}
             </span>
           )}
         </button>
-        <p className="text-center text-[11px] text-muted-foreground mt-2 font-heading-bn">সাধারণত ৮-১৫ সেকেন্ড লাগে</p>
+        <p className="text-center text-[11px] text-muted-foreground mt-2 font-heading-bn">{t('সাধারণত ৮-১৫ সেকেন্ড লাগে', 'Usually takes 8-15 seconds')}</p>
       </div>
     </div>
   );

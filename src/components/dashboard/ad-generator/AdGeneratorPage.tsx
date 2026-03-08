@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -29,6 +30,7 @@ const defaultForm: GeneratorFormData = {
 
 const AdGeneratorPage = () => {
   const { activeWorkspace } = useAuth();
+  const { t } = useLanguage();
   const isMobile = useIsMobile();
 
   const [mode, setMode] = useState<GeneratorMode>('copy');
@@ -37,21 +39,19 @@ const AdGeneratorPage = () => {
   const [results, setResults] = useState<AdResult[]>([]);
   const [remixAd, setRemixAd] = useState<AdResult | null>(null);
   const [remixing, setRemixing] = useState(false);
-
-  // Mobile tab
   const [mobileTab, setMobileTab] = useState<'input' | 'results'>('input');
 
   const handleGenerate = useCallback(async () => {
     if (!activeWorkspace) {
-      toast.error('প্রথমে একটি শপ তৈরি করুন');
+      toast.error(t('প্রথমে একটি শপ তৈরি করুন', 'Create a shop first'));
       return;
     }
     if (!form.productName.trim()) {
-      toast.error('পণ্যের নাম দিন');
+      toast.error(t('পণ্যের নাম দিন', 'Enter product name'));
       return;
     }
     if (form.platforms.length === 0) {
-      toast.error('কমপক্ষে একটি প্ল্যাটফর্ম নির্বাচন করুন');
+      toast.error(t('কমপক্ষে একটি প্ল্যাটফর্ম নির্বাচন করুন', 'Select at least one platform'));
       return;
     }
 
@@ -80,12 +80,11 @@ const AdGeneratorPage = () => {
 
         if (data?.success && data.ads) {
           setResults(data.ads);
-          toast.success(`${data.count}টি বিজ্ঞাপন তৈরি হয়েছে`);
+          toast.success(t(`${data.count}টি বিজ্ঞাপন তৈরি হয়েছে`, `${data.count} ads generated`));
         } else {
-          toast.error(data?.message || 'সমস্যা হয়েছে');
+          toast.error(data?.message || t('সমস্যা হয়েছে', 'Something went wrong'));
         }
       } else {
-        // Image mode - call generate-ad-image
         const { data, error } = await supabase.functions.invoke('generate-ad-image', {
           body: {
             workspace_id: activeWorkspace.id,
@@ -105,10 +104,9 @@ const AdGeneratorPage = () => {
         if (error) throw error;
 
         if (data?.success && data.images) {
-          // Map image results into AdResult-like format for display
           const imageAds: AdResult[] = data.images.map((img: any) => ({
             id: img.id,
-            headline: `ভার্শন ${img.variation_number}`,
+            headline: t(`ভার্শন ${img.variation_number}`, `Version ${img.variation_number}`),
             body: img.sd_prompt || '',
             cta: '',
             dhoom_score: img.dhoom_score || 70,
@@ -118,18 +116,18 @@ const AdGeneratorPage = () => {
             is_winner: false,
           }));
           setResults(imageAds);
-          toast.success(`${data.images.length}টি ইমেজ তৈরি হয়েছে`);
+          toast.success(t(`${data.images.length}টি ইমেজ তৈরি হয়েছে`, `${data.images.length} images generated`));
         } else {
-          toast.error(data?.message || 'ইমেজ তৈরিতে সমস্যা হয়েছে');
+          toast.error(data?.message || t('ইমেজ তৈরিতে সমস্যা হয়েছে', 'Image generation failed'));
         }
       }
     } catch (e: any) {
       console.error(e);
-      toast.error('AI সমস্যা। আবার চেষ্টা করুন।');
+      toast.error(t('AI সমস্যা। আবার চেষ্টা করুন।', 'AI error. Please try again.'));
     } finally {
       setGenerating(false);
     }
-  }, [activeWorkspace, form, mode, isMobile]);
+  }, [activeWorkspace, form, mode, isMobile, t]);
 
   const handleSwitchToImage = (ad: AdResult) => {
     setMode('image');
@@ -146,10 +144,10 @@ const AdGeneratorPage = () => {
       });
       if (data?.success && data.ads) {
         setResults(prev => [...data.ads, ...prev]);
-        toast.success('রিমিক্স তৈরি হয়েছে!');
+        toast.success(t('রিমিক্স তৈরি হয়েছে!', 'Remix created!'));
       }
     } catch {
-      toast.error('রিমিক্স ব্যর্থ হয়েছে');
+      toast.error(t('রিমিক্স ব্যর্থ হয়েছে', 'Remix failed'));
     } finally {
       setRemixing(false);
       setRemixAd(null);
@@ -197,7 +195,6 @@ const AdGeneratorPage = () => {
   // Mobile layout
   return (
     <div className="h-[calc(100vh-3.5rem-4rem)] flex flex-col overflow-hidden -m-3 sm:-m-6 md:-m-8">
-      {/* Mobile tab header */}
       <div className="flex bg-card border-b border-border shrink-0">
         {(['input', 'results'] as const).map(tab => (
           <button
@@ -209,7 +206,7 @@ const AdGeneratorPage = () => {
                 : 'text-muted-foreground'
             }`}
           >
-            {tab === 'input' ? 'ইনপুট' : 'ফলাফল'}
+            {tab === 'input' ? t('ইনপুট', 'Input') : t('ফলাফল', 'Results')}
           </button>
         ))}
       </div>

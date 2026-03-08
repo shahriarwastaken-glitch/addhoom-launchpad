@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, RefreshCw, Star, ChevronDown, Image as ImageIcon, Check, Rocket, Zap, BarChart3, RotateCcw, Lightbulb, Flame, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/contexts/LanguageContext';
 import type { AdResult, GeneratorMode } from './types';
+import { LOADING_TIPS, LOADING_TIPS_EN } from './types';
 
 const toBengali = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
 
@@ -17,22 +19,17 @@ interface ResultsPanelProps {
   onRemix: (ad: AdResult) => void;
 }
 
-const TIPS = [
-  'Facebook এ সন্ধ্যা ৭-১০টায় বিজ্ঞাপন পোস্ট করলে বেশি এনগেজমেন্ট পাওয়া যায়।',
-  '৳৯৯৯ মূল্য ৳১,০০০ থেকে বেশি বিক্রি আনে — মনোবিজ্ঞান কাজ করে!',
-  'ধুম স্কোর ৭৫+ বিজ্ঞাপন গড়ে ৩× বেশি ক্লিক পায়।',
-];
-
 const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix }: ResultsPanelProps) => {
+  const { t, lang } = useLanguage();
   const [progress, setProgress] = useState(0);
   const [showTip, setShowTip] = useState(false);
-  const [tipIdx] = useState(() => Math.floor(Math.random() * TIPS.length));
+  const [tipIdx] = useState(() => Math.floor(Math.random() * LOADING_TIPS.length));
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const loadingMsgs = mode === 'copy'
-    ? ['চিন্তা করছি...', 'লিখছি...', 'স্কোর করছি...']
-    : ['প্রম্পট তৈরি হচ্ছে...', 'AI ছবি আঁকছে...', 'ফিনিশিং টাচ...'];
+    ? [t('চিন্তা করছি...', 'Thinking...'), t('লিখছি...', 'Writing...'), t('স্কোর করছি...', 'Scoring...')]
+    : [t('প্রম্পট তৈরি হচ্ছে...', 'Creating prompt...'), t('AI ছবি আঁকছে...', 'AI drawing...'), t('ফিনিশিং টাচ...', 'Finishing touches...')];
 
   useEffect(() => {
     if (!generating) { setProgress(0); setShowTip(false); return; }
@@ -46,7 +43,7 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
   const copyAll = () => {
     const text = results.map(a => `${a.headline}\n\n${a.body}\n\n${a.cta}`).join('\n\n---\n\n');
     navigator.clipboard.writeText(text);
-    toast.success('সব কপি হয়েছে!');
+    toast.success(t('সব কপি হয়েছে!', 'All copied!'));
   };
 
   const copySingle = (ad: AdResult) => {
@@ -61,9 +58,11 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
     const { error } = await supabase.from('ad_creatives').update({ is_winner: newVal } as any).eq('id', ad.id);
     if (!error) {
       setResults(prev => prev.map(a => a.id === ad.id ? { ...a, is_winner: newVal } : a));
-      toast.success(newVal ? 'বিজয়ী চিহ্নিত করা হয়েছে' : 'বিজয়ী সরানো হয়েছে');
+      toast.success(newVal ? t('বিজয়ী চিহ্নিত করা হয়েছে', 'Marked as winner') : t('বিজয়ী সরানো হয়েছে', 'Removed winner'));
     }
   };
+
+  const displayNum = (n: number) => lang === 'bn' ? toBengali(n) : n;
 
   // EMPTY STATE
   if (!generating && results.length === 0) {
@@ -79,13 +78,13 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
           </div>
           <Rocket size={28} className="absolute -top-4 -right-4 text-primary animate-bounce" />
         </div>
-        <h3 className="text-xl font-semibold font-heading-bn text-foreground mb-2">এখানে আপনার বিজ্ঞাপন দেখাবে</h3>
-        <p className="text-[15px] font-heading-bn text-muted-foreground mb-6">বাম দিকে তথ্য দিয়ে তৈরি বাটনে চাপুন</p>
+        <h3 className="text-xl font-semibold font-heading-bn text-foreground mb-2">{t('এখানে আপনার বিজ্ঞাপন দেখাবে', 'Your ads will appear here')}</h3>
+        <p className="text-[15px] font-heading-bn text-muted-foreground mb-6">{t('বাম দিকে তথ্য দিয়ে তৈরি বাটনে চাপুন', 'Fill in the details on the left and hit generate')}</p>
         <div className="flex flex-wrap justify-center gap-2">
           {[
-            { icon: <Zap size={12} />, text: '৮-১৫ সেকেন্ডে তৈরি' },
-            { icon: <BarChart3 size={12} />, text: 'ধুম স্কোরসহ' },
-            { icon: <RotateCcw size={12} />, text: 'রিমিক্স করুন' },
+            { icon: <Zap size={12} />, text: t('৮-১৫ সেকেন্ডে তৈরি', 'Ready in 8-15 seconds') },
+            { icon: <BarChart3 size={12} />, text: t('ধুম স্কোরসহ', 'With Dhoom Score') },
+            { icon: <RotateCcw size={12} />, text: t('রিমিক্স করুন', 'Remix it') },
           ].map(chip => (
             <span key={chip.text} className="px-3 py-1.5 rounded-full bg-secondary text-xs font-heading-bn text-muted-foreground flex items-center gap-1.5">
               {chip.icon} {chip.text}
@@ -128,9 +127,11 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
               className="mt-6 bg-card rounded-xl p-4 max-w-sm border border-border"
             >
               <p className="text-xs font-semibold font-heading-bn text-foreground mb-1 flex items-center gap-1">
-                <Lightbulb size={14} className="text-primary" /> জানেন কি?
+                <Lightbulb size={14} className="text-primary" /> {t('জানেন কি?', 'Did you know?')}
               </p>
-              <p className="text-[13px] font-heading-bn text-muted-foreground">{TIPS[tipIdx]}</p>
+              <p className="text-[13px] font-heading-bn text-muted-foreground">
+                {lang === 'bn' ? LOADING_TIPS[tipIdx] : LOADING_TIPS_EN[tipIdx]}
+              </p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -144,14 +145,14 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-bold font-heading-bn text-foreground">
-          {toBengali(results.length)}টি বিজ্ঞাপন তৈরি হয়েছে
+          {t(`${toBengali(results.length)}টি বিজ্ঞাপন তৈরি হয়েছে`, `${results.length} ads generated`)}
         </h3>
         <div className="flex gap-2">
           <button onClick={copyAll} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn text-foreground hover:bg-secondary transition-colors">
-            সব কপি করুন
+            {t('সব কপি করুন', 'Copy All')}
           </button>
           <button onClick={onRegenerate} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn text-foreground hover:bg-secondary transition-colors flex items-center gap-1">
-            <RefreshCw size={12} /> পুনরায় তৈরি করুন
+            <RefreshCw size={12} /> {t('পুনরায় তৈরি করুন', 'Regenerate')}
           </button>
         </div>
       </div>
@@ -192,6 +193,7 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
   onCopy: () => void; onWinner: () => void; onRemix: () => void;
   onSwitchToImage: () => void; delay: number;
 }) => {
+  const { t } = useLanguage();
   const [expanded, setExpanded] = useState(false);
   const isWinner = ad.is_winner;
   const isCopied = copiedId === ad.id;
@@ -203,20 +205,20 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
   ];
 
   const scoreLabel = (s: number) => {
-    if (s >= 70) return { icon: <Flame size={14} />, text: `ধুম! ${s}`, bg: '#E8FFF4', color: '#00B96B' };
-    if (s >= 50) return { icon: <TrendingUp size={14} />, text: `ভালো ${s}`, bg: '#FFFBEB', color: '#D97706' };
-    return { icon: <Zap size={14} />, text: `আরো কাজ দরকার ${s}`, bg: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))' };
+    if (s >= 70) return { icon: <Flame size={14} />, text: t(`ধুম! ${s}`, `Dhoom! ${s}`), bg: '#E8FFF4', color: '#00B96B' };
+    if (s >= 50) return { icon: <TrendingUp size={14} />, text: t(`ভালো ${s}`, `Good ${s}`), bg: '#FFFBEB', color: '#D97706' };
+    return { icon: <Zap size={14} />, text: t(`আরো কাজ দরকার ${s}`, `Needs work ${s}`), bg: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))' };
   };
 
   const dhoomLabel = scoreLabel(ad.dhoom_score);
 
   const scoreBars = [
-    { label: 'হুক শক্তি', value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 15 - 5)) },
-    { label: 'বাংলা ভাষা', value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 15)) },
-    { label: 'কৌশল প্রয়োগ', value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 10 - 8)) },
-    { label: 'CTA শক্তি', value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 10 - 3)) },
-    { label: 'মোবাইল পাঠ', value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 12)) },
-    { label: 'বাজার ফিট', value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 10 - 2)) },
+    { label: t('হুক শক্তি', 'Hook Strength'), value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 15 - 5)) },
+    { label: t('বাংলা ভাষা', 'Language'), value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 15)) },
+    { label: t('কৌশল প্রয়োগ', 'Framework'), value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 10 - 8)) },
+    { label: t('CTA শক্তি', 'CTA Strength'), value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 10 - 3)) },
+    { label: t('মোবাইল পাঠ', 'Mobile Read'), value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 12)) },
+    { label: t('বাজার ফিট', 'Market Fit'), value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 10 - 2)) },
   ];
 
   const barColor = (v: number) => v > 80 ? '#00B96B' : v >= 60 ? '#FFB800' : '#EF4444';
@@ -231,7 +233,7 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
       {/* Winner banner */}
       {isWinner && (
         <div className="bg-gradient-to-r from-[#FFB800] to-[#FF8C00] text-primary-foreground text-[11px] font-semibold font-heading-bn h-7 flex items-center justify-center gap-1 rounded-t-[20px]">
-          <Star size={12} className="fill-current" /> বিজয়ী বিজ্ঞাপন — এটি সবচেয়ে ভালো কাজ করছে
+          <Star size={12} className="fill-current" /> {t('বিজয়ী বিজ্ঞাপন — এটি সবচেয়ে ভালো কাজ করছে', 'Winner Ad — Best performing')}
         </div>
       )}
       <div
@@ -256,7 +258,7 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
             >
               {dhoomLabel.icon} {dhoomLabel.text}
             </span>
-            <p className="text-[10px] text-muted-foreground mt-0.5">ধুম স্কোর</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{t('ধুম স্কোর', 'Dhoom Score')}</p>
           </div>
         </div>
 
@@ -278,7 +280,7 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
           onClick={() => setExpanded(!expanded)}
           className="text-[13px] text-muted-foreground font-heading-bn mt-3 flex items-center gap-1 hover:text-foreground transition-colors"
         >
-          স্কোর বিস্তারিত দেখুন <ChevronDown size={14} className={`transition-transform ${expanded ? 'rotate-180' : ''}`} />
+          {t('স্কোর বিস্তারিত দেখুন', 'View score details')} <ChevronDown size={14} className={`transition-transform ${expanded ? 'rotate-180' : ''}`} />
         </button>
 
         <AnimatePresence>
@@ -320,23 +322,23 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
             onClick={onCopy}
             className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
           >
-            {isCopied ? <><Check size={12} className="text-brand-green" /> কপি হয়েছে</> : <><Copy size={12} /> কপি করুন</>}
+            {isCopied ? <><Check size={12} className="text-brand-green" /> {t('কপি হয়েছে', 'Copied')}</> : <><Copy size={12} /> {t('কপি করুন', 'Copy')}</>}
           </button>
           <button onClick={onRemix} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1">
-            <RefreshCw size={12} /> রিমিক্স
+            <RefreshCw size={12} /> {t('রিমিক্স', 'Remix')}
           </button>
           <button
             onClick={onWinner}
             className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
           >
             <Star size={12} className={isWinner ? 'fill-[#FFB800] text-[#FFB800]' : ''} />
-            {isWinner ? 'বিজয়ী' : 'বিজয়ী চিহ্নিত করুন'}
+            {isWinner ? t('বিজয়ী', 'Winner') : t('বিজয়ী চিহ্নিত করুন', 'Mark Winner')}
           </button>
           <button
             onClick={onSwitchToImage}
             className="px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/[0.08] text-primary text-xs font-heading-bn hover:bg-primary/15 transition-all active:scale-95 flex items-center gap-1"
           >
-            <ImageIcon size={12} /> এই কপি দিয়ে ছবি বানান
+            <ImageIcon size={12} /> {t('এই কপি দিয়ে ছবি বানান', 'Make image from this')}
           </button>
         </div>
       </div>
