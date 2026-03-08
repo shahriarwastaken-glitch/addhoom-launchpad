@@ -294,14 +294,20 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
 };
 
 // Single ad card component
-const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToImage, onDownload, delay }: {
+const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToImage, onDownload, delay, projectId }: {
   ad: AdResult; rank: number; copiedId: string | null;
   onCopy: () => void; onWinner: () => void; onRemix: () => void;
   onSwitchToImage: () => void; onDownload: () => void; delay: number;
+  projectId?: string | null;
 }) => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const { activeWorkspace } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const [promptVisible, setPromptVisible] = useState(false);
+  const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
+  const [projects, setProjects] = useState<ProjectOption[]>([]);
+  const [assignedProject, setAssignedProject] = useState<ProjectOption | null>(null);
+  const [loadingProjects, setLoadingProjects] = useState(false);
   const isWinner = ad.is_winner;
   const isCopied = copiedId === ad.id;
 
