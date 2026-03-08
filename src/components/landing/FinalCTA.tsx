@@ -29,8 +29,8 @@ const FinalCTA = () => {
           <span className="block font-bn font-bold text-primary" style={{ textShadow: '0 0 40px rgba(255,81,0,0.5)' }}>AdDhoom {t('ব্যবহার করছে।', 'are using.')}</span>
           <span className="block font-bn font-bold text-primary-foreground">{t('আপনি কবে শুরু করবেন?', 'When will you start?')}</span>
         </h2>
-        <p className="mt-5 font-bn text-lg text-primary-foreground/65 max-w-[600px] mx-auto">{t('৩০ সেকেন্ডে সেটআপ। ক্রেডিট কার্ড লাগবে না। ৭ দিনের মধ্যে সন্তুষ্ট না হলে সম্পূর্ণ অর্থ ফেরত।', '30s setup. No credit card. Full refund within 7 days.')}</p>
-        <Link to="/auth" className="inline-block mt-12 font-bn text-xl font-bold text-primary-foreground bg-primary rounded-full px-14 py-5 shadow-[0_16px_64px_rgba(255,81,0,0.4)] hover:scale-[1.04] transition-all duration-300">{t('বিনামূল্যে শুরু করুন →', 'Start Free →')}</Link>
+        <p className="mt-5 font-bn text-lg text-primary-foreground/65 max-w-[600px] mx-auto">{t('৩০ সেকেন্ডে সেটআপ। bKash, Nagad, কার্ড — সবভাবে পেমেন্ট করুন।', '30s setup. Pay via bKash, Nagad, Card — any way you like.')}</p>
+        <Link to="/auth" className="inline-block mt-12 font-bn text-xl font-bold text-primary-foreground bg-primary rounded-full px-14 py-5 shadow-[0_16px_64px_rgba(255,81,0,0.4)] hover:scale-[1.04] transition-all duration-300">{t('শুরু করুন →', 'Get Started →')}</Link>
         <p className="mt-4 text-sm text-primary-foreground/50 font-body">{t('ইতিমধ্যে অ্যাকাউন্ট আছে?', 'Already have an account?')} <Link to="/auth" className="underline hover:text-primary-foreground">{t('লগইন করুন', 'Login')}</Link></p>
         <div className="mt-14 flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-0 sm:divide-x sm:divide-primary-foreground/10">
           {[{ num: 500, suffix: '+', lBn: 'সক্রিয় শপ মালিক', lEn: 'Active shop owners' }, { num: 3, suffix: '.২×', lBn: 'গড় ROAS উন্নতি', lEn: 'Avg ROAS boost' }, { num: 12, suffix: '', lBn: 'ঘণ্টা মাসে সাশ্রয়', lEn: 'Hours saved/month' }].map((s, i) => (

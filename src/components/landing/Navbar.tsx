@@ -51,7 +51,7 @@ const Navbar = () => {
         <div className="flex flex-col items-center gap-8 pt-12">
           {navLinks.map(link => (<a key={link.href} href={link.href} onClick={() => setMobileOpen(false)} className="font-bn text-xl font-semibold text-foreground">{link.label}</a>))}
           <Link to="/auth" onClick={() => setMobileOpen(false)} className="font-body text-base font-medium text-muted-foreground border border-border rounded-full px-8 py-3">{t('লগইন করুন', 'Login')}</Link>
-          <Link to="/auth" onClick={() => setMobileOpen(false)} className="font-body text-base font-semibold text-primary-foreground bg-primary rounded-full px-8 py-3 shadow-orange-glow">{t('শুরু করুন বিনামূল্যে', 'Start Free')}</Link>
+          <Link to="/auth" onClick={() => setMobileOpen(false)} className="font-body text-base font-semibold text-primary-foreground bg-primary rounded-full px-8 py-3 shadow-orange-glow">{t('শুরু করুন', 'Get Started')}</Link>
         </div>
       </div>
     </>

@@ -57,7 +57,7 @@ const Hero = () => {
             <button className="font-body text-[15px] font-medium text-muted-foreground border border-border rounded-full px-7 py-4 hover:border-primary hover:text-primary transition-all duration-200 flex items-center gap-2"><Play className="w-4 h-4" /> {t('ডেমো দেখুন', 'Watch Demo')}</button>
           </div>
           <div className={`mt-4 flex flex-wrap gap-x-3 gap-y-1 text-xs font-body text-muted-foreground transition-all duration-700 delay-[600ms] ${visible ? 'opacity-100' : 'opacity-0'}`}>
-            <span>✓ {t('ক্রেডিট কার্ড লাগবে না', 'No credit card')}</span><span>·</span><span>✓ {t('৩০ সেকেন্ডে সেটআপ', '30s setup')}</span><span>·</span><span>✓ {t('বাংলায় সম্পূর্ণ', 'Fully in Bengali')}</span>
+            <span>✓ {t('৩০ সেকেন্ডে সেটআপ', '30s setup')}</span><span>·</span><span>✓ {t('বাংলায় সম্পূর্ণ', 'Fully in Bengali')}</span><span>·</span><span>✓ {t('সহজ পেমেন্ট', 'Easy payment')}</span>
           </div>
         </div>
         <div className={`relative transition-all duration-700 delay-300 ${visible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
