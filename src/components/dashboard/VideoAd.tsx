@@ -67,17 +67,17 @@ const VideoAd = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-semibold text-foreground font-body-bn mb-2 block">{t('ভাষা', 'Language')}</label>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {[{ bn: 'বাংলা', en: 'Bangla' }, { bn: 'English', en: 'English' }].map(l => (
-                <span key={l.en} className="text-sm border border-border rounded-full px-4 py-2 cursor-pointer hover:border-primary hover:text-primary transition-colors font-body-bn">{t(l.bn, l.en)}</span>
+                <span key={l.en} className="text-sm border border-border rounded-full px-3 py-1.5 cursor-pointer hover:border-primary hover:text-primary transition-colors font-body-bn whitespace-nowrap">{t(l.bn, l.en)}</span>
               ))}
             </div>
           </div>
           <div>
             <label className="text-sm font-semibold text-foreground font-body-bn mb-2 block">{t('মিউজিক মুড', 'Music Mood')}</label>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {['Energetic', 'Soft', 'None'].map(m => (
-                <span key={m} className="text-sm border border-border rounded-full px-3 py-2 cursor-pointer hover:border-primary hover:text-primary transition-colors">{m}</span>
+                <span key={m} className="text-sm border border-border rounded-full px-3 py-1.5 cursor-pointer hover:border-primary hover:text-primary transition-colors whitespace-nowrap">{m}</span>
               ))}
             </div>
           </div>
