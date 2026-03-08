@@ -201,7 +201,11 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             </div>
           </header>
 
-          <main className="flex-1 bg-background p-3 sm:p-6 md:p-8 overflow-auto pb-20 md:pb-8">
+          <main className={`flex-1 bg-background overflow-auto ${
+            location.pathname === '/dashboard/chat' 
+              ? 'p-0 pb-14 md:pb-0' 
+              : 'p-3 sm:p-6 md:p-8 pb-20 md:pb-8'
+          }`}>
             {children}
           </main>
         </div>
