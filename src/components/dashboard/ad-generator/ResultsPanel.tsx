@@ -32,7 +32,7 @@ interface ProjectOption {
   color: string;
 }
 
-const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix, onLoadHistory, projectId }: ResultsPanelProps) => {
+const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix, onLoadHistory, projectId, imageHistoryOpen, onToggleImageHistory }: ResultsPanelProps) => {
   const { t, lang } = useLanguage();
   const { activeWorkspace } = useAuth();
   const [progress, setProgress] = useState(0);
@@ -41,7 +41,7 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [imageHistory, setImageHistory] = useState<ImageHistoryEntry[]>(() => getImageHistory());
-  const [showHistory, setShowHistory] = useState(false);
+  const showHistory = imageHistoryOpen ?? false;
 
   const loadingMsgs = mode === 'copy'
     ? [t('চিন্তা করছি...', 'Thinking...'), t('লিখছি...', 'Writing...'), t('স্কোর করছি...', 'Scoring...')]
