@@ -57,14 +57,18 @@ const Pricing = () => {
             {t('সহজ মূল্য। লুকানো চার্জ নেই।', 'Simple Pricing. No Hidden Charges.')}
           </h2>
         </div>
-        <div className="flex items-center justify-center gap-3 mb-12">
-          <button onClick={() => setAnnual(false)} className={`text-sm font-semibold px-4 py-2 rounded-full transition-colors ${!annual ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>
-            {t('মাসিক', 'Monthly')}
-          </button>
-          <button onClick={() => setAnnual(true)} className={`text-sm font-semibold px-4 py-2 rounded-full transition-colors flex items-center gap-2 ${annual ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>
-            {t('বার্ষিক', 'Annual')}
-            <span className="bg-brand-yellow text-foreground text-xs font-bold rounded-full px-2 py-0.5">{t('২০% ছাড়', '20% off')}</span>
-          </button>
+        <div className="flex items-center justify-center gap-2 mb-12">
+          <div className="inline-flex items-center bg-secondary rounded-full p-1">
+            <button onClick={() => setAnnual(false)} className={`text-sm font-semibold px-5 py-2 rounded-full transition-all ${!annual ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
+              {t('মাসিক', 'Monthly')}
+            </button>
+            <button onClick={() => setAnnual(true)} className={`text-sm font-semibold px-5 py-2 rounded-full transition-all ${annual ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
+              {t('বার্ষিক', 'Annual')}
+            </button>
+          </div>
+          <span className="bg-brand-yellow/20 text-brand-yellow border border-brand-yellow/30 text-xs font-bold rounded-full px-3 py-1">
+            {t('২০% ছাড়', '20% off')}
+          </span>
         </div>
         <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           {plans.map((plan, i) => (
