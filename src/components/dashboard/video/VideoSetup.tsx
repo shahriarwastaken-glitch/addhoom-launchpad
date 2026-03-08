@@ -396,42 +396,82 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
           <div className="mb-6">
             <label className="text-sm font-semibold font-heading-bn text-foreground mb-3 block">{t('ব্যাকগ্রাউন্ড মিউজিক', 'Background Music')}</label>
             <div className="space-y-2">
-              {MUSIC_OPTIONS.map(m => (
-                <button
-                  key={m.value}
-                  onClick={() => setForm(p => ({ ...p, musicTrack: m.value }))}
-                  className={`w-full flex items-center gap-3 p-3 rounded-xl border-[1.5px] transition-all text-left ${
-                    form.musicTrack === m.value
-                      ? 'border-primary bg-primary/[0.04]'
-                      : 'border-border hover:border-primary/30'
-                  }`}
-                >
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                    form.musicTrack === m.value ? 'border-primary' : 'border-border'
-                  }`}>
-                    {form.musicTrack === m.value && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
-                  </div>
-                  <span className="text-lg shrink-0">{m.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold font-heading-bn text-foreground">{t(m.label, m.labelEn)}</p>
-                    <p className="text-[11px] text-muted-foreground font-heading-bn">{t(m.desc, m.descEn)}</p>
-                  </div>
-                  {m.value !== 'none' && (
+              {MUSIC_OPTIONS.map(m => {
+                const MusicIconMap: Record<string, any> = { 'music': Music, 'music-2': Music2, 'drum': Drum, 'guitar': Guitar, 'volume-x': VolumeX, 'upload': UploadIcon };
+                const MusicIcon = MusicIconMap[m.iconName] || Music;
+                return (
+                  <div key={m.value}>
                     <button
-                      onClick={(e) => { e.stopPropagation(); playMusicPreview(m.value); }}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                        playingMusic === m.value
-                          ? 'bg-primary text-primary-foreground scale-110'
-                          : 'bg-secondary text-muted-foreground hover:text-primary hover:bg-primary/10'
+                      onClick={() => {
+                        setForm(p => ({ ...p, musicTrack: m.value }));
+                        if (m.value === 'custom') musicFileRef.current?.click();
+                      }}
+                      className={`w-full flex items-center gap-3 p-3 rounded-xl border-[1.5px] transition-all text-left ${
+                        form.musicTrack === m.value
+                          ? 'border-primary bg-primary/[0.04]'
+                          : 'border-border hover:border-primary/30'
                       }`}
-                      title={playingMusic === m.value ? t('থামান', 'Stop') : t('শুনুন', 'Preview')}
                     >
-                      {playingMusic === m.value ? <Square size={12} /> : <Play size={12} className="ml-0.5" />}
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                        form.musicTrack === m.value ? 'border-primary' : 'border-border'
+                      }`}>
+                        {form.musicTrack === m.value && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                      </div>
+                      <MusicIcon size={18} className="shrink-0 text-muted-foreground" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold font-heading-bn text-foreground">{t(m.label, m.labelEn)}</p>
+                        <p className="text-[11px] text-muted-foreground font-heading-bn">
+                          {m.value === 'custom' && form.customMusicFile
+                            ? form.customMusicFile.name
+                            : t(m.desc, m.descEn)}
+                        </p>
+                      </div>
+                      {m.value !== 'none' && m.value !== 'custom' && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); playMusicPreview(m.value); }}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                            playingMusic === m.value
+                              ? 'bg-primary text-primary-foreground scale-110'
+                              : 'bg-secondary text-muted-foreground hover:text-primary hover:bg-primary/10'
+                          }`}
+                          title={playingMusic === m.value ? t('থামান', 'Stop') : t('শুনুন', 'Preview')}
+                        >
+                          {playingMusic === m.value ? <Square size={12} /> : <Play size={12} className="ml-0.5" />}
+                        </button>
+                      )}
+                      {m.value === 'custom' && form.customMusicFile && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); playMusicPreview('custom'); }}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                            playingMusic === 'custom'
+                              ? 'bg-primary text-primary-foreground scale-110'
+                              : 'bg-secondary text-muted-foreground hover:text-primary hover:bg-primary/10'
+                          }`}
+                        >
+                          {playingMusic === 'custom' ? <Square size={12} /> : <Play size={12} className="ml-0.5" />}
+                        </button>
+                      )}
                     </button>
-                  )}
-                </button>
-              ))}
+                  </div>
+                );
+              })}
             </div>
+            <input
+              ref={musicFileRef}
+              type="file"
+              accept="audio/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                if (file.size > 10 * 1024 * 1024) {
+                  toast.error(t('অডিও ফাইল ১০MB এর কম হতে হবে', 'Audio file must be under 10MB'));
+                  return;
+                }
+                const url = URL.createObjectURL(file);
+                setForm(p => ({ ...p, musicTrack: 'custom' as MusicTrack, customMusicFile: file, customMusicPreview: url }));
+              }}
+            />
           </div>
 
           {/* Text Settings */}
