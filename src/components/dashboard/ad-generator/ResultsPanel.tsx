@@ -290,7 +290,7 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
                   {t('সাম্প্রতিক ইমেজ', 'Recent Images')}
                 </h4>
                 <button
-                  onClick={() => { localStorage.removeItem('dhoom_image_history'); setImageHistory([]); setShowHistory(false); toast.success(t('হিস্ট্রি মুছে ফেলা হয়েছে', 'History cleared')); }}
+                  onClick={() => { localStorage.removeItem('dhoom_image_history'); setImageHistory([]); onToggleImageHistory?.(); toast.success(t('হিস্ট্রি মুছে ফেলা হয়েছে', 'History cleared')); }}
                   className="text-xs text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1"
                 >
                   <Trash2 size={12} /> {t('মুছুন', 'Clear')}
