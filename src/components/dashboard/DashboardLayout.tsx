@@ -4,7 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/contexts/AuthContext';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { Bell, Moon, Sun, Target, Video, Calendar, MessageSquare, Stethoscope, LogOut, ChevronDown, Store, Zap, X, MoreHorizontal, Search, PartyPopper, FolderOpen, Settings, Wand2 } from 'lucide-react';
+import { Bell, Moon, Sun, Target, Video, MessageSquare, LogOut, ChevronDown, Store, X, Settings, Wand2 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
@@ -15,15 +15,6 @@ const mobileItems = [
   { icon: Wand2, bn: 'অ্যাড তৈরি', en: 'Create Ad', url: '/dashboard/generate' },
   { icon: Video, bn: 'ভিডিও', en: 'Video', url: '/dashboard/video' },
   { icon: MessageSquare, bn: 'চ্যাট', en: 'Chat', url: '/dashboard/chat' },
-];
-
-const moreItems = [
-  { icon: Calendar, bn: 'ক্যালেন্ডার', en: 'Calendar', url: '/dashboard/calendar' },
-  { icon: FolderOpen, bn: 'প্রজেক্ট', en: 'Projects', url: '/dashboard/projects' },
-  { icon: Search, bn: 'প্রতিযোগী', en: 'Competitors', url: '/dashboard/competitors' },
-  { icon: Stethoscope, bn: 'ডাক্তার', en: 'Doctor', url: '/dashboard/doctor' },
-  { icon: PartyPopper, bn: 'উৎসব', en: 'Festival', url: '/dashboard/festival' },
-  { icon: Zap, bn: 'ধুম স্কোর', en: 'Dhoom Score', url: '/dashboard/dhoom-score' },
   { icon: Settings, bn: 'সেটিংস', en: 'Settings', url: '/dashboard/settings' },
 ];
 
@@ -36,7 +27,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const [showWorkspaces, setShowWorkspaces] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
 
@@ -221,35 +211,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             <span className="text-[10px] font-medium truncate">{t(item.bn, item.en)}</span>
           </NavLink>
         ))}
-        {/* More menu */}
-        <div className="relative flex-1">
-          <button
-            onClick={() => setShowMoreMenu(!showMoreMenu)}
-            className={`flex flex-col items-center gap-0.5 px-2 py-2.5 w-full ${showMoreMenu ? 'text-primary' : 'text-muted-foreground'}`}
-          >
-            <MoreHorizontal size={20} />
-            <span className="text-[10px] font-medium">{t('আরো', 'More')}</span>
-          </button>
-          {showMoreMenu && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
-              <div className="absolute bottom-full right-0 mb-2 z-50 bg-card border border-border rounded-xl shadow-warm-lg py-2 min-w-[200px]">
-                {moreItems.map(item => (
-                  <NavLink
-                    key={item.en}
-                    to={item.url}
-                    onClick={() => setShowMoreMenu(false)}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary transition-colors"
-                    activeClassName="text-primary bg-primary/5"
-                  >
-                    <item.icon size={16} />
-                    <span className="font-body-bn">{t(item.bn, item.en)}</span>
-                  </NavLink>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
       </nav>
     </SidebarProvider>
   );
