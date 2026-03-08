@@ -59,10 +59,36 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
   const toggleWinner = async (ad: AdResult) => {
     if (!ad.id) return;
     const newVal = !ad.is_winner;
-    const { error } = await supabase.from('ad_creatives').update({ is_winner: newVal } as any).eq('id', ad.id);
+    // Update in the correct table based on whether it's an image or copy ad
+    const table = ad.image_url ? 'ad_images' : 'ad_creatives';
+    const { error } = await supabase.from(table).update({ is_winner: newVal } as any).eq('id', ad.id);
     if (!error) {
-      setResults(prev => prev.map(a => a.id === ad.id ? { ...a, is_winner: newVal } : a));
-      toast.success(newVal ? t('বিজয়ী চিহ্নিত করা হয়েছে', 'Marked as winner') : t('বিজয়ী সরানো হয়েছে', 'Removed winner'));
+      setResults(prev => {
+        const updated = prev.map(a => a.id === ad.id ? { ...a, is_winner: newVal } : a);
+        // Sort winners to the top
+        return updated.sort((a, b) => (b.is_winner ? 1 : 0) - (a.is_winner ? 1 : 0));
+      });
+      toast.success(newVal
+        ? t('🏆 বিজয়ী চিহ্নিত! রিমিক্সে এই প্যাটার্ন ব্যবহার হবে।', '🏆 Marked as winner! Remix will use this pattern.')
+        : t('বিজয়ী সরানো হয়েছে', 'Removed winner'));
+    }
+  };
+
+  const downloadImage = async (url: string, name: string) => {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${name}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+      toast.success(t('ডাউনলোড হচ্ছে...', 'Downloading...'));
+    } catch {
+      toast.error(t('ডাউনলোড ব্যর্থ হয়েছে', 'Download failed'));
     }
   };
 
