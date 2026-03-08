@@ -103,6 +103,7 @@ const SERVICE_COLORS: Record<string, string> = {
   shotstack: '#00B96B',
   meta_ad_library: '#1877F2',
   resend: '#FF5100',
+  replicate: '#0081FB',
 };
 
 const SETUP_GUIDES: Record<string, string[]> = {
@@ -134,6 +135,12 @@ const SETUP_GUIDES: Record<string, string[]> = {
     '২. API Keys সেকশনে যান',
     '৩. নতুন API Key তৈরি করুন',
     '৪. Key কপি করুন (একবারই দেখা যাবে)',
+  ],
+  replicate: [
+    '১. replicate.com এ অ্যাকাউন্ট তৈরি করুন',
+    '২. Account Settings → API Tokens এ যান',
+    '৩. নতুন Token তৈরি করুন',
+    '৪. Token কপি করুন এবং এখানে পেস্ট করুন',
   ],
 };
 
