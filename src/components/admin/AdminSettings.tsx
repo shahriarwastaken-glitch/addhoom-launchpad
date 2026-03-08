@@ -299,8 +299,8 @@ export default function AdminSettings() {
             <div className="bg-primary/10 rounded-lg p-4">
               <h4 className="font-semibold text-primary mb-3">Pro Plan</h4>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span>ভিডিও বিজ্ঞাপন/মাস</span><span className="font-medium">{PLAN_LIMITS.pro.video_ads_per_month}</span></div>
-                <div className="flex justify-between"><span>সর্বোচ্চ ভিডিও দৈর্ঘ্য</span><span className="font-medium">{PLAN_LIMITS.pro.max_video_duration}s</span></div>
+                <div className="flex justify-between"><span>Video Ads/Month</span><span className="font-medium">{PLAN_LIMITS.pro.video_ads_per_month}</span></div>
+                <div className="flex justify-between"><span>Max Video Duration</span><span className="font-medium">{PLAN_LIMITS.pro.max_video_duration}s</span></div>
               </div>
             </div>
             <div className="bg-purple-500/10 rounded-lg p-4">
