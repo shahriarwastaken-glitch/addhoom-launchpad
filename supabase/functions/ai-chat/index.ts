@@ -145,7 +145,7 @@ serve(async (req) => {
     if (action === "load_conversation" && conversation_id) {
       const { data: conv } = await supabase
         .from("ai_conversations")
-        .select("id, title, messages, language")
+        .select("id, title, messages, language, summary")
         .eq("id", conversation_id)
         .single();
       return jsonResponse({ conversation: conv });
