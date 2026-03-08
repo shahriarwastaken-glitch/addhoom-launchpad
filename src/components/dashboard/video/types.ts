@@ -38,6 +38,8 @@ export interface VideoFormData {
   format: VideoFormat;
   style: VideoStyle;
   musicTrack: MusicTrack;
+  customMusicFile: File | null;
+  customMusicPreview: string;
   textLanguage: TextLanguage;
   fontStyle: FontStyle;
   textAnimation: TextAnimation;
