@@ -150,13 +150,14 @@ Return ONLY valid JSON:
       };
     }
 
-    // Format ads for storage and frontend
+    // Format ads for storage and frontend (Graph API v21 returns arrays)
     const formattedAds = ads.slice(0, 10).map((ad: any) => ({
       page_name: ad.page_name || competitor_name,
-      headline: ad.ad_creative_link_title || "",
-      body: ad.ad_creative_body || "",
-      caption: ad.ad_creative_link_caption || "",
+      headline: (ad.ad_creative_link_titles || [])[0] || "",
+      body: (ad.ad_creative_bodies || [])[0] || "",
+      caption: (ad.ad_creative_link_captions || [])[0] || "",
       running_since: ad.ad_delivery_start_time || "",
+      snapshot_url: ad.ad_snapshot_url || "",
     }));
 
     // STEP 4 — Save
