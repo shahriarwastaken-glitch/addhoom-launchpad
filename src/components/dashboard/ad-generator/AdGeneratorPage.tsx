@@ -167,12 +167,41 @@ const AdGeneratorPage = () => {
     if (!remixAd?.id || !activeWorkspace) return;
     setRemixing(true);
     try {
-      const { data } = await supabase.functions.invoke('remix-ad', {
-        body: { workspace_id: activeWorkspace.id, ad_id: remixAd.id, num_variations: 2 },
-      });
-      if (data?.success && data.ads) {
-        setResults(prev => [...data.ads, ...prev]);
-        toast.success(t('রিমিক্স তৈরি হয়েছে!', 'Remix created!'));
+      // Image ad remix: regenerate with same prompt but different composition
+      if (remixAd.image_url) {
+        const { data } = await supabase.functions.invoke('remix-image-ad', {
+          body: {
+            workspace_id: activeWorkspace.id,
+            ad_image_id: remixAd.id,
+          },
+        });
+        if (data?.success && data.images) {
+          const newAds: AdResult[] = data.images.map((img: any) => ({
+            id: img.id,
+            headline: t(`রিমিক্স ভার্শন`, `Remix Version`),
+            body: img.sd_prompt || '',
+            cta: '',
+            dhoom_score: img.dhoom_score || 70,
+            copy_score: 0,
+            platform: remixAd.platform,
+            framework: remixAd.framework,
+            is_winner: false,
+            image_url: img.image_url || '',
+          }));
+          setResults(prev => [...newAds, ...prev]);
+          toast.success(t('ইমেজ রিমিক্স তৈরি হয়েছে!', 'Image remix created!'));
+        } else {
+          toast.error(data?.message || t('রিমিক্স ব্যর্থ হয়েছে', 'Remix failed'));
+        }
+      } else {
+        // Copy ad remix
+        const { data } = await supabase.functions.invoke('remix-ad', {
+          body: { workspace_id: activeWorkspace.id, ad_id: remixAd.id, num_variations: 2 },
+        });
+        if (data?.success && data.ads) {
+          setResults(prev => [...data.ads, ...prev]);
+          toast.success(t('রিমিক্স তৈরি হয়েছে!', 'Remix created!'));
+        }
       }
     } catch {
       toast.error(t('রিমিক্স ব্যর্থ হয়েছে', 'Remix failed'));
