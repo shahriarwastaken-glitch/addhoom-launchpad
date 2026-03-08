@@ -47,7 +47,11 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
   };
 
   const copySingle = (ad: AdResult) => {
-    navigator.clipboard.writeText(`${ad.headline}\n\n${ad.body}\n\n${ad.cta}`);
+    // For image ads, copy the actual prompt (stored in body = sd_prompt), not the "Version X" headline
+    const textToCopy = ad.image_url
+      ? (ad.body || ad.headline)
+      : `${ad.headline}\n\n${ad.body}\n\n${ad.cta}`;
+    navigator.clipboard.writeText(textToCopy);
     setCopiedId(ad.id || '');
     setTimeout(() => setCopiedId(null), 2000);
   };
