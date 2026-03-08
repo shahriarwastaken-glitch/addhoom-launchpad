@@ -78,7 +78,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           {/* Top Header */}
           <header className="h-14 flex items-center justify-between border-b border-border bg-card px-2 sm:px-4 flex-shrink-0">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <SidebarTrigger className="hidden md:flex" />
               {/* Workspace selector */}
               <div className="relative min-w-0">
                 <button
@@ -108,6 +107,9 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
               </div>
             </div>
 
+            <div className="flex-1 flex justify-center min-w-0">
+              <DashboardNavbar />
+            </div>
             <div className="flex items-center gap-1.5 sm:gap-3">
               {profile?.plan && (
                 <span className="hidden sm:inline-block text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">

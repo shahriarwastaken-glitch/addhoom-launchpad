@@ -29,7 +29,7 @@ const DashboardHome = () => {
         <h2 className="text-lg font-bold text-foreground mb-3 font-bn">
           {t('দ্রুত শুরু করুন', 'Quick Start')}
         </h2>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2.5">
           {quickActions.map(action => (
             <button
               key={action.path}
