@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, GripVertical, Play, Square, Rocket, ChevronDown, ChevronUp, Mic, History } from 'lucide-react';
+import { Upload, X, GripVertical, Play, Square, Rocket, ChevronDown, ChevronUp, Mic, History, Video, Facebook, Instagram, Music, Music2, Drum, Guitar, VolumeX, Zap, Pin, Lightbulb, User, Briefcase, Flame, Heart, Upload as UploadIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
