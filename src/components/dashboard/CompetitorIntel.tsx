@@ -260,6 +260,7 @@ const CompetitorIntel = () => {
             t={t}
             lang={lang}
             copyText={copyText}
+            workspaceName={activeWorkspace?.shop_name || 'AdDhoom'}
           />
         ) : null}
       </div>
