@@ -172,7 +172,7 @@ const ContentCalendar = () => {
             className="bg-gradient-cta text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform font-body-bn flex items-center gap-2 disabled:opacity-70"
           >
             {generating ? <Loader2 className="animate-spin" size={16} /> : <Sparkles size={16} />}
-            {generating ? t('তৈরি হচ্ছে...', 'Generating...') : t('৯০ দিনের প্ল্যান তৈরি করুন ⚡', 'Generate 90-Day Plan ⚡')}
+            {generating ? t('তৈরি হচ্ছে...', 'Generating...') : t('৯০ দিনের প্ল্যান তৈরি করুন', 'Generate 90-Day Plan')}
           </button>
         </div>
       </div>
