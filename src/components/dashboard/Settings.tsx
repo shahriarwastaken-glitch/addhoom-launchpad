@@ -73,7 +73,7 @@ const Settings = () => {
       </div>
 
       {/* Shop */}
-      <div className="bg-card rounded-[20px] shadow-warm p-6 mb-6">
+      <div className="bg-card rounded-[20px] shadow-warm p-4 sm:p-6 mb-6">
         <h3 className="font-heading-bn font-semibold text-foreground mb-4">{t('শপ তথ্য', 'Shop Info')}</h3>
         <div className="space-y-4">
           <div>
