@@ -562,14 +562,17 @@ const DetailView = ({
           <h2 className="text-xl sm:text-2xl font-heading-bn font-bold text-foreground">{data.competitor_name}</h2>
           <p className="text-xs text-muted-foreground">{new Date(data.created_at).toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
         </div>
-        <button
-          onClick={onReanalyze}
-          disabled={loading}
-          className="bg-gradient-cta text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-semibold flex items-center gap-2 disabled:opacity-70"
-        >
-          {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
-          {t('পুনরায় বিশ্লেষণ করুন', 'Re-analyze')}
-        </button>
+        <div className="flex gap-2">
+          <DetailPDFButton data={data} workspaceName={workspaceName} t={t} />
+          <button
+            onClick={onReanalyze}
+            disabled={loading}
+            className="bg-gradient-cta text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-semibold flex items-center gap-2 disabled:opacity-70"
+          >
+            {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+            {t('পুনরায় বিশ্লেষণ করুন', 'Re-analyze')}
+          </button>
+        </div>
       </div>
 
       {/* Section 1: Strategy Overview */}
