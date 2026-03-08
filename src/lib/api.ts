@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export type ApiError = {
   error: true;
@@ -7,25 +8,53 @@ export type ApiError = {
   message_en: string;
 };
 
+// Event emitter for upgrade modal (avoids circular deps with React context)
+type UpgradeHandler = (type: 'video' | 'general') => void;
+let _upgradeHandler: UpgradeHandler | null = null;
+export const setUpgradeHandler = (handler: UpgradeHandler) => { _upgradeHandler = handler; };
+
 async function callFunction<T = any>(
   name: string,
   body: Record<string, any>
 ): Promise<{ data: T | null; error: ApiError | null }> {
   const { data, error } = await supabase.functions.invoke(name, { body });
 
+  // Network / invocation error
   if (error) {
+    const status = (error as any)?.status || (error as any)?.context?.status || 500;
+
+    if (status === 401) {
+      window.location.href = '/auth';
+      return { data: null, error: { error: true, code: 401, message_bn: 'আবার লগইন করুন।', message_en: 'Please log in again.' } };
+    }
+
+    if (status === 402) {
+      const isVideo = name === 'generate-video' || name === 'video';
+      _upgradeHandler?.(isVideo ? 'video' : 'general');
+      return { data: null, error: { error: true, code: 402, message_bn: 'আপগ্রেড প্রয়োজন।', message_en: 'Upgrade required.' } };
+    }
+
+    if (status === 503) {
+      toast.info('AI এখন ব্যস্ত। ৩০ সেকেন্ড পরে আবার চেষ্টা করুন।', { duration: 6000 });
+      return { data: null, error: { error: true, code: 503, message_bn: 'AI ব্যস্ত।', message_en: 'AI is busy.' } };
+    }
+
+    toast.error('কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।');
     return {
       data: null,
-      error: {
-        error: true,
-        code: 500,
-        message_bn: 'কিছু একটা সমস্যা হয়েছে।',
-        message_en: error.message || 'Something went wrong.',
-      },
+      error: { error: true, code: 500, message_bn: 'কিছু একটা সমস্যা হয়েছে।', message_en: error.message || 'Something went wrong.' },
     };
   }
 
+  // Application-level error returned in data
   if (data?.error) {
+    const code = data.code || 500;
+
+    if (code === 402) {
+      const isVideo = name === 'generate-video' || name === 'video';
+      _upgradeHandler?.(isVideo ? 'video' : 'general');
+    }
+
     return { data: null, error: data as ApiError };
   }
 
