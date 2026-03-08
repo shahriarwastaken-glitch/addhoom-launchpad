@@ -202,7 +202,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           </header>
 
           <main className={`flex-1 bg-background overflow-auto ${
-            location.pathname === '/dashboard/chat' 
+            location.pathname === '/dashboard/chat' || location.pathname === '/dashboard/calendar'
               ? 'p-0 pb-14 md:pb-0' 
               : 'p-3 sm:p-6 md:p-8 pb-20 md:pb-8'
           }`}>
