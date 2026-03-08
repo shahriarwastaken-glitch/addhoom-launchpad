@@ -626,8 +626,8 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
       {/* Sticky bottom bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-6 py-4 z-10">
         <div className="max-w-[760px] mx-auto flex items-center justify-between">
-          <p className="text-xs text-muted-foreground font-heading-bn hidden sm:block">
-            💡 {t('ভিডিও তৈরিতে সাধারণত ৩০-৬০ সেকেন্ড লাগে', 'Video generation usually takes 30-60 seconds')}
+          <p className="text-xs text-muted-foreground font-heading-bn hidden sm:flex items-center gap-1.5">
+            <Lightbulb size={12} className="text-primary" /> {t('ভিডিও তৈরিতে সাধারণত ৩০-৬০ সেকেন্ড লাগে', 'Video generation usually takes 30-60 seconds')}
           </p>
           <div className="flex gap-3 ml-auto">
             <button
