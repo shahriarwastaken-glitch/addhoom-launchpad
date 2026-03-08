@@ -741,6 +741,8 @@ const AdGenerator = () => {
                   )}
                 </button>
               </div>
+
+              {generating && <RocketLoader />}
             </div>
           )}
 

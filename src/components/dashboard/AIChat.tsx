@@ -289,10 +289,8 @@ const AIChat = () => {
               {typing && (
                 <div className="flex justify-start">
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground text-xs font-bold mr-2">⚡</div>
-                  <div className="bg-secondary rounded-2xl rounded-bl-md px-4 py-3 flex gap-1.5">
-                    <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
-                    <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.15s' }} />
-                    <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.3s' }} />
+                  <div className="bg-secondary rounded-2xl rounded-bl-md">
+                    <ThinkingLoader />
                   </div>
                 </div>
               )}
