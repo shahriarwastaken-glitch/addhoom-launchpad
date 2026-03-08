@@ -85,6 +85,12 @@ const AdGeneratorPage = () => {
           toast.error(data?.message || t('সমস্যা হয়েছে', 'Something went wrong'));
         }
       } else {
+        // Convert product image to base64 if present
+        let product_image_base64: string | undefined;
+        if (form.productImagePreview) {
+          product_image_base64 = form.productImagePreview;
+        }
+
         const { data, error } = await supabase.functions.invoke('generate-ad-image', {
           body: {
             workspace_id: activeWorkspace.id,
@@ -98,6 +104,7 @@ const AdGeneratorPage = () => {
             num_variations: form.numVariations,
             platforms: form.platforms,
             framework: form.framework,
+            product_image_base64,
           },
         });
 
