@@ -101,9 +101,12 @@ const AccountDoctor = () => {
                     {t(section.title.bn, section.title.en)}
                   </h3>
                   <div className="space-y-3">
-                    {section.items.map((item: string, j: number) => (
-                      <div key={j} className={`bg-card rounded-xl shadow-warm p-4 border-l-4 ${section.borderColor} flex items-center justify-between`}>
-                        <span className="text-sm text-foreground font-body-bn">{item}</span>
+                    {section.items.map((item: any, j: number) => (
+                      <div key={j} className={`bg-card rounded-xl shadow-warm p-4 border-l-4 ${section.borderColor}`}>
+                        <p className="text-sm font-semibold text-foreground font-body-bn">{typeof item === 'string' ? item : item.title}</p>
+                        {typeof item === 'object' && item.description && (
+                          <p className="text-xs text-muted-foreground font-body-bn mt-1">{item.description}</p>
+                        )}
                       </div>
                     ))}
                   </div>
