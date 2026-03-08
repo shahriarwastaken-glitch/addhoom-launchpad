@@ -1,28 +1,104 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { api } from '@/lib/api';
+import { toast } from 'sonner';
 
 const toBengali = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
 
+interface AdResult {
+  headline: string;
+  body: string;
+  cta: string;
+  dhoom_score: number;
+  platform: string;
+  framework: string;
+  score_reason?: string;
+  id?: string;
+}
+
 const AdGenerator = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const { activeWorkspace } = useAuth();
   const [step, setStep] = useState(1);
   const [productName, setProductName] = useState('');
   const [productDesc, setProductDesc] = useState('');
   const [price, setPrice] = useState('');
+  const [productUrl, setProductUrl] = useState('');
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['Facebook']);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('bn');
+  const [selectedFramework, setSelectedFramework] = useState<string>('AIDA');
+  const [selectedOccasion, setSelectedOccasion] = useState<string>('regular');
   const [generating, setGenerating] = useState(false);
-  const [results, setResults] = useState<Array<{ headline: { bn: string; en: string }; body: { bn: string; en: string }; cta: { bn: string; en: string }; score: number; platform: string }>>([]);
+  const [results, setResults] = useState<AdResult[]>([]);
 
-  const handleGenerate = () => {
+  const togglePlatform = (p: string) => {
+    setSelectedPlatforms(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
+  };
+
+  const handleGenerate = async () => {
+    if (!activeWorkspace) {
+      toast.error(t('প্রথমে একটি শপ তৈরি করুন', 'Please create a shop first'));
+      return;
+    }
+
     setGenerating(true);
-    setTimeout(() => {
-      setResults([
-        { headline: { bn: '🔥 ঈদে ৫০% ছাড়! সীমিত স্টক!', en: '🔥 50% Eid Discount! Limited!' }, body: { bn: 'আপনার প্রিয় পণ্যটি এখন অবিশ্বাস্য দামে। অর্ডার করুন আজই!', en: 'Your favorite product at an unbelievable price!' }, cta: { bn: 'এখনই কিনুন', en: 'Buy Now' }, score: 92, platform: 'Facebook' },
-        { headline: { bn: '⚡ ফ্ল্যাশ সেল! মাত্র ২৪ ঘণ্টা!', en: '⚡ Flash Sale! 24 Hours Only!' }, body: { bn: 'তাড়াতাড়ি করুন! এই অফার আর আসবে না।', en: "Hurry! This offer won't come again." }, cta: { bn: 'অফার দেখুন', en: 'See Offer' }, score: 85, platform: 'Instagram' },
-        { headline: { bn: '✨ নতুন কালেকশন এসেছে!', en: '✨ New Collection is Here!' }, body: { bn: 'ট্রেন্ডি ডিজাইন, সেরা কোয়ালিটি। স্টাইল আপগ্রেড করুন।', en: 'Trendy designs, best quality.' }, cta: { bn: 'দেখুন', en: 'Explore' }, score: 78, platform: 'Google' },
-      ]);
+    try {
+      let response;
+      if (productUrl.trim()) {
+        response = await api.generateAdsFromUrl({
+          workspace_id: activeWorkspace.id,
+          url: productUrl,
+          platform: selectedPlatforms,
+          language: selectedLanguage,
+        });
+      } else {
+        response = await api.generateAds({
+          workspace_id: activeWorkspace.id,
+          product_name: productName,
+          description: productDesc,
+          price_bdt: price ? parseInt(price) : undefined,
+          platform: selectedPlatforms,
+          language: selectedLanguage,
+          framework: selectedFramework,
+          occasion: selectedOccasion,
+          num_variations: 3,
+        });
+      }
+
+      if (response.error) {
+        toast.error(t(response.error.message_bn, response.error.message_en));
+      } else if (response.data?.ads) {
+        setResults(response.data.ads);
+        setStep(4);
+        toast.success(t('বিজ্ঞাপন তৈরি হয়েছে! ⚡', 'Ads generated! ⚡'));
+      }
+    } catch (e) {
+      toast.error(t('কিছু একটা সমস্যা হয়েছে', 'Something went wrong'));
+    } finally {
       setGenerating(false);
-      setStep(4);
-    }, 2000);
+    }
+  };
+
+  const handleRemix = async (adId: string) => {
+    if (!activeWorkspace || !adId) return;
+    setGenerating(true);
+    try {
+      const response = await api.remixAd({
+        workspace_id: activeWorkspace.id,
+        ad_id: adId,
+        num_variations: 2,
+      });
+      if (response.data?.ads) {
+        setResults(prev => [...prev, ...response.data!.ads]);
+        toast.success(t('Remix তৈরি হয়েছে!', 'Remix created!'));
+      }
+    } catch { /* ignore */ } finally { setGenerating(false); }
+  };
+
+  const copyToClipboard = (ad: AdResult) => {
+    navigator.clipboard.writeText(`${ad.headline}\n\n${ad.body}\n\n${ad.cta}`);
+    toast.success(t('কপি হয়েছে!', 'Copied!'));
   };
 
   const scoreColor = (s: number) => s >= 71 ? 'text-brand-green' : s >= 41 ? 'text-brand-yellow' : 'text-destructive';
@@ -54,11 +130,15 @@ const AdGenerator = () => {
             <input value={price} onChange={e => setPrice(e.target.value)} placeholder="০"
               className="w-full p-4 pl-8 rounded-xl border border-border bg-background text-foreground font-mono focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" />
           </div>
-          <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 text-center cursor-pointer hover:bg-primary/5 transition-colors">
-            <span className="text-primary font-body-bn font-semibold">{t('অথবা লিংক পেস্ট করুন 🔗', 'Or paste a link 🔗')}</span>
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">🔗</span>
+            <input value={productUrl} onChange={e => setProductUrl(e.target.value)}
+              placeholder={t('অথবা প্রোডাক্ট URL পেস্ট করুন', 'Or paste product URL')}
+              className="w-full p-4 pl-10 rounded-xl border border-dashed border-primary/30 bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-body-bn" />
           </div>
-          <button onClick={() => setStep(2)} className="w-full bg-gradient-cta text-primary-foreground rounded-full py-3 font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform font-body-bn">
-            {t('পরবর্তী →', 'Next →')}
+          <button onClick={() => productUrl.trim() ? handleGenerate() : setStep(2)}
+            className="w-full bg-gradient-cta text-primary-foreground rounded-full py-3 font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform font-body-bn">
+            {productUrl.trim() ? t('⚡ URL থেকে বিজ্ঞাপন তৈরি করুন', '⚡ Generate from URL') : t('পরবর্তী →', 'Next →')}
           </button>
         </div>
       )}
@@ -70,15 +150,21 @@ const AdGenerator = () => {
             <label className="text-sm font-semibold text-foreground font-body-bn mb-2 block">{t('প্ল্যাটফর্ম', 'Platform')}</label>
             <div className="flex flex-wrap gap-2">
               {['Facebook', 'Google', 'Instagram'].map(p => (
-                <span key={p} className="text-sm border border-primary/30 text-primary rounded-full px-4 py-2 cursor-pointer hover:bg-primary/10 transition-colors">{p}</span>
+                <button key={p} onClick={() => togglePlatform(p)}
+                  className={`text-sm rounded-full px-4 py-2 transition-colors ${selectedPlatforms.includes(p) ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:border-primary hover:text-primary'}`}>
+                  {p}
+                </button>
               ))}
             </div>
           </div>
           <div>
             <label className="text-sm font-semibold text-foreground font-body-bn mb-2 block">{t('ভাষা', 'Language')}</label>
             <div className="flex flex-wrap gap-2">
-              {[{ bn: 'বাংলা', en: 'Bangla' }, { bn: 'English', en: 'English' }, { bn: 'দুটোই', en: 'Both' }].map(l => (
-                <span key={l.en} className="text-sm border border-border rounded-full px-4 py-2 cursor-pointer hover:border-primary hover:text-primary transition-colors font-body-bn">{t(l.bn, l.en)}</span>
+              {[{ label: 'বাংলা', value: 'bn' }, { label: 'English', value: 'en' }, { label: 'দুটোই', value: 'both' }].map(l => (
+                <button key={l.value} onClick={() => setSelectedLanguage(l.value)}
+                  className={`text-sm rounded-full px-4 py-2 transition-colors font-body-bn ${selectedLanguage === l.value ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:border-primary hover:text-primary'}`}>
+                  {l.label}
+                </button>
               ))}
             </div>
           </div>
@@ -86,15 +172,21 @@ const AdGenerator = () => {
             <label className="text-sm font-semibold text-foreground font-body-bn mb-2 block">{t('ফ্রেমওয়ার্ক', 'Framework')}</label>
             <div className="flex flex-wrap gap-2">
               {['AIDA', 'PAS', 'FOMO', 'Social Proof', 'Before-After'].map(f => (
-                <span key={f} className="text-sm border border-border rounded-full px-4 py-2 cursor-pointer hover:border-primary hover:text-primary transition-colors">{f}</span>
+                <button key={f} onClick={() => setSelectedFramework(f)}
+                  className={`text-sm rounded-full px-4 py-2 transition-colors ${selectedFramework === f ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:border-primary hover:text-primary'}`}>
+                  {f}
+                </button>
               ))}
             </div>
           </div>
           <div>
             <label className="text-sm font-semibold text-foreground font-body-bn mb-2 block">{t('উপলক্ষ', 'Occasion')}</label>
             <div className="flex flex-wrap gap-2">
-              {[{ bn: 'সাধারণ', en: 'Regular' }, { bn: 'ঈদ', en: 'Eid' }, { bn: 'বৈশাখ', en: 'Boishakh' }, { bn: 'পূজা', en: 'Puja' }].map(o => (
-                <span key={o.en} className="text-sm border border-border rounded-full px-4 py-2 cursor-pointer hover:border-primary hover:text-primary transition-colors font-body-bn">{t(o.bn, o.en)}</span>
+              {[{ bn: 'সাধারণ', en: 'Regular', v: 'regular' }, { bn: 'ঈদ', en: 'Eid', v: 'eid' }, { bn: 'বৈশাখ', en: 'Boishakh', v: 'boishakh' }, { bn: 'পূজা', en: 'Puja', v: 'puja' }].map(o => (
+                <button key={o.v} onClick={() => setSelectedOccasion(o.v)}
+                  className={`text-sm rounded-full px-4 py-2 transition-colors font-body-bn ${selectedOccasion === o.v ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:border-primary hover:text-primary'}`}>
+                  {t(o.bn, o.en)}
+                </button>
               ))}
             </div>
           </div>
@@ -114,8 +206,10 @@ const AdGenerator = () => {
           <h3 className="text-lg font-heading-bn font-semibold">{t('তৈরি করুন', 'Generate')}</h3>
           <div className="bg-secondary rounded-xl p-4 text-sm font-body-bn space-y-1">
             <p><strong>{t('পণ্য:', 'Product:')}</strong> {productName || t('উল্লেখ করা হয়নি', 'Not specified')}</p>
-            <p><strong>{t('প্ল্যাটফর্ম:', 'Platform:')}</strong> Facebook, Instagram</p>
-            <p><strong>{t('ভাষা:', 'Language:')}</strong> {t('বাংলা', 'Bangla')}</p>
+            <p><strong>{t('প্ল্যাটফর্ম:', 'Platform:')}</strong> {selectedPlatforms.join(', ')}</p>
+            <p><strong>{t('ভাষা:', 'Language:')}</strong> {selectedLanguage === 'bn' ? t('বাংলা', 'Bangla') : selectedLanguage === 'en' ? 'English' : t('দুটোই', 'Both')}</p>
+            <p><strong>{t('ফ্রেমওয়ার্ক:', 'Framework:')}</strong> {selectedFramework}</p>
+            {selectedOccasion !== 'regular' && <p><strong>{t('উপলক্ষ:', 'Occasion:')}</strong> {selectedOccasion}</p>}
           </div>
           <button onClick={handleGenerate} disabled={generating}
             className="w-full bg-gradient-cta text-primary-foreground rounded-full py-4 text-lg font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform disabled:opacity-70 font-body-bn">
@@ -142,20 +236,27 @@ const AdGenerator = () => {
             <div key={i} className="bg-card rounded-2xl shadow-warm p-6 animate-fade-up" style={{ animationDelay: `${i * 0.1}s` }}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <span className="text-xs bg-secondary rounded px-2 py-0.5 text-muted-foreground mb-2 inline-block">{ad.platform}</span>
-                  <h4 className="text-lg font-heading-bn font-bold text-foreground">{t(ad.headline.bn, ad.headline.en)}</h4>
+                  <div className="flex gap-2 mb-2">
+                    <span className="text-xs bg-secondary rounded px-2 py-0.5 text-muted-foreground">{ad.platform}</span>
+                    {ad.framework && <span className="text-xs bg-primary/10 text-primary rounded px-2 py-0.5">{ad.framework}</span>}
+                  </div>
+                  <h4 className="text-lg font-heading-bn font-bold text-foreground">{ad.headline}</h4>
                 </div>
-                <div className={`text-center ${scoreColor(ad.score)}`}>
-                  <div className="text-2xl font-mono font-bold">{toBengali(ad.score)}</div>
+                <div className={`text-center ${scoreColor(ad.dhoom_score)}`}>
+                  <div className="text-2xl font-mono font-bold">{toBengali(ad.dhoom_score)}</div>
                   <div className="text-[10px] font-body-bn">{t('ধুম স্কোর', 'Dhoom Score')}</div>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground font-body-bn mb-3">{t(ad.body.bn, ad.body.en)}</p>
-              <span className="inline-block bg-primary/10 text-primary text-sm font-semibold rounded-full px-4 py-1.5 mb-4 font-body-bn">{t(ad.cta.bn, ad.cta.en)}</span>
+              <p className="text-sm text-muted-foreground font-body-bn mb-3">{ad.body}</p>
+              <span className="inline-block bg-primary/10 text-primary text-sm font-semibold rounded-full px-4 py-1.5 mb-2 font-body-bn">{ad.cta}</span>
+              {ad.score_reason && (
+                <p className="text-xs text-muted-foreground italic mb-3">{ad.score_reason}</p>
+              )}
               <div className="flex flex-wrap gap-2 pt-3 border-t border-border">
-                {['⭐ Winner', '✏️ Edit', '📋 Copy', '🔄 Remix'].map(a => (
-                  <button key={a} className="text-xs text-muted-foreground hover:text-foreground bg-secondary rounded-full px-3 py-1.5 transition-colors">{a}</button>
-                ))}
+                <button onClick={() => copyToClipboard(ad)} className="text-xs text-muted-foreground hover:text-foreground bg-secondary rounded-full px-3 py-1.5 transition-colors">📋 {t('কপি', 'Copy')}</button>
+                {ad.id && (
+                  <button onClick={() => handleRemix(ad.id!)} disabled={generating} className="text-xs text-muted-foreground hover:text-foreground bg-secondary rounded-full px-3 py-1.5 transition-colors">🔄 Remix</button>
+                )}
               </div>
             </div>
           ))}

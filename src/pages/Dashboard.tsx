@@ -7,6 +7,8 @@ import AIChat from '@/components/dashboard/AIChat';
 import CompetitorIntel from '@/components/dashboard/CompetitorIntel';
 import AccountDoctor from '@/components/dashboard/AccountDoctor';
 import FestivalTemplates from '@/components/dashboard/FestivalTemplates';
+import CampaignsList from '@/components/dashboard/CampaignsList';
+import Settings from '@/components/dashboard/Settings';
 
 const Dashboard = () => {
   return (
@@ -19,6 +21,8 @@ const Dashboard = () => {
         <Route path="competitors" element={<CompetitorIntel />} />
         <Route path="doctor" element={<AccountDoctor />} />
         <Route path="festival" element={<FestivalTemplates />} />
+        <Route path="campaigns" element={<CampaignsList />} />
+        <Route path="settings" element={<Settings />} />
       </Routes>
     </DashboardLayout>
   );
