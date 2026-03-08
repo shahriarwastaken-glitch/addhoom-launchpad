@@ -1,12 +1,12 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import { Link2, MousePointerClick, Pencil, Rocket } from 'lucide-react';
+import { Store, Target, Bot, Rocket } from 'lucide-react';
 
 const steps = [
-  { num: '০১', title: { bn: 'শপের লিংক দিন', en: 'Paste Your Link' }, desc: { bn: 'Daraz, Facebook বা ওয়েবসাইটের URL দিন। AI আপনার ব্র্যান্ড মিনিটে শিখে নেবে।', en: 'Paste your Daraz, Facebook, or website URL. AI learns your brand in minutes.' }, icon: Link2 },
-  { num: '০২', title: { bn: 'আইডিয়া সোয়াইপ করুন', en: 'Swipe Ideas' }, desc: { bn: 'প্রতিদিন নতুন বিজ্ঞাপনের আইডিয়া পাবেন। পছন্দের গুলো সেভ করুন।', en: 'Get fresh ad ideas daily. Save the ones you like.' }, icon: MousePointerClick },
-  { num: '০৩', title: { bn: 'এডিট করুন', en: 'Edit Anything' }, desc: { bn: 'কপি, টোন, প্ল্যাটফর্ম — যেকোনো কিছু পরিবর্তন করুন।', en: 'Change copy, tone, platform. No design skills needed.' }, icon: Pencil },
-  { num: '০৪', title: { bn: 'লঞ্চ করুন', en: 'Launch' }, desc: { bn: 'ডাউনলোড বা সরাসরি পাবলিশ করুন। ১০x বেশি কনটেন্ট, ৭৫% দ্রুত।', en: 'Download or publish directly. 10x more content, 75% faster.' }, icon: Rocket },
+  { num: '01', Icon: Store, titleBn: 'আপনার শপ যোগ করুন', titleEn: 'Add Your Shop', descBn: 'আপনার Daraz, Facebook Shop বা ওয়েবসাইটের লিংক দিন। AI স্বয়ংক্রিয়ভাবে আপনার ব্র্যান্ড বুঝে নেবে।', descEn: 'Add your Daraz, Facebook Shop or website link. AI automatically understands your brand.' },
+  { num: '02', Icon: Target, titleBn: 'পণ্য ও লক্ষ্য বলুন', titleEn: 'Tell Your Goal', descBn: 'কোন পণ্যের বিজ্ঞাপন চাই, কোন প্ল্যাটফর্মে, কোন অনুষ্ঠানে — সহজ বাংলায় বলুন।', descEn: 'Which product, platform, occasion — just tell us in plain Bengali.' },
+  { num: '03', Icon: Bot, titleBn: 'AI বিজ্ঞাপন তৈরি করে', titleEn: 'AI Creates Ads', descBn: 'ধুম স্কোরসহ একাধিক বিজ্ঞাপন কপি পান। কোনটা সবচেয়ে ভালো কাজ করবে AI বলে দেবে।', descEn: 'Get multiple ad copies with Dhoom Score. AI tells you which performs best.' },
+  { num: '04', Icon: Rocket, titleBn: 'পোস্ট করুন, বিক্রি বাড়ান', titleEn: 'Post & Sell More', descBn: 'সেরা বিজ্ঞাপন বেছে নিন, সরাসরি কপি করুন, প্ল্যাটফর্মে পোস্ট করুন। ব্যস!', descEn: 'Pick the best, copy directly, post on platform. Done!' },
 ];
 
 const HowItWorks = () => {
@@ -14,23 +14,21 @@ const HowItWorks = () => {
   const { ref, isVisible } = useScrollReveal();
 
   return (
-    <section ref={ref} className="py-24 px-4 bg-secondary">
-      <div className="container mx-auto max-w-5xl">
-        <div className="text-center mb-16">
-          <span className="section-label">{t('কীভাবে কাজ করে', 'How It Works')}</span>
-          <h2 className="mt-3 font-heading-bn font-bold text-foreground" style={{ fontSize: 'clamp(28px, 4vw, 52px)' }}>
-            {t('৪টি ধাপে আপনার শপের মার্কেটিং সম্পূর্ণ', 'Complete Marketing in 4 Steps')}
-          </h2>
+    <section id="how-it-works" ref={ref} className="py-24 px-6 bg-secondary">
+      <div className="max-w-[1100px] mx-auto">
+        <div className={`text-center mb-[72px] transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7'}`}>
+          <span className="landing-pill">{t('প্রক্রিয়া', 'Process')}</span>
+          <h2 className="mt-3 font-bn font-bold text-foreground" style={{ fontSize: 'clamp(28px, 4vw, 42px)' }}>{t('মাত্র ৪টি ধাপে শুরু করুন', 'Start in Just 4 Steps')}</h2>
+          <p className="mt-3 font-bn text-lg text-muted-foreground">{t('জটিল কিছু নেই। কোনো টেকনিক্যাল জ্ঞান লাগবে না।', 'Nothing complex. No technical knowledge needed.')}</p>
         </div>
-        <div className="relative grid md:grid-cols-4 gap-8">
-          <div className="hidden md:block absolute top-12 left-[12.5%] right-[12.5%] h-0.5 border-t-2 border-dashed border-primary/30" />
+        <div className="relative grid md:grid-cols-4 gap-6">
+          <div className="hidden md:block absolute top-[30px] left-[12.5%] right-[12.5%] border-t-2 border-dashed border-border z-0" />
           {steps.map((step, i) => (
-            <div key={i} className={`relative flex flex-col items-center text-center transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
-              style={{ transitionDelay: `${i * 0.15}s` }}>
-              <span className="absolute -top-4 text-8xl font-heading-en font-extrabold text-primary/[0.06] select-none">{step.num}</span>
-              <div className="relative z-10 w-16 h-16 rounded-2xl bg-card shadow-warm flex items-center justify-center mb-4"><step.icon size={28} className="text-primary" /></div>
-              <h3 className="text-lg font-heading-bn font-bold text-foreground mb-2">{t(step.title.bn, step.title.en)}</h3>
-              <p className="text-sm text-muted-foreground font-body-bn leading-relaxed">{t(step.desc.bn, step.desc.en)}</p>
+            <div key={step.num} className={`relative z-[1] bg-card rounded-[20px] p-8 border border-border text-center hover:-translate-y-1 hover:shadow-[0_16px_48px_rgba(255,81,0,0.08)] transition-all duration-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7'}`} style={{ transitionDelay: `${i * 100}ms` }}>
+              <div className="w-[60px] h-[60px] mx-auto rounded-full bg-gradient-brand flex items-center justify-center shadow-[0_8px_24px_rgba(255,81,0,0.3)]"><span className="font-en text-2xl font-[800] text-primary-foreground">{step.num}</span></div>
+              <div className="mt-5 w-12 h-12 mx-auto flex items-center justify-center text-primary"><step.Icon className="w-10 h-10" /></div>
+              <h3 className="mt-4 font-bn text-xl font-bold text-foreground">{t(step.titleBn, step.titleEn)}</h3>
+              <p className="mt-2 font-bn text-[15px] text-muted-foreground leading-relaxed">{t(step.descBn, step.descEn)}</p>
             </div>
           ))}
         </div>

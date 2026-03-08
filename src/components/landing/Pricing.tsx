@@ -1,107 +1,52 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { Check } from 'lucide-react';
-import { Link } from 'react-router-dom';
-
-const plans = [
-  {
-    name: { bn: 'Pro', en: 'Pro' },
-    price: { monthly: '২,৯৯৯', annual: '২,৩৯৯' },
-    badge: { bn: 'সবচেয়ে জনপ্রিয়', en: 'Most Popular' },
-    highlight: true,
-    features: [
-      { bn: 'Unlimited AI বিজ্ঞাপন', en: 'Unlimited AI Ads' },
-      { bn: 'AI ভিডিও বিজ্ঞাপন (৩০টি/মাস)', en: 'AI Video Ads (30/mo)' },
-      { bn: 'Unlimited ধুম স্কোর', en: 'Unlimited Dhoom Score' },
-      { bn: 'শপ DNA সেটআপ', en: 'Shop DNA Setup' },
-      { bn: 'কনটেন্ট ক্যালেন্ডার (৩ মাস)', en: 'Content Calendar (3mo)' },
-      { bn: 'প্রতিযোগী গোয়েন্দা', en: 'Competitor Intel' },
-      { bn: 'অ্যাকাউন্ট ডাক্তার (সাপ্তাহিক)', en: 'Account Doctor (weekly)' },
-      { bn: 'সব উৎসব টেমপ্লেট', en: 'All Festival Templates' },
-      { bn: '৫টি ওয়ার্কস্পেস', en: '5 Workspaces' },
-    ],
-    cta: { bn: 'Pro তে যান', en: 'Go Pro' },
-    ctaStyle: 'bg-gradient-cta text-primary-foreground shadow-orange-glow',
-  },
-  {
-    name: { bn: 'Agency', en: 'Agency' },
-    price: { monthly: '৭,৯৯৯', annual: '৬,৩৯৯' },
-    badge: null,
-    highlight: false,
-    features: [
-      { bn: 'সব Pro ফিচার', en: 'All Pro Features' },
-      { bn: 'AI ভিডিও (Unlimited)', en: 'AI Video (Unlimited)' },
-      { bn: '২০টি ওয়ার্কস্পেস', en: '20 Workspaces' },
-      { bn: 'White label dashboard', en: 'White label dashboard' },
-      { bn: 'ক্লায়েন্ট রিপোর্ট শেয়ার', en: 'Client Report Sharing' },
-      { bn: 'অ্যাকাউন্ট ডাক্তার (দৈনিক)', en: 'Account Doctor (daily)' },
-      { bn: 'Dedicated support', en: 'Dedicated support' },
-    ],
-    cta: { bn: 'Agency শুরু করুন', en: 'Start Agency' },
-    ctaStyle: 'bg-foreground text-background hover:bg-foreground/90',
-  },
-];
 
 const Pricing = () => {
   const { t } = useLanguage();
   const { ref, isVisible } = useScrollReveal();
   const [annual, setAnnual] = useState(false);
 
+  const proFeatures = [t('সীমাহীন বিজ্ঞাপন কপি জেনারেশন','Unlimited ad copy'), t('ধুম স্কোর বিশ্লেষণ','Dhoom Score'), t('মাসে ২টি ভিডিও বিজ্ঞাপন','2 video ads/mo'), t('৯০ দিনের কনটেন্ট ক্যালেন্ডার','90-day calendar'), t('প্রতিযোগী বিশ্লেষণ','Competitor analysis'), t('AI চ্যাট বিশেষজ্ঞ','AI Chat'), t('৫টি ওয়ার্কস্পেস','5 workspaces'), t('বাংলা + ইংরেজি সাপোর্ট','Bengali + English')];
+  const agencyFeatures = [t('সব Pro ফিচার +','All Pro features +'), t('সীমাহীন ওয়ার্কস্পেস (২০টি ক্লায়েন্ট)','Unlimited workspaces (20 clients)'), t('সীমাহীন ভিডিও বিজ্ঞাপন','Unlimited video ads'), t('হোয়াইট লেবেল রিপোর্ট','White label reports'), t('দলগত অ্যাক্সেস','Team access'), t('অগ্রাধিকার সাপোর্ট','Priority support'), t('কাস্টম ব্র্যান্ড ভয়েস','Custom brand voice')];
+
   return (
-    <section ref={ref} id="pricing" className="py-24 px-4">
-      <div className="container mx-auto max-w-4xl">
-        <div className="text-center mb-12">
-          <span className="section-label">{t('মূল্য', 'Pricing')}</span>
-          <h2 className="mt-3 font-heading-bn font-bold text-foreground" style={{ fontSize: 'clamp(28px, 4vw, 52px)' }}>
-            {t('সহজ মূল্য। লুকানো চার্জ নেই।', 'Simple Pricing. No Hidden Charges.')}
-          </h2>
-        </div>
-        <div className="flex items-center justify-center mb-12">
-          <div className="relative inline-flex items-center bg-secondary rounded-full p-1">
-            <button onClick={() => setAnnual(false)} className={`text-sm font-semibold px-5 py-2 rounded-full transition-all ${!annual ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
-              {t('মাসিক', 'Monthly')}
-            </button>
-            <button onClick={() => setAnnual(true)} className={`text-sm font-semibold px-5 py-2 rounded-full transition-all ${annual ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
-              {t('বার্ষিক', 'Annual')}
-            </button>
-            <span className="absolute -top-5 right-0 -rotate-12 bg-brand-yellow/20 text-brand-yellow border border-brand-yellow/30 text-[10px] font-bold rounded-full px-2.5 py-0.5 leading-none whitespace-nowrap">
-              {t('২০% ছাড়', '20% off')}
-            </span>
+    <section id="pricing" ref={ref} className="py-24 px-6 bg-secondary">
+      <div className="max-w-[1000px] mx-auto">
+        <div className={`text-center mb-16 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7'}`}>
+          <span className="landing-pill">{t('মূল্য পরিকল্পনা', 'Pricing')}</span>
+          <h2 className="mt-3 font-bn font-bold text-foreground" style={{ fontSize: 'clamp(28px, 4vw, 42px)' }}>{t('সহজ মূল্য। কোনো লুকানো চার্জ নেই।', 'Simple Pricing. No Hidden Charges.')}</h2>
+          <p className="mt-3 font-bn text-lg text-muted-foreground">{t('bKash, Nagad, Rocket, কার্ড — সবভাবে পেমেন্ট করুন', 'bKash, Nagad, Rocket, Card — pay any way')}</p>
+          <div className="mt-8 inline-flex items-center gap-3 bg-card rounded-full p-1 border border-border">
+            <button onClick={() => setAnnual(false)} className={`font-bn text-sm font-semibold rounded-full px-5 py-2 transition-all ${!annual ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>{t('মাসিক', 'Monthly')}</button>
+            <button onClick={() => setAnnual(true)} className={`font-bn text-sm font-semibold rounded-full px-5 py-2 transition-all flex items-center gap-2 ${annual ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>{t('বার্ষিক', 'Annual')}<span className="text-[10px] font-bold bg-brand-green text-primary-foreground rounded-full px-2 py-0.5">{t('২০% সাশ্রয়', '20% off')}</span></button>
           </div>
         </div>
-        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-          {plans.map((plan, i) => (
-            <div key={i} className={`relative bg-card rounded-3xl p-8 shadow-warm transition-all duration-700 ${plan.highlight ? 'border-2 border-primary shadow-[0_0_40px_rgba(255,81,0,0.1)]' : 'border border-border'} ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
-              style={{ transitionDelay: `${i * 0.12}s` }}>
-              {plan.badge && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-bold rounded-full px-4 py-1">
-                  {t(plan.badge.bn, plan.badge.en)}
-                </span>
-              )}
-              <h3 className="text-xl font-heading-en font-bold text-foreground mb-2">{t(plan.name.bn, plan.name.en)}</h3>
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-4xl font-mono font-bold text-foreground">৳{annual ? plan.price.annual : plan.price.monthly}</span>
-                <span className="text-muted-foreground text-sm font-body-bn">/{t('মাস', 'mo')}</span>
-              </div>
-              <div className="space-y-3 mb-8">
-                {plan.features.map((f, j) => (
-                  <div key={j} className="flex items-start gap-2">
-                    <Check size={16} className="text-brand-green mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-foreground font-body-bn">{t(f.bn, f.en)}</span>
-                  </div>
-                ))}
-              </div>
-              <Link to="/auth" className={`block text-center rounded-full py-3 text-sm font-semibold transition-all ${plan.ctaStyle}`}>
-                {t(plan.cta.bn, plan.cta.en)}
-              </Link>
-              <div className="flex items-center justify-center gap-3 mt-4">
-                {['bKash', 'Nagad', 'Visa'].map(p => (
-                  <span key={p} className="text-xs text-muted-foreground bg-secondary rounded px-2 py-0.5">{p}</span>
-                ))}
-              </div>
-            </div>
-          ))}
+        <div className="grid md:grid-cols-2 gap-6 max-w-[800px] mx-auto items-start">
+          <div className={`bg-card rounded-3xl border border-border p-10 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7'}`} style={{ transitionDelay: '200ms' }}>
+            <span className="font-en text-base font-semibold text-muted-foreground tracking-[0.1em] uppercase">Pro</span>
+            <div className="mt-4 flex items-baseline gap-1"><span className="font-mono font-bold text-foreground" style={{ fontSize: 'clamp(40px, 5vw, 52px)' }}>{annual ? '৳২,৩৯৯' : '৳২,৯৯৯'}</span><span className="font-bn text-lg text-muted-foreground">/{t('মাস', 'mo')}</span></div>
+            {annual && <span className="inline-block mt-2 text-xs font-semibold text-brand-green bg-brand-green/10 rounded-full px-3 py-1">{t('৳৭,২০০ বাঁচবেন বছরে', 'Save ৳7,200/year')}</span>}
+            <p className="mt-3 font-bn text-[15px] text-muted-foreground">{t('একক দোকানের জন্য পারফেক্ট', 'Perfect for single shops')}</p>
+            <div className="h-px bg-border my-6" />
+            <ul className="space-y-3">{proFeatures.map(f => (<li key={f} className="flex items-start gap-2.5 text-sm"><Check className="w-4 h-4 text-primary shrink-0 mt-0.5" /><span className="font-bn text-foreground">{f}</span></li>))}</ul>
+            <Link to="/auth" className="mt-8 block w-full text-center font-bn text-base font-bold text-primary border-2 border-primary rounded-full py-3.5 hover:bg-primary hover:text-primary-foreground transition-all duration-200">Pro {t('শুরু করুন', 'Start')}</Link>
+          </div>
+          <div className={`relative bg-primary rounded-3xl p-10 text-primary-foreground scale-[1.02] shadow-[0_24px_80px_rgba(255,81,0,0.35)] transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7'}`} style={{ transitionDelay: '300ms' }}>
+            <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-card text-primary text-xs font-body font-semibold rounded-full px-5 py-1.5">{t('সবচেয়ে জনপ্রিয়', 'Most Popular')}</span>
+            <span className="font-en text-base font-semibold text-primary-foreground/70 tracking-[0.1em] uppercase">Agency</span>
+            <div className="mt-4 flex items-baseline gap-1"><span className="font-mono font-bold text-primary-foreground" style={{ fontSize: 'clamp(40px, 5vw, 52px)' }}>{annual ? '৳৬,৩৯৯' : '৳৭,৯৯৯'}</span><span className="font-bn text-lg text-primary-foreground/60">/{t('মাস', 'mo')}</span></div>
+            <p className="mt-3 font-bn text-[15px] text-primary-foreground/75">{t('একাধিক ক্লায়েন্ট ম্যানেজ করুন', 'Manage multiple clients')}</p>
+            <div className="h-px bg-primary-foreground/20 my-6" />
+            <ul className="space-y-3">{agencyFeatures.map(f => (<li key={f} className="flex items-start gap-2.5 text-sm"><Check className="w-4 h-4 text-primary-foreground/90 shrink-0 mt-0.5" /><span className="font-bn text-primary-foreground">{f}</span></li>))}</ul>
+            <Link to="/auth" className="mt-8 block w-full text-center font-bn text-base font-bold bg-card text-primary rounded-full py-3.5 shadow-[0_8px_24px_rgba(0,0,0,0.15)] hover:bg-card/90 hover:-translate-y-0.5 transition-all duration-200">Agency {t('শুরু করুন', 'Start')}</Link>
+          </div>
+        </div>
+        <div className={`mt-12 text-center transition-all duration-700 delay-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+          <p className="font-bn text-sm text-muted-foreground mb-3">{t('গ্রহণযোগ্য পেমেন্ট পদ্ধতি:', 'Accepted payment methods:')}</p>
+          <div className="flex flex-wrap justify-center gap-3">{[{name:'bKash',color:'#E2136E'},{name:'Nagad',color:'#F6921E'},{name:'Rocket',color:'#8B2F89'},{name:'Visa',color:'#1A1F71'},{name:'Mastercard',color:'#EB001B'}].map(m=>(<span key={m.name} className="font-body text-xs font-semibold rounded-full px-3 py-1" style={{color:m.color,background:`${m.color}10`,border:`1px solid ${m.color}20`}}>{m.name}</span>))}</div>
         </div>
       </div>
     </section>
