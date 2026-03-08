@@ -117,7 +117,7 @@ const AdGeneratorPage = () => {
             brand_color_secondary: form.brandColorSecondary,
             ad_headline: adHeadline,
             ad_body: form.productDesc,
-            language: form.language,
+            language: lang,
             num_variations: form.numVariations,
             product_image_base64,
             product_image_mime_type,
