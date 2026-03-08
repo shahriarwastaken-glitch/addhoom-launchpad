@@ -65,7 +65,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
     }
     stopMusicPreview();
 
-    const url = MUSIC_URLS[trackValue];
+    const url = trackValue === 'custom' ? form.customMusicPreview : MUSIC_URLS[trackValue];
     if (!url) return;
 
     const audio = new Audio(url);
