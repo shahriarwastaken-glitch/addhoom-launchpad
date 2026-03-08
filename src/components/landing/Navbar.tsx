@@ -58,7 +58,7 @@ const Navbar = () => {
               <span className="text-muted-foreground mx-1">|</span>
               <span className={lang === 'bn' ? 'text-primary' : 'text-muted-foreground'}>বাং</span>
             </button>
-            <Link to="/dashboard" className="hidden md:inline-block bg-gradient-cta text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold shadow-orange-glow hover:scale-[1.04] transition-transform font-body-bn">
+            <Link to="/auth" className="hidden md:inline-block bg-gradient-cta text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold shadow-orange-glow hover:scale-[1.04] transition-transform font-body-bn">
               {t('শুরু করুন', 'Get Started')}
             </Link>
             <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
