@@ -1,9 +1,10 @@
 import { ReactNode, useState, useEffect } from 'react';
 import DashboardSidebar from './DashboardSidebar';
+import DashboardNavbar from './DashboardNavbar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/contexts/AuthContext';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { Bell, Moon, Sun, Target, Video, MessageSquare, LogOut, ChevronDown, Store, X, Settings, Wand2 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate, useLocation } from 'react-router-dom';
