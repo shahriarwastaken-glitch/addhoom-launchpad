@@ -1,8 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
-  corsHeaders, ADDHOOM_SYSTEM_PROMPT, callGeminiMultiturn, logUsage,
-  errorResponse, jsonResponse,
+  corsHeaders, callGeminiMultiturn, logUsage,
+  errorResponse, jsonResponse, getSystemPrompt,
 } from "../_shared/addhoom.ts";
 
 serve(async (req) => {
@@ -65,7 +65,8 @@ serve(async (req) => {
       if (conv) history = conv.messages || [];
     }
 
-    // STEP 3 — Build context-aware system prompt
+    // STEP 3 — Build context-aware system prompt (fetch custom from DB)
+    const basePrompt = await getSystemPrompt();
     let shopContext = "";
     if (workspace) {
       shopContext = `
@@ -86,7 +87,7 @@ When recommending budgets, always use BDT (৳).
 When recommending timing, reference Bangladesh market patterns.`;
     }
 
-    const FULL_SYSTEM_PROMPT = ADDHOOM_SYSTEM_PROMPT + "\n\n" + shopContext;
+    const FULL_SYSTEM_PROMPT = basePrompt + "\n\n" + shopContext;
 
     // STEP 4 — Call Gemini with conversation history
     const geminiMessages = history.map((m: any) => ({
