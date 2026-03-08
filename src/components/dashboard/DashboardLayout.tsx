@@ -7,6 +7,7 @@ import { Bell, Moon, Sun } from 'lucide-react';
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const { lang, toggle } = useLanguage();
+  const { dark, toggleTheme } = useTheme();
 
   return (
     <SidebarProvider>
