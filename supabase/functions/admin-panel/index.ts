@@ -1,6 +1,24 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders, errorResponse, jsonResponse } from "../_shared/addhoom.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+function errorResponse(code: number, bn: string, en: string) {
+  return new Response(JSON.stringify({ error: true, code, message_bn: bn, message_en: en }), {
+    status: code,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+function jsonResponse(data: any) {
+  return new Response(JSON.stringify(data), {
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -43,29 +61,24 @@ serve(async (req) => {
           { count: totalAds },
           { count: totalPayments },
           { data: recentPayments },
-          { data: planBreakdown },
         ] = await Promise.all([
           supabase.from("profiles").select("*", { count: "exact", head: true }),
           supabase.from("workspaces").select("*", { count: "exact", head: true }),
           supabase.from("ad_creatives").select("*", { count: "exact", head: true }),
           supabase.from("payments").select("*", { count: "exact", head: true }).eq("status", "success"),
           supabase.from("payments").select("amount_bdt, plan_purchased, created_at, status").order("created_at", { ascending: false }).limit(10),
-          supabase.from("profiles").select("plan"),
         ]);
 
-        // Manual plan breakdown if RPC doesn't exist
         const { data: allProfiles } = await supabase.from("profiles").select("plan");
         const plans: Record<string, number> = {};
         allProfiles?.forEach((p: any) => { plans[p.plan] = (plans[p.plan] || 0) + 1; });
 
-        // Usage stats (last 7 days)
         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
         const { count: recentUsage } = await supabase
           .from("usage_logs")
           .select("*", { count: "exact", head: true })
           .gte("created_at", sevenDaysAgo);
 
-        // Revenue
         const { data: successPayments } = await supabase
           .from("payments")
           .select("amount_bdt")
@@ -96,7 +109,6 @@ serve(async (req) => {
           .order("created_at", { ascending: false })
           .range(from, to);
 
-        // Get roles for these users
         const userIds = profiles?.map((p: any) => p.id) || [];
         const { data: roles } = await supabase
           .from("user_roles")
@@ -133,7 +145,6 @@ serve(async (req) => {
         const { target_user_id: removeUserId, role: removeRole } = params;
         if (!removeUserId || !removeRole) return errorResponse(400, "ইউজার ও রোল প্রয়োজন।", "User and role required.");
 
-        // Prevent removing own admin role
         if (removeUserId === user.id && removeRole === "admin") {
           return errorResponse(400, "নিজের অ্যাডমিন রোল মুছতে পারবেন না।", "Cannot remove your own admin role.");
         }
@@ -157,6 +168,77 @@ serve(async (req) => {
         }
 
         await supabase.from("profiles").update(updateData).eq("id", planUserId);
+        return jsonResponse({ success: true });
+      }
+
+      // ===== API Keys Management =====
+      case "list_api_keys": {
+        const { data: keys, error } = await supabase
+          .from("api_keys")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) return errorResponse(500, "API কী লোড ব্যর্থ।", "Failed to load API keys.");
+        return jsonResponse({ keys: keys || [] });
+      }
+
+      case "add_api_key": {
+        const { key_name, key_value, description } = params;
+        if (!key_name || !key_value) return errorResponse(400, "Key নাম ও ভ্যালু আবশ্যক।", "Key name and value required.");
+
+        const { data: newKey, error } = await supabase
+          .from("api_keys")
+          .insert({
+            key_name,
+            key_value,
+            description: description || null,
+            created_by: user.id,
+          })
+          .select()
+          .single();
+
+        if (error) {
+          console.error("add_api_key error:", error);
+          return errorResponse(500, "API কী যোগ ব্যর্থ।", "Failed to add API key.");
+        }
+        return jsonResponse({ success: true, key: newKey });
+      }
+
+      case "update_api_key": {
+        const { key_id, key_name: updateName, key_value: updateValue, description: updateDesc, is_active } = params;
+        if (!key_id) return errorResponse(400, "Key ID আবশ্যক।", "Key ID required.");
+
+        const updateData: any = {};
+        if (updateName !== undefined) updateData.key_name = updateName;
+        if (updateValue !== undefined) updateData.key_value = updateValue;
+        if (updateDesc !== undefined) updateData.description = updateDesc;
+        if (is_active !== undefined) updateData.is_active = is_active;
+
+        const { error } = await supabase
+          .from("api_keys")
+          .update(updateData)
+          .eq("id", key_id);
+
+        if (error) {
+          console.error("update_api_key error:", error);
+          return errorResponse(500, "API কী আপডেট ব্যর্থ।", "Failed to update API key.");
+        }
+        return jsonResponse({ success: true });
+      }
+
+      case "delete_api_key": {
+        const { key_id: deleteKeyId } = params;
+        if (!deleteKeyId) return errorResponse(400, "Key ID আবশ্যক।", "Key ID required.");
+
+        const { error } = await supabase
+          .from("api_keys")
+          .delete()
+          .eq("id", deleteKeyId);
+
+        if (error) {
+          console.error("delete_api_key error:", error);
+          return errorResponse(500, "API কী ডিলিট ব্যর্থ।", "Failed to delete API key.");
+        }
         return jsonResponse({ success: true });
       }
 
