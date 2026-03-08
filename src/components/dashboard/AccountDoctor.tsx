@@ -1,11 +1,33 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
-import { Stethoscope, CheckCircle, AlertTriangle, AlertOctagon, RefreshCw, Search, Loader2 } from 'lucide-react';
+import { Stethoscope, CheckCircle, AlertTriangle, AlertOctagon, RefreshCw, Loader2, ArrowRight } from 'lucide-react';
 
 const toBengali = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
+
+type ActionRoute = { label: { bn: string; en: string }; path: string } | null;
+
+const getActionForItem = (item: any): ActionRoute => {
+  const text = (typeof item === 'string' ? item : `${item.title || ''} ${item.description || ''}`).toLowerCase();
+  if (text.includes('campaign') || text.includes('ক্যাম্পেইন'))
+    return { label: { bn: 'ক্যাম্পেইন তৈরি করুন', en: 'Create Campaign' }, path: '/dashboard/campaigns' };
+  if (text.includes('ad') || text.includes('বিজ্ঞাপন') || text.includes('creative'))
+    return { label: { bn: 'বিজ্ঞাপন তৈরি করুন', en: 'Create Ad' }, path: '/dashboard' };
+  if (text.includes('calendar') || text.includes('ক্যালেন্ডার') || text.includes('content'))
+    return { label: { bn: 'ক্যালেন্ডার দেখুন', en: 'View Calendar' }, path: '/dashboard/calendar' };
+  if (text.includes('competitor') || text.includes('প্রতিযোগী'))
+    return { label: { bn: 'প্রতিযোগী বিশ্লেষণ', en: 'Analyze Competitors' }, path: '/dashboard/competitors' };
+  if (text.includes('shop') || text.includes('dna') || text.includes('শপ') || text.includes('প্রোফাইল'))
+    return { label: { bn: 'শপ সেটআপ করুন', en: 'Setup Shop' }, path: '/dashboard/settings' };
+  if (text.includes('dhoom') || text.includes('score') || text.includes('স্কোর'))
+    return { label: { bn: 'ধুম স্কোর চেক', en: 'Check Dhoom Score' }, path: '/dashboard/dhoom-score' };
+  if (text.includes('video') || text.includes('ভিডিও'))
+    return { label: { bn: 'ভিডিও তৈরি করুন', en: 'Create Video' }, path: '/dashboard/video' };
+  return null;
+};
 
 const AccountDoctor = () => {
   const { t } = useLanguage();
