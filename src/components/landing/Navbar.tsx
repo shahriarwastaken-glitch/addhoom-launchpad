@@ -40,7 +40,7 @@ const Navbar = () => {
           <Link to="/" className="flex items-center gap-0.5 text-xl font-bold font-heading-en">
             <span className="text-foreground">Ad</span>
             <span className="text-primary">Dhoom</span>
-            <span className="text-brand-yellow">⚡</span>
+            <Zap size={18} className="text-brand-yellow" />
           </Link>
           <div className="hidden md:flex items-center gap-6">
             {navItems.map(item => (
