@@ -166,8 +166,9 @@ Return ONLY a valid JSON array. No explanation. No markdown. No text before or a
   }
 ]`;
 
-    // STEP 3 — Call Gemini
-    const aiResponse = await callGemini(prompt, ADDHOOM_SYSTEM_PROMPT, true);
+    // STEP 3 — Call Gemini with dynamic system prompt (DB override or default)
+    const activeSystemPrompt = await getSystemPrompt();
+    const aiResponse = await callGemini(prompt, activeSystemPrompt, true);
 
     if (!aiResponse) {
       const err = aiError(adLang === "en" ? "en" : "bn");

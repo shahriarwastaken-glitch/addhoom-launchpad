@@ -349,7 +349,7 @@ export default function AdminSettings() {
         <CardContent>
           <Button onClick={handleRefreshMetrics} disabled={refreshing}>
             <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            এখনই আপডেট করুন
+            Refresh Now
           </Button>
         </CardContent>
       </Card>
