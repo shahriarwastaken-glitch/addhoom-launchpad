@@ -624,23 +624,23 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
       </div>
 
       {/* Sticky bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-6 py-4 z-10">
-        <div className="max-w-[760px] mx-auto flex items-center justify-between">
+      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-4 sm:px-6 py-3 sm:py-4 z-40 mb-[60px] md:mb-0">
+        <div className="max-w-[760px] mx-auto flex flex-col sm:flex-row items-center gap-3 sm:justify-between">
           <p className="text-xs text-muted-foreground font-heading-bn hidden sm:flex items-center gap-1.5">
             <Lightbulb size={12} className="text-primary" /> {t('ভিডিও তৈরিতে সাধারণত ৩০-৬০ সেকেন্ড লাগে', 'Video generation usually takes 30-60 seconds')}
           </p>
-          <div className="flex gap-3 ml-auto">
+          <div className="flex gap-3 w-full sm:w-auto sm:ml-auto">
             <button
               onClick={onPreviewScript}
               disabled={!form.productName.trim() || form.images.length === 0 || generating}
-              className="px-5 py-3 rounded-xl border border-border text-sm font-heading-bn font-semibold text-foreground hover:bg-secondary transition-all disabled:opacity-50"
+              className="flex-1 sm:flex-none px-5 py-3 rounded-xl border border-border text-sm font-heading-bn font-semibold text-foreground hover:bg-secondary transition-all disabled:opacity-50"
             >
               {t('প্রিভিউ স্ক্রিপ্ট', 'Preview Script')}
             </button>
             <button
               onClick={onGenerate}
               disabled={!form.productName.trim() || form.images.length === 0 || generating}
-              className="px-8 py-3 rounded-xl bg-gradient-cta text-primary-foreground text-sm font-heading-bn font-bold shadow-orange-glow hover:scale-[1.02] transition-all disabled:opacity-50 active:scale-95"
+              className="flex-1 sm:flex-none px-8 py-3 rounded-xl bg-gradient-cta text-primary-foreground text-sm font-heading-bn font-bold shadow-orange-glow hover:scale-[1.02] transition-all disabled:opacity-50 active:scale-95"
             >
               {generating ? t('তৈরি হচ্ছে...', 'Generating...') : t('ভিডিও তৈরি করুন', 'Create Video')}
             </button>
