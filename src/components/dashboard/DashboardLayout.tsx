@@ -68,6 +68,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   return (
     <>
       <div className="min-h-screen flex w-full">
+        <div className="flex-1 flex flex-col min-w-0">
           {/* Top Header */}
           <header className="h-14 flex items-center justify-between border-b border-border bg-card px-2 sm:px-4 flex-shrink-0">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
