@@ -683,12 +683,12 @@ function MonthView({ entries, setEntries, t, lang, navigate, isMobile }: {
         </div>
       </div>
 
-      {/* Day detail panel */}
+      {/* Day detail panel — side panel on desktop, bottom sheet on mobile */}
       <AnimatePresence>
-        {selectedDate && (
+        {selectedDate && !isMobile && (
           <motion.div
             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
-            className="w-80 lg:w-96 bg-card rounded-[20px] shadow-warm border border-border p-4 flex flex-col overflow-hidden flex-shrink-0 hidden md:flex"
+            className="w-80 lg:w-96 bg-card rounded-[20px] shadow-warm border border-border p-4 flex flex-col overflow-hidden flex-shrink-0"
           >
             <div className="flex items-center justify-between mb-3 flex-shrink-0">
               <h4 className="font-bold text-foreground text-sm font-bn">
@@ -704,6 +704,41 @@ function MonthView({ entries, setEntries, t, lang, navigate, isMobile }: {
               ))}
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile bottom sheet */}
+      <AnimatePresence>
+        {selectedDate && isMobile && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/40 z-40"
+              onClick={() => setSelectedDate(null)}
+            />
+            <motion.div
+              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-[20px] shadow-warm-lg max-h-[70vh] flex flex-col"
+            >
+              <div className="flex items-center justify-center pt-2 pb-1">
+                <div className="w-10 h-1 rounded-full bg-muted-foreground/20" />
+              </div>
+              <div className="flex items-center justify-between px-4 pb-2">
+                <h4 className="font-bold text-foreground text-sm font-bn">
+                  {new Date(selectedDate + 'T00:00:00').toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                </h4>
+                <button onClick={() => setSelectedDate(null)} className="p-1 rounded-lg hover:bg-secondary"><X size={14} /></button>
+              </div>
+              <div className="flex-1 overflow-auto px-4 pb-20 space-y-3">
+                {selectedEntries.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8 font-bn">{t('এই দিনে কোনো কনটেন্ট নেই', 'No content for this day')}</p>
+                ) : selectedEntries.map(entry => (
+                  <ContentItemCard key={entry.id} entry={entry} t={t} lang={lang} onAction={handleSwipeAction} />
+                ))}
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>
