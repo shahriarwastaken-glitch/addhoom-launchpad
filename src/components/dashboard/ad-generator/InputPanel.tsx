@@ -14,6 +14,7 @@ import {
   GeneratorMode, GeneratorFormData, PLATFORMS, FRAMEWORKS,
   OCCASIONS, TONES, IMAGE_FORMATS, IMAGE_STYLES,
 } from './types';
+import { getImageHistory } from './AdGeneratorPage';
 
 const toBengali = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
 
