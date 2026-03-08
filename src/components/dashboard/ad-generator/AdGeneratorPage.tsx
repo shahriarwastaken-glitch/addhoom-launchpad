@@ -60,6 +60,8 @@ const AdGeneratorPage = () => {
   const { activeWorkspace } = useAuth();
   const { t, lang } = useLanguage();
   const isMobile = useIsMobile();
+  const [searchParams] = useSearchParams();
+  const projectId = searchParams.get('project_id');
 
   const [mode, setMode] = useState<GeneratorMode>('copy');
   const [form, setForm] = useState<GeneratorFormData>(defaultForm);
@@ -68,6 +70,14 @@ const AdGeneratorPage = () => {
   const [remixAd, setRemixAd] = useState<AdResult | null>(null);
   const [remixing, setRemixing] = useState(false);
   const [mobileTab, setMobileTab] = useState<'input' | 'results'>('input');
+  const [projectInfo, setProjectInfo] = useState<{ name: string; emoji: string; color: string } | null>(null);
+
+  // Fetch project info if project_id is present
+  useEffect(() => {
+    if (!projectId) { setProjectInfo(null); return; }
+    supabase.from('projects').select('name, emoji, color').eq('id', projectId).single()
+      .then(({ data }) => { if (data) setProjectInfo(data); });
+  }, [projectId]);
 
   const handleGenerate = useCallback(async () => {
     if (!activeWorkspace) {
