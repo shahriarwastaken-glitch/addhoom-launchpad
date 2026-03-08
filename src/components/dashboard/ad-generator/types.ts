@@ -46,19 +46,19 @@ export interface GeneratorFormData {
 }
 
 export const PLATFORMS = [
-  { label: 'Facebook', value: 'facebook', emoji: '🔵', color: '#1877F2', bg: '#E8F0FE' },
-  { label: 'Instagram', value: 'instagram', emoji: '📸', color: '#E4405F', bg: '#FCE4EC' },
-  { label: 'Daraz', value: 'daraz', emoji: '🛍️', color: '#FF5100', bg: '#FFF3E0' },
-  { label: 'Google', value: 'google', emoji: '🔍', color: '#00B96B', bg: '#E8F5E9' },
+  { label: 'Facebook', value: 'facebook', icon: 'facebook', color: '#1877F2', bg: '#E8F0FE' },
+  { label: 'Instagram', value: 'instagram', icon: 'instagram', color: '#E4405F', bg: '#FCE4EC' },
+  { label: 'Daraz', value: 'daraz', icon: 'shopping-bag', color: '#FF5100', bg: '#FFF3E0' },
+  { label: 'Google', value: 'google', icon: 'search', color: '#00B96B', bg: '#E8F5E9' },
 ];
 
 export const FRAMEWORKS = [
-  { label: '🎯 FOMO', value: 'FOMO', tooltip: 'ভয় দেখান, তাড়া তৈরি করুন' },
-  { label: '😰 PAS', value: 'PAS', tooltip: 'সমস্যা → জ্বালা → সমাধান' },
-  { label: '📖 AIDA', value: 'AIDA', tooltip: 'মনোযোগ → আগ্রহ → চাওয়া → কাজ' },
-  { label: '✅ সামাজিক প্রমাণ', value: 'social_proof', tooltip: 'অন্যরা কিনেছে দেখান' },
-  { label: '⚡ Before-After', value: 'before_after', tooltip: 'আগে কেমন ছিল, এখন কেমন' },
-  { label: '🎁 অফার-ফার্স্ট', value: 'offer_first', tooltip: 'দাম/অফার দিয়েই শুরু' },
+  { label: 'FOMO', value: 'FOMO', tooltip: 'ভয় দেখান, তাড়া তৈরি করুন', icon: 'target' },
+  { label: 'PAS', value: 'PAS', tooltip: 'সমস্যা → জ্বালা → সমাধান', icon: 'alert-triangle' },
+  { label: 'AIDA', value: 'AIDA', tooltip: 'মনোযোগ → আগ্রহ → চাওয়া → কাজ', icon: 'book-open' },
+  { label: 'সামাজিক প্রমাণ', value: 'social_proof', tooltip: 'অন্যরা কিনেছে দেখান', icon: 'check-circle' },
+  { label: 'Before-After', value: 'before_after', tooltip: 'আগে কেমন ছিল, এখন কেমন', icon: 'zap' },
+  { label: 'অফার-ফার্স্ট', value: 'offer_first', tooltip: 'দাম/অফার দিয়েই শুরু', icon: 'gift' },
 ];
 
 export const OCCASIONS = [
@@ -76,22 +76,22 @@ export const OCCASIONS = [
 ];
 
 export const TONES = [
-  { label: '😊 বন্ধুত্বপূর্ণ', value: 'friendly' },
-  { label: '💼 পেশাদার', value: 'professional' },
-  { label: '🔥 আক্রমণাত্মক', value: 'aggressive' },
+  { label: 'বন্ধুত্বপূর্ণ', value: 'friendly', icon: 'smile' },
+  { label: 'পেশাদার', value: 'professional', icon: 'briefcase' },
+  { label: 'আক্রমণাত্মক', value: 'aggressive', icon: 'flame' },
 ];
 
 export const IMAGE_FORMATS = [
-  { label: '◻️ স্কয়ার 1:1', value: 'square' as const },
-  { label: '📱 স্টোরি 9:16', value: 'story' as const },
-  { label: '🖼️ ব্যানার 16:9', value: 'banner' as const },
+  { label: 'স্কয়ার 1:1', value: 'square' as const, icon: 'square' },
+  { label: 'স্টোরি 9:16', value: 'story' as const, icon: 'smartphone' },
+  { label: 'ব্যানার 16:9', value: 'banner' as const, icon: 'monitor' },
 ];
 
 export const IMAGE_STYLES = [
-  { label: '✨ ক্লিন প্রোডাক্ট', value: 'clean' as const },
-  { label: '🎨 ক্রিয়েটিভ', value: 'creative' as const },
-  { label: '📸 লাইফস্টাইল', value: 'lifestyle' as const },
-  { label: '🔥 সেল/অফার', value: 'sale' as const },
+  { label: 'ক্লিন প্রোডাক্ট', value: 'clean' as const, icon: 'sparkles' },
+  { label: 'ক্রিয়েটিভ', value: 'creative' as const, icon: 'palette' },
+  { label: 'লাইফস্টাইল', value: 'lifestyle' as const, icon: 'camera' },
+  { label: 'সেল/অফার', value: 'sale' as const, icon: 'flame' },
 ];
 
 export const LOADING_TIPS = [
