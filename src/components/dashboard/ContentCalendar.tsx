@@ -611,7 +611,7 @@ function MonthView({ entries, setEntries, t, lang, navigate, isMobile }: {
                 onDragOver={e => handleDragOver(e, dateStr)}
                 onDragLeave={handleDragLeave}
                 onDrop={e => handleDrop(e, dateStr)}
-                className={`rounded-xl border cursor-pointer transition-all min-h-[80px] p-1.5 relative flex flex-col ${
+                className={`rounded-xl border cursor-pointer transition-all ${isMobile ? 'min-h-[52px] p-1' : 'min-h-[80px] p-1.5'} relative flex flex-col ${
                   isDragOver ? 'border-primary border-dashed bg-primary/10 ring-2 ring-primary/30' :
                   isSelected ? 'border-primary bg-primary/5 ring-1 ring-primary/20' :
                   isToday ? 'border-primary/30 bg-primary/[0.04]' :
