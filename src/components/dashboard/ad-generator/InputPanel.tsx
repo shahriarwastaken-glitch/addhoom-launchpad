@@ -61,7 +61,7 @@ interface InputPanelProps {
   generating: boolean;
 }
 
-const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: InputPanelProps) => {
+const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onToggleImageHistory }: InputPanelProps) => {
   const { t } = useLanguage();
   const [loadingTextIdx, setLoadingTextIdx] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
