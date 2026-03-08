@@ -1,12 +1,13 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   PenLine, ImageIcon, Facebook, Instagram, ShoppingBag, Search,
   Target, AlertTriangle, BookOpen, CheckCircle, Zap, Gift,
   Smile, Briefcase, Flame, Square, Smartphone, Monitor,
-  Sparkles, Palette, Camera, Upload, Rocket,
+  Sparkles, Palette, Camera, Upload, Rocket, History,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
