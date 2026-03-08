@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Star, Copy, RefreshCw, Pencil, Check, X, Rocket, ArrowLeft, ArrowRight, Filter, Link2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
+import { Star, Copy, RefreshCw, Pencil, Check, X, Rocket, ArrowLeft, ArrowRight, Filter, Link2, ChevronDown, ChevronUp, AlertTriangle, Zap, Award, RotateCw, Search } from 'lucide-react';
 import RocketLoader from '@/components/loaders/RocketLoader';
 
 const toBengali = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
