@@ -301,6 +301,7 @@ export type Database = {
           full_name: string | null
           id: string
           language_pref: string
+          onboarding_complete: boolean
           phone: string | null
           plan: string
           ssl_customer_id: string | null
@@ -313,6 +314,7 @@ export type Database = {
           full_name?: string | null
           id: string
           language_pref?: string
+          onboarding_complete?: boolean
           phone?: string | null
           plan?: string
           ssl_customer_id?: string | null
@@ -325,6 +327,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           language_pref?: string
+          onboarding_complete?: boolean
           phone?: string | null
           plan?: string
           ssl_customer_id?: string | null
@@ -394,34 +397,49 @@ export type Database = {
       }
       workspaces: {
         Row: {
+          brand_tone: string | null
           created_at: string
           id: string
           industry: string | null
+          key_products: string | null
           language: string
           owner_id: string
           platform: string | null
+          price_range: string | null
           shop_name: string
           shop_url: string | null
+          target_audience: string | null
+          unique_selling: string | null
         }
         Insert: {
+          brand_tone?: string | null
           created_at?: string
           id?: string
           industry?: string | null
+          key_products?: string | null
           language?: string
           owner_id: string
           platform?: string | null
+          price_range?: string | null
           shop_name: string
           shop_url?: string | null
+          target_audience?: string | null
+          unique_selling?: string | null
         }
         Update: {
+          brand_tone?: string | null
           created_at?: string
           id?: string
           industry?: string | null
+          key_products?: string | null
           language?: string
           owner_id?: string
           platform?: string | null
+          price_range?: string | null
           shop_name?: string
           shop_url?: string | null
+          target_audience?: string | null
+          unique_selling?: string | null
         }
         Relationships: [
           {
