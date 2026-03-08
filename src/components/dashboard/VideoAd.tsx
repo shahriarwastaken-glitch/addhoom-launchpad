@@ -162,7 +162,7 @@ const VideoAd = () => {
     // Save to database (mock result)
     const dhoomScore = calculateDhoomScore();
     if (activeWorkspace) {
-      const { data: videoRow } = await supabase.from('video_ads').insert({
+      const { data: videoRow } = await (supabase as any).from('video_ads').insert({
         workspace_id: activeWorkspace.id,
         product_name: form.productName,
         status: 'completed',
@@ -174,7 +174,7 @@ const VideoAd = () => {
         voiceover_enabled: form.voiceoverEnabled,
         dhoom_score: dhoomScore,
         completed_at: new Date().toISOString(),
-      } as any).select('id').single();
+      }).select('id').single();
 
       setResult({
         id: videoRow?.id || crypto.randomUUID(),
