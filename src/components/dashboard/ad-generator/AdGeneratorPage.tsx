@@ -256,13 +256,27 @@ const AdGeneratorPage = () => {
   if (!isMobile) {
     return (
       <div className="h-[calc(100vh-3.5rem)] flex overflow-hidden -m-3 sm:-m-6 md:-m-8">
-        <div className="w-[38%] min-w-[340px] border-r border-border">
-          <InputPanel
-            mode={mode} setMode={setMode}
-            form={form} setForm={setForm}
-            onGenerate={handleGenerate}
-            generating={generating}
-          />
+        <div className="w-[38%] min-w-[340px] border-r border-border flex flex-col">
+          {projectInfo && (
+            <div className="px-6 pt-4 pb-0">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg border-l-[3px]"
+                style={{ borderColor: projectInfo.color, background: `${projectInfo.color}12` }}>
+                <FolderOpen size={14} style={{ color: projectInfo.color }} />
+                <div>
+                  <span className="text-sm font-semibold text-foreground">{projectInfo.emoji} {projectInfo.name}</span>
+                  <p className="text-[11px] text-muted-foreground">{t('এই প্রজেক্টে সংরক্ষণ হবে', 'Will save to this project')}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="flex-1 min-h-0">
+            <InputPanel
+              mode={mode} setMode={setMode}
+              form={form} setForm={setForm}
+              onGenerate={handleGenerate}
+              generating={generating}
+            />
+          </div>
         </div>
         <div className="flex-1 bg-secondary">
           <ResultsPanel

@@ -148,6 +148,29 @@ const Settings = () => {
         </div>
       </div>
 
+      {/* Theme */}
+      <div className="bg-card rounded-[20px] shadow-warm p-4 sm:p-6 mb-6">
+        <h3 className="font-heading-bn font-semibold text-foreground mb-4">{t('থিম', 'Theme')}</h3>
+        <p className="text-xs text-muted-foreground mb-3">{t('লাইট বা ডার্ক মোড বেছে নিন', 'Choose light or dark mode')}</p>
+        <div className="flex gap-2">
+          {[
+            { label: t('লাইট', 'Light'), value: false, icon: <Sun size={14} /> },
+            { label: t('ডার্ক', 'Dark'), value: true, icon: <Moon size={14} /> },
+          ].map(opt => (
+            <button
+              key={String(opt.value)}
+              onClick={() => { if (dark !== opt.value) toggleTheme(); }}
+              className={`flex-1 py-2.5 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 flex items-center justify-center gap-1.5 ${
+                dark === opt.value
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-input bg-card text-foreground'
+              }`}
+            >
+              {opt.icon} {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <button onClick={handleSave} disabled={saving}
         className="w-full bg-gradient-cta text-primary-foreground rounded-full py-3 font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform disabled:opacity-70 font-body-bn flex items-center justify-center gap-2">
