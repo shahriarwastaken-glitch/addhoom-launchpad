@@ -1,10 +1,10 @@
-import { ReactNode, useState, useRef, useCallback, useEffect } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import DashboardSidebar from './DashboardSidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/contexts/AuthContext';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { Bell, Moon, Sun, Target, Video, Calendar, MessageSquare, Stethoscope, LogOut, ChevronDown, Store, RefreshCw, Zap, X, MoreHorizontal, Search, PartyPopper, BarChart3, Settings, Wand2 } from 'lucide-react';
+import { Bell, Moon, Sun, Target, Video, Calendar, MessageSquare, Stethoscope, LogOut, ChevronDown, Store, Zap, X, MoreHorizontal, Search, PartyPopper, BarChart3, Settings, Wand2 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
@@ -28,7 +28,7 @@ const moreItems = [
 ];
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
-  const { lang, toggle, t } = useLanguage();
+  const { t } = useLanguage();
   const { dark, toggleTheme } = useTheme();
   const { user, profile, activeWorkspace, workspaces, setActiveWorkspaceId, signOut } = useAuth();
   const navigate = useNavigate();
@@ -40,48 +40,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
 
-  // Pull-to-refresh state
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [pullDistance, setPullDistance] = useState(0);
-  const mainRef = useRef<HTMLElement>(null);
-  const touchStartY = useRef(0);
-  const isPulling = useRef(false);
-
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const main = mainRef.current;
-    if (main && main.scrollTop <= 0) {
-      touchStartY.current = e.touches[0].clientY;
-      isPulling.current = true;
-    }
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isPulling.current) return;
-    const main = mainRef.current;
-    if (!main || main.scrollTop > 0) {
-      isPulling.current = false;
-      setPullDistance(0);
-      return;
-    }
-    const diff = e.touches[0].clientY - touchStartY.current;
-    if (diff > 0) {
-      setPullDistance(Math.min(diff * 0.4, 80));
-    }
-  }, []);
-
-  const handleTouchEnd = useCallback(() => {
-    if (pullDistance > 50 && !isRefreshing) {
-      setIsRefreshing(true);
-      setPullDistance(50);
-      // Reload the page content
-      setTimeout(() => {
-        window.location.reload();
-      }, 600);
-    } else {
-      setPullDistance(0);
-    }
-    isPulling.current = false;
-  }, [pullDistance, isRefreshing]);
 
   // Load notifications
   useEffect(() => {
@@ -166,15 +124,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
               <button onClick={toggleTheme} className="p-1.5 sm:p-2 rounded-full bg-secondary text-foreground hover:bg-secondary/80 transition-colors" aria-label="Toggle theme">
                 {dark ? <Sun size={16} /> : <Moon size={16} />}
               </button>
-              <button onClick={toggle} className="hidden sm:flex items-center bg-secondary rounded-full px-3 py-1 text-xs font-semibold">
-                <span className={lang === 'en' ? 'text-primary' : 'text-muted-foreground'}>EN</span>
-                <span className="text-muted-foreground mx-1">|</span>
-                <span className={lang === 'bn' ? 'text-primary' : 'text-muted-foreground'}>বাং</span>
-              </button>
-              {/* Compact language toggle for mobile */}
-              <button onClick={toggle} className="sm:hidden p-1.5 rounded-full bg-secondary text-foreground text-xs font-bold">
-                {lang === 'bn' ? 'EN' : 'বাং'}
-              </button>
               <div className="relative">
                 <button onClick={() => setShowNotifications(!showNotifications)} className="relative p-1.5 sm:p-2 text-muted-foreground hover:text-foreground transition-colors">
                   <Bell size={16} />
@@ -252,32 +201,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             </div>
           </header>
 
-          {/* Pull-to-refresh indicator */}
-          <AnimatePresence>
-            {pullDistance > 0 && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: pullDistance, opacity: pullDistance > 20 ? 1 : 0 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="flex items-center justify-center bg-background overflow-hidden md:hidden"
-              >
-                <RefreshCw
-                  size={20}
-                  className={`text-primary transition-transform ${isRefreshing ? 'animate-spin' : ''}`}
-                  style={{ transform: `rotate(${pullDistance * 3}deg)` }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <main
-            ref={mainRef}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            className="flex-1 bg-background p-3 sm:p-6 md:p-8 overflow-auto pb-20 md:pb-8"
-          >
+          <main className="flex-1 bg-background p-3 sm:p-6 md:p-8 overflow-auto pb-20 md:pb-8">
             {children}
           </main>
         </div>
