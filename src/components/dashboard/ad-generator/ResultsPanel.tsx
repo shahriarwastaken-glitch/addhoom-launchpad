@@ -285,6 +285,16 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
         </div>
       </div>
 
+      {/* CONNECTION 5: Project prompt */}
+      {showProjectPrompt && (
+        <ProjectPromptInline
+          t={t}
+          workspaceId={activeWorkspace?.id}
+          onAssign={onAssignAllToProject}
+          onDismiss={onDismissProjectPrompt}
+        />
+      )}
+
       {/* Platform tags */}
       <div className="flex flex-wrap gap-1.5 mb-5">
         {[...new Set(results.map(r => r.platform))].map(p => (
@@ -308,6 +318,7 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
               onRemix={() => onRemix(ad)}
               onSwitchToImage={() => onSwitchToImage(ad)}
               onDownload={() => ad.image_url && downloadImage(ad.image_url, `ad-${ad.id || i + 1}`)}
+              onSchedule={onSchedule ? () => onSchedule(ad) : undefined}
               delay={i * 0.1}
               projectId={projectId}
             />
