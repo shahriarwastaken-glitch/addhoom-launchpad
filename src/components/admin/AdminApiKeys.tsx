@@ -136,6 +136,12 @@ const SETUP_GUIDES: Record<string, string[]> = {
     '৩. নতুন API Key তৈরি করুন',
     '৪. Key কপি করুন (একবারই দেখা যাবে)',
   ],
+  replicate: [
+    '১. replicate.com এ অ্যাকাউন্ট তৈরি করুন',
+    '২. Account Settings → API Tokens এ যান',
+    '৩. নতুন Token তৈরি করুন',
+    '৪. Token কপি করুন এবং এখানে পেস্ট করুন',
+  ],
 };
 
 export default function AdminApiKeys() {
