@@ -12,8 +12,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 const mobileItems = [
   { icon: Target, bn: 'অ্যাড', en: 'Ads', url: '/dashboard' },
+  { icon: Wand2, bn: 'জেনারেটর', en: 'Generator', url: '/dashboard/generate' },
   { icon: Video, bn: 'ভিডিও', en: 'Video', url: '/dashboard/video' },
-  { icon: Calendar, bn: 'ক্যালেন্ডার', en: 'Calendar', url: '/dashboard/calendar' },
   { icon: MessageSquare, bn: 'চ্যাট', en: 'Chat', url: '/dashboard/chat' },
 ];
 
