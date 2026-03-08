@@ -24,8 +24,9 @@ const BeforeAfter = () => {
             {t('AdDhoom ছাড়া বনাম AdDhoom দিয়ে', 'Without vs With AdDhoom')}
           </h2>
         </div>
+        {/* Desktop table */}
         <motion.div
-          className="bg-card rounded-[20px] shadow-warm-lg overflow-x-auto"
+          className="hidden md:block bg-card rounded-[20px] shadow-warm-lg"
           initial={{ opacity: 0, y: 30 }}
           animate={isVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
@@ -52,6 +53,34 @@ const BeforeAfter = () => {
             </tbody>
           </table>
         </motion.div>
+
+        {/* Mobile cards */}
+        <div className="md:hidden space-y-4">
+          {rows.map((row, i) => (
+            <motion.div
+              key={i}
+              className="bg-card rounded-2xl shadow-warm p-4 space-y-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isVisible ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 0.1 + i * 0.08 }}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-foreground font-body-bn">{t(row.feature.bn, row.feature.en)}</span>
+                <span className="bg-primary/10 text-primary text-xs font-bold rounded-full px-3 py-1">{t(row.gain.bn, row.gain.en)}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="bg-destructive/5 rounded-xl p-3">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">🔴 {t('ছাড়া', 'Without')}</span>
+                  <span className="text-foreground font-body-bn">{t(row.without.bn, row.without.en)}</span>
+                </div>
+                <div className="bg-brand-green/5 rounded-xl p-3">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">🟢 {t('দিয়ে', 'With')}</span>
+                  <span className="text-foreground font-body-bn">{t(row.with_.bn, row.with_.en)}</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
