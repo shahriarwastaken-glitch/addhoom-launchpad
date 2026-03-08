@@ -29,7 +29,7 @@ const HandoffBar = ({ mode, hasResults, isScheduled, hasImage, onCreateImage }: 
 
   return (
     <div
-      className={`sticky bottom-0 border-t px-4 lg:px-6 py-3 flex items-center justify-between gap-3 z-10 transition-colors ${
+      className={`shrink-0 border-t px-4 lg:px-6 py-3 flex items-center justify-between gap-3 z-10 transition-colors ${
         allDone
           ? 'bg-[hsl(var(--brand-green))]/[0.04] border-[hsl(var(--brand-green))]'
           : 'bg-card border-border'
