@@ -120,10 +120,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
           ) : (
             <button
               type="button"
-              onClick={() => {
-                // Dispatch a custom event so ResultsPanel can toggle its history panel
-                window.dispatchEvent(new CustomEvent('toggle-image-history'));
-              }}
+              onClick={() => onToggleImageHistory?.()}
               className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors font-heading-bn"
             >
               <History size={12} /> {t('ইমেজ হিস্ট্রি', 'Image History')}
