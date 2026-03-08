@@ -76,6 +76,10 @@ serve(async (req) => {
       language = "bn",
       num_variations = 1,
       creative_id,
+      framework = "AIDA",
+      occasion = "general",
+      tone = "friendly",
+      platforms = ["facebook"],
     } = input;
 
     if (!workspace_id || !product_name) {
