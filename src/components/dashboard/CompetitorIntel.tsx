@@ -324,7 +324,7 @@ const CompetitorIntel = () => {
               {/* RIGHT — AI Analysis */}
               <div className="space-y-4">
                 <div className="bg-card rounded-[20px] shadow-warm p-6 border-2 border-primary/20">
-                  <h3 className="font-heading-bn font-bold text-foreground mb-2">{t('🎯 তাদের স্ট্র্যাটেজি', '🎯 Their Strategy')}</h3>
+                  <h3 className="font-heading-bn font-bold text-foreground mb-2">{t('তাদের স্ট্র্যাটেজি', 'Their Strategy')}</h3>
                   <span className="inline-block bg-primary/10 text-primary font-bold rounded-full px-4 py-2 text-sm font-body-bn">{analysis.strategy_type}</span>
                 </div>
                 {analysis.strengths?.length > 0 && (
