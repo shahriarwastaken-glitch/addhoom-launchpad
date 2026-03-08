@@ -294,6 +294,65 @@ serve(async (req) => {
         return jsonResponse({ success: true });
       }
 
+      // ===== Image Generation Prompt Management =====
+      case "get_image_prompt": {
+        const { data } = await supabase
+          .from("api_keys")
+          .select("key_value, updated_at")
+          .eq("service_name", "image_prompt")
+          .eq("status", "active")
+          .maybeSingle();
+
+        return jsonResponse({ 
+          prompt: data?.key_value || null,
+          updated_at: data?.updated_at || null,
+          using_default: !data?.key_value
+        });
+      }
+
+      case "update_image_prompt": {
+        const { prompt: imgPrompt } = params;
+        if (!imgPrompt || typeof imgPrompt !== "string") {
+          return errorResponse(400, "প্রম্পট আবশ্যক।", "Prompt is required.");
+        }
+
+        const { data: existingImg } = await supabase
+          .from("api_keys")
+          .select("id")
+          .eq("service_name", "image_prompt")
+          .maybeSingle();
+
+        if (existingImg) {
+          await supabase
+            .from("api_keys")
+            .update({ key_value: imgPrompt, status: "active", updated_at: new Date().toISOString() })
+            .eq("id", existingImg.id);
+        } else {
+          await supabase
+            .from("api_keys")
+            .insert({
+              service_name: "image_prompt",
+              display_name: "Image Generation Master Prompt",
+              key_value: imgPrompt,
+              key_preview: "...prompt",
+              description: "Master prompt for AI image generation",
+              created_by: user.id,
+              status: "active",
+            });
+        }
+
+        return jsonResponse({ success: true });
+      }
+
+      case "reset_image_prompt": {
+        await supabase
+          .from("api_keys")
+          .update({ status: "inactive" })
+          .eq("service_name", "image_prompt");
+
+        return jsonResponse({ success: true });
+      }
+
       default:
         return errorResponse(400, "অজানা অ্যাকশন।", "Unknown action.");
     }
