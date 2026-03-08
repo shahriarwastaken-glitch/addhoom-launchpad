@@ -17,7 +17,7 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const admin = await verifySuperAdmin(req, supabase);
+    const admin = await verifyAdmin(req, supabase);
 
     const { user_id, new_plan, reason } = await req.json();
 
