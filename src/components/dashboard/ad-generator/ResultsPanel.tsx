@@ -21,6 +21,8 @@ interface ResultsPanelProps {
   onRemix: (ad: AdResult) => void;
   onLoadHistory?: (results: AdResult[]) => void;
   projectId?: string | null;
+  imageHistoryOpen?: boolean;
+  onToggleImageHistory?: () => void;
 }
 
 interface ProjectOption {
