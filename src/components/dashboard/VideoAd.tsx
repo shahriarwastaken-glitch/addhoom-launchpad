@@ -278,9 +278,8 @@ const VideoAd = () => {
                       if (error) throw error;
                       if (data?.success && data.script) {
                         setScript(data.script);
-                        // Script ready — start generation immediately
                         setGenerating(false);
-                        startVideoGeneration();
+                        startVideoGeneration(data.script);
                         return;
                       } else {
                         toast.error(data?.error || t('স্ক্রিপ্ট তৈরি ব্যর্থ', 'Script generation failed'));
