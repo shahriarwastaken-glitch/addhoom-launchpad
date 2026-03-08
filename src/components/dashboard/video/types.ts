@@ -76,7 +76,7 @@ export const FORMAT_OPTIONS = [
     dimensions: '1080 × 1080 | 1:1',
     desc: 'Feed, Timeline এর জন্য',
     descEn: 'For Feed & Timeline',
-    icons: ['🔵', '📸'],
+    iconNames: ['facebook', 'instagram'] as const,
     ratio: 'aspect-square',
   },
   {
@@ -86,10 +86,10 @@ export const FORMAT_OPTIONS = [
     dimensions: '1080 × 1920 | 9:16',
     desc: 'সবচেয়ে বেশি ভিউ পায়',
     descEn: 'Gets the most views',
-    icons: ['🔵', '📸', '🎵'],
+    iconNames: ['facebook', 'instagram', 'music'] as const,
     ratio: 'aspect-[9/16]',
-    badge: '⚡ জনপ্রিয়',
-    badgeEn: '⚡ Popular',
+    badge: 'জনপ্রিয়',
+    badgeEn: 'Popular',
   },
   {
     value: 'story' as VideoFormat,
@@ -98,7 +98,7 @@ export const FORMAT_OPTIONS = [
     dimensions: '1080 × 1920 | 9:16',
     desc: '24 ঘণ্টার জন্য',
     descEn: 'For 24 hours',
-    icons: ['🔵'],
+    iconNames: ['facebook'] as const,
     ratio: 'aspect-[9/16]',
   },
 ];
@@ -147,11 +147,12 @@ export const STYLE_OPTIONS = [
 ];
 
 export const MUSIC_OPTIONS = [
-  { value: 'energetic' as MusicTrack, icon: '🎵', label: 'এনার্জেটিক বিট', labelEn: 'Energetic Beat', desc: 'দ্রুত, উত্তেজনাপূর্ণ — সেলের জন্য', descEn: 'Fast, exciting — for sales' },
-  { value: 'soft' as MusicTrack, icon: '🎶', label: 'নরম ব্যাকগ্রাউন্ড', labelEn: 'Soft Background', desc: 'শান্ত, পেশাদার — সব ধরনে কাজ করে', descEn: 'Calm, professional — works for all' },
-  { value: 'trendy' as MusicTrack, icon: '🥁', label: 'ট্রেন্ডি পপ', labelEn: 'Trendy Pop', desc: 'আধুনিক, তরুণ দর্শকের জন্য', descEn: 'Modern, for young audience' },
-  { value: 'corporate' as MusicTrack, icon: '🎸', label: 'কর্পোরেট', labelEn: 'Corporate', desc: 'বিশ্বাসযোগ্য, ব্র্যান্ড বিল্ডিং', descEn: 'Trustworthy, brand building' },
-  { value: 'none' as MusicTrack, icon: '🔕', label: 'মিউজিক ছাড়া', labelEn: 'No Music', desc: 'শুধু ভয়েসওভার বা নীরব', descEn: 'Voiceover only or silent' },
+  { value: 'energetic' as MusicTrack, iconName: 'music' as const, label: 'এনার্জেটিক বিট', labelEn: 'Energetic Beat', desc: 'দ্রুত, উত্তেজনাপূর্ণ — সেলের জন্য', descEn: 'Fast, exciting — for sales' },
+  { value: 'soft' as MusicTrack, iconName: 'music-2' as const, label: 'নরম ব্যাকগ্রাউন্ড', labelEn: 'Soft Background', desc: 'শান্ত, পেশাদার — সব ধরনে কাজ করে', descEn: 'Calm, professional — works for all' },
+  { value: 'trendy' as MusicTrack, iconName: 'drum' as const, label: 'ট্রেন্ডি পপ', labelEn: 'Trendy Pop', desc: 'আধুনিক, তরুণ দর্শকের জন্য', descEn: 'Modern, for young audience' },
+  { value: 'corporate' as MusicTrack, iconName: 'guitar' as const, label: 'কর্পোরেট', labelEn: 'Corporate', desc: 'বিশ্বাসযোগ্য, ব্র্যান্ড বিল্ডিং', descEn: 'Trustworthy, brand building' },
+  { value: 'custom' as MusicTrack, iconName: 'upload' as const, label: 'নিজের মিউজিক', labelEn: 'Custom Music', desc: 'নিজের অডিও ফাইল আপলোড করুন', descEn: 'Upload your own audio file' },
+  { value: 'none' as MusicTrack, iconName: 'volume-x' as const, label: 'মিউজিক ছাড়া', labelEn: 'No Music', desc: 'শুধু ভয়েসওভার বা নীরব', descEn: 'Voiceover only or silent' },
 ];
 
 export const CTA_PRESETS = [
