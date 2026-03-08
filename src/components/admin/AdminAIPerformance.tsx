@@ -218,7 +218,7 @@ export default function AdminAIPerformance() {
         {/* Best Ads */}
         <div className="bg-card rounded-xl p-4 border border-border">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <span className="text-green-500">✓</span>
+            <span className="text-green-500"><Trophy className="h-4 w-4" /></span>
             সেরা বিজ্ঞাপন (সর্বকালের)
           </h3>
           <div className="space-y-3 max-h-64 overflow-auto">
