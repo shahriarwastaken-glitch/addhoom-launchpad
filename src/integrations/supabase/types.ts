@@ -922,6 +922,71 @@ export type Database = {
         }
         Relationships: []
       }
+      video_ads: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          dhoom_score: number | null
+          file_size_bytes: number | null
+          font_style: string | null
+          format: string
+          id: string
+          music_track: string
+          product_name: string | null
+          render_id: string | null
+          script: Json | null
+          status: string
+          style: string
+          video_url: string | null
+          voiceover_enabled: boolean | null
+          workspace_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          dhoom_score?: number | null
+          file_size_bytes?: number | null
+          font_style?: string | null
+          format?: string
+          id?: string
+          music_track?: string
+          product_name?: string | null
+          render_id?: string | null
+          script?: Json | null
+          status?: string
+          style?: string
+          video_url?: string | null
+          voiceover_enabled?: boolean | null
+          workspace_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          dhoom_score?: number | null
+          file_size_bytes?: number | null
+          font_style?: string | null
+          format?: string
+          id?: string
+          music_track?: string
+          product_name?: string | null
+          render_id?: string | null
+          script?: Json | null
+          status?: string
+          style?: string
+          video_url?: string | null
+          voiceover_enabled?: boolean | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_ads_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspaces: {
         Row: {
           brand_tone: string | null
