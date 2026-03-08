@@ -14,12 +14,6 @@ const FORMAT_INSTRUCTIONS: Record<string, string> = {
   banner: "16:9 horizontal format, optimized for Facebook cover ads",
 };
 
-const FORMAT_ASPECT: Record<string, string> = {
-  square: "1:1",
-  story: "9:16",
-  banner: "16:9",
-};
-
 function buildStyleInstructions(
   style: string,
   brandPrimary: string,
@@ -54,8 +48,7 @@ function computeDhoomScore(
   hasProductRef: boolean
 ): number {
   let score = 65;
-  // style completeness
-  score += 5;
+  score += 5; // style completeness
   if (hasHeadline) score += 8;
   if (hasBrandColors) score += 5;
   if (hasProductRef) score += 10;
@@ -68,7 +61,6 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
 
   try {
-    // --- Auth ---
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify(unauthorizedError("bn")), {
@@ -82,9 +74,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } }
     );
-    const {
-      data: { user },
-    } = await supabaseUser.auth.getUser();
+    const { data: { user } } = await supabaseUser.auth.getUser();
     if (!user) {
       return new Response(JSON.stringify(unauthorizedError("bn")), {
         status: 401,
@@ -97,20 +87,17 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // --- Parse input ---
     const input = await req.json();
     const {
       workspace_id,
       product_name,
       product_description = "",
       product_image_base64,
-      product_image_mime_type = "image/jpeg",
       format = "square",
       style = "clean",
       brand_color_primary = "#FF5100",
       brand_color_secondary = "#FFFFFF",
       ad_headline = "",
-      ad_body = "",
       language = "bn",
       num_variations = 1,
       creative_id,
@@ -118,82 +105,45 @@ serve(async (req) => {
 
     if (!workspace_id || !product_name) {
       return new Response(
-        JSON.stringify({
-          success: false,
-          code: 400,
-          message: "পণ্যের নাম আবশ্যক",
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        JSON.stringify({ success: false, code: 400, message: "পণ্যের নাম আবশ্যক" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     if (!product_image_base64) {
       return new Response(
-        JSON.stringify({
-          success: false,
-          code: 400,
-          message: "পণ্যের ছবি আবশ্যক",
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        JSON.stringify({ success: false, code: 400, message: "পণ্যের ছবি আবশ্যক" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Verify workspace ownership
     const { data: workspace } = await supabase
-      .from("workspaces")
-      .select("*")
-      .eq("id", workspace_id)
-      .eq("owner_id", user.id)
-      .single();
+      .from("workspaces").select("*").eq("id", workspace_id).eq("owner_id", user.id).single();
     if (!workspace) {
       return new Response(
-        JSON.stringify({
-          success: false,
-          code: 404,
-          message: "Workspace পাওয়া যায়নি",
-        }),
-        {
-          status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        JSON.stringify({ success: false, code: 404, message: "Workspace পাওয়া যায়নি" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) {
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
       return new Response(
-        JSON.stringify({
-          success: false,
-          code: 500,
-          message: "Image generation not configured",
-        }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        JSON.stringify({ success: false, code: 500, message: "Image generation not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // --- STEP 1: Build prompt ---
-    const styleText = buildStyleInstructions(
-      style,
-      brand_color_primary,
-      brand_color_secondary
-    );
+    // --- Build prompt ---
+    const styleText = buildStyleInstructions(style, brand_color_primary, brand_color_secondary);
     const headlineInstruction = ad_headline
       ? `Include this text as an overlay in Bengali: "${ad_headline}"`
       : "No text overlay needed — just the visual.";
 
     const prompt = `You are creating a professional advertisement image for a Bangladeshi e-commerce product.
 
-This exact product is shown in the reference image.
-Maintain the product's appearance, colors, and key features.
+This exact product is shown in the reference image I'm providing.
+Maintain the product's appearance, colors, and key features exactly.
 
 Create a ${styleText} advertisement image.
 
@@ -209,12 +159,12 @@ Requirements:
 
 The result should look like a high-converting Bangladeshi e-commerce advertisement.`;
 
-    // --- STEP 2 & 3: Generate images ---
+    // --- Generate images via Lovable AI Gateway ---
     const count = Math.min(num_variations, 3);
-    const cleanBase64 = product_image_base64.replace(
-      /^data:image\/\w+;base64,/,
-      ""
-    );
+    // Ensure product_image_base64 has data URI prefix for the gateway
+    const imageDataUri = product_image_base64.startsWith("data:")
+      ? product_image_base64
+      : `data:image/jpeg;base64,${product_image_base64}`;
 
     const images: Array<{
       id: string;
@@ -227,170 +177,97 @@ The result should look like a high-converting Bangladeshi e-commerce advertiseme
 
     for (let i = 0; i < count; i++) {
       try {
-        let generatedBase64: string | null = null;
+        const variationHint = count > 1 ? `\n\nThis is variation ${i + 1} of ${count} — create a unique composition different from others.` : "";
 
-        // Try Imagen 3 first
-        try {
-          const imagenResp = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${GEMINI_API_KEY}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                instances: [
+        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash-image",
+            messages: [
+              {
+                role: "user",
+                content: [
+                  { type: "text", text: prompt + variationHint },
                   {
-                    prompt,
-                    referenceImages: [
-                      {
-                        referenceType: "STYLE",
-                        referenceId: 1,
-                        referenceImage: {
-                          bytesBase64Encoded: cleanBase64,
-                        },
-                      },
-                    ],
+                    type: "image_url",
+                    image_url: { url: imageDataUri },
                   },
                 ],
-                parameters: {
-                  sampleCount: 1,
-                  aspectRatio: FORMAT_ASPECT[format] || "1:1",
-                  safetyFilterLevel: "block_some",
-                  personGeneration: "dont_allow",
-                },
-              }),
-            }
-          );
+              },
+            ],
+            modalities: ["image", "text"],
+          }),
+        });
 
-          if (imagenResp.ok) {
-            const imagenData = await imagenResp.json();
-            generatedBase64 =
-              imagenData?.predictions?.[0]?.bytesBase64Encoded || null;
-          } else {
-            const errText = await imagenResp.text();
-            console.error(
-              `Imagen 3 failed (${imagenResp.status}), falling back:`,
-              errText
-            );
-          }
-        } catch (imagenErr) {
-          console.error("Imagen 3 error, falling back:", imagenErr);
-        }
-
-        // Fallback: Gemini 2.0 Flash experimental image generation
-        if (!generatedBase64) {
-          console.log(
-            "Using Gemini 2.0 Flash fallback for variation",
-            i + 1
-          );
-          const fallbackResp = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                contents: [
-                  {
-                    parts: [
-                      { text: prompt },
-                      {
-                        inlineData: {
-                          mimeType: product_image_mime_type,
-                          data: cleanBase64,
-                        },
-                      },
-                    ],
-                  },
-                ],
-                generationConfig: {
-                  responseModalities: ["IMAGE", "TEXT"],
-                },
-              }),
-            }
-          );
-
-          if (!fallbackResp.ok) {
-            const errText = await fallbackResp.text();
-            console.error(
-              `Gemini fallback failed (${fallbackResp.status}):`,
-              errText
-            );
-            continue;
-          }
-
-          const fallbackData = await fallbackResp.json();
-          const parts =
-            fallbackData?.candidates?.[0]?.content?.parts || [];
-          for (const part of parts) {
-            if (part.inlineData?.data) {
-              generatedBase64 = part.inlineData.data;
-              break;
-            }
-          }
-        }
-
-        if (!generatedBase64) {
-          console.error("No image generated for variation", i + 1);
+        if (!response.ok) {
+          const errText = await response.text();
+          console.error(`Image gen failed (${response.status}):`, errText);
           continue;
         }
 
-        // --- STEP 3: Upload to storage ---
-        const fileName = `${workspace_id}/${Date.now()}-${i}.png`;
-        const binaryString = atob(generatedBase64);
+        const result = await response.json();
+        const generatedImages = result.choices?.[0]?.message?.images;
+
+        if (!generatedImages || generatedImages.length === 0) {
+          console.error("No images returned for variation", i + 1);
+          continue;
+        }
+
+        const base64Data = generatedImages[0].image_url.url;
+
+        // Upload to Supabase Storage
+        const base64Clean = base64Data.replace(/^data:image\/\w+;base64,/, "");
+        const binaryString = atob(base64Clean);
         const bytes = new Uint8Array(binaryString.length);
         for (let b = 0; b < binaryString.length; b++) {
           bytes[b] = binaryString.charCodeAt(b);
         }
 
+        const fileName = `${workspace_id}/${Date.now()}-${i}.png`;
         const { error: uploadError } = await supabase.storage
           .from("ad-images")
-          .upload(fileName, bytes, {
-            contentType: "image/png",
-            upsert: true,
-          });
+          .upload(fileName, bytes, { contentType: "image/png", upsert: true });
 
         if (uploadError) {
           console.error("Upload error:", uploadError);
           continue;
         }
 
-        const { data: publicUrl } = supabase.storage
-          .from("ad-images")
-          .getPublicUrl(fileName);
+        const { data: publicUrl } = supabase.storage.from("ad-images").getPublicUrl(fileName);
         const imageUrl = publicUrl.publicUrl;
 
-        // --- STEP 4: Dhoom Score ---
+        // Dhoom Score
         const dhoomScore = computeDhoomScore(
-          style,
-          !!ad_headline,
+          style, !!ad_headline,
           !!(brand_color_primary && brand_color_secondary),
-          true // product reference always provided
+          true
         );
 
-        // --- STEP 5: Save to ad_images ---
+        // Save to ad_images
         const { data: saved, error: saveErr } = await supabase
           .from("ad_images")
           .insert({
             workspace_id,
             creative_id: creative_id || null,
-            product_name,
-            format,
-            style,
+            product_name, format, style,
             image_url: imageUrl,
             sd_prompt: prompt,
             gemini_prompt: prompt,
             dhoom_score: dhoomScore,
             is_winner: false,
           })
-          .select()
-          .single();
+          .select().single();
 
         if (saveErr) console.error("Save error:", saveErr);
 
         images.push({
           id: saved?.id || crypto.randomUUID(),
           image_url: imageUrl,
-          format,
-          style,
+          format, style,
           dhoom_score: dhoomScore,
           variation_number: i + 1,
         });
@@ -399,14 +276,11 @@ The result should look like a high-converting Bangladeshi e-commerce advertiseme
       }
     }
 
-    // --- STEP 6: Track usage ---
+    // Track usage
     await supabase.from("usage_logs").insert({
-      user_id: user.id,
-      workspace_id,
-      feature: "image_generator",
+      user_id: user.id, workspace_id, feature: "image_generator",
     });
 
-    // Track API usage stats
     try {
       await supabase.rpc("upsert_api_usage_stats", {
         p_service_name: "gemini",
@@ -419,8 +293,7 @@ The result should look like a high-converting Bangladeshi e-commerce advertiseme
 
     return new Response(
       JSON.stringify({
-        success: true,
-        images,
+        success: true, images,
         count: images.length,
         message: `${images.length}টি ইমেজ তৈরি হয়েছে`,
       }),
@@ -429,8 +302,7 @@ The result should look like a high-converting Bangladeshi e-commerce advertiseme
   } catch (e) {
     console.error("generate-ad-image error:", e);
     return new Response(JSON.stringify(serverError("bn")), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
