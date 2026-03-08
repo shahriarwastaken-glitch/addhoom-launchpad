@@ -146,6 +146,60 @@ export type Database = {
           },
         ]
       }
+      admin_actions: {
+        Row: {
+          action: string
+          admin_id: string | null
+          created_at: string | null
+          id: string
+          new_value: string | null
+          old_value: string | null
+          reason: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_id?: string | null
+          created_at?: string | null
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          reason?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string | null
+          created_at?: string | null
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          reason?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
+      admin_users: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          role: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id: string
+          role?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          role?: string | null
+        }
+        Relationships: []
+      }
       ai_conversations: {
         Row: {
           created_at: string
@@ -408,6 +462,60 @@ export type Database = {
           },
         ]
       }
+      platform_metrics_cache: {
+        Row: {
+          active_users_today: number | null
+          ads_generated_today: number | null
+          agency_users: number | null
+          avg_dhoom_score: number | null
+          computed_at: string | null
+          id: string
+          metric_date: string
+          new_users_today: number | null
+          pro_users: number | null
+          revenue_today_bdt: number | null
+          total_ads_generated: number | null
+          total_ai_calls: number | null
+          total_revenue_bdt: number | null
+          total_users: number | null
+          total_videos_generated: number | null
+        }
+        Insert: {
+          active_users_today?: number | null
+          ads_generated_today?: number | null
+          agency_users?: number | null
+          avg_dhoom_score?: number | null
+          computed_at?: string | null
+          id?: string
+          metric_date: string
+          new_users_today?: number | null
+          pro_users?: number | null
+          revenue_today_bdt?: number | null
+          total_ads_generated?: number | null
+          total_ai_calls?: number | null
+          total_revenue_bdt?: number | null
+          total_users?: number | null
+          total_videos_generated?: number | null
+        }
+        Update: {
+          active_users_today?: number | null
+          ads_generated_today?: number | null
+          agency_users?: number | null
+          avg_dhoom_score?: number | null
+          computed_at?: string | null
+          id?: string
+          metric_date?: string
+          new_users_today?: number | null
+          pro_users?: number | null
+          revenue_today_bdt?: number | null
+          total_ads_generated?: number | null
+          total_ai_calls?: number | null
+          total_revenue_bdt?: number | null
+          total_users?: number | null
+          total_videos_generated?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -578,6 +686,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       workspace_owner_id: { Args: { _workspace_id: string }; Returns: string }
     }
     Enums: {
