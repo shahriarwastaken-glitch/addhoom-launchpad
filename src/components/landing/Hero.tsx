@@ -2,6 +2,9 @@ import { useEffect, useState, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Link } from 'react-router-dom';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
+import mockup1 from '@/assets/dashboard-mockup-1.png';
+import mockup2 from '@/assets/dashboard-mockup-2.png';
+import mockup3 from '@/assets/dashboard-mockup-3.png';
 
 const toBengali = (n: number) => {
   const str = Number.isInteger(n) ? n.toString() : n.toFixed(1);
