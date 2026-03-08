@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Link } from 'react-router-dom';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 
 const toBengali = (n: number) => {
   const str = Number.isInteger(n) ? n.toString() : n.toFixed(1);
@@ -44,11 +45,25 @@ const floatingShapes = Array.from({ length: 12 }, (_, i) => ({
 
 const dashScreens = ['AI বিজ্ঞাপন জেনারেটর', 'AI চ্যাট অ্যাসিস্ট্যান্ট', 'অ্যাকাউন্ট ডাক্তার'];
 
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+};
+
 const Hero = () => {
   const { t } = useLanguage();
   const [activeScreen, setActiveScreen] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const rotateX = useTransform(mouseY, [-300, 300], [5, -5]);
+  const rotateY = useTransform(mouseX, [-300, 300], [-5, 5]);
 
   useEffect(() => {
     const obs = new IntersectionObserver(([e]) => e.isIntersecting && setInView(true), { threshold: 0.2 });
@@ -60,6 +75,12 @@ const Hero = () => {
     const interval = setInterval(() => setActiveScreen(s => (s + 1) % 3), 4000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseX.set(e.clientX - rect.left - rect.width / 2);
+    mouseY.set(e.clientY - rect.top - rect.height / 2);
+  };
 
   const pills = ['Daraz সেলার', 'Facebook Shop', 'Instagram Store', 'D2C ব্র্যান্ড'];
 
@@ -75,35 +96,36 @@ const Hero = () => {
         </span>
       ))}
 
-      <div className="relative z-10 flex flex-col items-center text-center max-w-4xl mx-auto">
-        <div className="flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2 mb-8 animate-fade-up">
+      <motion.div
+        className="relative z-10 flex flex-col items-center text-center max-w-4xl mx-auto"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={itemVariants} className="flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2 mb-8">
           <span className="w-2 h-2 rounded-full bg-primary animate-pulse-dot" />
           <span className="text-sm font-medium font-body-bn text-primary">
             🇧🇩 {t('বাংলাদেশের ই-কমার্সের জন্য AI মার্কেটিং', 'AI Marketing for Bangladesh E-commerce')}
           </span>
-        </div>
+        </motion.div>
 
-        <h1 className="font-heading-bn font-extrabold leading-[1.1] tracking-[-0.02em] mb-6 animate-fade-up"
-          style={{ fontSize: 'clamp(42px, 6vw, 80px)', animationDelay: '0.08s' }}>
+        <motion.h1 variants={itemVariants} className="font-heading-bn font-extrabold leading-[1.1] tracking-[-0.02em] mb-6"
+          style={{ fontSize: 'clamp(42px, 6vw, 80px)' }}>
           <span className="block text-foreground">{t('আপনার শপের বিজ্ঞাপন', "Your Shop's Ads")}</span>
           <span className="block text-gradient-brand">{t('এখন AI দিয়ে ধুম তুলবে', 'Now Powered by AI')}</span>
-        </h1>
+        </motion.h1>
 
-        <p className="text-muted-foreground text-lg max-w-[560px] mb-8 font-body-bn animate-fade-up"
-          style={{ animationDelay: '0.16s', lineHeight: '1.75' }}>
+        <motion.p variants={itemVariants} className="text-muted-foreground text-lg max-w-[560px] mb-8 font-body-bn" style={{ lineHeight: '1.75' }}>
           {t('Facebook, Google, Instagram — সব এক জায়গায়। বাংলায়। মিনিটে।', 'Facebook, Google, Instagram — all in one place. In Bangla. In minutes.')}
-        </p>
+        </motion.p>
 
-        <div className="flex flex-col sm:flex-row gap-4 mb-8 animate-fade-up" style={{ animationDelay: '0.24s' }}>
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 mb-8">
           <Link to="/dashboard" className="bg-gradient-cta text-primary-foreground rounded-full px-8 py-4 text-lg font-semibold shadow-orange-glow hover:scale-[1.04] transition-transform animate-pulse-glow font-body-bn">
-            {t('বিনামূল্যে শুরু করুন', 'Start for Free')}
+            {t('শুরু করুন', 'Get Started')}
           </Link>
-          <button className="border-2 border-primary text-primary rounded-full px-8 py-4 text-lg font-semibold hover:bg-primary hover:text-primary-foreground transition-colors font-body-bn">
-            {t('ডেমো দেখুন ▶', 'Watch Demo ▶')}
-          </button>
-        </div>
+        </motion.div>
 
-        <div className="flex flex-col items-center gap-3 mb-8 animate-fade-up" style={{ animationDelay: '0.32s' }}>
+        <motion.div variants={itemVariants} className="flex flex-col items-center gap-3 mb-8">
           <div className="flex items-center gap-2">
             <div className="flex -space-x-2">
               {['র', 'ত', 'না', 'ক', 'স'].map((c, i) => (
@@ -117,54 +139,66 @@ const Hero = () => {
           <div className="flex items-center gap-1 text-brand-yellow text-sm">
             ★★★★★ <span className="text-muted-foreground font-mono">4.9/5</span>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="flex flex-wrap justify-center gap-2 mb-12 animate-fade-up" style={{ animationDelay: '0.4s' }}>
+        <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-2 mb-12">
           <span className="text-xs text-muted-foreground font-body-bn mr-1">{t('পারফেক্ট ফর:', 'Perfect for:')}</span>
           {pills.map(p => (
             <span key={p} className="text-xs border border-primary/30 text-primary rounded-full px-3 py-1 font-body-bn">{p}</span>
           ))}
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl mb-16">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl mb-16">
           {stats.map((s, i) => (
-            <div key={i} className="bg-card rounded-2xl p-5 shadow-warm flex flex-col items-center gap-2 animate-fade-up" style={{ animationDelay: `${0.48 + i * 0.08}s` }}>
+            <motion.div key={i} className="bg-card rounded-2xl p-5 shadow-warm flex flex-col items-center gap-2"
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 + i * 0.1 }}>
               <div className={`w-3 h-3 rounded-full ${s.color}`} />
               <AnimatedCounter target={s.value} suffix={s.suffix} inView={inView} />
               <span className="text-xs text-muted-foreground font-body-bn">{t(s.label.bn, s.label.en)}</span>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
-        <div className="w-full max-w-3xl bg-card rounded-3xl shadow-warm-lg border border-border overflow-hidden animate-fade-up" style={{ animationDelay: '0.8s' }}>
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-secondary/50">
-            <div className="flex gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-destructive/60" />
-              <div className="w-3 h-3 rounded-full bg-brand-yellow/60" />
-              <div className="w-3 h-3 rounded-full bg-brand-green/60" />
-            </div>
-            <div className="flex-1 text-center text-xs text-muted-foreground font-mono">addhoom.com/dashboard</div>
-          </div>
-          <div className="relative h-[300px] md:h-[400px] bg-background overflow-hidden">
-            {dashScreens.map((screen, i) => (
-              <div key={i} className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-700 ${i === activeScreen ? 'opacity-100' : 'opacity-0'}`}>
-                <div className="text-6xl mb-4">{['🎯', '💬', '🩺'][i]}</div>
-                <div className="text-xl font-heading-bn font-bold text-foreground">{screen}</div>
-                <div className="mt-4 flex gap-3">
-                  {[1, 2, 3].map(j => (
-                    <div key={j} className="w-24 h-16 rounded-xl bg-secondary animate-pulse" />
-                  ))}
-                </div>
+        <motion.div
+          variants={itemVariants}
+          className="w-full max-w-3xl perspective-[1000px]"
+          onMouseMove={handleMouseMove}
+          onMouseLeave={() => { mouseX.set(0); mouseY.set(0); }}
+        >
+          <motion.div
+            className="bg-card rounded-3xl shadow-warm-lg border border-border overflow-hidden"
+            style={{ rotateX, rotateY }}
+            transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+          >
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-secondary/50">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-destructive/60" />
+                <div className="w-3 h-3 rounded-full bg-brand-yellow/60" />
+                <div className="w-3 h-3 rounded-full bg-brand-green/60" />
               </div>
-            ))}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-              {dashScreens.map((_, i) => (
-                <div key={i} className={`w-2 h-2 rounded-full transition-colors ${i === activeScreen ? 'bg-primary' : 'bg-border'}`} />
-              ))}
+              <div className="flex-1 text-center text-xs text-muted-foreground font-mono">addhoom.com/dashboard</div>
             </div>
-          </div>
-        </div>
-      </div>
+            <div className="relative h-[300px] md:h-[400px] bg-background overflow-hidden">
+              {dashScreens.map((screen, i) => (
+                <div key={i} className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-700 ${i === activeScreen ? 'opacity-100' : 'opacity-0'}`}>
+                  <div className="text-6xl mb-4">{['🎯', '💬', '🩺'][i]}</div>
+                  <div className="text-xl font-heading-bn font-bold text-foreground">{screen}</div>
+                  <div className="mt-4 flex gap-3">
+                    {[1, 2, 3].map(j => (
+                      <div key={j} className="w-24 h-16 rounded-xl bg-secondary animate-pulse" />
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                {dashScreens.map((_, i) => (
+                  <div key={i} className={`w-2 h-2 rounded-full transition-colors ${i === activeScreen ? 'bg-primary' : 'bg-border'}`} />
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 };

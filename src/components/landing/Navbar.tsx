@@ -22,6 +22,14 @@ const Navbar = () => {
     { bn: 'যোগাযোগ', en: 'Contact', href: '#contact' },
   ];
 
+  const handleAnchor = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    setMobileOpen(false);
+    const id = href.replace('#', '');
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
     <>
       <nav className={`fixed top-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-b border-border transition-all duration-300 ${scrolled ? 'shadow-[0_2px_24px_rgba(255,81,0,0.08)]' : ''}`}
@@ -34,24 +42,24 @@ const Navbar = () => {
           </Link>
           <div className="hidden md:flex items-center gap-6">
             {navItems.map(item => (
-              <a key={item.en} href={item.href} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <a key={item.en} href={item.href} onClick={e => handleAnchor(e, item.href)} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 {t(item.bn, item.en)}
               </a>
             ))}
           </div>
-          <div className="hidden md:flex items-center gap-3">
+          <div className="flex items-center gap-3">
             <button onClick={toggle} className="flex items-center bg-secondary rounded-full px-3 py-1.5 text-xs font-semibold">
               <span className={lang === 'en' ? 'text-primary' : 'text-muted-foreground'}>EN</span>
               <span className="text-muted-foreground mx-1">|</span>
               <span className={lang === 'bn' ? 'text-primary' : 'text-muted-foreground'}>বাং</span>
             </button>
-            <Link to="/dashboard" className="bg-gradient-cta text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold shadow-orange-glow hover:scale-[1.04] transition-transform font-body-bn">
+            <Link to="/dashboard" className="hidden md:inline-block bg-gradient-cta text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold shadow-orange-glow hover:scale-[1.04] transition-transform font-body-bn">
               {t('শুরু করুন', 'Get Started')}
             </Link>
+            <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
+              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
-          <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
         </div>
       </nav>
       {mobileOpen && (
@@ -62,7 +70,7 @@ const Navbar = () => {
             <span className="text-brand-yellow">⚡</span>
           </Link>
           {navItems.map((item, i) => (
-            <a key={item.en} href={item.href} onClick={() => setMobileOpen(false)}
+            <a key={item.en} href={item.href} onClick={e => handleAnchor(e, item.href)}
               className="text-lg font-medium text-foreground animate-fade-up"
               style={{ animationDelay: `${i * 0.06}s` }}>
               {t(item.bn, item.en)}
