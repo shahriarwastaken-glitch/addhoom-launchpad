@@ -12,13 +12,21 @@ import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import PlanGate from "./pages/PlanGate";
 
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, profile } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><div className="animate-pulse text-primary text-xl font-bold">AdDhoom ⚡</div></div>;
   if (!user) return <Navigate to="/auth" replace />;
+  
+  // Check if user has a paid plan
+  const plan = profile?.plan || 'free';
+  if (plan === 'free') {
+    return <PlanGate />;
+  }
+  
   return <>{children}</>;
 };
 
