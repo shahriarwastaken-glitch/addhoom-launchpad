@@ -1131,69 +1131,105 @@ function ListView({ entries, setEntries, t, lang, navigate, isMobile }: {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="flex-1 overflow-auto rounded-xl border border-border">
-        <table className="w-full text-sm">
-          <thead className="bg-secondary/50 sticky top-0 z-10">
-            <tr>
-              <th className="w-8 p-2"><input type="checkbox" checked={selected.size === filtered.length && filtered.length > 0} onChange={toggleAll} className="accent-primary" /></th>
-              <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('তারিখ', 'Date')}</th>
-              <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('ধরন', 'Type')}</th>
-              <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('শিরোনাম', 'Title')}</th>
-              <th className="text-left p-2 text-xs font-semibold text-muted-foreground hidden md:table-cell">{t('প্ল্যাটফর্ম', 'Platform')}</th>
-              <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('স্ট্যাটাস', 'Status')}</th>
-              <th className="text-right p-2 text-xs font-semibold text-muted-foreground">{t('অ্যাকশন', 'Actions')}</th>
-            </tr>
-          </thead>
-          <tbody>
+      {/* Content list */}
+      <div className="flex-1 overflow-auto">
+        {isMobile ? (
+          /* Mobile: Card-based list */
+          <div className="space-y-2 pb-44">
             {filtered.map(entry => {
               const tc = TYPE_COLORS[entry.content_type] || { bg: 'bg-secondary', text: 'text-foreground' };
               const st = STATUS_LABELS[entry.status || 'planned'] || STATUS_LABELS.planned;
-              const isExpanded = expandedId === entry.id;
               const isOverdue = entry.status === 'overdue';
-
               return (
-                <Fragment key={entry.id}>
-                  <tr
-                    onClick={() => setExpandedId(isExpanded ? null : entry.id)}
-                    className={`border-b border-border/50 cursor-pointer transition-colors hover:bg-primary/[0.03] ${isOverdue ? 'border-l-2 border-l-destructive' : ''}`}
-                  >
-                    <td className="p-2" onClick={e => e.stopPropagation()}>
-                      <input type="checkbox" checked={selected.has(entry.id)} onChange={() => toggleSelect(entry.id)} className="accent-primary" />
-                    </td>
-                    <td className="p-2 text-xs text-foreground whitespace-nowrap font-body">
-                      {new Date(entry.date + 'T00:00:00').toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short' })}
-                    </td>
-                    <td className="p-2"><span className={`text-[10px] px-2 py-0.5 rounded-full ${tc.bg} ${tc.text}`}>{t(TYPE_LABELS[entry.content_type]?.bn, TYPE_LABELS[entry.content_type]?.en)}</span></td>
-                    <td className="p-2 text-xs font-medium text-foreground truncate max-w-[200px] font-bn">{entry.title}</td>
-                    <td className="p-2 text-xs text-muted-foreground capitalize hidden md:table-cell">{entry.platform}</td>
-                    <td className="p-2"><span className={`text-[10px] px-2 py-0.5 rounded-full ${st.class}`}>{t(st.bn, st.en)}</span></td>
-                    <td className="p-2 text-right" onClick={e => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handleAction(entry.id, 'generate')} className="p-1 rounded hover:bg-primary/10 text-primary" title={t('তৈরি', 'Generate')}><Zap size={14} /></button>
-                        {entry.status !== 'confirmed' && <button onClick={() => handleAction(entry.id, 'confirm')} className="p-1 rounded hover:bg-[hsl(var(--brand-green))]/10 text-[hsl(var(--brand-green))]" title={t('নিশ্চিত', 'Confirm')}><Check size={14} /></button>}
-                        {entry.status !== 'skipped' && <button onClick={() => handleAction(entry.id, 'skip')} className="p-1 rounded hover:bg-destructive/10 text-destructive" title={t('বাদ', 'Skip')}><X size={14} /></button>}
+                <div key={entry.id} className={`bg-card rounded-xl border border-border p-3 ${isOverdue ? 'border-l-2 border-l-destructive' : ''}`}>
+                  <div className="flex items-start gap-2">
+                    <input type="checkbox" checked={selected.has(entry.id)} onChange={() => toggleSelect(entry.id)} className="accent-primary mt-1 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                        <span className="text-[10px] text-muted-foreground font-body">
+                          {new Date(entry.date + 'T00:00:00').toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short' })}
+                        </span>
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${tc.bg} ${tc.text}`}>{t(TYPE_LABELS[entry.content_type]?.bn, TYPE_LABELS[entry.content_type]?.en)}</span>
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${st.class}`}>{t(st.bn, st.en)}</span>
                       </div>
-                    </td>
-                  </tr>
-                  {isExpanded && (
-                    <tr className="bg-secondary/20">
-                      <td colSpan={7} className="p-4">
-                        <p className="text-xs text-muted-foreground font-bn mb-1">{entry.content_idea}</p>
-                        {entry.hook && <p className="text-xs text-primary italic font-bn">"{entry.hook}"</p>}
-                        {entry.recommended_framework && (
-                          <p className="text-[10px] text-muted-foreground mt-1">
-                            {t('ফ্রেমওয়ার্ক', 'Framework')}: {entry.recommended_framework} | {t('টোন', 'Tone')}: {entry.recommended_tone || '-'}
-                          </p>
-                        )}
-                      </td>
-                    </tr>
-                  )}
-                </Fragment>
+                      <p className="text-xs font-medium text-foreground font-bn truncate">{entry.title}</p>
+                    </div>
+                    <div className="flex items-center gap-0.5 flex-shrink-0">
+                      <button onClick={() => handleAction(entry.id, 'generate')} className="p-1.5 rounded hover:bg-primary/10 text-primary"><Zap size={14} /></button>
+                      {entry.status !== 'confirmed' && <button onClick={() => handleAction(entry.id, 'confirm')} className="p-1.5 rounded hover:bg-[hsl(var(--brand-green))]/10 text-[hsl(var(--brand-green))]"><Check size={14} /></button>}
+                      {entry.status !== 'skipped' && <button onClick={() => handleAction(entry.id, 'skip')} className="p-1.5 rounded hover:bg-destructive/10 text-destructive"><X size={14} /></button>}
+                    </div>
+                  </div>
+                </div>
               );
             })}
-          </tbody>
-        </table>
+          </div>
+        ) : (
+          /* Desktop: Table */
+          <div className="rounded-xl border border-border">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary/50 sticky top-0 z-10">
+                <tr>
+                  <th className="w-8 p-2"><input type="checkbox" checked={selected.size === filtered.length && filtered.length > 0} onChange={toggleAll} className="accent-primary" /></th>
+                  <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('তারিখ', 'Date')}</th>
+                  <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('ধরন', 'Type')}</th>
+                  <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('শিরোনাম', 'Title')}</th>
+                  <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('প্ল্যাটফর্ম', 'Platform')}</th>
+                  <th className="text-left p-2 text-xs font-semibold text-muted-foreground">{t('স্ট্যাটাস', 'Status')}</th>
+                  <th className="text-right p-2 text-xs font-semibold text-muted-foreground">{t('অ্যাকশন', 'Actions')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(entry => {
+                  const tc = TYPE_COLORS[entry.content_type] || { bg: 'bg-secondary', text: 'text-foreground' };
+                  const st = STATUS_LABELS[entry.status || 'planned'] || STATUS_LABELS.planned;
+                  const isExpanded = expandedId === entry.id;
+                  const isOverdue = entry.status === 'overdue';
+
+                  return (
+                    <Fragment key={entry.id}>
+                      <tr
+                        onClick={() => setExpandedId(isExpanded ? null : entry.id)}
+                        className={`border-b border-border/50 cursor-pointer transition-colors hover:bg-primary/[0.03] ${isOverdue ? 'border-l-2 border-l-destructive' : ''}`}
+                      >
+                        <td className="p-2" onClick={e => e.stopPropagation()}>
+                          <input type="checkbox" checked={selected.has(entry.id)} onChange={() => toggleSelect(entry.id)} className="accent-primary" />
+                        </td>
+                        <td className="p-2 text-xs text-foreground whitespace-nowrap font-body">
+                          {new Date(entry.date + 'T00:00:00').toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short' })}
+                        </td>
+                        <td className="p-2"><span className={`text-[10px] px-2 py-0.5 rounded-full ${tc.bg} ${tc.text}`}>{t(TYPE_LABELS[entry.content_type]?.bn, TYPE_LABELS[entry.content_type]?.en)}</span></td>
+                        <td className="p-2 text-xs font-medium text-foreground truncate max-w-[200px] font-bn">{entry.title}</td>
+                        <td className="p-2 text-xs text-muted-foreground capitalize">{entry.platform}</td>
+                        <td className="p-2"><span className={`text-[10px] px-2 py-0.5 rounded-full ${st.class}`}>{t(st.bn, st.en)}</span></td>
+                        <td className="p-2 text-right" onClick={e => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1">
+                            <button onClick={() => handleAction(entry.id, 'generate')} className="p-1 rounded hover:bg-primary/10 text-primary" title={t('তৈরি', 'Generate')}><Zap size={14} /></button>
+                            {entry.status !== 'confirmed' && <button onClick={() => handleAction(entry.id, 'confirm')} className="p-1 rounded hover:bg-[hsl(var(--brand-green))]/10 text-[hsl(var(--brand-green))]" title={t('নিশ্চিত', 'Confirm')}><Check size={14} /></button>}
+                            {entry.status !== 'skipped' && <button onClick={() => handleAction(entry.id, 'skip')} className="p-1 rounded hover:bg-destructive/10 text-destructive" title={t('বাদ', 'Skip')}><X size={14} /></button>}
+                          </div>
+                        </td>
+                      </tr>
+                      {isExpanded && (
+                        <tr className="bg-secondary/20">
+                          <td colSpan={7} className="p-4">
+                            <p className="text-xs text-muted-foreground font-bn mb-1">{entry.content_idea}</p>
+                            {entry.hook && <p className="text-xs text-primary italic font-bn">"{entry.hook}"</p>}
+                            {entry.recommended_framework && (
+                              <p className="text-[10px] text-muted-foreground mt-1">
+                                {t('ফ্রেমওয়ার্ক', 'Framework')}: {entry.recommended_framework} | {t('টোন', 'Tone')}: {entry.recommended_tone || '-'}
+                              </p>
+                            )}
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Bulk actions */}
