@@ -332,8 +332,8 @@ export default function AdminSettings() {
             <div className="border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Agency</h4>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span>মাসিক</span><span className="font-medium">৳{PRICING.agency.monthly.toLocaleString()}</span></div>
-                <div className="flex justify-between"><span>বার্ষিক</span><span className="font-medium">৳{PRICING.agency.annual.toLocaleString()} ({PRICING.agency.discount}% ছাড়)</span></div>
+                <div className="flex justify-between"><span>Monthly</span><span className="font-medium">৳{PRICING.agency.monthly.toLocaleString()}</span></div>
+                <div className="flex justify-between"><span>Annual</span><span className="font-medium">৳{PRICING.agency.annual.toLocaleString()} ({PRICING.agency.discount}% off)</span></div>
               </div>
             </div>
           </div>
