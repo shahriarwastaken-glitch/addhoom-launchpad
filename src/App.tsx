@@ -17,15 +17,17 @@ import PlanGate from "./pages/PlanGate";
 
 const queryClient = new QueryClient();
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute = ({ children, skipPlanCheck }: { children: React.ReactNode; skipPlanCheck?: boolean }) => {
   const { user, loading, profile } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><div className="animate-pulse text-primary text-xl font-bold">AdDhoom ⚡</div></div>;
   if (!user) return <Navigate to="/auth" replace />;
   
-  // Check if user has a paid plan
-  const plan = profile?.plan || 'free';
-  if (plan === 'free') {
-    return <PlanGate />;
+  // Check if user has a paid plan (skip for admin routes)
+  if (!skipPlanCheck) {
+    const plan = profile?.plan || 'free';
+    if (plan === 'free') {
+      return <PlanGate />;
+    }
   }
   
   return <>{children}</>;
