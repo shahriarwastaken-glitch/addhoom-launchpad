@@ -148,7 +148,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-[760px] mx-auto px-6 py-8 pb-32">
+      <div className="max-w-[760px] mx-auto px-4 sm:px-6 py-8 pb-44 md:pb-32">
         {/* Header */}
         <div className="flex items-start justify-between mb-10">
           <div>
