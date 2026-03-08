@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/hooks/useTheme';
 import { 
   LayoutDashboard, 
   Users, 
@@ -8,8 +9,11 @@ import {
   Bot, 
   Settings, 
   Shield,
-  ArrowLeft 
+  ArrowLeft,
+  Sun,
+  Moon
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface AdminSidebarProps {
   isSuperAdmin: boolean;
@@ -25,16 +29,31 @@ const navItems = [
 
 export default function AdminSidebar({ isSuperAdmin }: AdminSidebarProps) {
   const { profile } = useAuth();
+  const { dark, toggleTheme } = useTheme();
 
   return (
-    <aside className="w-60 min-h-screen bg-[#1C1B1A] text-white flex flex-col">
+    <aside className="w-60 min-h-screen bg-sidebar-background border-r border-sidebar-border text-sidebar-foreground flex flex-col">
       {/* Logo */}
-      <div className="p-4 border-b border-white/10">
-        <div className="flex items-center gap-2">
-          <span className="text-xl font-bold text-primary">AdDhoom</span>
-          <span className="text-xs bg-red-500 text-white px-1.5 py-0.5 rounded font-medium">
-            Admin
-          </span>
+      <div className="p-4 border-b border-sidebar-border">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-bold text-primary">AdDhoom</span>
+            <span className="text-xs bg-destructive text-destructive-foreground px-1.5 py-0.5 rounded font-medium">
+              Admin
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="h-8 w-8 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+          >
+            {dark ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </Button>
         </div>
       </div>
 
@@ -49,8 +68,8 @@ export default function AdminSidebar({ isSuperAdmin }: AdminSidebarProps) {
               cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors',
                 isActive 
-                  ? 'bg-primary/20 text-primary' 
-                  : 'text-white/70 hover:bg-white/10 hover:text-white'
+                  ? 'bg-sidebar-primary/20 text-sidebar-primary' 
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
               )
             }
           >
@@ -67,8 +86,8 @@ export default function AdminSidebar({ isSuperAdmin }: AdminSidebarProps) {
               cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors',
                 isActive 
-                  ? 'bg-primary/20 text-primary' 
-                  : 'text-white/70 hover:bg-white/10 hover:text-white'
+                  ? 'bg-sidebar-primary/20 text-sidebar-primary' 
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
               )
             }
           >
@@ -79,13 +98,13 @@ export default function AdminSidebar({ isSuperAdmin }: AdminSidebarProps) {
       </nav>
 
       {/* Bottom section */}
-      <div className="p-3 border-t border-white/10 space-y-2">
-        <div className="px-3 py-2 text-xs text-white/50 truncate">
+      <div className="p-3 border-t border-sidebar-border space-y-2">
+        <div className="px-3 py-2 text-xs text-sidebar-foreground/50 truncate">
           {profile?.email}
         </div>
         <NavLink
           to="/dashboard"
-          className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+          className="flex items-center gap-2 px-3 py-2 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-lg transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>ড্যাশবোর্ডে ফিরুন</span>
