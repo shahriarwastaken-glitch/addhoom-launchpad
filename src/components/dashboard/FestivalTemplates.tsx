@@ -72,7 +72,7 @@ const FestivalTemplates = () => {
             <div className={`bg-gradient-to-r ${f.gradient} p-5 text-white`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl">{f.emoji}</span>
+                  <f.icon size={28} />
                   <div>
                     <h3 className="text-lg font-bold">{t(f.bn, f.en)}</h3>
                   </div>
