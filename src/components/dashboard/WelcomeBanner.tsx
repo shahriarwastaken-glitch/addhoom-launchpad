@@ -22,14 +22,14 @@ const WelcomeBanner = () => {
       <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-base font-bold text-foreground font-bn">⚠️ শপ সেটআপ বাকি আছে</p>
-            <p className="text-sm text-muted-foreground font-bn">সেটআপ সম্পন্ন করলে AI আপনার শপের জন্য কাস্টমাইজ করতে পারবে।</p>
+            <p className="text-base font-bold text-foreground">⚠️ Shop setup incomplete</p>
+            <p className="text-sm text-muted-foreground">Complete setup so AI can customize for your shop.</p>
           </div>
           <button
             onClick={() => navigate('/onboarding')}
-            className="bg-gradient-cta text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold font-bn whitespace-nowrap"
+            className="bg-gradient-cta text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold whitespace-nowrap"
           >
-            সেটআপ সম্পন্ন করুন
+            Complete Setup
           </button>
         </div>
       </div>
@@ -52,23 +52,23 @@ const WelcomeBanner = () => {
       </button>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-xl font-bold text-white font-bn">
-            👋 স্বাগতম{firstName ? `, ${firstName}` : ''}!
+          <h3 className="text-xl font-bold text-white">
+            👋 Welcome{firstName ? `, ${firstName}` : ''}!
           </h3>
-          <p className="text-[15px] text-white/85 font-bn">
-            AdDhoom-এ আপনার যাত্রা শুরু হয়েছে।
+          <p className="text-[15px] text-white/85">
+            Your journey with AdDhoom has begun.
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
           {[
-            { label: 'বিজ্ঞাপন তৈরি করুন', path: '/dashboard/generate' },
-            { label: 'ক্যালেন্ডার দেখুন', path: '/dashboard/calendar' },
-            { label: 'ধুম স্কোর সম্পর্কে জানুন', path: '/dashboard/doctor' },
+            { label: 'Create Ad', path: '/dashboard/generate' },
+            { label: 'View Calendar', path: '/dashboard/calendar' },
+            { label: 'Learn about Dhoom Score', path: '/dashboard/doctor' },
           ].map(a => (
             <button
               key={a.path}
               onClick={() => navigate(a.path)}
-              className="text-xs font-semibold text-white border border-white/30 rounded-full px-4 py-2 hover:bg-white/10 transition-colors font-bn whitespace-nowrap"
+              className="text-xs font-semibold text-white border border-white/30 rounded-full px-4 py-2 hover:bg-white/10 transition-colors whitespace-nowrap"
             >
               {a.label}
             </button>
