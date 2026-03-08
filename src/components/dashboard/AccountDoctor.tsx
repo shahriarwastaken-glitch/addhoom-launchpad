@@ -12,7 +12,7 @@ const AccountDoctor = () => {
   const sections = [
     {
       type: 'good',
-      title: { bn: '✅ যা ভালো চলছে', en: '✅ What's Going Well' },
+      title: { bn: '✅ যা ভালো চলছে', en: '✅ What\'s Going Well' },
       borderColor: 'border-l-brand-green',
       items: [
         { bn: 'বিজ্ঞাপন কপি কোয়ালিটি উন্নত', en: 'Ad copy quality improved' },
