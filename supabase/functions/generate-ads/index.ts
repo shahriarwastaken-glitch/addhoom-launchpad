@@ -1,103 +1,250 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import {
-  corsHeaders, callGemini, checkPlanLimit, logUsage,
-  errorResponse, jsonResponse, ADDHOOM_SYSTEM_PROMPT,
-} from "../_shared/addhoom.ts";
+import { callGemini } from "../_shared/gemini.ts";
+import { ADDHOOM_SYSTEM_PROMPT } from "../_shared/systemPrompt.ts";
+import { serverError, aiError, unauthorizedError } from "../_shared/errors.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) return errorResponse(401, "লগইন করুন।", "Please log in.");
+    if (!authHeader) {
+      const err = unauthorizedError("bn");
+      return new Response(JSON.stringify(err), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    const supabaseUser = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user } } = await supabaseUser.auth.getUser();
+    if (!user) {
+      const err = unauthorizedError("bn");
+      return new Response(JSON.stringify(err), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { data: { user }, error: authError } = await createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    ).auth.getUser();
-
-    if (authError || !user) return errorResponse(401, "লগইন করুন।", "Please log in.");
-
-    const { data: profile } = await supabase
-      .from("profiles").select("plan").eq("id", user.id).single();
-
-    const plan = profile?.plan || "pro";
-
-    const limitCheck = await checkPlanLimit(supabase, user.id, "ad_generator", plan);
-    if (!limitCheck.allowed) return errorResponse(402, limitCheck.message_bn!, limitCheck.message_en!);
-
-    const body = await req.json();
+    const input = await req.json();
     const {
       workspace_id, product_name, description, price_bdt,
-      target_audience, platform, language, framework,
-      occasion, num_variations, tone,
-    } = body;
+      target_audience, platforms, language, framework,
+      occasion, tone, num_variations, source_url,
+    } = input;
 
     if (!workspace_id || !product_name) {
-      return errorResponse(400, "পণ্যের নাম দিন।", "Product name is required.");
+      return new Response(
+        JSON.stringify({ success: false, code: 400, message: "পণ্যের নাম আবশ্যক" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    const prompt = `Generate ${num_variations || 5} ad variations for ${(platform || ["facebook"]).join(", ")} using ${framework || "AIDA"} framework.
-Product: ${product_name}
-Description: ${description || "N/A"}
-Price: ৳${price_bdt || "N/A"}
-Audience: ${target_audience || "General Bangladesh audience"}
-Occasion: ${occasion || "general"}
-Tone: ${tone || "friendly"}
-Language: ${language || "bn"}
+    // STEP 1 — Fetch workspace with Shop DNA
+    const { data: workspace } = await supabase
+      .from("workspaces")
+      .select("*")
+      .eq("id", workspace_id)
+      .eq("owner_id", user.id)
+      .single();
 
-For each ad give a dhoom_score (0-100 predicted performance), copy_score (0-100 copy quality), and score_reason (one sentence in ${language || "bn"}).
-Return ONLY a valid JSON array: [{"headline":"...","body":"...","cta":"...","dhoom_score":0,"copy_score":0,"score_reason":"..."}]`;
+    if (!workspace) {
+      return new Response(
+        JSON.stringify({ success: false, code: 404, message: "Workspace পাওয়া যায়নি" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
-    const aiResponse = await callGemini(prompt);
+    const shopName = workspace.shop_name || "My Shop";
+    const industry = workspace.industry || "other";
+    const brandTone = workspace.brand_tone || tone || "friendly";
+    const shopTarget = workspace.target_audience || "General Bangladesh audience";
+    const keyProducts = workspace.key_products || "N/A";
+    const uniqueSelling = workspace.unique_selling || "N/A";
+    const priceRange = workspace.price_range || "mid_range";
 
-    // Extract JSON from response
+    const adTarget = target_audience || shopTarget;
+    const adPlatforms = (platforms || ["facebook"]).join(", ");
+    const adLang = language || "bn";
+    const adFramework = framework || "AIDA";
+    const adOccasion = occasion || "general";
+    const adTone = tone || brandTone;
+    const adCount = num_variations || 5;
+
+    // Framework instructions
+    const frameworkInstructions: Record<string, string> = {
+      AIDA: "Headline = Attention grabber. Body line 1 = build Interest with a key benefit. Body line 2-3 = create Desire with features, social proof, or scarcity. CTA = Action.",
+      PAS: "Headline = name the Problem the customer has. Body = Agitate it — make them feel the pain. Then present the product as the Solution.",
+      FOMO: "Lead with what they'll MISS if they don't act. Include scarcity (limited stock or time). Social proof. Urgent CTA.",
+      before_after: "Headline = their current painful situation (Before). Body = paint the dream outcome (After). Then bridge: this product is HOW they get there.",
+      social_proof: "Lead with a customer result or testimonial angle. Build credibility. Then present the offer.",
+    };
+
+    const occasionContext: Record<string, string> = {
+      eid: "This is for Eid season — the biggest shopping event in Bangladesh. Use celebratory, gift-giving, family-centered messaging. 'ঈদ স্পেশাল অফার' hooks perform best. Urgency: stock runs out before Eid.",
+      boishakh: "Pohela Boishakh — Bengali New Year. Cultural pride, new beginnings, celebration. Red and white theme.",
+      puja: "Durga Puja season. Festive, joyful, celebratory tone.",
+      december16: "Victory Day — national pride. Patriotic messaging, red and green colors.",
+      general: "Standard campaign — focus purely on product benefits and conversion.",
+      valentine: "Valentine's Day — gifts, love, relationships. Romantic but subtle for BD context.",
+      mothers_day: "Mother's Day — emotional, gratitude, care. Very high-converting for beauty and fashion.",
+    };
+
+    const langInstruction = adLang === "bn"
+      ? "Pure Bangla — write natively, do NOT translate from English"
+      : adLang === "en"
+        ? "English"
+        : "Generate half in Bangla, half in English — label each";
+
+    // STEP 2 — Build prompt
+    const prompt = `Generate ${adCount} high-converting ad variations for a Bangladeshi e-commerce shop.
+
+SHOP CONTEXT (always stay true to this):
+- Shop name: ${shopName}
+- Industry: ${industry}
+- Brand tone: ${brandTone}
+- Shop's target audience: ${shopTarget}
+- Key products: ${keyProducts}
+- What makes them unique: ${uniqueSelling}
+- Price range positioning: ${priceRange}
+
+PRODUCT TO ADVERTISE:
+- Product name: ${product_name}
+- Description: ${description || "N/A"}
+- Price: ৳${price_bdt || "N/A"}
+- Target audience for THIS ad: ${adTarget}
+
+AD SPECIFICATIONS:
+- Platforms: ${adPlatforms}
+- Language: ${langInstruction}
+- Copywriting framework: ${adFramework}
+- Occasion/season: ${adOccasion}
+- Tone: ${adTone}
+
+FRAMEWORK INSTRUCTIONS FOR ${adFramework}:
+${frameworkInstructions[adFramework] || frameworkInstructions.AIDA}
+
+OCCASION CONTEXT FOR ${adOccasion}:
+${occasionContext[adOccasion] || occasionContext.general}
+
+FOR EACH VARIATION, also calculate and return:
+1. dhoom_score (0-100): Your honest prediction of how well this ad will perform in the Bangladesh Facebook/Instagram market. Consider: hook strength, Bangla authenticity, platform fit, framework execution, scarcity/urgency presence, CTA clarity. Be realistic — not everything scores 80+.
+2. copy_score (0-100): Quality of the copywriting itself. Consider: headline power, emotional pull, readability, grammar, framework adherence.
+3. score_reason: One sentence in ${adLang === "en" ? "English" : "Bangla"} explaining the combined score. Be specific — mention what makes it strong OR what its weakness is.
+4. platform_tag: Which of the requested platforms this variation is best suited for.
+
+RETURN FORMAT:
+Return ONLY a valid JSON array. No explanation. No markdown. No text before or after the array. Just the raw JSON.
+
+[
+  {
+    "headline": "string",
+    "body": "string",
+    "cta": "string",
+    "language": "bn or en",
+    "platform_tag": "facebook | instagram | google",
+    "framework_used": "${adFramework}",
+    "dhoom_score": number,
+    "copy_score": number,
+    "score_reason": "string"
+  }
+]`;
+
+    // STEP 3 — Call Gemini
+    const aiResponse = await callGemini(prompt, ADDHOOM_SYSTEM_PROMPT, true);
+
+    if (!aiResponse) {
+      const err = aiError(adLang === "en" ? "en" : "bn");
+      return new Response(JSON.stringify(err), { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // STEP 4 — Parse response
     let ads: any[];
     try {
-      const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
-      ads = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+      ads = JSON.parse(aiResponse);
     } catch {
-      console.error("Failed to parse Gemini response:", aiResponse);
-      return errorResponse(500, "AI এখন ব্যস্ত। একটু পরে চেষ্টা করুন।", "AI is busy. Please try again.");
+      const match = aiResponse.match(/\[[\s\S]*\]/);
+      if (match) {
+        try {
+          ads = JSON.parse(match[0]);
+        } catch {
+          const err = serverError("bn");
+          return new Response(JSON.stringify(err), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+      } else {
+        const err = serverError("bn");
+        return new Response(JSON.stringify(err), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
     }
 
-    // Save to database
+    if (!Array.isArray(ads)) {
+      const err = serverError("bn");
+      return new Response(JSON.stringify(err), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // STEP 5 — Save to database
     const creatives = ads.map((ad: any) => ({
       workspace_id,
-      headline: ad.headline,
-      body: ad.body,
-      cta: ad.cta,
-      language: language || "bn",
-      platform: (platform || ["facebook"])[0],
-      framework: framework || "AIDA",
-      occasion: occasion || "general",
-      dhoom_score: ad.dhoom_score,
-      copy_score: ad.copy_score,
-      score_reason: ad.score_reason,
+      product_name,
+      headline: ad.headline || "",
+      body: ad.body || "",
+      cta: ad.cta || "",
+      language: ad.language || adLang,
+      platform: ad.platform_tag || "facebook",
+      framework: ad.framework_used || adFramework,
+      occasion: adOccasion,
+      tone: adTone,
+      dhoom_score: ad.dhoom_score || 0,
+      copy_score: ad.copy_score || 0,
+      score_reason: ad.score_reason || "",
+      is_winner: false,
+      source_url: source_url || null,
+      ai_generated: true,
     }));
 
     const { data: saved, error: saveError } = await supabase
-      .from("ad_creatives").insert(creatives).select();
+      .from("ad_creatives")
+      .insert(creatives)
+      .select();
 
     if (saveError) console.error("Save error:", saveError);
 
-    await logUsage(supabase, user.id, workspace_id, "ad_generator");
+    // STEP 6 — Log usage
+    await supabase.from("usage_logs").insert({
+      user_id: user.id,
+      workspace_id,
+      feature: "ad_generator",
+    });
 
     // Sort by dhoom_score descending
     const sorted = (saved || creatives).sort(
       (a: any, b: any) => (b.dhoom_score || 0) - (a.dhoom_score || 0)
     );
 
-    return jsonResponse({ ads: sorted });
+    // STEP 7 — Return
+    return new Response(
+      JSON.stringify({
+        success: true,
+        ads: sorted,
+        count: sorted.length,
+        message: `${sorted.length}টি বিজ্ঞাপন তৈরি হয়েছে`,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (e) {
     console.error("generate-ads error:", e);
-    return errorResponse(500, "কিছু একটা সমস্যা হয়েছে।", "Something went wrong.");
+    const err = serverError("bn");
+    return new Response(JSON.stringify(err), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
