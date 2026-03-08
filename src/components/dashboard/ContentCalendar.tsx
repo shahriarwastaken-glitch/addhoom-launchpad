@@ -109,6 +109,7 @@ const ContentCalendar = () => {
   const { t, lang } = useLanguage();
   const { activeWorkspace } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [entries, setEntries] = useState<CalendarEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'month' | 'swipe' | 'list'>('month');
