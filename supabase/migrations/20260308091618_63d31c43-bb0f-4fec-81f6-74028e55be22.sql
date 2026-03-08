@@ -1,0 +1,2 @@
+ALTER TABLE public.ad_creatives ADD COLUMN IF NOT EXISTS remixed_from_id uuid REFERENCES public.ad_creatives(id) ON DELETE SET NULL;
+ALTER TABLE public.ad_creatives ADD COLUMN IF NOT EXISTS improvement_note text;

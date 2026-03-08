@@ -64,11 +64,13 @@ export type Database = {
           framework: string | null
           headline: string | null
           id: string
+          improvement_note: string | null
           is_winner: boolean
           language: string | null
           occasion: string | null
           platform: string | null
           product_name: string | null
+          remixed_from_id: string | null
           score_reason: string | null
           source_url: string | null
           tone: string | null
@@ -85,11 +87,13 @@ export type Database = {
           framework?: string | null
           headline?: string | null
           id?: string
+          improvement_note?: string | null
           is_winner?: boolean
           language?: string | null
           occasion?: string | null
           platform?: string | null
           product_name?: string | null
+          remixed_from_id?: string | null
           score_reason?: string | null
           source_url?: string | null
           tone?: string | null
@@ -106,11 +110,13 @@ export type Database = {
           framework?: string | null
           headline?: string | null
           id?: string
+          improvement_note?: string | null
           is_winner?: boolean
           language?: string | null
           occasion?: string | null
           platform?: string | null
           product_name?: string | null
+          remixed_from_id?: string | null
           score_reason?: string | null
           source_url?: string | null
           tone?: string | null
@@ -122,6 +128,13 @@ export type Database = {
             columns: ["campaign_id"]
             isOneToOne: false
             referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_creatives_remixed_from_id_fkey"
+            columns: ["remixed_from_id"]
+            isOneToOne: false
+            referencedRelation: "ad_creatives"
             referencedColumns: ["id"]
           },
           {

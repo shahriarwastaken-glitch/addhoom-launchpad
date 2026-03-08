@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
-  corsHeaders, callGemini, errorResponse, jsonResponse,
+  corsHeaders, callGemini, errorResponse, jsonResponse, logUsage, ADDHOOM_SYSTEM_PROMPT,
 } from "../_shared/addhoom.ts";
 
 serve(async (req) => {
@@ -23,61 +23,144 @@ serve(async (req) => {
     const { data: { user } } = await userClient.auth.getUser();
     if (!user) return errorResponse(401, "লগইন করুন।", "Please log in.");
 
-    const { workspace_id, ad_id, num_variations } = await req.json();
+    const { workspace_id, ad_id, num_variations = 5 } = await req.json();
     if (!workspace_id || !ad_id) {
       return errorResponse(400, "অ্যাড আইডি দিন।", "Ad ID is required.");
     }
 
-    // Fetch target ad
+    // STEP 1 — Fetch target ad
     const { data: targetAd } = await supabase
       .from("ad_creatives").select("*").eq("id", ad_id).single();
 
     if (!targetAd) return errorResponse(404, "অ্যাড পাওয়া যায়নি।", "Ad not found.");
 
-    // Fetch winners
+    // STEP 2 — Fetch winner ads
     const { data: winners } = await supabase
-      .from("ad_creatives").select("headline, body, cta, dhoom_score")
-      .eq("workspace_id", workspace_id).eq("is_winner", true)
-      .order("created_at", { ascending: false }).limit(20);
+      .from("ad_creatives")
+      .select("headline, body, cta, dhoom_score, framework")
+      .eq("workspace_id", workspace_id)
+      .eq("is_winner", true)
+      .order("dhoom_score", { ascending: false })
+      .limit(10);
 
-    const prompt = `Here are winning ads from this shop:
-${JSON.stringify(winners || [], null, 2)}
+    // STEP 3 — Fetch workspace shop DNA
+    const { data: workspace } = await supabase
+      .from("workspaces").select("*").eq("id", workspace_id).single();
 
-Here is an ad to improve:
-${JSON.stringify({ headline: targetAd.headline, body: targetAd.body, cta: targetAd.cta, dhoom_score: targetAd.dhoom_score })}
+    const shopName = workspace?.shop_name || "Shop";
+    const industry = workspace?.industry || "general";
+    const brandTone = workspace?.brand_tone || "friendly";
 
-Generate ${num_variations || 5} improved variations that apply patterns from the winners.
+    // STEP 4 — Build prompt
+    let prompt: string;
+
+    if (winners && winners.length > 0) {
+      const winnersText = winners.map((w: any, i: number) =>
+        `Winner ${i + 1} (Dhoom Score: ${w.dhoom_score}):
+Headline: ${w.headline}
+Body: ${w.body}
+CTA: ${w.cta}
+Framework: ${w.framework}`
+      ).join("\n\n");
+
+      prompt = `You are improving an ad using proven winner patterns from the same shop.
+
+SHOP CONTEXT:
+${shopName} | ${industry} | Tone: ${brandTone}
+
+WINNING ADS FROM THIS SHOP (these actually performed best — study their patterns):
+
+${winnersText}
+
+PATTERNS IDENTIFIED: Look at the winners above. What makes them work? Apply those same patterns — the hook style, the tone, the urgency level, the framework structure — to create improved variations of the ad below.
+
+AD TO IMPROVE:
+Headline: ${targetAd.headline}
+Body: ${targetAd.body}
+CTA: ${targetAd.cta}
 Language: ${targetAd.language || "bn"}
-Return ONLY a valid JSON array: [{"headline":"...","body":"...","cta":"...","dhoom_score":0,"copy_score":0,"score_reason":"..."}]`;
+Platform: ${targetAd.platform || "facebook"}
 
-    const aiResponse = await callGemini(prompt);
+Generate ${num_variations} improved variations. Apply winner patterns. Make each one genuinely different — vary the hook angle, the emotional appeal, the urgency level.
 
-    let ads: any[];
-    try {
-      const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
-      ads = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
-    } catch {
-      return errorResponse(500, "AI এখন ব্যস্ত।", "AI is busy.");
+Return ONLY valid JSON array:
+[{"headline":"...","body":"...","cta":"...","dhoom_score":0,"copy_score":0,"score_reason":"...","improvement_note":"one sentence on what was improved vs original"}]`;
+    } else {
+      prompt = `Generate ${num_variations} improved variations of this ad for a Bangladesh e-commerce shop.
+
+SHOP: ${shopName} | ${industry} | Tone: ${brandTone}
+
+ORIGINAL AD:
+Headline: ${targetAd.headline}
+Body: ${targetAd.body}
+CTA: ${targetAd.cta}
+Language: ${targetAd.language || "bn"}
+
+Make each variation genuinely better — stronger hook, clearer benefit, more compelling CTA. Try different frameworks: AIDA, PAS, FOMO, Social Proof.
+
+Return ONLY valid JSON array:
+[{"headline":"...","body":"...","cta":"...","dhoom_score":0,"copy_score":0,"score_reason":"...","improvement_note":"one sentence on what was improved vs original"}]`;
     }
 
+    // STEP 5 — Call Gemini
+    let aiResponse: string;
+    try {
+      aiResponse = await callGemini(prompt, ADDHOOM_SYSTEM_PROMPT);
+    } catch (e) {
+      console.error("Gemini error:", e);
+      return errorResponse(503, "AI এখন ব্যস্ত।", "AI is busy right now.");
+    }
+
+    // Parse response
+    let ads: any[];
+    try {
+      const cleaned = aiResponse.replace(/```json/g, "").replace(/```/g, "").trim();
+      const jsonMatch = cleaned.match(/\[[\s\S]*\]/);
+      ads = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+    } catch {
+      return errorResponse(500, "AI থেকে সঠিক উত্তর আসেনি।", "Could not parse AI response.");
+    }
+
+    if (!Array.isArray(ads) || ads.length === 0) {
+      return errorResponse(500, "AI কোনো বিজ্ঞাপন তৈরি করেনি।", "AI did not generate any ads.");
+    }
+
+    // Save to database
     const creatives = ads.map((ad: any) => ({
       workspace_id,
       headline: ad.headline,
       body: ad.body,
       cta: ad.cta,
       language: targetAd.language || "bn",
-      platform: targetAd.platform,
-      framework: targetAd.framework,
-      occasion: targetAd.occasion,
+      platform: targetAd.platform || "facebook",
+      framework: targetAd.framework || "AIDA",
+      occasion: targetAd.occasion || "general",
+      tone: targetAd.tone || null,
       dhoom_score: ad.dhoom_score,
       copy_score: ad.copy_score,
       score_reason: ad.score_reason,
+      improvement_note: ad.improvement_note || null,
+      remixed_from_id: ad_id,
+      ai_generated: true,
     }));
 
     const { data: saved } = await supabase.from("ad_creatives").insert(creatives).select();
 
+    // Log usage
+    await logUsage(supabase, user.id, workspace_id, "ad_remix");
+
+    const resultAds = (saved || creatives).sort(
+      (a: any, b: any) => (b.dhoom_score || 0) - (a.dhoom_score || 0)
+    );
+
     return jsonResponse({
-      ads: (saved || creatives).sort((a: any, b: any) => (b.dhoom_score || 0) - (a.dhoom_score || 0)),
+      success: true,
+      ads: resultAds,
+      count: resultAds.length,
+      has_winners: !!(winners && winners.length > 0),
+      message: winners && winners.length > 0
+        ? `Winner pattern থেকে ${resultAds.length}টি রিমিক্স তৈরি হয়েছে ⚡`
+        : `${resultAds.length}টি উন্নত ভার্সন তৈরি হয়েছে`,
     });
   } catch (e) {
     console.error("remix-ad error:", e);

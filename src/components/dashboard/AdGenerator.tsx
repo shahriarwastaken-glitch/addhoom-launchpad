@@ -20,6 +20,8 @@ interface AdResult {
   language?: string;
   is_winner?: boolean;
   adaptation_note?: string;
+  improvement_note?: string;
+  remixed_from_id?: string;
 }
 
 interface SourceAd {
@@ -88,6 +90,10 @@ const AdGenerator = () => {
   const [sourceAd, setSourceAd] = useState<SourceAd | null>(null);
   const [adaptedAds, setAdaptedAds] = useState<AdResult[]>([]);
   const [showWhyItWorks, setShowWhyItWorks] = useState(false);
+
+  // Remix state
+  const [remixingId, setRemixingId] = useState<string | null>(null);
+  const [showRemixDropdown, setShowRemixDropdown] = useState<string | null>(null);
 
   // Results state
   const [generating, setGenerating] = useState(false);
@@ -264,18 +270,29 @@ const AdGenerator = () => {
     toast.success(t('কপি হয়েছে!', 'Copied!'));
   };
 
-  const handleRemix = async (ad: AdResult) => {
+  const handleRemix = async (ad: AdResult, numVariations: number) => {
     if (!ad.id || !activeWorkspace) return;
-    setGenerating(true);
+    setRemixingId(ad.id);
+    setShowRemixDropdown(null);
     try {
       const { data } = await supabase.functions.invoke('remix-ad', {
-        body: { workspace_id: activeWorkspace.id, ad_id: ad.id, num_variations: 2 },
+        body: { workspace_id: activeWorkspace.id, ad_id: ad.id, num_variations: numVariations },
       });
-      if (data?.ads) {
+      if (data?.success && data.ads) {
         setResults(prev => [...prev, ...data.ads]);
-        toast.success(t('Remix তৈরি হয়েছে!', 'Remix created!'));
+        toast.success(
+          data.has_winners
+            ? t('Winner pattern থেকে রিমিক্স তৈরি হয়েছে ⚡', 'Remixed from winner patterns ⚡')
+            : t('রিমিক্স তৈরি হয়েছে!', 'Remix created!')
+        );
+      } else {
+        toast.error(data?.message || t('সমস্যা হয়েছে', 'Something went wrong'));
       }
-    } catch { /* ignore */ } finally { setGenerating(false); }
+    } catch {
+      toast.error(t('রিমিক্স ব্যর্থ হয়েছে', 'Remix failed'));
+    } finally {
+      setRemixingId(null);
+    }
   };
 
   const resetAll = () => {
@@ -326,6 +343,7 @@ const AdGenerator = () => {
               <span className="text-[10px] uppercase tracking-wider bg-secondary text-muted-foreground rounded px-2 py-0.5">{ad.platform}</span>
               <span className="text-[10px] uppercase tracking-wider bg-primary/10 text-primary rounded px-2 py-0.5">{ad.framework}</span>
               {ad.is_winner && <span className="text-[10px] bg-yellow-500/20 text-yellow-600 rounded px-2 py-0.5">⭐ Winner</span>}
+              {ad.remixed_from_id && <span className="text-[10px] bg-accent text-accent-foreground rounded px-2 py-0.5">🔄 Remixed</span>}
             </div>
 
             {isEditing ? (
@@ -391,6 +409,11 @@ const AdGenerator = () => {
           <p className="text-xs text-primary/70 mb-3 font-body-bn">💡 {ad.adaptation_note}</p>
         )}
 
+        {/* Improvement Note (Remix) */}
+        {ad.improvement_note && (
+          <p className="text-xs text-accent-foreground/70 italic mb-3 font-body-bn">🔄 {ad.improvement_note}</p>
+        )}
+
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-2 pt-3 border-t border-border">
           {isEditing ? (
@@ -414,9 +437,37 @@ const AdGenerator = () => {
                 <Copy size={12} /> {t('কপি', 'Copy')}
               </button>
               {!isAdapted && ad.id && (
-                <button onClick={() => handleRemix(ad)} disabled={generating} className="text-xs bg-secondary text-muted-foreground hover:text-foreground rounded-full px-3 py-1.5 flex items-center gap-1 transition-colors disabled:opacity-50">
-                  <RefreshCw size={12} /> Remix
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowRemixDropdown(showRemixDropdown === ad.id ? null : (ad.id || null))}
+                    disabled={remixingId === ad.id}
+                    className="text-xs bg-secondary text-muted-foreground hover:text-foreground rounded-full px-3 py-1.5 flex items-center gap-1 transition-colors disabled:opacity-50"
+                  >
+                    {remixingId === ad.id ? (
+                      <>
+                        <RefreshCw size={12} className="animate-spin" />
+                        {t('Winner pattern থেকে শিখছে...', 'Learning from winners...')}
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw size={12} /> Remix <ChevronDown size={10} />
+                      </>
+                    )}
+                  </button>
+                  {showRemixDropdown === ad.id && (
+                    <div className="absolute bottom-full mb-1 left-0 bg-card border border-border rounded-xl shadow-lg p-1 z-10 min-w-[140px]">
+                      {[5, 10].map(n => (
+                        <button
+                          key={n}
+                          onClick={() => handleRemix(ad, n)}
+                          className="w-full text-left text-xs px-3 py-2 rounded-lg hover:bg-secondary transition-colors font-body-bn"
+                        >
+                          {t(`${toBengali(n)}টি রিমিক্স করুন`, `Remix ${n} variations`)}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
             </>
           )}
