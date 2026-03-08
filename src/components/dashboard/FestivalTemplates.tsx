@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
-import { PartyPopper, Sparkles, Loader2 } from 'lucide-react';
+import { PartyPopper, Sparkles, Loader2, Moon, Drama, Flame, Flag, Zap, ClipboardCopy } from 'lucide-react';
 import { toast } from 'sonner';
 
 const festivals = [
