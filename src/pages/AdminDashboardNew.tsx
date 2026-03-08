@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminGuard from '@/components/admin/AdminGuard';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminOverview from '@/components/admin/AdminOverview';
@@ -28,6 +28,7 @@ export default function AdminDashboardNew() {
           {isSuperAdmin && (
             <Route path="admins" element={<AdminManageAdmins />} />
           )}
+          <Route path="*" element={<Navigate to="/admin" replace />} />
         </Route>
       </Routes>
     </AdminGuard>
