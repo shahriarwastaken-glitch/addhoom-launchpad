@@ -98,3 +98,12 @@ verify_jwt = false
 
 [functions.send-notification]
 verify_jwt = false
+
+[functions.update-calendar-item]
+verify_jwt = false
+
+[functions.swipe-action]
+verify_jwt = false
+
+[functions.bulk-update-calendar]
+verify_jwt = false

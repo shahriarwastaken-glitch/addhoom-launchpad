@@ -121,6 +121,31 @@ export const api = {
   generateContentCalendar: (params: {
     workspace_id: string;
     start_date: string;
+    posts_per_week?: number;
+    platforms?: string[];
+    content_mix?: Record<string, number>;
+    regenerate?: boolean;
     language?: string;
-  }) => callFunction<{ entries_count: number; batch_id: string; festivals_found: number }>('generate-content-calendar', params),
+  }) => callFunction<{ total_items: number; batch_id: string; festivals_covered: string[] }>('generate-content-calendar', params),
+
+  updateCalendarItem: (params: {
+    item_id: string;
+    title?: string;
+    content_idea?: string;
+    date?: string;
+    content_type?: string;
+    platform?: string;
+    status?: string;
+  }) => callFunction<{ item: any }>('update-calendar-item', params),
+
+  swipeAction: (params: {
+    item_id: string;
+    action: 'confirm' | 'skip' | 'generate' | 'undo_skip';
+  }) => callFunction<{ action: string; redirect_to?: string; prefill?: Record<string, string> }>('swipe-action', params),
+
+  bulkUpdateCalendar: (params: {
+    item_ids: string[];
+    action: 'confirm' | 'skip' | 'reschedule';
+    new_date?: string;
+  }) => callFunction<{ updated: number }>('bulk-update-calendar', params),
 };
