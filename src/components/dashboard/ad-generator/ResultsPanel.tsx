@@ -544,7 +544,19 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
                 {isWinner ? t('বিজয়ী', 'Winner') : t('বিজয়ী চিহ্নিত করুন', 'Mark Winner')}
               </button>
             </>
-          ) : (
+          ) : null}
+          {/* Schedule button (Connection 2 & 4) */}
+          {onSchedule && ad.id && (
+            ad.image_url ? (
+              <button
+                onClick={onSchedule}
+                className="w-full mt-2 py-2 rounded-lg border-[1.5px] border-border text-xs font-heading-bn text-muted-foreground hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-1.5"
+              >
+                <Calendar size={12} /> {t('ক্যালেন্ডারে শিডিউল করুন', 'Schedule to Calendar')}
+              </button>
+            ) : null
+          )}
+          {!ad.image_url && (
             <>
               <button
                 onClick={onCopy}
