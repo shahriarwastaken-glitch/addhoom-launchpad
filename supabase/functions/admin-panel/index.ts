@@ -173,6 +173,34 @@ serve(async (req) => {
 
       // ===== API Keys Management =====
       case "list_api_keys": {
+        // Auto-sync known env secrets into api_keys table
+        const knownSecrets = [
+          { name: "GEMINI_API_KEY", desc: "Google Gemini AI API Key" },
+          { name: "RESEND_API_KEY", desc: "Resend Email API Key" },
+        ];
+
+        for (const secret of knownSecrets) {
+          const envVal = Deno.env.get(secret.name);
+          if (!envVal) continue;
+
+          // Check if already in table
+          const { data: existing } = await supabase
+            .from("api_keys")
+            .select("id, key_value")
+            .eq("key_name", secret.name)
+            .maybeSingle();
+
+          if (!existing) {
+            // Insert from env
+            await supabase.from("api_keys").insert({
+              key_name: secret.name,
+              key_value: envVal,
+              description: secret.desc,
+              created_by: user.id,
+            });
+          }
+        }
+
         const { data: keys, error } = await supabase
           .from("api_keys")
           .select("*")
