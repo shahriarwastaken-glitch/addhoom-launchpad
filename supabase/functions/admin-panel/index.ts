@@ -270,6 +270,65 @@ serve(async (req) => {
         return jsonResponse({ success: true });
       }
 
+      // ===== System Prompt Management =====
+      case "get_system_prompt": {
+        const { data } = await supabase
+          .from("api_keys")
+          .select("key_value, updated_at")
+          .eq("key_name", "SYSTEM_PROMPT")
+          .eq("is_active", true)
+          .maybeSingle();
+
+        return jsonResponse({ 
+          prompt: data?.key_value || null,
+          updated_at: data?.updated_at || null,
+          using_default: !data?.key_value
+        });
+      }
+
+      case "update_system_prompt": {
+        const { prompt } = params;
+        if (!prompt || typeof prompt !== "string") {
+          return errorResponse(400, "প্রম্পট আবশ্যক।", "Prompt is required.");
+        }
+
+        // Check if system prompt row exists
+        const { data: existing } = await supabase
+          .from("api_keys")
+          .select("id")
+          .eq("key_name", "SYSTEM_PROMPT")
+          .maybeSingle();
+
+        if (existing) {
+          await supabase
+            .from("api_keys")
+            .update({ key_value: prompt, is_active: true })
+            .eq("id", existing.id);
+        } else {
+          await supabase
+            .from("api_keys")
+            .insert({
+              key_name: "SYSTEM_PROMPT",
+              key_value: prompt,
+              description: "AI System Prompt",
+              created_by: user.id,
+              is_active: true,
+            });
+        }
+
+        return jsonResponse({ success: true });
+      }
+
+      case "reset_system_prompt": {
+        // Just disable the custom prompt so default is used
+        await supabase
+          .from("api_keys")
+          .update({ is_active: false })
+          .eq("key_name", "SYSTEM_PROMPT");
+
+        return jsonResponse({ success: true });
+      }
+
       default:
         return errorResponse(400, "অজানা অ্যাকশন।", "Unknown action.");
     }

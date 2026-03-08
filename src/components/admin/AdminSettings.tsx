@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { RefreshCw, Copy, Check } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { RefreshCw, Save, RotateCcw, Loader2 } from 'lucide-react';
 
 const PLAN_LIMITS = {
   pro: {
@@ -29,13 +30,91 @@ const PRICING = {
   },
 };
 
-const SYSTEM_PROMPT_PREVIEW = `তুমি একজন বাংলাদেশি ডিজিটাল মার্কেটিং বিশেষজ্ঞ এবং কপিরাইটার। তোমার নাম "AdDhoom AI"...
+const DEFAULT_SYSTEM_PROMPT = `You are AdDhoom AI — Bangladesh's most intelligent digital marketing strategist...
 
-(Full prompt in supabase/functions/_shared/systemPrompt.ts)`;
+(Default prompt from supabase/functions/_shared/systemPrompt.ts)`;
 
 export default function AdminSettings() {
   const [refreshing, setRefreshing] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [systemPrompt, setSystemPrompt] = useState('');
+  const [originalPrompt, setOriginalPrompt] = useState('');
+  const [loadingPrompt, setLoadingPrompt] = useState(true);
+  const [savingPrompt, setSavingPrompt] = useState(false);
+  const [usingDefault, setUsingDefault] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadSystemPrompt();
+  }, []);
+
+  const loadSystemPrompt = async () => {
+    setLoadingPrompt(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-panel', {
+        body: { action: 'get_system_prompt' }
+      });
+      if (error) throw error;
+      
+      if (data.prompt) {
+        setSystemPrompt(data.prompt);
+        setOriginalPrompt(data.prompt);
+        setUsingDefault(false);
+      } else {
+        // Fetch default prompt from backend or show placeholder
+        setSystemPrompt('');
+        setOriginalPrompt('');
+        setUsingDefault(true);
+      }
+      setLastUpdated(data.updated_at);
+    } catch (err: any) {
+      toast.error('সিস্টেম প্রম্পট লোড করতে সমস্যা হয়েছে।');
+    } finally {
+      setLoadingPrompt(false);
+    }
+  };
+
+  const handleSavePrompt = async () => {
+    if (!systemPrompt.trim()) {
+      toast.error('প্রম্পট খালি রাখা যাবে না।');
+      return;
+    }
+
+    setSavingPrompt(true);
+    try {
+      const { error } = await supabase.functions.invoke('admin-panel', {
+        body: { action: 'update_system_prompt', prompt: systemPrompt }
+      });
+      if (error) throw error;
+      
+      setOriginalPrompt(systemPrompt);
+      setUsingDefault(false);
+      toast.success('সিস্টেম প্রম্পট সফলভাবে আপডেট হয়েছে!');
+      loadSystemPrompt();
+    } catch (err: any) {
+      toast.error(err.message || 'সেভ করতে সমস্যা হয়েছে।');
+    } finally {
+      setSavingPrompt(false);
+    }
+  };
+
+  const handleResetPrompt = async () => {
+    setSavingPrompt(true);
+    try {
+      const { error } = await supabase.functions.invoke('admin-panel', {
+        body: { action: 'reset_system_prompt' }
+      });
+      if (error) throw error;
+      
+      setSystemPrompt('');
+      setOriginalPrompt('');
+      setUsingDefault(true);
+      toast.success('ডিফল্ট প্রম্পটে ফিরে গেছে।');
+    } catch (err: any) {
+      toast.error(err.message || 'রিসেট করতে সমস্যা হয়েছে।');
+    } finally {
+      setSavingPrompt(false);
+    }
+  };
 
   const handleRefreshMetrics = async () => {
     setRefreshing(true);
@@ -50,16 +129,79 @@ export default function AdminSettings() {
     }
   };
 
-  const copyPrompt = () => {
-    navigator.clipboard.writeText(SYSTEM_PROMPT_PREVIEW);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    toast.success('কপি করা হয়েছে!');
-  };
+  const hasChanges = systemPrompt !== originalPrompt;
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <h1 className="text-2xl font-bold">প্ল্যাটফর্ম সেটিংস</h1>
+      <h1 className="text-xl md:text-2xl font-bold">প্ল্যাটফর্ম সেটিংস</h1>
+
+      {/* System Prompt Editor */}
+      <Card className="border-primary/20">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                🤖 AI সিস্টেম প্রম্পট
+                {usingDefault && (
+                  <span className="text-xs bg-muted px-2 py-0.5 rounded-full font-normal">
+                    ডিফল্ট ব্যবহার হচ্ছে
+                  </span>
+                )}
+              </CardTitle>
+              <CardDescription>
+                AdDhoom AI এর ব্যক্তিত্ব এবং আচরণ নির্ধারণ করে
+                {lastUpdated && !usingDefault && (
+                  <span className="ml-2 text-xs">
+                    • শেষ আপডেট: {new Date(lastUpdated).toLocaleDateString('bn-BD')}
+                  </span>
+                )}
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {loadingPrompt ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : (
+            <>
+              <Textarea
+                value={systemPrompt}
+                onChange={(e) => setSystemPrompt(e.target.value)}
+                placeholder={DEFAULT_SYSTEM_PROMPT}
+                className="min-h-[300px] font-mono text-sm"
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button 
+                  onClick={handleSavePrompt} 
+                  disabled={savingPrompt || !hasChanges}
+                  className="gap-2"
+                >
+                  {savingPrompt ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                  সংরক্ষণ করুন
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleResetPrompt}
+                  disabled={savingPrompt || usingDefault}
+                  className="gap-2"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  ডিফল্টে ফিরুন
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                💡 টিপ: কাস্টম প্রম্পট না দিলে supabase/functions/_shared/systemPrompt.ts থেকে ডিফল্ট প্রম্পট ব্যবহার হবে।
+              </p>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Plan Limits */}
       <Card>
@@ -137,31 +279,6 @@ export default function AdminSettings() {
                 </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* System Prompt Preview */}
-      <Card>
-        <CardHeader>
-          <CardTitle>সিস্টেম প্রম্পট প্রিভিউ</CardTitle>
-          <CardDescription>
-            প্রম্পট পরিবর্তন করতে supabase/functions/_shared/systemPrompt.ts আপডেট করুন
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="relative">
-            <pre className="bg-muted rounded-lg p-4 text-sm font-mono overflow-auto max-h-48 text-muted-foreground">
-              {SYSTEM_PROMPT_PREVIEW}
-            </pre>
-            <Button
-              variant="outline"
-              size="sm"
-              className="absolute top-2 right-2"
-              onClick={copyPrompt}
-            >
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            </Button>
           </div>
         </CardContent>
       </Card>

@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { ADDHOOM_SYSTEM_PROMPT } from "./systemPrompt.ts";
 
 const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
@@ -21,6 +22,26 @@ async function getGeminiKey(): Promise<string> {
   const envVal = Deno.env.get("GEMINI_API_KEY");
   if (!envVal) throw new Error("GEMINI_API_KEY not set");
   return envVal;
+}
+
+// Get system prompt from database or fallback to default
+export async function getSystemPrompt(): Promise<string> {
+  try {
+    const sb = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const { data } = await sb
+      .from("api_keys")
+      .select("key_value")
+      .eq("key_name", "SYSTEM_PROMPT")
+      .eq("is_active", true)
+      .maybeSingle();
+    if (data?.key_value) return data.key_value;
+  } catch (e) {
+    console.warn("Could not read system prompt from db, using default:", e);
+  }
+  return ADDHOOM_SYSTEM_PROMPT;
 }
 
 export async function callGemini(
