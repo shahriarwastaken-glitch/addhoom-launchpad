@@ -460,8 +460,8 @@ const AdGeneratorPage = () => {
             />
           </div>
         </div>
-        <div className="flex-1 bg-secondary flex flex-col">
-          <div className="flex-1 min-h-0">
+        <div className="flex-1 bg-secondary flex flex-col overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-y-auto">
             {resultsPanel}
           </div>
           {results.length > 0 && !generating && (
