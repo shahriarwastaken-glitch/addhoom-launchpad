@@ -222,16 +222,16 @@ export default function AdminSettings() {
                 className="min-h-[300px] font-mono text-sm"
               />
               <div className="flex flex-wrap gap-2">
-                <Button onClick={handleSavePrompt} disabled={savingPrompt || !hasChanges} className="gap-2">
+               <Button onClick={handleSavePrompt} disabled={savingPrompt || !hasChanges} className="gap-2">
                   {savingPrompt ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                  সংরক্ষণ করুন
+                   Save
                 </Button>
                 <Button variant="outline" onClick={handleResetPrompt} disabled={savingPrompt || usingDefault} className="gap-2">
-                  <RotateCcw className="h-4 w-4" /> ডিফল্টে ফিরুন
+                   <RotateCcw className="h-4 w-4" /> Reset to Default
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                💡 টিপ: কাস্টম প্রম্পট না দিলে supabase/functions/_shared/systemPrompt.ts থেকে ডিফল্ট প্রম্পট ব্যবহার হবে।
+                 💡 Tip: Without a custom prompt, the default 11-section master copy prompt from systemPrompt.ts will be used. Covers BD buyer psychology, 6 frameworks, hook rules, CTA rules, platform specs, and Dhoom scoring.
               </p>
             </>
           )}
