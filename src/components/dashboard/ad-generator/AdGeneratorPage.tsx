@@ -3,7 +3,6 @@ import { AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import { useLanguage as useGlobalLang } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import InputPanel from './InputPanel';
