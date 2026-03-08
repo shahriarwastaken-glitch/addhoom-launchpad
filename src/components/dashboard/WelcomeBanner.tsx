@@ -22,14 +22,14 @@ const WelcomeBanner = () => {
       <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-base font-bold text-foreground font-bn">⚠️ শপ সেটআপ বাকি আছে</p>
-            <p className="text-sm text-muted-foreground font-bn">সেটআপ সম্পন্ন করলে AI আপনার শপের জন্য কাস্টমাইজ করতে পারবে।</p>
+            <p className="text-base font-bold text-foreground">⚠️ Shop setup incomplete</p>
+            <p className="text-sm text-muted-foreground">Complete setup so AI can customize for your shop.</p>
           </div>
           <button
             onClick={() => navigate('/onboarding')}
-            className="bg-gradient-cta text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold font-bn whitespace-nowrap"
+            className="bg-gradient-cta text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold whitespace-nowrap"
           >
-            সেটআপ সম্পন্ন করুন
+            Complete Setup
           </button>
         </div>
       </div>
