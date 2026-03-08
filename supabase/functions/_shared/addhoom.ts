@@ -162,8 +162,7 @@ export async function callGeminiMultiturn(
   messages: Array<{ role: string; parts: Array<{ text: string }> }>,
   systemPrompt: string = ADDHOOM_SYSTEM_PROMPT
 ): Promise<string> {
-  const apiKey = Deno.env.get("GEMINI_API_KEY");
-  if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
+  const apiKey = await getApiKey("GEMINI_API_KEY");
 
   // Prepend system instruction as first user message if not already there
   const contents = [
