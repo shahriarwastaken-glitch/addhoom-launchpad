@@ -149,68 +149,72 @@ export async function getSystemPrompt(): Promise<string> {
 }
 
 export async function callGemini(prompt: string, systemPrompt: string = ADDHOOM_SYSTEM_PROMPT): Promise<string> {
-  const apiKey = await getApiKey("GEMINI_API_KEY");
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          { role: "user", parts: [{ text: systemPrompt + "\n\n" + prompt }] },
-        ],
-        generationConfig: {
-          temperature: 0.8,
-          maxOutputTokens: 8192,
-        },
-      }),
-    }
-  );
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: prompt },
+      ],
+    }),
+  });
 
   if (!response.ok) {
     const err = await response.text();
-    console.error("Gemini API error:", response.status, err);
-    throw new Error(`Gemini API error: ${response.status}`);
+    console.error("AI Gateway error:", response.status, err);
+    throw new Error(`AI Gateway error: ${response.status}`);
   }
 
   const data = await response.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  return data.choices?.[0]?.message?.content || "";
 }
 
 export async function callGeminiMultiturn(
   messages: Array<{ role: string; parts: Array<{ text: string }> }>,
   systemPrompt: string = ADDHOOM_SYSTEM_PROMPT
 ): Promise<string> {
-  const apiKey = await getApiKey("GEMINI_API_KEY");
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-  // Prepend system instruction as first user message if not already there
-  const contents = [
-    { role: "user", parts: [{ text: systemPrompt }] },
-    { role: "model", parts: [{ text: "বুঝেছি। আমি AdDhoom AI — বাংলাদেশের ই-কমার্সের জন্য আপনার মার্কেটিং এক্সপার্ট। কীভাবে সাহায্য করতে পারি?" }] },
-    ...messages,
-  ];
+  // Convert Gemini format to OpenAI format
+  const openaiMessages = messages.map((m) => ({
+    role: m.role === "model" ? "assistant" as const : "user" as const,
+    content: m.parts.map(p => p.text).join("\n"),
+  }));
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents,
-        generationConfig: { temperature: 0.8, maxOutputTokens: 4096 },
-      }),
-    }
-  );
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...openaiMessages,
+      ],
+    }),
+  });
 
   if (!response.ok) {
     const err = await response.text();
-    console.error("Gemini API error:", response.status, err);
-    throw new Error(`Gemini API error: ${response.status}`);
+    console.error("AI Gateway error:", response.status, err);
+    if (response.status === 429) throw new Error("Rate limit exceeded. Please try again later.");
+    if (response.status === 402) throw new Error("AI credits exhausted. Please add funds.");
+    throw new Error(`AI Gateway error: ${response.status}`);
   }
 
   const data = await response.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  return data.choices?.[0]?.message?.content || "";
 }
 
 export const corsHeaders = {
