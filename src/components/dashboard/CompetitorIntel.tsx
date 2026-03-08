@@ -86,6 +86,31 @@ const PDFExportButton = ({ analysisId, competitorName, t, workspaceName }: {
   );
 };
 
+// PDF Export for Detail View (data already loaded)
+const DetailPDFButton = ({ data, workspaceName, t }: {
+  data: any; workspaceName: string; t: (bn: string, en: string) => string;
+}) => {
+  const [exporting, setExporting] = useState(false);
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await exportCompetitorPDF(data, workspaceName);
+      toast.success(t('PDF রিপোর্ট ডাউনলোড হয়েছে', 'PDF report downloaded'));
+    } catch {
+      toast.error(t('PDF তৈরি ব্যর্থ', 'PDF generation failed'));
+    } finally {
+      setExporting(false);
+    }
+  };
+  return (
+    <button onClick={handleExport} disabled={exporting}
+      className="border border-border text-foreground rounded-xl px-4 py-2.5 text-sm font-semibold flex items-center gap-2 hover:bg-secondary transition-colors disabled:opacity-50">
+      {exporting ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
+      {exporting ? t('তৈরি হচ্ছে...', 'Generating...') : t('PDF এক্সপোর্ট', 'Export PDF')}
+    </button>
+  );
+};
+
 const CompetitorIntel = () => {
   const { t, lang } = useLanguage();
   const { activeWorkspace } = useAuth();
