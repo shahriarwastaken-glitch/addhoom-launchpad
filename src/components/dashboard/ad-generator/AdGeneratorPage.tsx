@@ -68,7 +68,7 @@ const AdGeneratorPage = () => {
             description: form.productDesc,
             price_bdt: form.price ? parseInt(form.price) : undefined,
             platforms: form.platforms,
-            language: form.language === 'banglish' ? 'banglish' : 'bn',
+            language: form.language === 'en' ? 'en' : 'bn',
             framework: form.framework,
             occasion: form.occasion,
             tone: form.tone,
