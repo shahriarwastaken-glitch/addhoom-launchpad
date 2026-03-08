@@ -61,15 +61,27 @@ serve(async (req) => {
 
     if (!SSL_STORE_ID || !SSL_STORE_PASSWD) {
       // SSLCommerz not configured — simulate success for dev
-      // In production, this would call SSLCommerz API
+      // Activate the plan directly using service role
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      await supabase.from("profiles").update({
+        plan,
+        subscription_status: "active",
+        subscription_expires_at: expiresAt,
+      }).eq("id", user.id);
+
+      await supabase.from("payments").update({
+        status: "completed",
+        method: "dev_mode",
+      }).eq("id", payment.id);
+
       return jsonResponse({
         payment_id: payment.id,
         amount_bdt: amount,
         plan,
         billing_cycle: cycle,
         gateway_url: null,
-        message_bn: "SSLCommerz কনফিগার করা হয়নি। ডেভ মোডে আছে।",
-        message_en: "SSLCommerz not configured. Running in dev mode.",
+        message_bn: "ডেভ মোড: প্ল্যান সক্রিয় হয়েছে।",
+        message_en: "Dev mode: Plan activated.",
         dev_mode: true,
       });
     }
