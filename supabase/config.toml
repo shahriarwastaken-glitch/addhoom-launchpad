@@ -86,3 +86,15 @@ verify_jwt = false
 
 [functions.admin-api-keys]
 verify_jwt = false
+
+[functions.generate-video-script]
+verify_jwt = false
+
+[functions.generate-ad-image]
+verify_jwt = false
+
+[functions.remix-image-ad]
+verify_jwt = false
+
+[functions.send-notification]
+verify_jwt = false
