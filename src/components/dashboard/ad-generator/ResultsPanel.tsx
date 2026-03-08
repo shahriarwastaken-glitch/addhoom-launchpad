@@ -209,6 +209,7 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
             onWinner={() => toggleWinner(ad)}
             onRemix={() => onRemix(ad)}
             onSwitchToImage={() => onSwitchToImage(ad)}
+            onDownload={() => ad.image_url && downloadImage(ad.image_url, `ad-${ad.id || i + 1}`)}
             delay={i * 0.1}
           />
         ))}
