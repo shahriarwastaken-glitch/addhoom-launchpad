@@ -482,9 +482,8 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
             {/* Language */}
             <div className="flex gap-2 mb-4">
               {([
-                { val: 'bn' as TextLanguage, label: '🇧🇩 বাংলা', labelEn: '🇧🇩 Bangla' },
-                { val: 'banglish' as TextLanguage, label: '🔤 Banglish', labelEn: '🔤 Banglish' },
-                { val: 'en' as TextLanguage, label: '🇬🇧 English', labelEn: '🇬🇧 English' },
+                { val: 'bn' as TextLanguage, label: 'বাংলা', labelEn: 'Bangla' },
+                { val: 'en' as TextLanguage, label: 'English', labelEn: 'English' },
               ]).map(l => (
                 <button
                   key={l.val}
