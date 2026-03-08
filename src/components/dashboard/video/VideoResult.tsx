@@ -42,22 +42,28 @@ const VideoResultView = ({ result, plan, usageUsed, usageLimit, onReset, onRegen
   };
 
   const handleDownload = async () => {
+    if (!result.videoUrl) {
+      toast.info(t('ভিডিও রেন্ডারিং এখনো সংযুক্ত হয়নি। শীঘ্রই আসছে!', 'Video rendering not yet connected. Coming soon!'));
+      return;
+    }
     try {
-      if (result.videoUrl) {
-        const a = document.createElement('a');
-        a.href = result.videoUrl;
-        a.download = `addhoom-video-${result.productName}-${new Date().toISOString().slice(0,10)}.mp4`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        toast.success(t('ডাউনলোড শুরু হচ্ছে...', 'Download starting...'));
-      }
+      const a = document.createElement('a');
+      a.href = result.videoUrl;
+      a.download = `addhoom-video-${result.productName}-${new Date().toISOString().slice(0,10)}.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      toast.success(t('ডাউনলোড শুরু হচ্ছে...', 'Download starting...'));
     } catch {
       toast.error(t('ডাউনলোড ব্যর্থ', 'Download failed'));
     }
   };
 
   const copyUrl = () => {
+    if (!result.videoUrl) {
+      toast.info(t('ভিডিও URL এখনো তৈরি হয়নি', 'Video URL not yet available'));
+      return;
+    }
     navigator.clipboard.writeText(result.videoUrl);
     toast.success(t('URL কপি হয়েছে!', 'URL copied!'));
   };
