@@ -41,26 +41,32 @@ serve(async (req) => {
 
     const lang = language || "bn";
 
-    // STEP 2 — Try Meta Ad Library API
+    // STEP 2 — Try Meta Ad Library API (Graph API v21.0)
     let ads: any[] = [];
     let adsFetched = false;
 
     try {
-      const encodedName = encodeURIComponent(competitor_name);
-      const adsApiUrl = `https://www.facebook.com/ads/library/api/?search_terms=${encodedName}&ad_type=ALL&ad_reached_countries=['BD']&limit=20&fields=ad_creative_body,ad_creative_link_caption,ad_creative_link_title,ad_delivery_start_time,page_name`;
+      const metaToken = Deno.env.get("META_ACCESS_TOKEN");
+      if (!metaToken) {
+        console.warn("META_ACCESS_TOKEN not configured, skipping Ad Library fetch");
+      } else {
+        const encodedName = encodeURIComponent(competitor_name);
+        const fields = "ad_creative_bodies,ad_creative_link_titles,ad_creative_link_captions,ad_delivery_start_time,page_name,ad_snapshot_url";
+        const adsApiUrl = `https://graph.facebook.com/v21.0/ads_archive?search_terms=${encodedName}&ad_type=ALL&ad_reached_countries=["BD"]&limit=20&fields=${fields}&access_token=${metaToken}`;
 
-      console.log("Fetching Meta Ad Library:", adsApiUrl);
-      const adsResponse = await fetch(adsApiUrl);
-
-      if (adsResponse.ok) {
+        console.log("Fetching Meta Ad Library via Graph API...");
+        const adsResponse = await fetch(adsApiUrl);
         const adsData = await adsResponse.json();
-        if (Array.isArray(adsData?.data) && adsData.data.length > 0) {
+
+        if (!adsResponse.ok) {
+          console.warn("Meta Graph API error:", JSON.stringify(adsData?.error || adsData));
+        } else if (Array.isArray(adsData?.data) && adsData.data.length > 0) {
           ads = adsData.data;
           adsFetched = true;
           console.log(`Found ${ads.length} ads from Meta Ad Library`);
+        } else {
+          console.warn("Meta Ad Library returned empty results");
         }
-      } else {
-        console.warn("Meta Ad Library returned status:", adsResponse.status);
       }
     } catch (e) {
       console.warn("Meta Ad Library fetch failed, using fallback:", e);
