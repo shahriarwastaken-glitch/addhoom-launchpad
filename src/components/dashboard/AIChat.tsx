@@ -264,7 +264,7 @@ const AIChat = () => {
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {msg.role === 'model' && (
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground text-xs font-bold mr-2 flex-shrink-0 mt-1">⚡</div>
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground text-xs font-bold mr-2 flex-shrink-0 mt-1"><Zap size={14} /></div>
                   )}
                   <div className="max-w-[88%] sm:max-w-[75%]">
                     <div className={`rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 text-sm font-body-bn ${
