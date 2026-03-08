@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, RefreshCw, Star, ChevronDown, Image as ImageIcon, Check, Rocket, Zap, BarChart3, RotateCcw, Lightbulb, Flame, TrendingUp, Download, Clock, Trash2, FolderPlus, FolderOpen, CheckCircle2, Calendar, X } from 'lucide-react';
+import FeatureTooltip from '@/components/ui/FeatureTooltip';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -429,15 +430,29 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
             )}
             <span className="px-2 py-0.5 rounded-full text-[11px] bg-secondary text-muted-foreground capitalize font-heading-bn">{ad.platform}</span>
           </div>
-          <div className="text-right">
-            <span
-              className="px-3 py-1 rounded-full text-[13px] font-mono font-bold inline-flex items-center gap-1"
-              style={{ backgroundColor: dhoomLabel.bg, color: dhoomLabel.color }}
-            >
-              {dhoomLabel.icon} {dhoomLabel.text}
-            </span>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{t('ধুম স্কোর', 'Dhoom Score')}</p>
-          </div>
+          {rank === 1 ? (
+            <FeatureTooltip tooltipKey="dhoom_score" position="left">
+              <div className="text-right">
+                <span
+                  className="px-3 py-1 rounded-full text-[13px] font-mono font-bold inline-flex items-center gap-1"
+                  style={{ backgroundColor: dhoomLabel.bg, color: dhoomLabel.color }}
+                >
+                  {dhoomLabel.icon} {dhoomLabel.text}
+                </span>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{t('ধুম স্কোর', 'Dhoom Score')}</p>
+              </div>
+            </FeatureTooltip>
+          ) : (
+            <div className="text-right">
+              <span
+                className="px-3 py-1 rounded-full text-[13px] font-mono font-bold inline-flex items-center gap-1"
+                style={{ backgroundColor: dhoomLabel.bg, color: dhoomLabel.color }}
+              >
+                {dhoomLabel.icon} {dhoomLabel.text}
+              </span>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{t('ধুম স্কোর', 'Dhoom Score')}</p>
+            </div>
+          )}
         </div>
 
         {/* Generated Image */}
@@ -551,16 +566,36 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
               >
                 {isCopied ? <><Check size={12} className="text-brand-green" /> {t('কপি হয়েছে', 'Copied')}</> : <><Copy size={12} /> {t('কপি করুন', 'Copy')}</>}
               </button>
-              <button onClick={onRemix} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1">
-                <RefreshCw size={12} /> {t('রিমিক্স', 'Remix')}
-              </button>
-              <button
-                onClick={onWinner}
-                className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
-              >
-                <Star size={12} className={isWinner ? 'fill-[#FFB800] text-[#FFB800]' : ''} />
-                {isWinner ? t('বিজয়ী', 'Winner') : t('বিজয়ী চিহ্নিত করুন', 'Mark Winner')}
-              </button>
+              {rank === 1 ? (
+                <FeatureTooltip tooltipKey="remix_button" position="bottom">
+                  <button onClick={onRemix} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1">
+                    <RefreshCw size={12} /> {t('রিমিক্স', 'Remix')}
+                  </button>
+                </FeatureTooltip>
+              ) : (
+                <button onClick={onRemix} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1">
+                  <RefreshCw size={12} /> {t('রিমিক্স', 'Remix')}
+                </button>
+              )}
+              {rank === 1 ? (
+                <FeatureTooltip tooltipKey="winner_star" position="bottom">
+                  <button
+                    onClick={onWinner}
+                    className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
+                  >
+                    <Star size={12} className={isWinner ? 'fill-[#FFB800] text-[#FFB800]' : ''} />
+                    {isWinner ? t('বিজয়ী', 'Winner') : t('বিজয়ী চিহ্নিত করুন', 'Mark Winner')}
+                  </button>
+                </FeatureTooltip>
+              ) : (
+                <button
+                  onClick={onWinner}
+                  className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
+                >
+                  <Star size={12} className={isWinner ? 'fill-[#FFB800] text-[#FFB800]' : ''} />
+                  {isWinner ? t('বিজয়ী', 'Winner') : t('বিজয়ী চিহ্নিত করুন', 'Mark Winner')}
+                </button>
+              )}
               <button
                 onClick={onSwitchToImage}
                 className="px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/[0.08] text-primary text-xs font-heading-bn hover:bg-primary/15 transition-all active:scale-95 flex items-center gap-1"
