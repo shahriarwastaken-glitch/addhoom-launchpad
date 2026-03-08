@@ -1,117 +1,308 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Upload, Film } from 'lucide-react';
+import { useUpgrade } from '@/contexts/UpgradeContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import StageIndicator from './video/StageIndicator';
+import VideoSetup from './video/VideoSetup';
+import VideoProcessing from './video/VideoProcessing';
+import VideoResultView from './video/VideoResult';
+import ScriptPreviewModal from './video/ScriptPreviewModal';
+import type { VideoStage, VideoFormData, VideoScript, VideoResult, ProcessingStep } from './video/types';
+import { DEFAULT_FORM } from './video/types';
+
+const SLIDE_VARIANTS = {
+  enter: (direction: number) => ({ x: direction > 0 ? 300 : -300, opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (direction: number) => ({ x: direction > 0 ? -300 : 300, opacity: 0 }),
+};
 
 const VideoAd = () => {
-  const { t } = useLanguage();
-  const [images, setImages] = useState<string[]>([]);
-  const [format, setFormat] = useState('9:16');
-  const [duration, setDuration] = useState('15s');
+  const { user, profile, activeWorkspace } = useAuth();
+  const { t, lang } = useLanguage();
+  const { showUpgrade } = useUpgrade();
+
+  const [stage, setStage] = useState<VideoStage>(1);
+  const [direction, setDirection] = useState(1);
+  const [form, setForm] = useState<VideoFormData>(DEFAULT_FORM);
   const [generating, setGenerating] = useState(false);
-  const [generated, setGenerated] = useState(false);
+  const [script, setScript] = useState<VideoScript | null>(null);
+  const [showScriptModal, setShowScriptModal] = useState(false);
+  const [result, setResult] = useState<VideoResult | null>(null);
+  const [usageUsed, setUsageUsed] = useState(0);
+  const [usageLimit] = useState(2);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const elapsedRef = useRef<ReturnType<typeof setInterval>>();
+  const [processingSteps, setProcessingSteps] = useState<ProcessingStep[]>([
+    { label: 'স্ক্রিপ্ট তৈরি হচ্ছে...', labelEn: 'Creating script...', status: 'waiting' },
+    { label: 'ছবি প্রসেস করা হচ্ছে...', labelEn: 'Processing images...', status: 'waiting' },
+    { label: 'টেক্সট ওভারলে যোগ করা হচ্ছে...', labelEn: 'Adding text overlays...', status: 'waiting' },
+    { label: 'মিউজিক মিশ্রণ করা হচ্ছে...', labelEn: 'Mixing music...', status: 'waiting' },
+    { label: 'ফাইনাল রেন্ডার হচ্ছে...', labelEn: 'Final rendering...', status: 'waiting' },
+  ]);
 
-  const formats = [
-    { label: 'Reels/TikTok', value: '9:16' },
-    { label: 'Feed', value: '1:1' },
-    { label: 'Story', value: '9:16s' },
-    { label: 'YouTube', value: '16:9' },
-  ];
-  const durations = ['15s', '30s', '60s'];
+  const plan = profile?.plan || 'pro';
 
-  const handleGenerate = () => {
-    setGenerating(true);
-    setTimeout(() => { setGenerating(false); setGenerated(true); }, 2500);
+  // Check plan access
+  useEffect(() => {
+    if (plan === 'free') {
+      showUpgrade('video');
+    }
+  }, [plan, showUpgrade]);
+
+  // Fetch usage
+  useEffect(() => {
+    if (!user) return;
+    const fetchUsage = async () => {
+      const now = new Date();
+      const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const { count } = await supabase
+        .from('usage_logs')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('feature', 'video_ad')
+        .gte('created_at', firstOfMonth);
+      setUsageUsed(count || 0);
+    };
+    fetchUsage();
+  }, [user]);
+
+  const goToStage = (s: VideoStage) => {
+    setDirection(s > stage ? 1 : -1);
+    setStage(s);
   };
 
+  const generateScript = useCallback(async () => {
+    if (!activeWorkspace) { toast.error(t('প্রথমে শপ তৈরি করুন', 'Create a shop first')); return; }
+    if (!form.productName.trim()) { toast.error(t('পণ্যের নাম দিন', 'Enter product name')); return; }
+    if (form.images.length === 0) { toast.error(t('ছবি আপলোড করুন', 'Upload images')); return; }
+
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-video-script', {
+        body: {
+          workspace_id: activeWorkspace.id,
+          product_name: form.productName,
+          key_message: form.keyMessage,
+          original_price_bdt: form.originalPrice ? parseInt(form.originalPrice) : undefined,
+          offer_price_bdt: form.offerPrice ? parseInt(form.offerPrice) : undefined,
+          cta_text: form.ctaText,
+          style: form.style,
+          language: form.textLanguage,
+          num_images: form.images.length,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.success && data.script) {
+        setScript(data.script);
+        setShowScriptModal(true);
+      } else {
+        toast.error(data?.error || t('স্ক্রিপ্ট তৈরি ব্যর্থ', 'Script generation failed'));
+      }
+    } catch (e: any) {
+      console.error(e);
+      toast.error(t('সমস্যা হয়েছে', 'Something went wrong'));
+    } finally {
+      setGenerating(false);
+    }
+  }, [activeWorkspace, form, t]);
+
+  const startVideoGeneration = useCallback(async () => {
+    if (plan === 'pro' && usageUsed >= usageLimit) {
+      showUpgrade('video');
+      return;
+    }
+
+    setShowScriptModal(false);
+    goToStage(2);
+    setElapsedSeconds(0);
+
+    // Start elapsed timer
+    elapsedRef.current = setInterval(() => setElapsedSeconds(s => s + 1), 1000);
+
+    // Simulate processing steps (mock since no Shotstack)
+    const stepTimings = [2000, 5000, 9000, 13000, 18000];
+    const updateStep = (idx: number, status: 'active' | 'done') => {
+      setProcessingSteps(prev => prev.map((s, i) => {
+        if (i === idx) return { ...s, status };
+        if (i === idx - 1 && status === 'active') return { ...s, status: 'done' };
+        return s;
+      }));
+    };
+
+    // Reset steps
+    setProcessingSteps(prev => prev.map(s => ({ ...s, status: 'waiting' as const })));
+
+    // Simulate step progression
+    for (let i = 0; i < stepTimings.length; i++) {
+      await new Promise(r => setTimeout(r, i === 0 ? stepTimings[0] : stepTimings[i] - stepTimings[i - 1]));
+      updateStep(i, 'active');
+    }
+
+    // Complete final step
+    await new Promise(r => setTimeout(r, 4000));
+    updateStep(4, 'done');
+
+    // Clear timer
+    if (elapsedRef.current) clearInterval(elapsedRef.current);
+
+    // Log usage
+    if (user) {
+      await supabase.from('usage_logs').insert({
+        user_id: user.id,
+        workspace_id: activeWorkspace?.id,
+        feature: 'video_ad',
+      });
+      setUsageUsed(u => u + 1);
+    }
+
+    // Save to database (mock result)
+    const dhoomScore = calculateDhoomScore();
+    if (activeWorkspace) {
+      const { data: videoRow } = await supabase.from('video_ads').insert({
+        workspace_id: activeWorkspace.id,
+        product_name: form.productName,
+        status: 'completed',
+        script: script as any,
+        format: form.format,
+        style: form.style,
+        music_track: form.musicTrack,
+        font_style: form.fontStyle,
+        voiceover_enabled: form.voiceoverEnabled,
+        dhoom_score: dhoomScore,
+        completed_at: new Date().toISOString(),
+      } as any).select('id').single();
+
+      setResult({
+        id: videoRow?.id || crypto.randomUUID(),
+        videoUrl: '', // Mock - no actual video URL without Shotstack
+        dhoomScore,
+        productName: form.productName,
+        format: form.format,
+        style: form.style,
+        musicTrack: form.musicTrack,
+        script: script!,
+        createdAt: new Date().toISOString(),
+      });
+    }
+
+    goToStage(3);
+  }, [script, form, plan, usageUsed, usageLimit, user, activeWorkspace, showUpgrade]);
+
+  const calculateDhoomScore = () => {
+    let score = script?.dhoom_score_prediction || 70;
+    if (form.format === 'reels') score += 5;
+    if (form.musicTrack !== 'none') score += 3;
+    if (form.ctaText) score += 5;
+    if (form.images.length >= 3) score += 4;
+    return Math.min(100, score);
+  };
+
+  const handleCancel = () => {
+    if (elapsedRef.current) clearInterval(elapsedRef.current);
+    goToStage(1);
+    setProcessingSteps(prev => prev.map(s => ({ ...s, status: 'waiting' as const })));
+  };
+
+  const handleReset = () => {
+    setForm(DEFAULT_FORM);
+    setScript(null);
+    setResult(null);
+    goToStage(1);
+  };
+
+  // Free users see upgrade gate
+  if (plan === 'free') {
+    return (
+      <div className="h-full flex items-center justify-center text-center px-8">
+        <div>
+          <span className="text-5xl mb-4 block">🎬</span>
+          <h2 className="text-2xl font-bold font-heading-bn text-foreground mb-2">{t('ভিডিও বিজ্ঞাপন', 'Video Ads')}</h2>
+          <p className="text-muted-foreground font-heading-bn mb-6">{t('Pro বা Agency প্ল্যানে আপগ্রেড করুন', 'Upgrade to Pro or Agency plan')}</p>
+          <button onClick={() => showUpgrade('video')} className="px-8 py-3 rounded-xl bg-gradient-cta text-primary-foreground font-bold font-heading-bn shadow-orange-glow">
+            {t('আপগ্রেড করুন', 'Upgrade')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-3xl mx-auto">
-      <h2 className="text-2xl font-heading-bn font-bold text-foreground mb-8 flex items-center gap-2">
-        <Film className="text-primary" size={28} /> {t('AI ভিডিও বিজ্ঞাপন', 'AI Video Ads')}
-      </h2>
+    <div className="h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden -m-3 sm:-m-6 md:-m-8">
+      {/* Stage indicator */}
+      <StageIndicator currentStage={stage} />
 
-      <div className="bg-card rounded-[20px] shadow-warm p-4 sm:p-8 space-y-6">
-        {/* Upload */}
-        <div className="border-2 border-dashed border-primary/30 rounded-xl p-10 text-center cursor-pointer hover:bg-primary/5 transition-colors">
-          <Upload className="mx-auto mb-3 text-primary" size={32} />
-          <p className="font-body-bn font-semibold text-foreground">{t('পণ্যের ছবি আপলোড করুন', 'Upload Product Images')}</p>
-          <p className="text-sm text-muted-foreground mt-1">{t('১–৫টি ছবি ড্র্যাগ করুন', 'Drag 1-5 images')}</p>
-        </div>
-
-        {/* Format */}
-        <div>
-          <label className="text-sm font-semibold text-foreground font-body-bn mb-2 block">{t('ভিডিও ফরম্যাট', 'Video Format')}</label>
-          <div className="flex flex-wrap gap-2">
-            {formats.map(f => (
-              <button key={f.value} onClick={() => setFormat(f.value)}
-                className={`text-sm rounded-full px-4 py-2 transition-colors ${format === f.value ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:border-primary hover:text-primary'}`}>
-                {f.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Duration */}
-        <div>
-          <label className="text-sm font-semibold text-foreground font-body-bn mb-2 block">{t('সময়কাল', 'Duration')}</label>
-          <div className="flex gap-2">
-            {durations.map(d => (
-              <button key={d} onClick={() => setDuration(d)}
-                className={`text-sm rounded-full px-4 py-2 transition-colors ${duration === d ? 'bg-primary text-primary-foreground' : 'border border-border text-muted-foreground hover:border-primary'}`}>
-                {d}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Language & Mood */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-semibold text-foreground font-body-bn mb-2 block">{t('ভাষা', 'Language')}</label>
-            <div className="flex flex-col gap-2">
-              {[{ bn: 'বাংলা', en: 'Bangla' }, { bn: 'English', en: 'English' }].map(l => (
-                <span key={l.en} className="text-sm border border-border rounded-full px-4 py-2 cursor-pointer hover:border-primary hover:text-primary transition-colors font-body-bn text-center">{t(l.bn, l.en)}</span>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className="text-sm font-semibold text-foreground font-body-bn mb-2 block">{t('মিউজিক মুড', 'Music Mood')}</label>
-            <div className="flex flex-col gap-2">
-              {['Energetic', 'Soft', 'None'].map(m => (
-                <span key={m} className="text-sm border border-border rounded-full px-4 py-2 cursor-pointer hover:border-primary hover:text-primary transition-colors text-center">{m}</span>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <button onClick={handleGenerate} disabled={generating}
-          className="w-full bg-gradient-cta text-primary-foreground rounded-full py-4 text-lg font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform disabled:opacity-70 font-body-bn">
-          {generating ? (
-            <span className="flex items-center justify-center gap-2">
-              <Film className="animate-spin" size={16} /> {t('ভিডিও তৈরি হচ্ছে...', 'Creating video...')}
-            </span>
-          ) : (
-            <span className="flex items-center gap-2"><Film size={16} /> {t('ভিডিও অ্যাড তৈরি করুন', 'Create Video Ad')}</span>
-          )}
-        </button>
+      {/* Stage content */}
+      <div className="flex-1 overflow-hidden relative">
+        <AnimatePresence custom={direction} mode="wait">
+          <motion.div
+            key={stage}
+            custom={direction}
+            variants={SLIDE_VARIANTS}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="absolute inset-0"
+          >
+            {stage === 1 && (
+              <VideoSetup
+                form={form}
+                setForm={setForm}
+                onPreviewScript={generateScript}
+                onGenerate={() => {
+                  if (!script) {
+                    generateScript();
+                  } else {
+                    startVideoGeneration();
+                  }
+                }}
+                generating={generating}
+                usageUsed={usageUsed}
+                usageLimit={usageLimit}
+                plan={plan}
+              />
+            )}
+            {stage === 2 && (
+              <VideoProcessing
+                onCancel={handleCancel}
+                steps={processingSteps}
+                elapsedSeconds={elapsedSeconds}
+              />
+            )}
+            {stage === 3 && result && (
+              <VideoResultView
+                result={result}
+                plan={plan}
+                usageUsed={usageUsed}
+                usageLimit={usageLimit}
+                onReset={handleReset}
+                onRegenerate={() => {
+                  goToStage(1);
+                }}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      {generated && (
-        <div className="mt-8 bg-card rounded-[20px] shadow-warm p-8 animate-fade-up">
-          <div className="aspect-video bg-secondary rounded-xl flex items-center justify-center mb-4">
-            <Film className="text-muted-foreground" size={48} />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-brand-green font-mono font-bold text-xl">৮৮</span>
-              <span className="text-xs text-muted-foreground ml-2 font-body-bn">{t('ধুম স্কোর', 'Dhoom Score')}</span>
-            </div>
-            <div className="flex gap-2">
-              <button className="text-sm bg-primary text-primary-foreground rounded-full px-4 py-2 font-body-bn">{t('ডাউনলোড', 'Download')}</button>
-              <button className="text-sm border border-border rounded-full px-4 py-2 text-muted-foreground hover:text-primary transition-colors font-body-bn">{t('Remix করুন', 'Remix')}</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Script preview modal */}
+      <AnimatePresence>
+        {showScriptModal && script && (
+          <ScriptPreviewModal
+            script={script}
+            form={form}
+            onClose={() => setShowScriptModal(false)}
+            onConfirm={startVideoGeneration}
+            onRegenerate={generateScript}
+            regenerating={generating}
+            generating={false}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
