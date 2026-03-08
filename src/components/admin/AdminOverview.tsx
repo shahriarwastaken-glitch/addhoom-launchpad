@@ -178,13 +178,13 @@ export default function AdminOverview() {
       </div>
 
       {/* Middle Row - Charts */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-4 md:gap-6">
         {/* User Growth Placeholder */}
         <div className="bg-card rounded-xl p-4 border border-border">
-          <h3 className="font-semibold mb-4">ব্যবহারকারী বৃদ্ধি</h3>
-          <div className="h-64 flex items-center justify-center text-muted-foreground">
+          <h3 className="font-semibold mb-4 text-sm md:text-base">ব্যবহারকারী বৃদ্ধি</h3>
+          <div className="h-48 md:h-64 flex items-center justify-center text-muted-foreground">
             <div className="text-center">
-              <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <Users className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-2 opacity-50" />
               <p>মোট: {data.users.total}</p>
               <p className="text-sm">এই মাসে নতুন: {data.users.new_month}</p>
             </div>
@@ -193,10 +193,10 @@ export default function AdminOverview() {
 
         {/* Revenue Chart Placeholder */}
         <div className="bg-card rounded-xl p-4 border border-border">
-          <h3 className="font-semibold mb-4">দৈনিক রাজস্ব</h3>
-          <div className="h-64 flex items-center justify-center text-muted-foreground">
+          <h3 className="font-semibold mb-4 text-sm md:text-base">দৈনিক রাজস্ব</h3>
+          <div className="h-48 md:h-64 flex items-center justify-center text-muted-foreground">
             <div className="text-center">
-              <DollarSign className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <DollarSign className="h-10 w-10 md:h-12 md:w-12 mx-auto mb-2 opacity-50" />
               <p>মোট: ৳{data.revenue.total.toLocaleString()}</p>
               <p className="text-sm">আজ: ৳{data.revenue.today.toLocaleString()}</p>
             </div>
@@ -205,7 +205,7 @@ export default function AdminOverview() {
       </div>
 
       {/* Bottom Row - 3 Panels */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
         {/* Payment Methods */}
         <div className="bg-card rounded-xl p-4 border border-border">
           <h3 className="font-semibold mb-4">পেমেন্ট পদ্ধতি</h3>
