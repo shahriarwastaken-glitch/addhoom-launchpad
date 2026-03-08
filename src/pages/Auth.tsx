@@ -129,7 +129,7 @@ const Auth = forwardRef<HTMLDivElement>((_, ref) => {
           <Link to="/" className="text-3xl font-bold font-heading-en inline-block">
             <span className="text-foreground">Ad</span>
             <span className="text-primary">Dhoom</span>
-            <span className="text-brand-yellow">⚡</span>
+            <Zap size={20} className="text-brand-yellow" />
           </Link>
           <p className="mt-2 text-muted-foreground">
             {t('আপনার AI মার্কেটিং অ্যাসিস্ট্যান্ট', 'Your AI Marketing Assistant')}

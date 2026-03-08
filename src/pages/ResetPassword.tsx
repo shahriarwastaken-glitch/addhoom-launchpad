@@ -77,7 +77,7 @@ const ResetPassword = forwardRef<HTMLDivElement>((_, ref) => {
           <h1 className="text-3xl font-bold font-heading-en">
             <span className="text-foreground">Ad</span>
             <span className="text-primary">Dhoom</span>
-            <span className="text-brand-yellow">⚡</span>
+            <Zap size={20} className="text-brand-yellow" />
           </h1>
         </div>
 
