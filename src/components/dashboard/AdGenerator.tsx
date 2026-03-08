@@ -161,7 +161,7 @@ const AdGenerator = () => {
           setProductUrl(extractUrl);
         }
         setExtractMode('product');
-        toast.success(t('পণ্যের তথ্য সফলভাবে আনা হয়েছে ✓', 'Product info extracted ✓'));
+        toast.success(t('পণ্যের তথ্য সফলভাবে আনা হয়েছে', 'Product info extracted'));
       }
     } catch (e: any) {
       console.error(e);
