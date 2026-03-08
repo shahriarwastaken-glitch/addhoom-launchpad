@@ -119,13 +119,14 @@ const VideoAd = () => {
     }
 
     setShowScriptModal(false);
+    cancelledRef.current = false;
     goToStage(2);
     setElapsedSeconds(0);
 
     // Start elapsed timer
     elapsedRef.current = setInterval(() => setElapsedSeconds(s => s + 1), 1000);
 
-    // Simulate processing steps (mock since no Shotstack)
+    // Simulate processing steps
     const stepTimings = [2000, 5000, 9000, 13000, 18000];
     const updateStep = (idx: number, status: 'active' | 'done') => {
       setProcessingSteps(prev => prev.map((s, i) => {
@@ -138,14 +139,15 @@ const VideoAd = () => {
     // Reset steps
     setProcessingSteps(prev => prev.map(s => ({ ...s, status: 'waiting' as const })));
 
-    // Simulate step progression
+    // Simulate step progression with cancel support
     for (let i = 0; i < stepTimings.length; i++) {
       await new Promise(r => setTimeout(r, i === 0 ? stepTimings[0] : stepTimings[i] - stepTimings[i - 1]));
+      if (cancelledRef.current) return;
       updateStep(i, 'active');
     }
 
-    // Complete final step
     await new Promise(r => setTimeout(r, 4000));
+    if (cancelledRef.current) return;
     updateStep(4, 'done');
 
     // Clear timer
