@@ -183,6 +183,9 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
             <p className="text-base text-muted-foreground font-heading-bn mt-1">
               {t('পণ্যের ছবি দিন — AI ১৫ সেকেন্ডের ভিডিও বানাবে', 'Upload product images — AI will create a 15-second video')}
             </p>
+            <Link to="/dashboard/video/history" className="inline-flex items-center gap-1.5 mt-2 text-xs text-primary hover:text-primary/80 transition-colors font-heading-bn">
+              <History size={12} /> {t('ভিডিও ইতিহাস দেখুন', 'View Video History')}
+            </Link>
           </div>
           {plan === 'pro' && (
             <div className="text-right shrink-0">
