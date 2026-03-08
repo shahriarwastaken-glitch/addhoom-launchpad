@@ -86,7 +86,7 @@ serve(async (req) => {
     const adFramework = framework || "AIDA";
     const adOccasion = occasion || "general";
     const adTone = tone || brandTone;
-    const adCount = num_variations || 5;
+    const adCount = requestedVariations;
 
     // Framework instructions
     const frameworkInstructions: Record<string, string> = {
