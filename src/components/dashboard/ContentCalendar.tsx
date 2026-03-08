@@ -976,8 +976,8 @@ function SwipeView({ entries, setEntries, t, lang, navigate, isMobile }: {
 }
 
 // ── LIST VIEW ──
-function ListView({ entries, setEntries, t, lang, navigate }: {
-  entries: CalendarEntry[]; setEntries: any; t: any; lang: string; navigate: any;
+function ListView({ entries, setEntries, t, lang, navigate, isMobile }: {
+  entries: CalendarEntry[]; setEntries: any; t: any; lang: string; navigate: any; isMobile: boolean;
 }) {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
