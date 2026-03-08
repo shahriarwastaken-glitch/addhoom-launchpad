@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 const Settings = () => {
   const { t, lang, toggle } = useLanguage();
   const { user, profile, activeWorkspace, refreshProfile } = useAuth();
+  const { dark, toggleTheme } = useTheme();
   const { showUpgrade } = useUpgrade();
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
