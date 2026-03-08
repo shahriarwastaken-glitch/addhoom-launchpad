@@ -3,8 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend,
-  ScatterChart, Scatter, ZAxis,
-  Cell,
+  ScatterChart, Scatter, ZAxis, Cell,
 } from 'recharts';
 import { Search, BarChart3, Activity, TrendingUp, Lightbulb } from 'lucide-react';
 
@@ -44,7 +43,6 @@ const ChartCard = ({ title, subtitle, children, className = '' }: {
 const CompetitorCharts = ({ competitors }: { competitors: HistoryItem[] }) => {
   const { t, lang } = useLanguage();
 
-  // Deduplicate by name (latest first)
   const unique = useMemo(() => {
     const sorted = [...competitors].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     const seen = new Set<string>();
@@ -55,15 +53,14 @@ const CompetitorCharts = ({ competitors }: { competitors: HistoryItem[] }) => {
     });
   }, [competitors]);
 
-  // Chart 1: Ad volume
   const adVolumeData = useMemo(() => unique.map(c => ({
     name: c.competitor_name.length > 12 ? c.competitor_name.slice(0, 12) + '…' : c.competitor_name,
     fullName: c.competitor_name,
     count: c.ads_count,
   })), [unique]);
+
   const maxAds = Math.max(...adVolumeData.map(d => d.count), 0);
 
-  // Chart 2: Radar
   const radarData = useMemo(() => RADAR_DIMS.map(dim => {
     const entry: any = { dimension: dim };
     unique.forEach(c => {
@@ -72,7 +69,6 @@ const CompetitorCharts = ({ competitors }: { competitors: HistoryItem[] }) => {
     return entry;
   }), [unique]);
 
-  // Chart 3: Timeline scatter
   const scatterData = useMemo(() => competitors.map(c => ({
     x: new Date(c.created_at).getTime(),
     y: c.ads_count,
@@ -81,7 +77,6 @@ const CompetitorCharts = ({ competitors }: { competitors: HistoryItem[] }) => {
     z: Math.max(c.ads_count * 10, 40),
   })), [competitors, lang]);
 
-  // Chart 4: Pattern frequency
   const patternFreq = useMemo(() => {
     const patternMap = new Map<string, Set<string>>();
     competitors.forEach(c => {
@@ -98,7 +93,6 @@ const CompetitorCharts = ({ competitors }: { competitors: HistoryItem[] }) => {
       .slice(0, 8);
   }, [competitors]);
 
-  // Generate insight
   const insight = useMemo(() => {
     if (adVolumeData.length === 0) return '';
     const top = adVolumeData.reduce((a, b) => a.count > b.count ? a : b);
@@ -109,16 +103,16 @@ const CompetitorCharts = ({ competitors }: { competitors: HistoryItem[] }) => {
         : `${top.fullName} is running the most ads — they likely have the highest ad budget.`;
     }
     if (patternFreq.length > 0) {
-      const topPattern = patternFreq[0].pattern;
       return lang === 'bn'
-        ? `আপনার বাজারে "${topPattern}" সবচেয়ে বেশি ব্যবহৃত কৌশল। ভিন্ন কৌশল নিয়ে এগিয়ে থাকুন।`
-        : `"${topPattern}" is the most common strategy. Try a different approach to stand out.`;
+        ? `আপনার বাজারে "${patternFreq[0].pattern}" সবচেয়ে বেশি ব্যবহৃত কৌশল। ভিন্ন কৌশল নিয়ে এগিয়ে থাকুন।`
+        : `"${patternFreq[0].pattern}" is the most common strategy. Try a different approach to stand out.`;
     }
     return lang === 'bn'
       ? 'সব প্রতিযোগী একই কৌশল ব্যবহার করছে। এটাই আপনার সুযোগ — ভিন্ন কিছু করুন।'
       : 'All competitors use similar strategies. This is your opportunity — do something different.';
   }, [adVolumeData, patternFreq, lang]);
 
+  // Early return AFTER all hooks
   if (unique.length < 2) {
     return (
       <div className="bg-card rounded-2xl shadow-warm p-8 text-center mb-6 border border-border">
@@ -133,67 +127,6 @@ const CompetitorCharts = ({ competitors }: { competitors: HistoryItem[] }) => {
     );
   }
 
-  // Chart 1: Ad volume
-  const adVolumeData = unique.map(c => ({
-    name: c.competitor_name.length > 12 ? c.competitor_name.slice(0, 12) + '…' : c.competitor_name,
-    fullName: c.competitor_name,
-    count: c.ads_count,
-  }));
-  const maxAds = Math.max(...adVolumeData.map(d => d.count));
-
-  // Chart 2: Radar
-  const radarData = RADAR_DIMS.map(dim => {
-    const entry: any = { dimension: dim };
-    unique.forEach(c => {
-      entry[c.competitor_name] = c.top_patterns.some(p => matchesDim(p, dim)) ? 1 : 0;
-    });
-    return entry;
-  });
-
-  // Chart 3: Timeline scatter
-  const scatterData = competitors.map(c => ({
-    x: new Date(c.created_at).getTime(),
-    y: c.ads_count,
-    name: c.competitor_name,
-    date: new Date(c.created_at).toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US'),
-    z: Math.max(c.ads_count * 10, 40),
-  }));
-
-  // Chart 4: Pattern frequency
-  const patternMap = new Map<string, Set<string>>();
-  competitors.forEach(c => {
-    c.top_patterns.forEach(p => {
-      const short = (typeof p === 'string' ? p.split(':')[0].split('—')[0].trim() : '').slice(0, 30);
-      if (!short) return;
-      if (!patternMap.has(short)) patternMap.set(short, new Set());
-      patternMap.get(short)!.add(c.competitor_name);
-    });
-  });
-  const patternFreq = Array.from(patternMap.entries())
-    .map(([pattern, users]) => ({ pattern, count: users.size }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 8);
-
-  // Generate insight
-  const insight = useMemo(() => {
-    const top = adVolumeData.reduce((a, b) => a.count > b.count ? a : b);
-    const avg = adVolumeData.reduce((s, d) => s + d.count, 0) / adVolumeData.length;
-    if (top.count > avg * 2.5) {
-      return lang === 'bn'
-        ? `${top.fullName} সবচেয়ে বেশি বিজ্ঞাপন চালাচ্ছে — তারা সম্ভবত সবচেয়ে বেশি বাজেট খরচ করছে।`
-        : `${top.fullName} is running the most ads — they likely have the highest ad budget.`;
-    }
-    if (patternFreq.length > 0) {
-      const topPattern = patternFreq[0].pattern;
-      return lang === 'bn'
-        ? `আপনার বাজারে "${topPattern}" সবচেয়ে বেশি ব্যবহৃত কৌশল। ভিন্ন কৌশল নিয়ে এগিয়ে থাকুন।`
-        : `"${topPattern}" is the most common strategy. Try a different approach to stand out.`;
-    }
-    return lang === 'bn'
-      ? 'সব প্রতিযোগী একই কৌশল ব্যবহার করছে। এটাই আপনার সুযোগ — ভিন্ন কিছু করুন।'
-      : 'All competitors use similar strategies. This is your opportunity — do something different.';
-  }, [adVolumeData, patternFreq, lang]);
-
   return (
     <div className="mb-8">
       <div className="mb-4">
@@ -201,9 +134,7 @@ const CompetitorCharts = ({ competitors }: { competitors: HistoryItem[] }) => {
           {t('প্রতিযোগী তুলনা বিশ্লেষণ', 'Competitor Comparison Analysis')}
         </h3>
         <p className="text-xs text-muted-foreground font-body-bn">
-          {lang === 'bn'
-            ? `${toBn(unique.length)}টি প্রতিযোগীর তথ্য বিশ্লেষণ করা হয়েছে`
-            : `${unique.length} competitors analyzed`}
+          {lang === 'bn' ? `${toBn(unique.length)}টি প্রতিযোগীর তথ্য বিশ্লেষণ করা হয়েছে` : `${unique.length} competitors analyzed`}
         </p>
       </div>
 
@@ -235,23 +166,15 @@ const CompetitorCharts = ({ competitors }: { competitors: HistoryItem[] }) => {
         </ChartCard>
 
         {/* Chart 2: Radar */}
-        <ChartCard
-          title={t('কোন কৌশল কারা ব্যবহার করছে?', 'Who uses which strategy?')}
-        >
+        <ChartCard title={t('কোন কৌশল কারা ব্যবহার করছে?', 'Who uses which strategy?')}>
           <ResponsiveContainer width="100%" height={320}>
             <RadarChart data={radarData}>
               <PolarGrid stroke="hsl(var(--border))" />
               <PolarAngleAxis dataKey="dimension" tick={{ fontSize: 9 }} />
               <PolarRadiusAxis domain={[0, 1]} tick={false} axisLine={false} />
               {unique.slice(0, 4).map((c, i) => (
-                <Radar
-                  key={c.id}
-                  name={c.competitor_name}
-                  dataKey={c.competitor_name}
-                  stroke={COLORS[i]}
-                  fill={COLORS[i]}
-                  fillOpacity={0.2}
-                />
+                <Radar key={c.id} name={c.competitor_name} dataKey={c.competitor_name}
+                  stroke={COLORS[i]} fill={COLORS[i]} fillOpacity={0.2} />
               ))}
               <Legend wrapperStyle={{ fontSize: 10 }} />
               <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: 11 }} />
@@ -260,30 +183,25 @@ const CompetitorCharts = ({ competitors }: { competitors: HistoryItem[] }) => {
         </ChartCard>
 
         {/* Chart 3: Timeline Scatter */}
-        <ChartCard
-          title={t('প্রতিযোগীদের কার্যকলাপের ট্রেন্ড', 'Competitor Activity Trend')}
-        >
+        <ChartCard title={t('প্রতিযোগীদের কার্যকলাপের ট্রেন্ড', 'Competitor Activity Trend')}>
           <ResponsiveContainer width="100%" height={250}>
             <ScatterChart margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis
-                dataKey="x" type="number" domain={['auto', 'auto']}
+              <XAxis dataKey="x" type="number" domain={['auto', 'auto']}
                 tickFormatter={v => new Date(v).toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { month: 'short', day: 'numeric' })}
-                tick={{ fontSize: 9 }}
-              />
+                tick={{ fontSize: 9 }} />
               <YAxis dataKey="y" tick={{ fontSize: 10 }} />
               <ZAxis dataKey="z" range={[40, 200]} />
               <Tooltip
                 formatter={(_: any, __: any, entry: any) => [
-                  `${entry.payload.name} — ${entry.payload.date} — ${lang === 'bn' ? toBn(entry.payload.y) : entry.payload.y}টি অ্যাড`,
-                  ''
+                  `${entry.payload.name} — ${entry.payload.date} — ${lang === 'bn' ? toBn(entry.payload.y) : entry.payload.y}টি অ্যাড`, ''
                 ]}
                 contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: 11 }}
               />
               <Scatter data={scatterData}>
                 {scatterData.map((entry, i) => {
                   const colorIdx = unique.findIndex(u => u.competitor_name === entry.name);
-                  return <Cell key={i} fill={COLORS[colorIdx % COLORS.length]} />;
+                  return <Cell key={i} fill={COLORS[colorIdx >= 0 ? colorIdx % COLORS.length : 0]} />;
                 })}
               </Scatter>
             </ScatterChart>
@@ -291,9 +209,7 @@ const CompetitorCharts = ({ competitors }: { competitors: HistoryItem[] }) => {
         </ChartCard>
 
         {/* Chart 4: Pattern Frequency */}
-        <ChartCard
-          title={t('বাজারে সবচেয়ে বেশি ব্যবহৃত কৌশল', 'Most Used Strategies in Market')}
-        >
+        <ChartCard title={t('বাজারে সবচেয়ে বেশি ব্যবহৃত কৌশল', 'Most Used Strategies in Market')}>
           <ResponsiveContainer width="100%" height={Math.max(200, patternFreq.length * 40)}>
             <BarChart data={patternFreq} layout="vertical" margin={{ top: 5, right: 20, left: 5, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -301,8 +217,7 @@ const CompetitorCharts = ({ competitors }: { competitors: HistoryItem[] }) => {
               <YAxis dataKey="pattern" type="category" width={120} tick={{ fontSize: 9 }} />
               <Tooltip
                 formatter={(value: number) => [
-                  `${lang === 'bn' ? toBn(value) : value}টি প্রতিযোগী ব্যবহার করছে`,
-                  ''
+                  `${lang === 'bn' ? toBn(value) : value}টি প্রতিযোগী ব্যবহার করছে`, ''
                 ]}
                 contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: 11 }}
               />
@@ -320,9 +235,7 @@ const CompetitorCharts = ({ competitors }: { competitors: HistoryItem[] }) => {
       <div className="mt-4 bg-primary/5 border border-primary/20 rounded-2xl p-4 flex items-start gap-3">
         <Lightbulb size={20} className="text-primary shrink-0 mt-0.5" />
         <div>
-          <p className="text-sm font-bold text-foreground font-heading-bn mb-1">
-            {t('AI অন্তর্দৃষ্টি:', 'AI Insight:')}
-          </p>
+          <p className="text-sm font-bold text-foreground font-heading-bn mb-1">{t('AI অন্তর্দৃষ্টি:', 'AI Insight:')}</p>
           <p className="text-sm text-muted-foreground font-body-bn">{insight}</p>
         </div>
       </div>
