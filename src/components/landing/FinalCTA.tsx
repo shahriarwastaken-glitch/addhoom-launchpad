@@ -20,7 +20,7 @@ const FinalCTA = () => {
           {t('৩০ সেকেন্ডে সেটআপ। ঝামেলা নেই।', 'Setup in 30 seconds. No hassle.')}
         </p>
         <div className="flex justify-center mb-10">
-          <Link to="/dashboard" className="bg-card text-foreground rounded-full px-8 py-4 text-lg font-semibold hover:scale-[1.04] transition-transform shadow-warm-lg font-body-bn">
+          <Link to="/auth" className="bg-card text-foreground rounded-full px-8 py-4 text-lg font-semibold hover:scale-[1.04] transition-transform shadow-warm-lg font-body-bn">
             {t('শুরু করুন', 'Get Started')}
           </Link>
         </div>

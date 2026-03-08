@@ -123,7 +123,7 @@ const Hero = () => {
         </motion.p>
 
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 mb-8">
-          <Link to="/dashboard" className="bg-gradient-cta text-primary-foreground rounded-full px-8 py-4 text-lg font-semibold shadow-orange-glow hover:scale-[1.04] transition-transform animate-pulse-glow font-body-bn">
+          <Link to="/auth" className="bg-gradient-cta text-primary-foreground rounded-full px-8 py-4 text-lg font-semibold shadow-orange-glow hover:scale-[1.04] transition-transform animate-pulse-glow font-body-bn">
             {t('শুরু করুন', 'Get Started')}
           </Link>
         </motion.div>
