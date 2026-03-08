@@ -21,13 +21,14 @@ interface ResultsPanelProps {
   onLoadHistory?: (results: AdResult[]) => void;
 }
 
-const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix }: ResultsPanelProps) => {
+const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix, onLoadHistory }: ResultsPanelProps) => {
   const { t, lang } = useLanguage();
   const [progress, setProgress] = useState(0);
   const [showTip, setShowTip] = useState(false);
   const [tipIdx] = useState(() => Math.floor(Math.random() * LOADING_TIPS.length));
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [imageHistory, setImageHistory] = useState<ImageHistoryEntry[]>(() => getImageHistory());
 
   const loadingMsgs = mode === 'copy'
     ? [t('চিন্তা করছি...', 'Thinking...'), t('লিখছি...', 'Writing...'), t('স্কোর করছি...', 'Scoring...')]
