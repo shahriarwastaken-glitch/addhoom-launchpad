@@ -74,7 +74,7 @@ const Auth = forwardRef<HTMLDivElement>((_, ref) => {
           password,
           options: {
             data: { full_name: fullName.trim() },
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: `${window.location.origin}/dashboard`,
           },
         });
         if (error) throw error;
