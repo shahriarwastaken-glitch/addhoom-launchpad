@@ -302,6 +302,65 @@ export type Database = {
           },
         ]
       }
+      content_calendar: {
+        Row: {
+          batch_id: string | null
+          content_idea: string | null
+          content_type: string
+          created_at: string | null
+          date: string
+          day_of_week: string | null
+          hook: string | null
+          id: string
+          occasion: string | null
+          platform: string | null
+          priority: string | null
+          status: string | null
+          title: string | null
+          workspace_id: string
+        }
+        Insert: {
+          batch_id?: string | null
+          content_idea?: string | null
+          content_type?: string
+          created_at?: string | null
+          date: string
+          day_of_week?: string | null
+          hook?: string | null
+          id?: string
+          occasion?: string | null
+          platform?: string | null
+          priority?: string | null
+          status?: string | null
+          title?: string | null
+          workspace_id: string
+        }
+        Update: {
+          batch_id?: string | null
+          content_idea?: string | null
+          content_type?: string
+          created_at?: string | null
+          date?: string
+          day_of_week?: string | null
+          hook?: string | null
+          id?: string
+          occasion?: string | null
+          platform?: string | null
+          priority?: string | null
+          status?: string | null
+          title?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_calendar_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount_bdt: number
