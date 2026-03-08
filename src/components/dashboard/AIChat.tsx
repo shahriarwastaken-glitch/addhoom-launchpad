@@ -288,7 +288,7 @@ const AIChat = () => {
               ))}
               {typing && (
                 <div className="flex justify-start">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground text-xs font-bold mr-2">⚡</div>
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-brand flex items-center justify-center text-primary-foreground text-xs font-bold mr-2"><Zap size={14} /></div>
                   <div className="bg-secondary rounded-2xl rounded-bl-md">
                     <ThinkingLoader />
                   </div>
