@@ -102,20 +102,23 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) return errorResponse(401, "লগইন করুন।", "Please log in.");
+    if (!authHeader?.startsWith("Bearer ")) return errorResponse(401, "লগইন করুন।", "Please log in.");
+
+    const token = authHeader.replace("Bearer ", "").trim();
+    const authClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+    const userId = claimsData?.claims?.sub as string | undefined;
+    if (claimsError || !userId) return errorResponse(401, "লগইন করুন।", "Please log in.");
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
-
-    // Extract token and verify via admin API (more reliable than creating a separate client)
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.admin.getUserById(
-      // First decode the JWT to get the user ID
-      JSON.parse(atob(token.split(".")[1])).sub
-    );
-    if (authError || !user) return errorResponse(401, "লগইন করুন।", "Please log in.");
 
     const body = await req.json();
     const { workspace_id, conversation_id, message, language, action } = body;

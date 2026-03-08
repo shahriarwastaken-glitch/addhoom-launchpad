@@ -115,7 +115,7 @@ const AdCopyCardView = ({ ad, t }: { ad: AdCopyCard; t: (bn: string, en: string)
 // ─── Main Component ───
 const AIChat = () => {
   const { t, lang } = useLanguage();
-  const { activeWorkspace, workspaces, setActiveWorkspaceId } = useAuth();
+  const { activeWorkspace, session, workspaces, setActiveWorkspaceId } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
