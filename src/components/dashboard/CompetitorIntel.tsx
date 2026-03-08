@@ -88,12 +88,7 @@ const CompetitorIntel = () => {
     setHistoryLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const res = await supabase.functions.invoke('get-competitor-history', {
-        body: null,
-        headers: { 'Content-Type': 'application/json' },
-      });
 
-      // Use query params via URL construction
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-competitor-history?workspace_id=${activeWorkspace.id}&page=${page}&limit=10`;
       const response = await fetch(url, {
         headers: {
