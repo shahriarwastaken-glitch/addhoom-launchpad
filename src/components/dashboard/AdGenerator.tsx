@@ -64,7 +64,8 @@ const TONES = [
   { bn: 'জরুরি', en: 'Urgent', v: 'urgent' },
   { bn: 'হাস্যরসাত্মক', en: 'Humorous', v: 'humorous' },
 ];
-const VARIATIONS = [5, 10, 20, 50];
+const VARIATIONS_PRO = [5, 10];
+const VARIATIONS_AGENCY = [5, 10, 20, 50];
 
 const AdGenerator = () => {
   const { t, lang } = useLanguage();
