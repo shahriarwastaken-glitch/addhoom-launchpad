@@ -1,4 +1,5 @@
 import UpcomingContentWidget from './UpcomingContentWidget';
+import TodaysLoopWidget from './TodaysLoopWidget';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Video, Brain, Shield, FolderOpen, Calendar } from 'lucide-react';
@@ -38,6 +39,9 @@ const DashboardHome = () => {
           ))}
         </div>
       </div>
+
+      {/* Today's Loop widget */}
+      <TodaysLoopWidget />
 
       {/* Upcoming content widget */}
       <UpcomingContentWidget />

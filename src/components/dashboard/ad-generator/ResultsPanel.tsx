@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Copy, RefreshCw, Star, ChevronDown, Image as ImageIcon, Check, Rocket, Zap, BarChart3, RotateCcw, Lightbulb, Flame, TrendingUp, Download, Clock, Trash2, FolderPlus, FolderOpen, CheckCircle2 } from 'lucide-react';
+import { Copy, RefreshCw, Star, ChevronDown, Image as ImageIcon, Check, Rocket, Zap, BarChart3, RotateCcw, Lightbulb, Flame, TrendingUp, Download, Clock, Trash2, FolderPlus, FolderOpen, CheckCircle2, Calendar, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -23,6 +23,10 @@ interface ResultsPanelProps {
   projectId?: string | null;
   imageHistoryOpen?: boolean;
   onToggleImageHistory?: () => void;
+  onSchedule?: (ad: AdResult) => void;
+  showProjectPrompt?: boolean;
+  onAssignAllToProject?: (projectId: string, projectName: string) => void;
+  onDismissProjectPrompt?: () => void;
 }
 
 interface ProjectOption {
@@ -32,7 +36,7 @@ interface ProjectOption {
   color: string;
 }
 
-const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix, onLoadHistory, projectId, imageHistoryOpen, onToggleImageHistory }: ResultsPanelProps) => {
+const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix, onLoadHistory, projectId, imageHistoryOpen, onToggleImageHistory, onSchedule, showProjectPrompt, onAssignAllToProject, onDismissProjectPrompt }: ResultsPanelProps) => {
   const { t, lang } = useLanguage();
   const { activeWorkspace } = useAuth();
   const [progress, setProgress] = useState(0);
@@ -281,6 +285,16 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
         </div>
       </div>
 
+      {/* CONNECTION 5: Project prompt */}
+      {showProjectPrompt && (
+        <ProjectPromptInline
+          t={t}
+          workspaceId={activeWorkspace?.id}
+          onAssign={onAssignAllToProject}
+          onDismiss={onDismissProjectPrompt}
+        />
+      )}
+
       {/* Platform tags */}
       <div className="flex flex-wrap gap-1.5 mb-5">
         {[...new Set(results.map(r => r.platform))].map(p => (
@@ -304,6 +318,7 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
               onRemix={() => onRemix(ad)}
               onSwitchToImage={() => onSwitchToImage(ad)}
               onDownload={() => ad.image_url && downloadImage(ad.image_url, `ad-${ad.id || i + 1}`)}
+              onSchedule={onSchedule ? () => onSchedule(ad) : undefined}
               delay={i * 0.1}
               projectId={projectId}
             />
@@ -314,10 +329,10 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
 };
 
 // Single ad card component
-const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToImage, onDownload, delay, projectId }: {
+const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToImage, onDownload, onSchedule, delay, projectId }: {
   ad: AdResult; rank: number; copiedId: string | null;
   onCopy: () => void; onWinner: () => void; onRemix: () => void;
-  onSwitchToImage: () => void; onDownload: () => void; delay: number;
+  onSwitchToImage: () => void; onDownload: () => void; onSchedule?: () => void; delay: number;
   projectId?: string | null;
 }) => {
   const { t, lang } = useLanguage();
@@ -529,7 +544,19 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
                 {isWinner ? t('বিজয়ী', 'Winner') : t('বিজয়ী চিহ্নিত করুন', 'Mark Winner')}
               </button>
             </>
-          ) : (
+          ) : null}
+          {/* Schedule button (Connection 2 & 4) */}
+          {onSchedule && ad.id && (
+            ad.image_url ? (
+              <button
+                onClick={onSchedule}
+                className="w-full mt-2 py-2 rounded-lg border-[1.5px] border-border text-xs font-heading-bn text-muted-foreground hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-1.5"
+              >
+                <Calendar size={12} /> {t('ক্যালেন্ডারে শিডিউল করুন', 'Schedule to Calendar')}
+              </button>
+            ) : null
+          )}
+          {!ad.image_url && (
             <>
               <button
                 onClick={onCopy}
@@ -551,8 +578,17 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
                 onClick={onSwitchToImage}
                 className="px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/[0.08] text-primary text-xs font-heading-bn hover:bg-primary/15 transition-all active:scale-95 flex items-center gap-1"
               >
-                <ImageIcon size={12} /> {t('এই কপি দিয়ে ছবি বানান', 'Make image from this')}
+              <ImageIcon size={12} /> {t('ছবি বানান', 'Make Image')}
               </button>
+              {/* Schedule copy directly (Connection 4) */}
+              {onSchedule && ad.id && (
+                <button
+                  onClick={onSchedule}
+                  className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
+                >
+                  <Calendar size={12} /> {t('শিডিউল', 'Schedule')}
+                </button>
+              )}
             </>
           )}
         </div>
@@ -598,6 +634,60 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
         )}
       </div>
     </motion.div>
+  );
+};
+
+// CONNECTION 5: Inline project assignment prompt
+const ProjectPromptInline = ({ t, workspaceId, onAssign, onDismiss }: {
+  t: any;
+  workspaceId?: string;
+  onAssign?: (projectId: string, projectName: string) => void;
+  onDismiss?: () => void;
+}) => {
+  const [projects, setProjects] = useState<{ id: string; name: string; emoji: string }[]>([]);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!workspaceId || !open) return;
+    supabase.from('projects').select('id, name, emoji')
+      .eq('workspace_id', workspaceId)
+      .eq('is_archived', false)
+      .order('updated_at', { ascending: false })
+      .then(({ data }) => { if (data) setProjects(data); });
+  }, [workspaceId, open]);
+
+  return (
+    <div className="mb-4 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/[0.04] border border-primary/10">
+      <Lightbulb size={14} className="text-primary shrink-0" />
+      <span className="text-xs font-heading-bn text-foreground flex-1">
+        {t('এই বিজ্ঞাপনগুলো কোনো প্রজেক্টে সংরক্ষণ করবেন?', 'Save these ads to a project?')}
+      </span>
+      {!open ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-[11px] font-heading-bn font-semibold hover:bg-primary/20 transition-colors"
+        >
+          {t('নির্বাচন করুন', 'Select')}
+        </button>
+      ) : (
+        <select
+          onChange={e => {
+            const p = projects.find(pr => pr.id === e.target.value);
+            if (p && onAssign) onAssign(p.id, p.name);
+          }}
+          className="text-xs border border-input rounded-lg px-2 py-1 bg-card font-heading-bn"
+          defaultValue=""
+        >
+          <option value="" disabled>{t('প্রজেক্ট বাছুন', 'Choose project')}</option>
+          {projects.map(p => (
+            <option key={p.id} value={p.id}>{p.emoji} {p.name}</option>
+          ))}
+        </select>
+      )}
+      <button onClick={onDismiss} className="text-muted-foreground hover:text-foreground text-xs ml-1">
+        <X size={14} />
+      </button>
+    </div>
   );
 };
 
