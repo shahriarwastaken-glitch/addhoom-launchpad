@@ -15,7 +15,7 @@ const defaultForm: GeneratorFormData = {
   productDesc: '',
   price: '',
   platforms: ['facebook'],
-  language: 'bn',
+  language: 'en',
   framework: 'FOMO',
   occasion: 'general',
   tone: 'friendly',
@@ -30,7 +30,7 @@ const defaultForm: GeneratorFormData = {
 
 const AdGeneratorPage = () => {
   const { activeWorkspace } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const isMobile = useIsMobile();
 
   const [mode, setMode] = useState<GeneratorMode>('copy');
@@ -68,7 +68,7 @@ const AdGeneratorPage = () => {
             description: form.productDesc,
             price_bdt: form.price ? parseInt(form.price) : undefined,
             platforms: form.platforms,
-            language: form.language === 'en' ? 'en' : 'bn',
+            language: lang,
             framework: form.framework,
             occasion: form.occasion,
             tone: form.tone,
@@ -117,7 +117,7 @@ const AdGeneratorPage = () => {
             brand_color_secondary: form.brandColorSecondary,
             ad_headline: adHeadline,
             ad_body: form.productDesc,
-            language: form.language,
+            language: lang,
             num_variations: form.numVariations,
             product_image_base64,
             product_image_mime_type,

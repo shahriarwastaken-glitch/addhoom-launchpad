@@ -6,7 +6,7 @@ import {
   PenLine, ImageIcon, Facebook, Instagram, ShoppingBag, Search,
   Target, AlertTriangle, BookOpen, CheckCircle, Zap, Gift,
   Smile, Briefcase, Flame, Square, Smartphone, Monitor,
-  Sparkles, Palette, Camera, Upload, Rocket, Globe, Type,
+  Sparkles, Palette, Camera, Upload, Rocket,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
@@ -199,27 +199,6 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
           </div>
         </FieldGroup>
 
-        {/* Language */}
-        <FieldGroup label={t('ভাষা', 'Language')}>
-          <div className="flex gap-2">
-            {[
-              { label: 'বাংলা', labelEn: 'Bengali', value: 'bn' as const, icon: <Globe size={14} /> },
-              { label: 'English', labelEn: 'English', value: 'en' as const, icon: <Type size={14} /> },
-            ].map(l => (
-              <button
-                key={l.value}
-                onClick={() => updateField('language', l.value)}
-                className={`flex-1 py-2 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 flex items-center justify-center gap-1.5 ${
-                  form.language === l.value
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-input bg-card text-foreground'
-                }`}
-              >
-                {l.icon} {t(l.label, l.labelEn)}
-              </button>
-            ))}
-          </div>
-        </FieldGroup>
 
         {/* Framework */}
         <FieldGroup label={t('বিজ্ঞাপনের কৌশল (Framework)', 'Ad Framework')}>
