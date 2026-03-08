@@ -270,18 +270,29 @@ const AdGenerator = () => {
     toast.success(t('কপি হয়েছে!', 'Copied!'));
   };
 
-  const handleRemix = async (ad: AdResult) => {
+  const handleRemix = async (ad: AdResult, numVariations: number) => {
     if (!ad.id || !activeWorkspace) return;
-    setGenerating(true);
+    setRemixingId(ad.id);
+    setShowRemixDropdown(null);
     try {
       const { data } = await supabase.functions.invoke('remix-ad', {
-        body: { workspace_id: activeWorkspace.id, ad_id: ad.id, num_variations: 2 },
+        body: { workspace_id: activeWorkspace.id, ad_id: ad.id, num_variations: numVariations },
       });
-      if (data?.ads) {
+      if (data?.success && data.ads) {
         setResults(prev => [...prev, ...data.ads]);
-        toast.success(t('Remix তৈরি হয়েছে!', 'Remix created!'));
+        toast.success(
+          data.has_winners
+            ? t('Winner pattern থেকে রিমিক্স তৈরি হয়েছে ⚡', 'Remixed from winner patterns ⚡')
+            : t('রিমিক্স তৈরি হয়েছে!', 'Remix created!')
+        );
+      } else {
+        toast.error(data?.message || t('সমস্যা হয়েছে', 'Something went wrong'));
       }
-    } catch { /* ignore */ } finally { setGenerating(false); }
+    } catch {
+      toast.error(t('রিমিক্স ব্যর্থ হয়েছে', 'Remix failed'));
+    } finally {
+      setRemixingId(null);
+    }
   };
 
   const resetAll = () => {
