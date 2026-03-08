@@ -1,7 +1,7 @@
 import UpcomingContentWidget from './UpcomingContentWidget';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Video, Brain, Shield, BarChart3, Calendar } from 'lucide-react';
+import { Sparkles, Video, Brain, Shield, FolderOpen, Calendar } from 'lucide-react';
 
 const DashboardHome = () => {
   const { t } = useLanguage();
@@ -12,7 +12,7 @@ const DashboardHome = () => {
     { icon: Video, label: t('ভিডিও তৈরি', 'Create Video'), path: '/dashboard/video', color: 'bg-[hsl(var(--brand-purple))]/10 text-[hsl(var(--brand-purple))]' },
     { icon: Calendar, label: t('ক্যালেন্ডার', 'Calendar'), path: '/dashboard/calendar', color: 'bg-[hsl(var(--brand-green))]/10 text-[hsl(var(--brand-green))]' },
     { icon: Brain, label: t('AI চ্যাট', 'AI Chat'), path: '/dashboard/chat', color: 'bg-[hsl(var(--brand-yellow))]/10 text-[hsl(var(--brand-yellow))]' },
-    { icon: BarChart3, label: t('প্রতিযোগী', 'Competitors'), path: '/dashboard/competitors', color: 'bg-destructive/10 text-destructive' },
+    { icon: FolderOpen, label: t('প্রজেক্ট', 'Projects'), path: '/dashboard/projects', color: 'bg-destructive/10 text-destructive' },
     { icon: Shield, label: t('অ্যাকাউন্ট ডক্টর', 'Account Doctor'), path: '/dashboard/doctor', color: 'bg-primary/10 text-primary' },
   ];
 

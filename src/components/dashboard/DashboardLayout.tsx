@@ -4,7 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/contexts/AuthContext';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { Bell, Moon, Sun, Target, Video, Calendar, MessageSquare, Stethoscope, LogOut, ChevronDown, Store, Zap, X, MoreHorizontal, Search, PartyPopper, BarChart3, Settings, Wand2 } from 'lucide-react';
+import { Bell, Moon, Sun, Target, Video, Calendar, MessageSquare, Stethoscope, LogOut, ChevronDown, Store, Zap, X, MoreHorizontal, Search, PartyPopper, FolderOpen, Settings, Wand2 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
@@ -19,11 +19,11 @@ const mobileItems = [
 
 const moreItems = [
   { icon: Calendar, bn: 'ক্যালেন্ডার', en: 'Calendar', url: '/dashboard/calendar' },
+  { icon: FolderOpen, bn: 'প্রজেক্ট', en: 'Projects', url: '/dashboard/projects' },
   { icon: Search, bn: 'প্রতিযোগী', en: 'Competitors', url: '/dashboard/competitors' },
   { icon: Stethoscope, bn: 'ডাক্তার', en: 'Doctor', url: '/dashboard/doctor' },
   { icon: PartyPopper, bn: 'উৎসব', en: 'Festival', url: '/dashboard/festival' },
   { icon: Zap, bn: 'ধুম স্কোর', en: 'Dhoom Score', url: '/dashboard/dhoom-score' },
-  { icon: BarChart3, bn: 'ক্যাম্পেইন', en: 'Campaigns', url: '/dashboard/campaigns' },
   { icon: Settings, bn: 'সেটিংস', en: 'Settings', url: '/dashboard/settings' },
 ];
 

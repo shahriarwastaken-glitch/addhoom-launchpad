@@ -9,19 +9,19 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
 } from '@/components/ui/sidebar';
-import { Target, Video, Calendar, MessageSquare, Search, Stethoscope, PartyPopper, BarChart3, Settings, Shield, Zap, Wand2 } from 'lucide-react';
+import { Target, Video, Calendar, MessageSquare, Search, Stethoscope, PartyPopper, FolderOpen, Settings, Shield, Zap, Wand2 } from 'lucide-react';
 
 const items = [
   { icon: Target, bn: 'হোম', en: 'Home', url: '/dashboard' },
   { icon: Wand2, bn: 'অ্যাড তৈরি', en: 'Create Ad', url: '/dashboard/generate' },
   { icon: Video, bn: 'ভিডিও অ্যাড', en: 'Video Ads', url: '/dashboard/video' },
+  { icon: FolderOpen, bn: 'প্রজেক্ট', en: 'Projects', url: '/dashboard/projects' },
   { icon: Calendar, bn: 'ক্যালেন্ডার', en: 'Calendar', url: '/dashboard/calendar' },
   { icon: MessageSquare, bn: 'AI চ্যাট', en: 'AI Chat', url: '/dashboard/chat' },
   { icon: Search, bn: 'প্রতিযোগী', en: 'Competitors', url: '/dashboard/competitors' },
   { icon: Stethoscope, bn: 'অ্যাকাউন্ট ডাক্তার', en: 'Doctor', url: '/dashboard/doctor' },
   { icon: PartyPopper, bn: 'উৎসব', en: 'Festival', url: '/dashboard/festival' },
   { icon: Zap, bn: 'ধুম স্কোর', en: 'Dhoom Score', url: '/dashboard/dhoom-score' },
-  { icon: BarChart3, bn: 'ক্যাম্পেইন', en: 'Campaigns', url: '/dashboard/campaigns' },
   { icon: Settings, bn: 'সেটিংস', en: 'Settings', url: '/dashboard/settings' },
 ];
 
