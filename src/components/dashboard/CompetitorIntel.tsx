@@ -329,7 +329,7 @@ const CompetitorIntel = () => {
                 </div>
                 {analysis.strengths?.length > 0 && (
                   <div className="bg-card rounded-[20px] shadow-warm p-6">
-                    <h3 className="font-heading-bn font-bold text-foreground mb-3">{t('✅ তাদের শক্তি', '✅ Their Strengths')}</h3>
+                    <h3 className="font-heading-bn font-bold text-foreground mb-3">{t('তাদের শক্তি', 'Their Strengths')}</h3>
                     <ul className="space-y-2">{analysis.strengths.map((s, i) => (<li key={i} className="flex items-start gap-2"><CheckCircle className="text-[hsl(var(--brand-green))] mt-0.5 shrink-0" size={16} /><span className="text-sm text-muted-foreground font-body-bn">{s}</span></li>))}</ul>
                   </div>
                 )}
