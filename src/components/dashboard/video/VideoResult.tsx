@@ -7,6 +7,27 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { VideoResult as VResult, VideoScript, VideoFormat, VideoStyle, MusicTrack } from './types';
 
+// Script-based preview when no actual video URL is available
+const ScriptPreview = ({ script, isReels }: { script: VideoScript; isReels: boolean }) => (
+  <div className={`w-full ${isReels ? 'aspect-[9/16]' : 'aspect-square'} bg-gradient-to-b from-[#1C1B1A] to-[#2A2520] flex flex-col items-center justify-center p-4 relative overflow-hidden`}>
+    {/* Animated gradient overlay */}
+    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-[#FFB800]/10 animate-pulse" />
+    <div className="relative z-10 text-center space-y-3 max-w-[90%]">
+      <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-2">
+        <Play size={20} className="text-primary ml-0.5" />
+      </div>
+      {script.slides.slice(0, 3).map((slide, i) => (
+        <p key={i} className={`font-heading-bn text-white/90 leading-snug ${i === 0 ? 'text-sm font-bold' : 'text-xs text-white/60'}`}>
+          {slide.headline_text}
+        </p>
+      ))}
+      <p className="text-[10px] text-white/40 font-heading-bn mt-2">
+        {script.slides.length} slides · 15s
+      </p>
+    </div>
+  </div>
+);
+
 interface VideoResultProps {
   result: VResult;
   plan: string;
