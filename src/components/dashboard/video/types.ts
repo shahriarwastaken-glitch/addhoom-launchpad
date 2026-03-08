@@ -1,8 +1,8 @@
 export type VideoStage = 1 | 2 | 3;
 export type VideoFormat = 'feed' | 'reels' | 'story';
 export type VideoStyle = 'clean' | 'bold' | 'story' | 'luxury';
-export type MusicTrack = 'energetic' | 'soft' | 'trendy' | 'corporate' | 'none';
-export type TextLanguage = 'bn' | 'banglish' | 'en';
+export type MusicTrack = 'energetic' | 'soft' | 'trendy' | 'corporate' | 'none' | 'custom';
+export type TextLanguage = 'bn' | 'en';
 export type FontStyle = 'hind' | 'bold' | 'modern';
 export type TextAnimation = 'fade' | 'slide' | 'typewriter' | 'zoom';
 export type VoiceGender = 'male' | 'female';
