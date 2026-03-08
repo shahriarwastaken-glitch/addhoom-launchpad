@@ -73,7 +73,16 @@ const AdGeneratorPage = () => {
   const [mobileTab, setMobileTab] = useState<'input' | 'results'>('input');
   const [projectInfo, setProjectInfo] = useState<{ name: string; emoji: string; color: string } | null>(null);
   const [imageHistoryOpen, setImageHistoryOpen] = useState(false);
-  const toggleImageHistory = useCallback(() => setImageHistoryOpen(prev => !prev), []);
+
+  const toggleImageHistory = useCallback(() => {
+    setImageHistoryOpen(prev => {
+      const next = !prev;
+      if (next && isMobile) {
+        setMobileTab('results');
+      }
+      return next;
+    });
+  }, [isMobile]);
 
   // Fetch project info if project_id is present
   useEffect(() => {
