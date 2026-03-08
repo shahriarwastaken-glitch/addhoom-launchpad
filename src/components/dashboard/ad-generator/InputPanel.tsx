@@ -68,6 +68,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
   const [loadingTextIdx, setLoadingTextIdx] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
+  const historyCount = useMemo(() => getImageHistory().length, []);
 
   const copyLoadingTexts = [t('চিন্তা করছি...', 'Thinking...'), t('লিখছি...', 'Writing...'), t('স্কোর করছি...', 'Scoring...')];
   const imageLoadingTexts = [t('প্রম্পট তৈরি হচ্ছে...', 'Creating prompt...'), t('AI ছবি আঁকছে...', 'AI drawing...'), t('ফিনিশিং টাচ...', 'Finishing touches...')];
