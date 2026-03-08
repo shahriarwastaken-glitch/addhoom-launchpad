@@ -233,17 +233,20 @@ const AIChat = () => {
     let assistantText = '';
 
     try {
-      // Build message_history from current messages for context
-      const history = [...messages, userMsg].map(m => ({
-        role: m.role === 'user' ? 'user' : 'assistant',
-        content: m.content,
-      }));
+      const token = session?.access_token || (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) {
+        toast.error(t('সেশন শেষ হয়েছে। আবার লগইন করুন।', 'Session expired. Please log in again.'));
+        setMessages(prev => prev.filter((_, i) => i !== prev.length - 1));
+        setStreaming(false);
+        setInput(msg);
+        return;
+      }
 
       const resp = await fetch(CHAT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${session?.access_token ?? ''}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           workspace_id: activeWorkspace.id,
