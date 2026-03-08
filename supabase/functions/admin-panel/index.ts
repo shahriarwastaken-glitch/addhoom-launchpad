@@ -50,7 +50,7 @@ serve(async (req) => {
           supabase.from("ad_creatives").select("*", { count: "exact", head: true }),
           supabase.from("payments").select("*", { count: "exact", head: true }).eq("status", "success"),
           supabase.from("payments").select("amount_bdt, plan_purchased, created_at, status").order("created_at", { ascending: false }).limit(10),
-          supabase.rpc("get_plan_breakdown").catch(() => ({ data: null })),
+          supabase.from("profiles").select("plan"),
         ]);
 
         // Manual plan breakdown if RPC doesn't exist
