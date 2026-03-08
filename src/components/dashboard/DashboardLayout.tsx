@@ -4,7 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/contexts/AuthContext';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { Bell, Moon, Sun, Target, Video, Calendar, MessageSquare, Stethoscope, LogOut, ChevronDown, Store, RefreshCw, Zap, X, MoreHorizontal, Search, PartyPopper, BarChart3, Settings } from 'lucide-react';
+import { Bell, Moon, Sun, Target, Video, Calendar, MessageSquare, Stethoscope, LogOut, ChevronDown, Store, RefreshCw, Zap, X, MoreHorizontal, Search, PartyPopper, BarChart3, Settings, Wand2 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
@@ -12,12 +12,13 @@ import { supabase } from '@/integrations/supabase/client';
 
 const mobileItems = [
   { icon: Target, bn: 'অ্যাড', en: 'Ads', url: '/dashboard' },
+  { icon: Wand2, bn: 'জেনারেটর', en: 'Generator', url: '/dashboard/generate' },
   { icon: Video, bn: 'ভিডিও', en: 'Video', url: '/dashboard/video' },
-  { icon: Calendar, bn: 'ক্যালেন্ডার', en: 'Calendar', url: '/dashboard/calendar' },
   { icon: MessageSquare, bn: 'চ্যাট', en: 'Chat', url: '/dashboard/chat' },
 ];
 
 const moreItems = [
+  { icon: Calendar, bn: 'ক্যালেন্ডার', en: 'Calendar', url: '/dashboard/calendar' },
   { icon: Search, bn: 'প্রতিযোগী', en: 'Competitors', url: '/dashboard/competitors' },
   { icon: Stethoscope, bn: 'ডাক্তার', en: 'Doctor', url: '/dashboard/doctor' },
   { icon: PartyPopper, bn: 'উৎসব', en: 'Festival', url: '/dashboard/festival' },
