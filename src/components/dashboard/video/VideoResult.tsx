@@ -125,30 +125,31 @@ const VideoResultView = ({ result, plan, usageUsed, usageLimit, onReset, onRegen
                 <div className="rounded-[30px] border-[3px] border-foreground/10 p-1.5 bg-foreground/5">
                   <div className="w-20 h-1.5 rounded-full bg-foreground/10 mx-auto mb-1" />
                   <div className="rounded-[22px] overflow-hidden bg-[#1C1B1A] relative">
-                    <video
-                      ref={videoRef}
-                      className="w-full aspect-[9/16] object-cover"
-                      poster={result.videoUrl ? undefined : '/placeholder.svg'}
-                      loop
-                      muted={muted}
-                      playsInline
-                      onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
-                      onPlay={() => setPlaying(true)}
-                      onPause={() => setPlaying(false)}
-                    >
-                      {result.videoUrl && <source src={result.videoUrl} type="video/mp4" />}
-                    </video>
+                    {result.videoUrl ? (
+                      <video
+                        ref={videoRef}
+                        className="w-full aspect-[9/16] object-cover"
+                        loop muted={muted} playsInline
+                        onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
+                        onPlay={() => setPlaying(true)}
+                        onPause={() => setPlaying(false)}
+                      >
+                        <source src={result.videoUrl} type="video/mp4" />
+                      </video>
+                    ) : (
+                      <ScriptPreview script={result.script} isReels={true} />
+                    )}
                     {/* Custom controls */}
                     <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-3">
                       <div className="flex items-center gap-2">
-                        <button onClick={togglePlay} className="text-white">
+                        <button onClick={togglePlay} className="text-white" disabled={!result.videoUrl}>
                           {playing ? <Pause size={20} /> : <Play size={20} />}
                         </button>
                         <div className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
                           <div className="h-full bg-primary rounded-full" style={{ width: `${(currentTime / 15) * 100}%` }} />
                         </div>
                         <span className="text-white text-[11px] font-mono">{Math.floor(currentTime)}s/15s</span>
-                        <button onClick={() => setMuted(!muted)} className="text-white">
+                        <button onClick={() => setMuted(!muted)} className="text-white" disabled={!result.videoUrl}>
                           {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
                         </button>
                       </div>
@@ -159,26 +160,30 @@ const VideoResultView = ({ result, plan, usageUsed, usageLimit, onReset, onRegen
 
               {!isReels && (
                 <div className="rounded-[20px] overflow-hidden bg-[#1C1B1A] shadow-[0_24px_80px_rgba(0,0,0,0.2)] relative">
-                  <video
-                    ref={videoRef}
-                    className="w-full aspect-square object-cover"
-                    loop
-                    muted={muted}
-                    playsInline
-                    onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
-                    onPlay={() => setPlaying(true)}
-                    onPause={() => setPlaying(false)}
-                  >
-                    {result.videoUrl && <source src={result.videoUrl} type="video/mp4" />}
-                  </video>
+                  {result.videoUrl ? (
+                    <video
+                      ref={videoRef}
+                      className="w-full aspect-square object-cover"
+                      loop muted={muted} playsInline
+                      onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
+                      onPlay={() => setPlaying(true)}
+                      onPause={() => setPlaying(false)}
+                    >
+                      <source src={result.videoUrl} type="video/mp4" />
+                    </video>
+                  ) : (
+                    <ScriptPreview script={result.script} isReels={false} />
+                  )}
                   <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-3">
                     <div className="flex items-center gap-2">
-                      <button onClick={togglePlay} className="text-white"><Play size={20} /></button>
+                      <button onClick={togglePlay} className="text-white" disabled={!result.videoUrl}>
+                        {playing ? <Pause size={20} /> : <Play size={20} />}
+                      </button>
                       <div className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
                         <div className="h-full bg-primary rounded-full" style={{ width: `${(currentTime / 15) * 100}%` }} />
                       </div>
                       <span className="text-white text-[11px] font-mono">{Math.floor(currentTime)}s/15s</span>
-                      <button onClick={() => setMuted(!muted)} className="text-white">
+                      <button onClick={() => setMuted(!muted)} className="text-white" disabled={!result.videoUrl}>
                         {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
                       </button>
                     </div>
