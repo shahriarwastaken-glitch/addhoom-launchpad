@@ -986,7 +986,7 @@ function SwipeView({ entries, setEntries, t, lang, navigate, isMobile }: {
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center gap-6 mt-6">
+      <div className={`flex items-center gap-6 ${isMobile ? 'fixed bottom-16 left-0 right-0 justify-center pb-4 pt-3 bg-background/80 backdrop-blur-sm z-30' : 'mt-6'}`}>
         <button onClick={() => handleAction('skip')}
           className="w-14 h-14 rounded-full border-2 border-destructive flex items-center justify-center hover:bg-destructive hover:text-white transition-colors text-destructive">
           <X size={24} />
