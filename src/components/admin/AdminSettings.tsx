@@ -291,8 +291,8 @@ export default function AdminSettings() {
       {/* Plan Limits */}
       <Card>
         <CardHeader>
-          <CardTitle>পরিকল্পনার সীমা</CardTitle>
-          <CardDescription>সীমা পরিবর্তন করতে কোড আপডেট প্রয়োজন (planLimits.ts)</CardDescription>
+          <CardTitle>Plan Limits</CardTitle>
+          <CardDescription>Code update required to change limits (planLimits.ts)</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-2 gap-4">
