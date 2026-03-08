@@ -40,6 +40,9 @@ const DashboardHome = () => {
         </div>
       </div>
 
+      {/* Today's Loop widget */}
+      <TodaysLoopWidget />
+
       {/* Upcoming content widget */}
       <UpcomingContentWidget />
     </div>
