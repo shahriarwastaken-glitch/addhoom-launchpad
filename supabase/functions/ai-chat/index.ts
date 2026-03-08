@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
-  corsHeaders, callGemini, callGeminiMultiturn, checkPlanLimit, logUsage,
+  corsHeaders, ADDHOOM_SYSTEM_PROMPT, callGeminiMultiturn, logUsage,
   errorResponse, jsonResponse,
 } from "../_shared/addhoom.ts";
 
@@ -16,7 +16,6 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
-
     const userClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
@@ -25,17 +24,38 @@ serve(async (req) => {
     const { data: { user } } = await userClient.auth.getUser();
     if (!user) return errorResponse(401, "লগইন করুন।", "Please log in.");
 
-    const { data: profile } = await supabase
-      .from("profiles").select("plan").eq("id", user.id).single();
+    const { workspace_id, conversation_id, message, language, action } = await req.json();
 
-    const limitCheck = await checkPlanLimit(supabase, user.id, "ai_chat", profile?.plan || "pro");
-    if (!limitCheck.allowed) return errorResponse(402, limitCheck.message_bn!, limitCheck.message_en!);
+    // Action: list conversations
+    if (action === "list_conversations") {
+      const { data: convs } = await supabase
+        .from("ai_conversations")
+        .select("id, title, updated_at")
+        .eq("workspace_id", workspace_id)
+        .order("updated_at", { ascending: false })
+        .limit(50);
+      return jsonResponse({ conversations: convs || [] });
+    }
 
-    const { workspace_id, conversation_id, message, language } = await req.json();
+    // Action: load conversation
+    if (action === "load_conversation" && conversation_id) {
+      const { data: conv } = await supabase
+        .from("ai_conversations")
+        .select("id, title, messages, language")
+        .eq("id", conversation_id)
+        .single();
+      return jsonResponse({ conversation: conv });
+    }
+
     if (!workspace_id || !message) {
       return errorResponse(400, "মেসেজ দিন।", "Message is required.");
     }
 
+    // STEP 1 — Fetch workspace DNA
+    const { data: workspace } = await supabase
+      .from("workspaces").select("*").eq("id", workspace_id).single();
+
+    // STEP 2 — Manage conversation
     let convId = conversation_id;
     let history: any[] = [];
 
@@ -45,26 +65,49 @@ serve(async (req) => {
       if (conv) history = conv.messages || [];
     }
 
-    // Build multi-turn messages
+    // STEP 3 — Build context-aware system prompt
+    let shopContext = "";
+    if (workspace) {
+      shopContext = `
+
+CURRENT USER'S SHOP CONTEXT:
+Shop name: ${workspace.shop_name || "Unknown"}
+Industry: ${workspace.industry || "General"}
+Platform: ${workspace.platform || "Facebook"}
+Target audience: ${workspace.target_audience || "General BD audience"}
+Key products: ${workspace.key_products || "Not specified"}
+Unique selling point: ${workspace.unique_selling || "Not specified"}
+Brand tone: ${workspace.brand_tone || "Friendly"}
+Price range: ${workspace.price_range || "Not specified"}
+
+Always give advice that is SPECIFIC to this shop. Reference their actual products, industry, and audience. Never give generic advice that could apply to any business.
+
+When recommending budgets, always use BDT (৳).
+When recommending timing, reference Bangladesh market patterns.`;
+    }
+
+    const FULL_SYSTEM_PROMPT = ADDHOOM_SYSTEM_PROMPT + "\n\n" + shopContext;
+
+    // STEP 4 — Call Gemini with conversation history
     const geminiMessages = history.map((m: any) => ({
       role: m.role === "user" ? "user" : "model",
       parts: [{ text: m.content }],
     }));
     geminiMessages.push({ role: "user", parts: [{ text: message }] });
 
-    const aiResponse = await callGeminiMultiturn(geminiMessages);
+    const aiResponse = await callGeminiMultiturn(geminiMessages, FULL_SYSTEM_PROMPT);
 
-    // Update history
-    history.push({ role: "user", content: message });
-    history.push({ role: "model", content: aiResponse });
+    // STEP 5 — Save and return
+    const ts = new Date().toISOString();
+    history.push({ role: "user", content: message, timestamp: ts });
+    history.push({ role: "model", content: aiResponse, timestamp: ts });
 
     if (convId) {
       await supabase.from("ai_conversations").update({
         messages: history,
-        updated_at: new Date().toISOString(),
+        updated_at: ts,
       }).eq("id", convId);
     } else {
-      // Create new conversation with auto title from first message
       const title = message.substring(0, 50) + (message.length > 50 ? "..." : "");
       const { data: newConv } = await supabase.from("ai_conversations").insert({
         workspace_id,
@@ -77,7 +120,7 @@ serve(async (req) => {
 
     await logUsage(supabase, user.id, workspace_id, "ai_chat");
 
-    return jsonResponse({ response: aiResponse, conversation_id: convId });
+    return jsonResponse({ success: true, response: aiResponse, conversation_id: convId });
   } catch (e) {
     console.error("ai-chat error:", e);
     return errorResponse(500, "AI এখন ব্যস্ত। একটু পরে চেষ্টা করুন।", "AI is busy. Please try again.");
