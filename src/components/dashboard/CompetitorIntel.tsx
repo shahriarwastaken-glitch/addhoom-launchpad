@@ -5,9 +5,11 @@ import { api } from '@/lib/api';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import RocketLoader from '@/components/loaders/RocketLoader';
+import CompetitorCharts from '@/components/dashboard/CompetitorCharts';
+import { exportCompetitorPDF } from '@/utils/exportCompetitorPDF';
 import {
   Search, CheckCircle, XCircle, Swords, ChevronDown, ChevronUp, Copy,
-  Loader2, ArrowLeft, RefreshCw, ArrowRight, Clock
+  Loader2, ArrowLeft, RefreshCw, ArrowRight, Clock, FileText
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -48,6 +50,66 @@ const avatarColors = [
   'bg-primary', 'bg-[hsl(var(--brand-green))]', 'bg-[hsl(var(--brand-purple))]',
   'bg-[hsl(var(--brand-yellow))]', 'bg-destructive',
 ];
+
+// PDF Export Button helper
+const PDFExportButton = ({ analysisId, competitorName, t, workspaceName }: {
+  analysisId: string; competitorName: string; t: (bn: string, en: string) => string; workspaceName: string;
+}) => {
+  const [exporting, setExporting] = useState(false);
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-competitor-detail?analysis_id=${analysisId}&workspace_id=any`;
+      const resp = await fetch(url, {
+        headers: { Authorization: `Bearer ${session?.access_token}`, apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+      });
+      const result = await resp.json();
+      if (result.success) {
+        await exportCompetitorPDF(result.analysis, workspaceName);
+        toast.success(t('PDF রিপোর্ট ডাউনলোড হয়েছে', 'PDF report downloaded'));
+      } else {
+        toast.error(t('রিপোর্ট তৈরি ব্যর্থ', 'Report generation failed'));
+      }
+    } catch {
+      toast.error(t('PDF তৈরি ব্যর্থ', 'PDF generation failed'));
+    } finally {
+      setExporting(false);
+    }
+  };
+  return (
+    <button onClick={handleExport} disabled={exporting}
+      className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors disabled:opacity-50">
+      {exporting ? <Loader2 size={12} className="animate-spin" /> : <FileText size={12} />}
+      {exporting ? t('তৈরি হচ্ছে...', 'Generating...') : t('PDF রিপোর্ট', 'PDF Report')}
+    </button>
+  );
+};
+
+// PDF Export for Detail View (data already loaded)
+const DetailPDFButton = ({ data, workspaceName, t }: {
+  data: any; workspaceName: string; t: (bn: string, en: string) => string;
+}) => {
+  const [exporting, setExporting] = useState(false);
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await exportCompetitorPDF(data, workspaceName);
+      toast.success(t('PDF রিপোর্ট ডাউনলোড হয়েছে', 'PDF report downloaded'));
+    } catch {
+      toast.error(t('PDF তৈরি ব্যর্থ', 'PDF generation failed'));
+    } finally {
+      setExporting(false);
+    }
+  };
+  return (
+    <button onClick={handleExport} disabled={exporting}
+      className="border border-border text-foreground rounded-xl px-4 py-2.5 text-sm font-semibold flex items-center gap-2 hover:bg-secondary transition-colors disabled:opacity-50">
+      {exporting ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
+      {exporting ? t('তৈরি হচ্ছে...', 'Generating...') : t('PDF এক্সপোর্ট', 'Export PDF')}
+    </button>
+  );
+};
 
 const CompetitorIntel = () => {
   const { t, lang } = useLanguage();
@@ -223,6 +285,7 @@ const CompetitorIntel = () => {
             t={t}
             lang={lang}
             copyText={copyText}
+            workspaceName={activeWorkspace?.shop_name || 'AdDhoom'}
           />
         ) : null}
       </div>
@@ -390,6 +453,9 @@ const CompetitorIntel = () => {
             </div>
           ) : (
             <>
+              {/* Comparison Charts */}
+              <CompetitorCharts competitors={allCompetitors} />
+
               {/* Search + Sort */}
               <div className="flex flex-col sm:flex-row gap-3 mb-4">
                 <div className="relative flex-1">
@@ -453,6 +519,7 @@ const CompetitorIntel = () => {
                         >
                           {t('বিস্তারিত দেখুন', 'View details')} <ArrowRight size={12} />
                         </button>
+                        <PDFExportButton analysisId={item.id} competitorName={item.competitor_name} t={t} workspaceName={activeWorkspace?.shop_name || 'AdDhoom'} />
                         <button
                           onClick={() => handleAnalyze(item.competitor_name, item.competitor_url || undefined)}
                           disabled={loading}
@@ -490,7 +557,7 @@ const CompetitorIntel = () => {
 
 // ─── DETAIL VIEW COMPONENT ───
 const DetailView = ({
-  data, allCompetitors, onBack, onReanalyze, onCreateAd, loading, t, lang, copyText,
+  data, allCompetitors, onBack, onReanalyze, onCreateAd, loading, t, lang, copyText, workspaceName,
 }: {
   data: DetailData;
   allCompetitors: HistoryItem[];
@@ -501,6 +568,7 @@ const DetailView = ({
   t: (bn: string, en: string) => string;
   lang: string;
   copyText: (text: string) => void;
+  workspaceName: string;
 }) => {
   const ai = data.ai_analysis;
   const uniqueCompetitors = allCompetitors.filter(
@@ -519,14 +587,17 @@ const DetailView = ({
           <h2 className="text-xl sm:text-2xl font-heading-bn font-bold text-foreground">{data.competitor_name}</h2>
           <p className="text-xs text-muted-foreground">{new Date(data.created_at).toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
         </div>
-        <button
-          onClick={onReanalyze}
-          disabled={loading}
-          className="bg-gradient-cta text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-semibold flex items-center gap-2 disabled:opacity-70"
-        >
-          {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
-          {t('পুনরায় বিশ্লেষণ করুন', 'Re-analyze')}
-        </button>
+        <div className="flex gap-2">
+          <DetailPDFButton data={data} workspaceName={workspaceName} t={t} />
+          <button
+            onClick={onReanalyze}
+            disabled={loading}
+            className="bg-gradient-cta text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-semibold flex items-center gap-2 disabled:opacity-70"
+          >
+            {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+            {t('পুনরায় বিশ্লেষণ করুন', 'Re-analyze')}
+          </button>
+        </div>
       </div>
 
       {/* Section 1: Strategy Overview */}
