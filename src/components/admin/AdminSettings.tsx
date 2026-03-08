@@ -274,14 +274,14 @@ export default function AdminSettings() {
               <div className="flex flex-wrap gap-2">
                 <Button onClick={handleSaveImagePrompt} disabled={savingImagePrompt || !hasImageChanges} className="gap-2">
                   {savingImagePrompt ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                  সংরক্ষণ করুন
+                   Save
                 </Button>
                 <Button variant="outline" onClick={handleResetImagePrompt} disabled={savingImagePrompt || usingImageDefault} className="gap-2">
-                  <RotateCcw className="h-4 w-4" /> ডিফল্টে ফিরুন
+                   <RotateCcw className="h-4 w-4" /> Reset to Default
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                💡 টিপ: কাস্টম প্রম্পট না দিলে _shared/imagePrompt.ts থেকে ডিফল্ট মাস্টার প্রম্পট ব্যবহার হবে। প্রম্পটে প্রোডাক্ট ফিডেলিটি, টেক্সট রুলস, কম্পোজিশন, স্টাইল গাইড, এবং বাংলাদেশী মার্কেট অ্যাসথেটিকস নির্দেশনা রাখুন।
+                 💡 Tip: Without a custom prompt, the default 9-section master image prompt from imagePrompt.ts will be used. Covers product fidelity, text rules, composition, style, and BD market aesthetics.
               </p>
             </>
           )}
