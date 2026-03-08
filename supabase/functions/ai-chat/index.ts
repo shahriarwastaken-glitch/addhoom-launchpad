@@ -232,6 +232,10 @@ serve(async (req) => {
     // STEP 5 — Build system prompt (now includes summary from Layer 3)
     const systemPrompt = buildSystemPrompt(workspace, summary);
 
+    // STEP 6 — Call AI Gateway with streaming
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
