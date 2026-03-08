@@ -59,9 +59,10 @@ interface InputPanelProps {
   setForm: (fn: (prev: GeneratorFormData) => GeneratorFormData) => void;
   onGenerate: () => void;
   generating: boolean;
+  onToggleImageHistory?: () => void;
 }
 
-const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: InputPanelProps) => {
+const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onToggleImageHistory }: InputPanelProps) => {
   const { t } = useLanguage();
   const [loadingTextIdx, setLoadingTextIdx] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -120,10 +121,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating }: In
           ) : (
             <button
               type="button"
-              onClick={() => {
-                // Dispatch a custom event so ResultsPanel can toggle its history panel
-                window.dispatchEvent(new CustomEvent('toggle-image-history'));
-              }}
+              onClick={() => onToggleImageHistory?.()}
               className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors font-heading-bn"
             >
               <History size={12} /> {t('ইমেজ হিস্ট্রি', 'Image History')}

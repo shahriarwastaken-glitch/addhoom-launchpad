@@ -21,6 +21,8 @@ interface ResultsPanelProps {
   onRemix: (ad: AdResult) => void;
   onLoadHistory?: (results: AdResult[]) => void;
   projectId?: string | null;
+  imageHistoryOpen?: boolean;
+  onToggleImageHistory?: () => void;
 }
 
 interface ProjectOption {
@@ -30,7 +32,7 @@ interface ProjectOption {
   color: string;
 }
 
-const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix, onLoadHistory, projectId }: ResultsPanelProps) => {
+const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix, onLoadHistory, projectId, imageHistoryOpen, onToggleImageHistory }: ResultsPanelProps) => {
   const { t, lang } = useLanguage();
   const { activeWorkspace } = useAuth();
   const [progress, setProgress] = useState(0);
@@ -39,18 +41,11 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [imageHistory, setImageHistory] = useState<ImageHistoryEntry[]>(() => getImageHistory());
-  const [showHistory, setShowHistory] = useState(false);
+  const showHistory = imageHistoryOpen ?? false;
 
   const loadingMsgs = mode === 'copy'
     ? [t('চিন্তা করছি...', 'Thinking...'), t('লিখছি...', 'Writing...'), t('স্কোর করছি...', 'Scoring...')]
     : [t('প্রম্পট তৈরি হচ্ছে...', 'Creating prompt...'), t('AI ছবি আঁকছে...', 'AI drawing...'), t('ফিনিশিং টাচ...', 'Finishing touches...')];
-
-  // Listen for toggle-image-history event from InputPanel
-  useEffect(() => {
-    const handler = () => setShowHistory(prev => !prev);
-    window.addEventListener('toggle-image-history', handler);
-    return () => window.removeEventListener('toggle-image-history', handler);
-  }, []);
 
   useEffect(() => {
     if (!generating) { setProgress(0); setShowTip(false); return; }
@@ -263,7 +258,7 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
         <div className="flex gap-2">
           {imageHistory.length > 0 && (
             <button
-              onClick={() => setShowHistory(!showHistory)}
+              onClick={() => onToggleImageHistory?.()}
               className={`px-3 py-1.5 rounded-lg border text-xs font-heading-bn transition-colors flex items-center gap-1 ${showHistory ? 'border-primary text-primary bg-primary/5' : 'border-input text-foreground hover:bg-secondary'}`}
             >
               <Clock size={12} /> {t('হিস্ট্রি', 'History')}
@@ -295,7 +290,7 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
                   {t('সাম্প্রতিক ইমেজ', 'Recent Images')}
                 </h4>
                 <button
-                  onClick={() => { localStorage.removeItem('dhoom_image_history'); setImageHistory([]); setShowHistory(false); toast.success(t('হিস্ট্রি মুছে ফেলা হয়েছে', 'History cleared')); }}
+                  onClick={() => { localStorage.removeItem('dhoom_image_history'); setImageHistory([]); onToggleImageHistory?.(); toast.success(t('হিস্ট্রি মুছে ফেলা হয়েছে', 'History cleared')); }}
                   className="text-xs text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1"
                 >
                   <Trash2 size={12} /> {t('মুছুন', 'Clear')}
@@ -305,7 +300,7 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
                 {imageHistory.map(entry => (
                   <button
                     key={entry.id}
-                    onClick={() => { if (onLoadHistory) onLoadHistory(entry.results); else setResults(entry.results); setShowHistory(false); toast.success(t('হিস্ট্রি থেকে লোড হয়েছে', 'Loaded from history')); }}
+                    onClick={() => { if (onLoadHistory) onLoadHistory(entry.results); else setResults(entry.results); onToggleImageHistory?.(); toast.success(t('হিস্ট্রি থেকে লোড হয়েছে', 'Loaded from history')); }}
                     className="w-full flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/50 hover:bg-secondary transition-all text-left group"
                   >
                     {entry.results[0]?.image_url && (
