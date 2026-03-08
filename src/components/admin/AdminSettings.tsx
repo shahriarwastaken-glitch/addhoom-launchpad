@@ -244,15 +244,15 @@ export default function AdminSettings() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <ImageIcon className="h-5 w-5 text-orange-500" /> ইমেজ জেনারেশন মাস্টার প্রম্পট
+                <ImageIcon className="h-5 w-5 text-orange-500" /> Image Generation Master Prompt
                 {usingImageDefault && (
-                  <span className="text-xs bg-muted px-2 py-0.5 rounded-full font-normal">ডিফল্ট ব্যবহার হচ্ছে</span>
+                   <span className="text-xs bg-muted px-2 py-0.5 rounded-full font-normal">Using Default</span>
                 )}
               </CardTitle>
               <CardDescription>
-                AI ইমেজ জেনারেটরের আচরণ, কম্পোজিশন, স্টাইল ও মার্কেট রুলস নির্ধারণ করে
+                Controls AI image generator's composition, style, product fidelity, and BD market aesthetics
                 {imageLastUpdated && !usingImageDefault && (
-                  <span className="ml-2 text-xs">• শেষ আপডেট: {new Date(imageLastUpdated).toLocaleDateString('bn-BD')}</span>
+                   <span className="ml-2 text-xs">• Last updated: {new Date(imageLastUpdated).toLocaleDateString('en-US')}</span>
                 )}
               </CardDescription>
             </div>
