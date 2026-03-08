@@ -279,36 +279,173 @@ export type Database = {
           },
         ]
       }
-      api_keys: {
+      api_key_logs: {
         Row: {
-          created_at: string
-          created_by: string | null
-          description: string | null
+          action: string
+          api_key_id: string | null
+          created_at: string | null
           id: string
-          is_active: boolean
-          key_name: string
-          key_value: string
-          updated_at: string
+          new_preview: string | null
+          notes: string | null
+          old_preview: string | null
+          performed_by: string | null
+          result: string | null
+          service_name: string
         }
         Insert: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
+          action: string
+          api_key_id?: string | null
+          created_at?: string | null
           id?: string
-          is_active?: boolean
-          key_name: string
-          key_value: string
-          updated_at?: string
+          new_preview?: string | null
+          notes?: string | null
+          old_preview?: string | null
+          performed_by?: string | null
+          result?: string | null
+          service_name: string
         }
         Update: {
-          created_at?: string
+          action?: string
+          api_key_id?: string | null
+          created_at?: string | null
+          id?: string
+          new_preview?: string | null
+          notes?: string | null
+          old_preview?: string | null
+          performed_by?: string | null
+          result?: string | null
+          service_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_key_logs_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_key_logs_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_keys: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          display_name: string
+          docs_url: string | null
+          environment: string | null
+          expires_at: string | null
+          icon: string | null
+          id: string
+          is_critical: boolean | null
+          key_preview: string | null
+          key_value: string
+          last_test_error: string | null
+          last_test_result: string | null
+          last_tested_at: string | null
+          monthly_limit: number | null
+          monthly_usage: number | null
+          notes: string | null
+          rotated_at: string | null
+          service_name: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
           created_by?: string | null
           description?: string | null
+          display_name: string
+          docs_url?: string | null
+          environment?: string | null
+          expires_at?: string | null
+          icon?: string | null
           id?: string
-          is_active?: boolean
-          key_name?: string
+          is_critical?: boolean | null
+          key_preview?: string | null
+          key_value: string
+          last_test_error?: string | null
+          last_test_result?: string | null
+          last_tested_at?: string | null
+          monthly_limit?: number | null
+          monthly_usage?: number | null
+          notes?: string | null
+          rotated_at?: string | null
+          service_name: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_name?: string
+          docs_url?: string | null
+          environment?: string | null
+          expires_at?: string | null
+          icon?: string | null
+          id?: string
+          is_critical?: boolean | null
+          key_preview?: string | null
           key_value?: string
-          updated_at?: string
+          last_test_error?: string | null
+          last_test_result?: string | null
+          last_tested_at?: string | null
+          monthly_limit?: number | null
+          monthly_usage?: number | null
+          notes?: string | null
+          rotated_at?: string | null
+          service_name?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_usage_stats: {
+        Row: {
+          avg_response_ms: number | null
+          calls_failed: number | null
+          calls_made: number | null
+          estimated_cost_bdt: number | null
+          id: string
+          service_name: string
+          stat_date: string
+          total_tokens_used: number | null
+        }
+        Insert: {
+          avg_response_ms?: number | null
+          calls_failed?: number | null
+          calls_made?: number | null
+          estimated_cost_bdt?: number | null
+          id?: string
+          service_name: string
+          stat_date: string
+          total_tokens_used?: number | null
+        }
+        Update: {
+          avg_response_ms?: number | null
+          calls_failed?: number | null
+          calls_made?: number | null
+          estimated_cost_bdt?: number | null
+          id?: string
+          service_name?: string
+          stat_date?: string
+          total_tokens_used?: number | null
         }
         Relationships: []
       }
