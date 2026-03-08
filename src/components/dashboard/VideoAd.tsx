@@ -160,14 +160,24 @@ const VideoAd = () => {
       setUsageUsed(u => u + 1);
     }
 
-    // Save to database (mock result)
-    const dhoomScore = calculateDhoomScore();
+    // Calculate dhoom score using the active script
+    const calculateScore = () => {
+      let score = activeScript?.dhoom_score_prediction || 70;
+      if (form.format === 'reels') score += 5;
+      if (form.musicTrack !== 'none') score += 3;
+      if (form.ctaText) score += 5;
+      if (form.images.length >= 3) score += 4;
+      return Math.min(100, score);
+    };
+
+    const dhoomScore = calculateScore();
     if (activeWorkspace) {
-      const { data: videoRow } = await (supabase as any).from('video_ads').insert({
+      const { data: videoRow } = await supabase.from('video_ads').insert({
         workspace_id: activeWorkspace.id,
         product_name: form.productName,
         status: 'completed',
         script: activeScript as any,
+        format: form.format,
         style: form.style,
         music_track: form.musicTrack,
         font_style: form.fontStyle,
@@ -178,7 +188,7 @@ const VideoAd = () => {
 
       setResult({
         id: videoRow?.id || crypto.randomUUID(),
-        videoUrl: '', // Mock - no actual video URL without Shotstack
+        videoUrl: '',
         dhoomScore,
         productName: form.productName,
         format: form.format,
@@ -191,15 +201,6 @@ const VideoAd = () => {
 
     goToStage(3);
   }, [script, form, plan, usageUsed, usageLimit, user, activeWorkspace, showUpgrade]);
-
-  const calculateDhoomScore = () => {
-    let score = script?.dhoom_score_prediction || 70;
-    if (form.format === 'reels') score += 5;
-    if (form.musicTrack !== 'none') score += 3;
-    if (form.ctaText) score += 5;
-    if (form.images.length >= 3) score += 4;
-    return Math.min(100, score);
-  };
 
   const handleCancel = () => {
     if (elapsedRef.current) clearInterval(elapsedRef.current);
