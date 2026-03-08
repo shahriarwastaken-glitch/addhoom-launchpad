@@ -1,5 +1,6 @@
 import UpcomingContentWidget from './UpcomingContentWidget';
 import TodaysLoopWidget from './TodaysLoopWidget';
+import WelcomeBanner from './WelcomeBanner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Video, Brain, Shield, FolderOpen, Calendar } from 'lucide-react';
@@ -19,6 +20,8 @@ const DashboardHome = () => {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
+      {/* Welcome / Setup banner */}
+      <WelcomeBanner />
       {/* Quick actions */}
       <div>
         <h2 className="text-lg font-bold text-foreground mb-3 font-bn">
