@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import DashboardHome from '@/components/dashboard/DashboardHome';
 import AdGeneratorPage from '@/components/dashboard/ad-generator/AdGeneratorPage';
 import AdHistory from '@/components/dashboard/ad-generator/AdHistory';
 import VideoAd from '@/components/dashboard/VideoAd';
@@ -17,7 +18,7 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <Routes>
-        <Route index element={<AdGeneratorPage />} />
+        <Route index element={<DashboardHome />} />
         <Route path="generate" element={<AdGeneratorPage />} />
         <Route path="ad-history" element={<AdHistory />} />
         <Route path="video" element={<VideoAd />} />
