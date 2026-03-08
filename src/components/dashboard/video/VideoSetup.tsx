@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, GripVertical, Play, Square, Rocket, ChevronDown, ChevronUp, Mic, History } from 'lucide-react';
+import { Upload, X, GripVertical, Play, Square, Rocket, ChevronDown, ChevronUp, Mic, History, Video, Facebook, Instagram, Music, Music2, Drum, Guitar, VolumeX, Zap, Pin, Lightbulb, User, Briefcase, Flame, Heart, Upload as UploadIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,6 +32,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
   const { t, lang } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
+  const musicFileRef = useRef<HTMLInputElement>(null);
   const [voiceoverOpen, setVoiceoverOpen] = useState(false);
   const [playingMusic, setPlayingMusic] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -64,7 +65,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
     }
     stopMusicPreview();
 
-    const url = MUSIC_URLS[trackValue];
+    const url = trackValue === 'custom' ? form.customMusicPreview : MUSIC_URLS[trackValue];
     if (!url) return;
 
     const audio = new Audio(url);
@@ -193,7 +194,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
                 <p className="text-primary font-heading-bn font-semibold text-lg">{t('ছেড়ে দিন!', 'Drop here!')}</p>
               ) : (
                 <>
-                  <span className="text-[40px] mb-2">🎬</span>
+                  <Video size={40} className="text-muted-foreground mb-2" />
                   <p className="text-base text-muted-foreground font-heading-bn">{t('ছবি টেনে আনুন অথবা ক্লিক করুন', 'Drag images or click to upload')}</p>
                   <p className="text-xs text-muted-foreground mt-1">{t('সর্বোচ্চ ৫টি ছবি • PNG, JPG • প্রতিটি সর্বোচ্চ 8MB', 'Max 5 images • PNG, JPG • Max 8MB each')}</p>
                   <p className="text-xs text-primary italic mt-1">{t('ভালো ফলাফলের জন্য ৩-৫টি ছবি দিন', 'Use 3-5 images for best results')}</p>
@@ -233,7 +234,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
                 )}
               </div>
               <p className="text-xs text-muted-foreground font-heading-bn mt-2">
-                📌 {t('ছবির ক্রম ভিডিওর ক্রম নির্ধারণ করে। টেনে সাজিয়ে নিন।', 'Image order determines video order. Drag to rearrange.')}
+                <Pin size={12} className="inline mr-1" />{t('ছবির ক্রম ভিডিওর ক্রম নির্ধারণ করে। টেনে সাজিয়ে নিন।', 'Image order determines video order. Drag to rearrange.')}
               </p>
             </div>
           )}
@@ -347,14 +348,20 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
                   }`}
                 >
                   {fmt.badge && (
-                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-brand-green/10 text-brand-green text-[10px] font-bold whitespace-nowrap">
-                      {t(fmt.badge, fmt.badgeEn || fmt.badge)}
+                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-brand-green/10 text-brand-green text-[10px] font-bold whitespace-nowrap">
+                      <Zap size={10} /> {t(fmt.badge, fmt.badgeEn || fmt.badge)}
                     </span>
                   )}
                   <div className="flex justify-center mb-2">
                     <div className={`bg-border rounded-sm ${fmt.value === 'feed' ? 'w-10 h-10' : 'w-6 h-10'}`} />
                   </div>
-                  <div className="text-lg mb-1">{fmt.icons.join(' ')}</div>
+                  <div className="flex justify-center gap-1.5 mb-1">
+                    {fmt.iconNames.map(name => {
+                      const IconMap: Record<string, any> = { facebook: Facebook, instagram: Instagram, music: Music };
+                      const Icon = IconMap[name];
+                      return Icon ? <Icon key={name} size={14} className="text-muted-foreground" /> : null;
+                    })}
+                  </div>
                   <p className="text-sm font-semibold font-heading-bn text-foreground">{t(fmt.label, fmt.labelEn)}</p>
                   <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{fmt.dimensions}</p>
                   <p className="text-[11px] text-muted-foreground font-heading-bn mt-0.5">{t(fmt.desc, fmt.descEn)}</p>
@@ -390,42 +397,82 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
           <div className="mb-6">
             <label className="text-sm font-semibold font-heading-bn text-foreground mb-3 block">{t('ব্যাকগ্রাউন্ড মিউজিক', 'Background Music')}</label>
             <div className="space-y-2">
-              {MUSIC_OPTIONS.map(m => (
-                <button
-                  key={m.value}
-                  onClick={() => setForm(p => ({ ...p, musicTrack: m.value }))}
-                  className={`w-full flex items-center gap-3 p-3 rounded-xl border-[1.5px] transition-all text-left ${
-                    form.musicTrack === m.value
-                      ? 'border-primary bg-primary/[0.04]'
-                      : 'border-border hover:border-primary/30'
-                  }`}
-                >
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                    form.musicTrack === m.value ? 'border-primary' : 'border-border'
-                  }`}>
-                    {form.musicTrack === m.value && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
-                  </div>
-                  <span className="text-lg shrink-0">{m.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold font-heading-bn text-foreground">{t(m.label, m.labelEn)}</p>
-                    <p className="text-[11px] text-muted-foreground font-heading-bn">{t(m.desc, m.descEn)}</p>
-                  </div>
-                  {m.value !== 'none' && (
+              {MUSIC_OPTIONS.map(m => {
+                const MusicIconMap: Record<string, any> = { 'music': Music, 'music-2': Music2, 'drum': Drum, 'guitar': Guitar, 'volume-x': VolumeX, 'upload': UploadIcon };
+                const MusicIcon = MusicIconMap[m.iconName] || Music;
+                return (
+                  <div key={m.value}>
                     <button
-                      onClick={(e) => { e.stopPropagation(); playMusicPreview(m.value); }}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                        playingMusic === m.value
-                          ? 'bg-primary text-primary-foreground scale-110'
-                          : 'bg-secondary text-muted-foreground hover:text-primary hover:bg-primary/10'
+                      onClick={() => {
+                        setForm(p => ({ ...p, musicTrack: m.value }));
+                        if (m.value === 'custom') musicFileRef.current?.click();
+                      }}
+                      className={`w-full flex items-center gap-3 p-3 rounded-xl border-[1.5px] transition-all text-left ${
+                        form.musicTrack === m.value
+                          ? 'border-primary bg-primary/[0.04]'
+                          : 'border-border hover:border-primary/30'
                       }`}
-                      title={playingMusic === m.value ? t('থামান', 'Stop') : t('শুনুন', 'Preview')}
                     >
-                      {playingMusic === m.value ? <Square size={12} /> : <Play size={12} className="ml-0.5" />}
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                        form.musicTrack === m.value ? 'border-primary' : 'border-border'
+                      }`}>
+                        {form.musicTrack === m.value && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                      </div>
+                      <MusicIcon size={18} className="shrink-0 text-muted-foreground" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold font-heading-bn text-foreground">{t(m.label, m.labelEn)}</p>
+                        <p className="text-[11px] text-muted-foreground font-heading-bn">
+                          {m.value === 'custom' && form.customMusicFile
+                            ? form.customMusicFile.name
+                            : t(m.desc, m.descEn)}
+                        </p>
+                      </div>
+                      {m.value !== 'none' && m.value !== 'custom' && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); playMusicPreview(m.value); }}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                            playingMusic === m.value
+                              ? 'bg-primary text-primary-foreground scale-110'
+                              : 'bg-secondary text-muted-foreground hover:text-primary hover:bg-primary/10'
+                          }`}
+                          title={playingMusic === m.value ? t('থামান', 'Stop') : t('শুনুন', 'Preview')}
+                        >
+                          {playingMusic === m.value ? <Square size={12} /> : <Play size={12} className="ml-0.5" />}
+                        </button>
+                      )}
+                      {m.value === 'custom' && form.customMusicFile && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); playMusicPreview('custom'); }}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                            playingMusic === 'custom'
+                              ? 'bg-primary text-primary-foreground scale-110'
+                              : 'bg-secondary text-muted-foreground hover:text-primary hover:bg-primary/10'
+                          }`}
+                        >
+                          {playingMusic === 'custom' ? <Square size={12} /> : <Play size={12} className="ml-0.5" />}
+                        </button>
+                      )}
                     </button>
-                  )}
-                </button>
-              ))}
+                  </div>
+                );
+              })}
             </div>
+            <input
+              ref={musicFileRef}
+              type="file"
+              accept="audio/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                if (file.size > 10 * 1024 * 1024) {
+                  toast.error(t('অডিও ফাইল ১০MB এর কম হতে হবে', 'Audio file must be under 10MB'));
+                  return;
+                }
+                const url = URL.createObjectURL(file);
+                setForm(p => ({ ...p, musicTrack: 'custom' as MusicTrack, customMusicFile: file, customMusicPreview: url }));
+              }}
+            />
           </div>
 
           {/* Text Settings */}
@@ -435,9 +482,8 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
             {/* Language */}
             <div className="flex gap-2 mb-4">
               {([
-                { val: 'bn' as TextLanguage, label: '🇧🇩 বাংলা', labelEn: '🇧🇩 Bangla' },
-                { val: 'banglish' as TextLanguage, label: '🔤 Banglish', labelEn: '🔤 Banglish' },
-                { val: 'en' as TextLanguage, label: '🇬🇧 English', labelEn: '🇬🇧 English' },
+                { val: 'bn' as TextLanguage, label: 'বাংলা', labelEn: 'Bangla' },
+                { val: 'en' as TextLanguage, label: 'English', labelEn: 'English' },
               ]).map(l => (
                 <button
                   key={l.val}
@@ -508,7 +554,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
               className="flex items-center gap-2 text-sm font-semibold font-heading-bn text-foreground hover:text-primary transition-colors"
             >
               <Mic size={16} />
-              {t('🎙️ ভয়েসওভার যোগ করুন (ঐচ্ছিক)', '🎙️ Add Voiceover (optional)')}
+              {t('ভয়েসওভার যোগ করুন (ঐচ্ছিক)', 'Add Voiceover (optional)')}
               {voiceoverOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
 
@@ -535,8 +581,8 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
                       <>
                         <div className="flex gap-2">
                           {([
-                            { val: 'male' as const, label: '👨 পুরুষ কণ্ঠ', labelEn: '👨 Male' },
-                            { val: 'female' as const, label: '👩 মহিলা কণ্ঠ', labelEn: '👩 Female' },
+                            { val: 'male' as const, label: 'পুরুষ কণ্ঠ', labelEn: 'Male' },
+                            { val: 'female' as const, label: 'মহিলা কণ্ঠ', labelEn: 'Female' },
                           ]).map(v => (
                             <button
                               key={v.val}
@@ -551,9 +597,9 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
                         </div>
                         <div className="flex gap-2">
                           {([
-                            { val: 'warm' as const, label: '😊 উষ্ণ', labelEn: '😊 Warm' },
-                            { val: 'professional' as const, label: '💼 পেশাদার', labelEn: '💼 Professional' },
-                            { val: 'excited' as const, label: '🔥 উৎসাহী', labelEn: '🔥 Excited' },
+                            { val: 'warm' as const, label: 'উষ্ণ', labelEn: 'Warm' },
+                            { val: 'professional' as const, label: 'পেশাদার', labelEn: 'Professional' },
+                            { val: 'excited' as const, label: 'উৎসাহী', labelEn: 'Excited' },
                           ]).map(v => (
                             <button
                               key={v.val}
@@ -580,8 +626,8 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
       {/* Sticky bottom bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-6 py-4 z-10">
         <div className="max-w-[760px] mx-auto flex items-center justify-between">
-          <p className="text-xs text-muted-foreground font-heading-bn hidden sm:block">
-            💡 {t('ভিডিও তৈরিতে সাধারণত ৩০-৬০ সেকেন্ড লাগে', 'Video generation usually takes 30-60 seconds')}
+          <p className="text-xs text-muted-foreground font-heading-bn hidden sm:flex items-center gap-1.5">
+            <Lightbulb size={12} className="text-primary" /> {t('ভিডিও তৈরিতে সাধারণত ৩০-৬০ সেকেন্ড লাগে', 'Video generation usually takes 30-60 seconds')}
           </p>
           <div className="flex gap-3 ml-auto">
             <button
@@ -596,7 +642,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
               disabled={!form.productName.trim() || form.images.length === 0 || generating}
               className="px-8 py-3 rounded-xl bg-gradient-cta text-primary-foreground text-sm font-heading-bn font-bold shadow-orange-glow hover:scale-[1.02] transition-all disabled:opacity-50 active:scale-95"
             >
-              {t('ভিডিও তৈরি করুন 🚀', 'Create Video 🚀')}
+              {generating ? t('তৈরি হচ্ছে...', 'Generating...') : t('ভিডিও তৈরি করুন', 'Create Video')}
             </button>
           </div>
         </div>
