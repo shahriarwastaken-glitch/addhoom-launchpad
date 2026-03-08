@@ -68,7 +68,10 @@ export type Database = {
           language: string | null
           occasion: string | null
           platform: string | null
+          product_name: string | null
           score_reason: string | null
+          source_url: string | null
+          tone: string | null
           workspace_id: string
         }
         Insert: {
@@ -86,7 +89,10 @@ export type Database = {
           language?: string | null
           occasion?: string | null
           platform?: string | null
+          product_name?: string | null
           score_reason?: string | null
+          source_url?: string | null
+          tone?: string | null
           workspace_id: string
         }
         Update: {
@@ -104,7 +110,10 @@ export type Database = {
           language?: string | null
           occasion?: string | null
           platform?: string | null
+          product_name?: string | null
           score_reason?: string | null
+          source_url?: string | null
+          tone?: string | null
           workspace_id?: string
         }
         Relationships: [
