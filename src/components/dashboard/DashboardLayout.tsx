@@ -25,6 +25,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const [showWorkspaces, setShowWorkspaces] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Pull-to-refresh state
   const [isRefreshing, setIsRefreshing] = useState(false);
