@@ -173,54 +173,32 @@ serve(async (req) => {
 
       // ===== API Keys Management =====
       case "list_api_keys": {
-        // Auto-sync known env secrets into api_keys table
-        const knownSecrets = [
-          { name: "GEMINI_API_KEY", desc: "Google Gemini AI API Key" },
-          { name: "RESEND_API_KEY", desc: "Resend Email API Key" },
-        ];
-
-        for (const secret of knownSecrets) {
-          const envVal = Deno.env.get(secret.name);
-          if (!envVal) continue;
-
-          // Check if already in table
-          const { data: existing } = await supabase
-            .from("api_keys")
-            .select("id, key_value")
-            .eq("key_name", secret.name)
-            .maybeSingle();
-
-          if (!existing) {
-            // Insert from env
-            await supabase.from("api_keys").insert({
-              key_name: secret.name,
-              key_value: envVal,
-              description: secret.desc,
-              created_by: user.id,
-            });
-          }
-        }
-
         const { data: keys, error } = await supabase
           .from("api_keys")
           .select("*")
           .order("created_at", { ascending: false });
 
         if (error) return errorResponse(500, "API কী লোড ব্যর্থ।", "Failed to load API keys.");
-        return jsonResponse({ keys: keys || [] });
+        // Never return key_value to frontend
+        const safeKeys = (keys || []).map((k: any) => ({ ...k, key_value: undefined }));
+        return jsonResponse({ keys: safeKeys });
       }
 
       case "add_api_key": {
-        const { key_name, key_value, description } = params;
-        if (!key_name || !key_value) return errorResponse(400, "Key নাম ও ভ্যালু আবশ্যক।", "Key name and value required.");
+        const { service_name: svcName, key_value: kv, description: desc2, display_name: dn } = params;
+        if (!svcName || !kv) return errorResponse(400, "Service name ও key value আবশ্যক।", "Service name and key value required.");
 
+        const keyPreview = "..." + kv.slice(-4);
         const { data: newKey, error } = await supabase
           .from("api_keys")
           .insert({
-            key_name,
-            key_value,
-            description: description || null,
+            service_name: svcName,
+            display_name: dn || svcName,
+            key_value: kv,
+            key_preview: keyPreview,
+            description: desc2 || null,
             created_by: user.id,
+            status: "active",
           })
           .select()
           .single();
@@ -229,44 +207,31 @@ serve(async (req) => {
           console.error("add_api_key error:", error);
           return errorResponse(500, "API কী যোগ ব্যর্থ।", "Failed to add API key.");
         }
-        return jsonResponse({ success: true, key: newKey });
+        return jsonResponse({ success: true, key: { ...newKey, key_value: undefined } });
       }
 
       case "update_api_key": {
-        const { key_id, key_name: updateName, key_value: updateValue, description: updateDesc, is_active } = params;
+        const { key_id, key_value: updVal, description: updDesc, status: updStatus } = params;
         if (!key_id) return errorResponse(400, "Key ID আবশ্যক।", "Key ID required.");
 
-        const updateData: any = {};
-        if (updateName !== undefined) updateData.key_name = updateName;
-        if (updateValue !== undefined) updateData.key_value = updateValue;
-        if (updateDesc !== undefined) updateData.description = updateDesc;
-        if (is_active !== undefined) updateData.is_active = is_active;
-
-        const { error } = await supabase
-          .from("api_keys")
-          .update(updateData)
-          .eq("id", key_id);
-
-        if (error) {
-          console.error("update_api_key error:", error);
-          return errorResponse(500, "API কী আপডেট ব্যর্থ।", "Failed to update API key.");
+        const updateData: any = { updated_at: new Date().toISOString() };
+        if (updVal !== undefined) {
+          updateData.key_value = updVal;
+          updateData.key_preview = "..." + updVal.slice(-4);
         }
+        if (updDesc !== undefined) updateData.description = updDesc;
+        if (updStatus !== undefined) updateData.status = updStatus;
+
+        const { error } = await supabase.from("api_keys").update(updateData).eq("id", key_id);
+        if (error) return errorResponse(500, "API কী আপডেট ব্যর্থ।", "Failed to update API key.");
         return jsonResponse({ success: true });
       }
 
       case "delete_api_key": {
         const { key_id: deleteKeyId } = params;
         if (!deleteKeyId) return errorResponse(400, "Key ID আবশ্যক।", "Key ID required.");
-
-        const { error } = await supabase
-          .from("api_keys")
-          .delete()
-          .eq("id", deleteKeyId);
-
-        if (error) {
-          console.error("delete_api_key error:", error);
-          return errorResponse(500, "API কী ডিলিট ব্যর্থ।", "Failed to delete API key.");
-        }
+        const { error } = await supabase.from("api_keys").delete().eq("id", deleteKeyId);
+        if (error) return errorResponse(500, "API কী ডিলিট ব্যর্থ।", "Failed to delete API key.");
         return jsonResponse({ success: true });
       }
 
@@ -275,8 +240,8 @@ serve(async (req) => {
         const { data } = await supabase
           .from("api_keys")
           .select("key_value, updated_at")
-          .eq("key_name", "SYSTEM_PROMPT")
-          .eq("is_active", true)
+          .eq("service_name", "system_prompt")
+          .eq("status", "active")
           .maybeSingle();
 
         return jsonResponse({ 
@@ -292,27 +257,28 @@ serve(async (req) => {
           return errorResponse(400, "প্রম্পট আবশ্যক।", "Prompt is required.");
         }
 
-        // Check if system prompt row exists
         const { data: existing } = await supabase
           .from("api_keys")
           .select("id")
-          .eq("key_name", "SYSTEM_PROMPT")
+          .eq("service_name", "system_prompt")
           .maybeSingle();
 
         if (existing) {
           await supabase
             .from("api_keys")
-            .update({ key_value: prompt, is_active: true })
+            .update({ key_value: prompt, status: "active", updated_at: new Date().toISOString() })
             .eq("id", existing.id);
         } else {
           await supabase
             .from("api_keys")
             .insert({
-              key_name: "SYSTEM_PROMPT",
+              service_name: "system_prompt",
+              display_name: "AI System Prompt",
               key_value: prompt,
+              key_preview: "...prompt",
               description: "AI System Prompt",
               created_by: user.id,
-              is_active: true,
+              status: "active",
             });
         }
 
@@ -320,11 +286,10 @@ serve(async (req) => {
       }
 
       case "reset_system_prompt": {
-        // Just disable the custom prompt so default is used
         await supabase
           .from("api_keys")
-          .update({ is_active: false })
-          .eq("key_name", "SYSTEM_PROMPT");
+          .update({ status: "inactive" })
+          .eq("service_name", "system_prompt");
 
         return jsonResponse({ success: true });
       }
