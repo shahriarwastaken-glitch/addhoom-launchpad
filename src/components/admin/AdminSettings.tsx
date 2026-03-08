@@ -317,8 +317,8 @@ export default function AdminSettings() {
       {/* Pricing Info */}
       <Card>
         <CardHeader>
-          <CardTitle>মূল্য তথ্য</CardTitle>
-          <CardDescription>বর্তমান মূল্য কাঠামো</CardDescription>
+          <CardTitle>Pricing Info</CardTitle>
+          <CardDescription>Current pricing structure</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-2 gap-4">
