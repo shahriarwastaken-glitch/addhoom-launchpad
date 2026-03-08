@@ -262,13 +262,34 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
           </div>
         </div>
 
+        {/* Generated Image */}
+        {ad.image_url && (
+          <div className="mb-4 rounded-xl overflow-hidden border border-border">
+            <img
+              src={ad.image_url}
+              alt={ad.headline}
+              className="w-full h-auto object-cover"
+              loading="lazy"
+            />
+          </div>
+        )}
+
         {/* Headline */}
         <div className="bg-primary/[0.04] border-l-[3px] border-primary rounded-r-lg px-3.5 py-2.5 mb-3">
           <h4 className="text-[17px] font-bold font-heading-bn text-foreground leading-relaxed">{ad.headline}</h4>
         </div>
 
-        {/* Body */}
-        <p className="text-[15px] font-heading-bn text-muted-foreground leading-[1.7] mb-2 whitespace-pre-line px-1">{ad.body}</p>
+        {/* Body (prompt) - show truncated for image ads */}
+        {ad.image_url ? (
+          <details className="mb-2">
+            <summary className="text-[13px] text-muted-foreground font-heading-bn cursor-pointer hover:text-foreground transition-colors">
+              {t('প্রম্পট দেখুন', 'View prompt')}
+            </summary>
+            <p className="text-[13px] font-heading-bn text-muted-foreground leading-[1.6] mt-2 whitespace-pre-line px-1">{ad.body}</p>
+          </details>
+        ) : (
+          <p className="text-[15px] font-heading-bn text-muted-foreground leading-[1.7] mb-2 whitespace-pre-line px-1">{ad.body}</p>
+        )}
 
         {/* CTA */}
         {ad.cta && (
