@@ -206,6 +206,7 @@ const AIChat = () => {
     setConversationId(null);
     setMessages([]);
     setInput('');
+    setHasSummary(false);
     setDrawerOpen(false);
   };
 
