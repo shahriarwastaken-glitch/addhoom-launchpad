@@ -70,8 +70,8 @@ const Hero = () => {
             </div>
             <div className="h-px bg-border mb-4" />
             <span className="text-[11px] font-body text-muted-foreground uppercase tracking-[0.08em]">Generated Ad Copy</span>
-            <div className="bg-secondary rounded-xl p-3.5 border-l-[3px] border-primary mb-2 mt-1"><p className="font-bn text-[15px] font-bold text-foreground">{t('ঈদ স্পেশাল অফার! ৫০% ছাড়', 'Eid Special! 50% Off')}</p></div>
-            <p className="font-bn text-[13px] text-muted-foreground leading-relaxed mb-4">{t('সীমিত সময়ের জন্য! আজই অর্ডার করুন এবং পান ফ্রি ডেলিভারি সারা বাংলাদেশে', 'Limited time! Order today, free delivery across Bangladesh')}</p>
+            <div className="bg-secondary rounded-xl p-3.5 border-l-[3px] border-primary mb-2 mt-1"><p className="font-bn text-[15px] font-bold text-foreground">{t('আজই নিন! স্টক শেষ হওয়ার আগে', 'Grab It Today! Before Stock Runs Out')}</p></div>
+            <p className="font-bn text-[13px] text-muted-foreground leading-relaxed mb-4">{t('হাজার হাজার কাস্টমার ইতিমধ্যে নিয়ে নিয়েছে। বাকি মাত্র কয়েকটি পিস — ফ্রি ডেলিভারি সারা বাংলাদেশে', 'Thousands of customers already grabbed it. Only a few pieces left — free delivery across Bangladesh')}</p>
             <div className="flex items-start gap-6 mb-4">
               <div className="flex flex-col items-center flex-shrink-0"><DhoomScoreRing score={87} /><span className="font-bn text-[11px] text-muted-foreground mt-1">{t('ধুম স্কোর', 'Dhoom Score')}</span></div>
               <div className="flex-1 space-y-2.5 pt-2">
