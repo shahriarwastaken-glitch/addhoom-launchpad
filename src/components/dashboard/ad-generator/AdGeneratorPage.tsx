@@ -292,6 +292,8 @@ const AdGeneratorPage = () => {
             onRemix={ad => setRemixAd(ad)}
             onLoadHistory={setResults}
             projectId={projectId}
+            imageHistoryOpen={imageHistoryOpen}
+            onToggleImageHistory={toggleImageHistory}
           />
         </div>
 
