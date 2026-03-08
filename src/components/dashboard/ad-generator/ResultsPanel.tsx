@@ -279,6 +279,7 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
             <RefreshCw size={12} /> {t('পুনরায় তৈরি করুন', 'Regenerate')}
           </button>
         </div>
+      </div>
 
       {/* Platform tags */}
       <div className="flex flex-wrap gap-1.5 mb-5">
