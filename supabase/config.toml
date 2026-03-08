@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.admin-panel]
 verify_jwt = false
+
+[functions.extract-from-url]
+verify_jwt = false
