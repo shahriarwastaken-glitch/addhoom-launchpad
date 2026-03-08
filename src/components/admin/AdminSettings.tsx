@@ -268,7 +268,7 @@ export default function AdminSettings() {
               <Textarea
                 value={imagePrompt}
                 onChange={(e) => setImagePrompt(e.target.value)}
-                placeholder="ইমেজ জেনারেশনের জন্য মাস্টার প্রম্পট এখানে লিখুন... ডিফল্ট প্রম্পটে প্রোডাক্ট ফিডেলিটি, টেক্সট রুলস, কম্পোজিশন, স্টাইল, এবং বাংলাদেশী মার্কেট অ্যাসথেটিকস অন্তর্ভুক্ত আছে।"
+                placeholder="Write the master prompt for image generation here... The default covers product fidelity, text rules, composition, style guides, and Bangladeshi market aesthetics."
                 className="min-h-[400px] font-mono text-sm"
               />
               <div className="flex flex-wrap gap-2">
