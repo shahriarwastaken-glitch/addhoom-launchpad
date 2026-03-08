@@ -578,7 +578,17 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
                 onClick={onSwitchToImage}
                 className="px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/[0.08] text-primary text-xs font-heading-bn hover:bg-primary/15 transition-all active:scale-95 flex items-center gap-1"
               >
-                <ImageIcon size={12} /> {t('এই কপি দিয়ে ছবি বানান', 'Make image from this')}
+              <ImageIcon size={12} /> {t('ছবি বানান', 'Make Image')}
+              </button>
+              {/* Schedule copy directly (Connection 4) */}
+              {onSchedule && ad.id && (
+                <button
+                  onClick={onSchedule}
+                  className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
+                >
+                  <Calendar size={12} /> {t('শিডিউল', 'Schedule')}
+                </button>
+              )}
               </button>
             </>
           )}
