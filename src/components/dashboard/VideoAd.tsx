@@ -35,6 +35,7 @@ const VideoAd = () => {
   const [usageLimit] = useState(2);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const elapsedRef = useRef<ReturnType<typeof setInterval>>();
+  const cancelledRef = useRef(false);
   const [processingSteps, setProcessingSteps] = useState<ProcessingStep[]>([
     { label: 'স্ক্রিপ্ট তৈরি হচ্ছে...', labelEn: 'Creating script...', status: 'waiting' },
     { label: 'ছবি প্রসেস করা হচ্ছে...', labelEn: 'Processing images...', status: 'waiting' },
