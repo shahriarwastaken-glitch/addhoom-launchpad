@@ -642,21 +642,20 @@ const AdGenerator = () => {
                     className="w-full p-3.5 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-body-bn text-sm resize-none" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-semibold text-foreground font-body-bn mb-1.5 block">{t('মূল্য (৳)', 'Price (৳)')}</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">৳</span>
-                      <input value={price} onChange={e => setPrice(e.target.value.replace(/\D/g, ''))} placeholder="০"
-                        className="w-full p-3.5 pl-8 rounded-xl border border-border bg-background text-foreground font-mono text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" />
-                    </div>
+                <div>
+                  <label className="text-sm font-semibold text-foreground font-body-bn mb-1.5 block">{t('মূল্য (৳)', 'Price (৳)')}</label>
+                  <div className="relative max-w-[200px]">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">৳</span>
+                    <input value={price} onChange={e => setPrice(e.target.value.replace(/\D/g, ''))} placeholder="০"
+                      className="w-full p-3.5 pl-8 rounded-xl border border-border bg-background text-foreground font-mono text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" />
                   </div>
-                  <div>
-                    <label className="text-sm font-semibold text-foreground font-body-bn mb-1.5 block">{t('টার্গেট', 'Target Audience')}</label>
-                    <input value={targetAudience} onChange={e => setTargetAudience(e.target.value)}
-                      placeholder={t('খালি রাখলে Shop DNA ব্যবহার হবে', 'Leave empty to use Shop DNA')}
-                      className="w-full p-3.5 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-body-bn text-sm" />
-                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-foreground font-body-bn mb-1.5 block">{t('টার্গেট অডিয়েন্স', 'Target Audience')}</label>
+                  <input value={targetAudience} onChange={e => setTargetAudience(e.target.value)}
+                    placeholder={t('খালি রাখলে Shop DNA ব্যবহার হবে', 'Leave empty to use Shop DNA')}
+                    className="w-full p-3.5 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none font-body-bn text-sm" />
                 </div>
 
                 <button onClick={() => setStep(2)} disabled={!productName.trim()}
