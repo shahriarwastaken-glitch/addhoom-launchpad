@@ -82,6 +82,33 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
     isPulling.current = false;
   }, [pullDistance, isRefreshing]);
 
+  // Load notifications
+  useEffect(() => {
+    if (!user) return;
+    const loadNotifications = async () => {
+      const { data: notifs } = await supabase
+        .from('notifications')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      setNotifications(notifs || []);
+      const { data: reads } = await supabase
+        .from('notification_reads')
+        .select('notification_id')
+        .eq('user_id', user.id);
+      setReadIds(new Set((reads || []).map((r: any) => r.notification_id)));
+    };
+    loadNotifications();
+  }, [user]);
+
+  const unreadCount = notifications.filter(n => !readIds.has(n.id)).length;
+
+  const markAsRead = async (notifId: string) => {
+    if (readIds.has(notifId) || !user) return;
+    await supabase.from('notification_reads').insert({ notification_id: notifId, user_id: user.id });
+    setReadIds(prev => new Set([...prev, notifId]));
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');

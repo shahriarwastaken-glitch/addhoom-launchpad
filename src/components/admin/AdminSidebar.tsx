@@ -15,7 +15,8 @@ import {
   Key,
   Menu,
   X,
-  Crown
+  Crown,
+  Bell
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
