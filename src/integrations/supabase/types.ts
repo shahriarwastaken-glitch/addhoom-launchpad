@@ -56,7 +56,6 @@ export type Database = {
         Row: {
           ai_generated: boolean
           body: string | null
-          campaign_id: string | null
           copy_score: number | null
           created_at: string
           cta: string | null
@@ -70,6 +69,7 @@ export type Database = {
           occasion: string | null
           platform: string | null
           product_name: string | null
+          project_id: string | null
           remixed_from_id: string | null
           score_reason: string | null
           source_url: string | null
@@ -79,7 +79,6 @@ export type Database = {
         Insert: {
           ai_generated?: boolean
           body?: string | null
-          campaign_id?: string | null
           copy_score?: number | null
           created_at?: string
           cta?: string | null
@@ -93,6 +92,7 @@ export type Database = {
           occasion?: string | null
           platform?: string | null
           product_name?: string | null
+          project_id?: string | null
           remixed_from_id?: string | null
           score_reason?: string | null
           source_url?: string | null
@@ -102,7 +102,6 @@ export type Database = {
         Update: {
           ai_generated?: boolean
           body?: string | null
-          campaign_id?: string | null
           copy_score?: number | null
           created_at?: string
           cta?: string | null
@@ -116,6 +115,7 @@ export type Database = {
           occasion?: string | null
           platform?: string | null
           product_name?: string | null
+          project_id?: string | null
           remixed_from_id?: string | null
           score_reason?: string | null
           source_url?: string | null
@@ -125,9 +125,9 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "ad_creatives_campaign_id_fkey"
-            columns: ["campaign_id"]
+            columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "campaigns"
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
           {
@@ -512,50 +512,6 @@ export type Database = {
         }
         Relationships: []
       }
-      campaigns: {
-        Row: {
-          budget_bdt: number | null
-          created_at: string
-          end_date: string | null
-          id: string
-          name: string
-          platform: string | null
-          start_date: string | null
-          status: string
-          workspace_id: string
-        }
-        Insert: {
-          budget_bdt?: number | null
-          created_at?: string
-          end_date?: string | null
-          id?: string
-          name: string
-          platform?: string | null
-          start_date?: string | null
-          status?: string
-          workspace_id: string
-        }
-        Update: {
-          budget_bdt?: number | null
-          created_at?: string
-          end_date?: string | null
-          id?: string
-          name?: string
-          platform?: string | null
-          start_date?: string | null
-          status?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "campaigns_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       competitor_analyses: {
         Row: {
           ads_found: Json | null
@@ -890,6 +846,59 @@ export type Database = {
           subscription_status?: string
         }
         Relationships: []
+      }
+      projects: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          emoji: string | null
+          end_date: string | null
+          id: string
+          is_archived: boolean | null
+          name: string
+          platform: string | null
+          start_date: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          end_date?: string | null
+          id?: string
+          is_archived?: boolean | null
+          name: string
+          platform?: string | null
+          start_date?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          end_date?: string | null
+          id?: string
+          is_archived?: boolean | null
+          name?: string
+          platform?: string | null
+          start_date?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       usage_logs: {
         Row: {
