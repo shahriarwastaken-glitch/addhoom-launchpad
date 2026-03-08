@@ -300,7 +300,7 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
                 {imageHistory.map(entry => (
                   <button
                     key={entry.id}
-                    onClick={() => { if (onLoadHistory) onLoadHistory(entry.results); else setResults(entry.results); setShowHistory(false); toast.success(t('হিস্ট্রি থেকে লোড হয়েছে', 'Loaded from history')); }}
+                    onClick={() => { if (onLoadHistory) onLoadHistory(entry.results); else setResults(entry.results); onToggleImageHistory?.(); toast.success(t('হিস্ট্রি থেকে লোড হয়েছে', 'Loaded from history')); }}
                     className="w-full flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/50 hover:bg-secondary transition-all text-left group"
                   >
                     {entry.results[0]?.image_url && (
