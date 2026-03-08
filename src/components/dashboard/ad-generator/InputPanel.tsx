@@ -6,7 +6,7 @@ import {
   PenLine, ImageIcon, Facebook, Instagram, ShoppingBag, Search,
   Target, AlertTriangle, BookOpen, CheckCircle, Zap, Gift,
   Smile, Briefcase, Flame, Square, Smartphone, Monitor,
-  Sparkles, Palette, Camera, Upload, Rocket, Globe, Type,
+  Sparkles, Palette, Camera, Upload, Rocket,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
