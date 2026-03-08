@@ -195,6 +195,7 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
 }) => {
   const { t } = useLanguage();
   const [expanded, setExpanded] = useState(false);
+  const [promptVisible, setPromptVisible] = useState(false);
   const isWinner = ad.is_winner;
   const isCopied = copiedId === ad.id;
 
