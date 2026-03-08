@@ -59,6 +59,7 @@ interface InputPanelProps {
   setForm: (fn: (prev: GeneratorFormData) => GeneratorFormData) => void;
   onGenerate: () => void;
   generating: boolean;
+  onToggleImageHistory?: () => void;
 }
 
 const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onToggleImageHistory }: InputPanelProps) => {
