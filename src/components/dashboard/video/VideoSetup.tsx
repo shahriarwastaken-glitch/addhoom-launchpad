@@ -32,6 +32,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
   const { t, lang } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
+  const musicFileRef = useRef<HTMLInputElement>(null);
   const [voiceoverOpen, setVoiceoverOpen] = useState(false);
   const [playingMusic, setPlayingMusic] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
