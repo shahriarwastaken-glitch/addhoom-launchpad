@@ -64,7 +64,7 @@ interface InputPanelProps {
   generateBtnRef?: React.RefObject<HTMLButtonElement>;
 }
 
-const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onToggleImageHistory }: InputPanelProps) => {
+const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onToggleImageHistory, generateBtnRef }: InputPanelProps) => {
   const { t } = useLanguage();
   const [loadingTextIdx, setLoadingTextIdx] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);

@@ -36,7 +36,7 @@ interface ProjectOption {
   color: string;
 }
 
-const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix, onLoadHistory, projectId, imageHistoryOpen, onToggleImageHistory }: ResultsPanelProps) => {
+const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onSwitchToImage, onRemix, onLoadHistory, projectId, imageHistoryOpen, onToggleImageHistory, onSchedule, showProjectPrompt, onAssignAllToProject, onDismissProjectPrompt }: ResultsPanelProps) => {
   const { t, lang } = useLanguage();
   const { activeWorkspace } = useAuth();
   const [progress, setProgress] = useState(0);
