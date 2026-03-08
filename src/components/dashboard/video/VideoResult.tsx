@@ -316,7 +316,7 @@ const VideoResultView = ({ result, plan, usageUsed, usageLimit, onReset, onRegen
                 <Copy size={12} /> {t('URL কপি', 'Copy URL')}
               </button>
               <button onClick={handleDownload} className="px-3 py-1.5 rounded-lg border border-border text-xs font-heading-bn hover:bg-secondary transition-all flex items-center gap-1">
-                <Download size={12} /> {t('ডাউনলোড', 'Download')}
+                {result.videoUrl ? <Download size={12} /> : <FileText size={12} />} {result.videoUrl ? t('ডাউনলোড', 'Download') : t('স্ক্রিপ্ট PDF', 'Script PDF')}
               </button>
             </div>
           </div>
