@@ -102,7 +102,7 @@ const FestivalTemplates = () => {
                   {generatingId === f.id ? (
                     <><Loader2 size={14} className="animate-spin" /> {t('তৈরি হচ্ছে...', 'Generating...')}</>
                   ) : (
-                    <>{t('⚡ AI টেমপ্লেট তৈরি করুন', '⚡ Generate AI Templates')}</>
+                    <><Zap size={14} /> {t('AI টেমপ্লেট তৈরি করুন', 'Generate AI Templates')}</>
                   )}
                 </button>
               )}
