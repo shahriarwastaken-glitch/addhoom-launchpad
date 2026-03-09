@@ -16,7 +16,16 @@ import {
   Menu,
   X,
   Crown,
-  Bell
+  Bell,
+  ClipboardList,
+  Palette,
+  Flag,
+  Megaphone,
+  Ticket,
+  Mail,
+  Wrench,
+  FileText,
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
