@@ -71,6 +71,9 @@ export default function AdminUsers() {
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [impersonating, setImpersonating] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const navigate = useNavigate();
 
   // Plan change state
   const [planChangeOpen, setPlanChangeOpen] = useState(false);
