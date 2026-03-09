@@ -566,7 +566,20 @@ export default function AdminUsers() {
                 </Badge>
               </div>
 
-              <Tabs defaultValue="summary">
+              {/* Impersonation Button - Super Admin Only */}
+              {isSuperAdmin && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                  onClick={() => handleImpersonate(selectedUser.profile.id)}
+                  disabled={impersonating}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  {impersonating ? 'লগইন হচ্ছে...' : 'এই ব্যবহারকারী হিসেবে দেখুন'}
+                </Button>
+              )}
+
                 <TabsList className="w-full grid grid-cols-4">
                   <TabsTrigger value="summary" className="text-xs">সারসংক্ষেপ</TabsTrigger>
                   <TabsTrigger value="ads" className="text-xs">বিজ্ঞাপন</TabsTrigger>
