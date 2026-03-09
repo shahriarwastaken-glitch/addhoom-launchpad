@@ -33,6 +33,7 @@ const Dashboard = () => {
         <Route path="projects" element={<ProjectsList />} />
         <Route path="projects/:id" element={<ProjectDetail />} />
         <Route path="dhoom-score" element={<DhoomScoreChecker />} />
+        <Route path="analytics" element={<Analytics />} />
         <Route path="settings" element={<Settings />} />
       </Routes>
     </DashboardLayout>
