@@ -348,6 +348,110 @@ export type Database = {
           },
         ]
       }
+      announcement_dismissals: {
+        Row: {
+          announcement_id: string
+          dismissed_at: string | null
+          user_id: string
+        }
+        Insert: {
+          announcement_id: string
+          dismissed_at?: string | null
+          user_id: string
+        }
+        Update: {
+          announcement_id?: string
+          dismissed_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_dismissals_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcement_dismissals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcements: {
+        Row: {
+          click_count: number | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          dismiss_count: number | null
+          ends_at: string | null
+          id: string
+          is_active: boolean | null
+          is_dismissible: boolean | null
+          link_text: string | null
+          link_url: string | null
+          location: string[] | null
+          starts_at: string | null
+          target_audience: string | null
+          target_plans: string[] | null
+          title: string
+          type: string | null
+          view_count: number | null
+        }
+        Insert: {
+          click_count?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          dismiss_count?: number | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_dismissible?: boolean | null
+          link_text?: string | null
+          link_url?: string | null
+          location?: string[] | null
+          starts_at?: string | null
+          target_audience?: string | null
+          target_plans?: string[] | null
+          title: string
+          type?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          click_count?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          dismiss_count?: number | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_dismissible?: boolean | null
+          link_text?: string | null
+          link_url?: string | null
+          location?: string[] | null
+          starts_at?: string | null
+          target_audience?: string | null
+          target_plans?: string[] | null
+          title?: string
+          type?: string | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_key_logs: {
         Row: {
           action: string
@@ -518,6 +622,44 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          description: string | null
+          id: string
+          setting_key: string
+          setting_type: string | null
+          setting_value: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_type?: string | null
+          setting_value?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_type?: string | null
+          setting_value?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competitor_analyses: {
         Row: {
           ads_found: Json | null
@@ -643,6 +785,217 @@ export type Database = {
           },
         ]
       }
+      coupon_uses: {
+        Row: {
+          coupon_id: string | null
+          discount_applied_bdt: number
+          id: string
+          payment_id: string | null
+          used_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          coupon_id?: string | null
+          discount_applied_bdt: number
+          id?: string
+          payment_id?: string | null
+          used_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          coupon_id?: string | null
+          discount_applied_bdt?: number
+          id?: string
+          payment_id?: string | null
+          used_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_uses_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_uses_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_uses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coupons: {
+        Row: {
+          applicable_billing: string | null
+          applicable_plans: string[] | null
+          code: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string | null
+          new_users_only: boolean | null
+          total_revenue_bdt: number | null
+          total_uses: number | null
+          usage_limit: number | null
+          usage_limit_per_user: number | null
+        }
+        Insert: {
+          applicable_billing?: string | null
+          applicable_plans?: string[] | null
+          code: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          discount_type: string
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string | null
+          new_users_only?: boolean | null
+          total_revenue_bdt?: number | null
+          total_uses?: number | null
+          usage_limit?: number | null
+          usage_limit_per_user?: number | null
+        }
+        Update: {
+          applicable_billing?: string | null
+          applicable_plans?: string[] | null
+          code?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string | null
+          new_users_only?: boolean | null
+          total_revenue_bdt?: number | null
+          total_uses?: number | null
+          usage_limit?: number | null
+          usage_limit_per_user?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupons_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          html_content: string
+          id: string
+          is_active: boolean | null
+          last_tested_at: string | null
+          name: string
+          subject: string
+          template_key: string
+          updated_at: string | null
+          updated_by: string | null
+          variables: Json | null
+        }
+        Insert: {
+          html_content: string
+          id?: string
+          is_active?: boolean | null
+          last_tested_at?: string | null
+          name: string
+          subject: string
+          template_key: string
+          updated_at?: string | null
+          updated_by?: string | null
+          variables?: Json | null
+        }
+        Update: {
+          html_content?: string
+          id?: string
+          is_active?: boolean | null
+          last_tested_at?: string | null
+          name?: string
+          subject?: string
+          template_key?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          variables?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_templates_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feature_flags: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          flag_key: string
+          global_enabled: boolean | null
+          id: string
+          name: string
+          plan_overrides: Json | null
+          updated_at: string | null
+          user_overrides: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          flag_key: string
+          global_enabled?: boolean | null
+          id?: string
+          name: string
+          plan_overrides?: Json | null
+          updated_at?: string | null
+          user_overrides?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          flag_key?: string
+          global_enabled?: boolean | null
+          id?: string
+          name?: string
+          plan_overrides?: Json | null
+          updated_at?: string | null
+          user_overrides?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_flags_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_reads: {
         Row: {
           id: string
@@ -757,6 +1110,77 @@ export type Database = {
           },
         ]
       }
+      plans: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          display_order: number | null
+          features: Json | null
+          grandfather_policy: string | null
+          id: string
+          is_popular: boolean | null
+          limits: Json | null
+          name: string
+          plan_key: string
+          price_annual_bdt: number | null
+          price_monthly_bdt: number
+          sslcommerz_plan_code: string | null
+          status: string | null
+          trial_days: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          features?: Json | null
+          grandfather_policy?: string | null
+          id?: string
+          is_popular?: boolean | null
+          limits?: Json | null
+          name: string
+          plan_key: string
+          price_annual_bdt?: number | null
+          price_monthly_bdt?: number
+          sslcommerz_plan_code?: string | null
+          status?: string | null
+          trial_days?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          features?: Json | null
+          grandfather_policy?: string | null
+          id?: string
+          is_popular?: boolean | null
+          limits?: Json | null
+          name?: string
+          plan_key?: string
+          price_annual_bdt?: number | null
+          price_monthly_bdt?: number
+          sslcommerz_plan_code?: string | null
+          status?: string | null
+          trial_days?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_metrics_cache: {
         Row: {
           active_users_today: number | null
@@ -821,6 +1245,7 @@ export type Database = {
           onboarding_complete: boolean
           phone: string | null
           plan: string
+          plan_key: string | null
           ssl_customer_id: string | null
           subscription_expires_at: string | null
           subscription_status: string
@@ -834,6 +1259,7 @@ export type Database = {
           onboarding_complete?: boolean
           phone?: string | null
           plan?: string
+          plan_key?: string | null
           ssl_customer_id?: string | null
           subscription_expires_at?: string | null
           subscription_status?: string
@@ -847,6 +1273,7 @@ export type Database = {
           onboarding_complete?: boolean
           phone?: string | null
           plan?: string
+          plan_key?: string | null
           ssl_customer_id?: string | null
           subscription_expires_at?: string | null
           subscription_status?: string

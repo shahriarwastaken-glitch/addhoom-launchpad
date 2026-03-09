@@ -16,7 +16,16 @@ import {
   Menu,
   X,
   Crown,
-  Bell
+  Bell,
+  ClipboardList,
+  Palette,
+  Flag,
+  Megaphone,
+  Ticket,
+  Mail,
+  Wrench,
+  FileText,
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -26,14 +35,26 @@ interface AdminSidebarProps {
   isSuperAdmin: boolean;
 }
 
-const navItems = [
+const mainNavItems = [
   { icon: LayoutDashboard, label: 'ওভারভিউ', path: '/admin' },
   { icon: Users, label: 'ব্যবহারকারী', path: '/admin/users' },
   { icon: DollarSign, label: 'রাজস্ব', path: '/admin/revenue' },
   { icon: Bot, label: 'AI পারফরম্যান্স', path: '/admin/ai' },
-  { icon: Bell, label: 'নোটিফিকেশন', path: '/admin/notifications' },
+];
+
+const controlNavItems = [
+  { icon: ClipboardList, label: 'প্ল্যান ম্যানেজার', path: '/admin/plans' },
+  { icon: Palette, label: 'ব্র্যান্ড সেটিংস', path: '/admin/branding' },
+  { icon: Flag, label: 'ফিচার ফ্ল্যাগ', path: '/admin/feature-flags' },
+  { icon: Megaphone, label: 'ঘোষণা', path: '/admin/announcements' },
+  { icon: Ticket, label: 'কুপন', path: '/admin/coupons' },
+];
+
+const systemNavItems = [
   { icon: Key, label: 'API কী', path: '/admin/api-keys' },
-  { icon: Settings, label: 'সেটিংস', path: '/admin/settings' },
+  { icon: Mail, label: 'ইমেইল টেমপ্লেট', path: '/admin/emails' },
+  { icon: Wrench, label: 'সিস্টেম সেটিংস', path: '/admin/settings' },
+  { icon: FileText, label: 'অডিট লগ', path: '/admin/audit-log' },
 ];
 
 export default function AdminSidebar({ isSuperAdmin }: AdminSidebarProps) {
@@ -120,14 +141,63 @@ export default function AdminSidebar({ isSuperAdmin }: AdminSidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        {/* MAIN SECTION */}
         <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium px-3 py-2">
-          মেনু
+          MAIN
         </p>
-        {navItems.map((item) => (
+        {mainNavItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
             end={item.path === '/admin'}
+            onClick={() => setMobileOpen(false)}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200',
+                isActive 
+                  ? 'bg-gradient-to-r from-primary/15 to-orange-500/10 text-primary shadow-sm border border-primary/10' 
+                  : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+              )
+            }
+          >
+            <item.icon className="h-4 w-4" />
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+
+        {/* CONTROL SECTION */}
+        <div className="my-3 border-t border-border/50" />
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium px-3 py-2">
+          CONTROL
+        </p>
+        {controlNavItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            onClick={() => setMobileOpen(false)}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200',
+                isActive 
+                  ? 'bg-gradient-to-r from-primary/15 to-orange-500/10 text-primary shadow-sm border border-primary/10' 
+                  : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+              )
+            }
+          >
+            <item.icon className="h-4 w-4" />
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+
+        {/* SYSTEM SECTION */}
+        <div className="my-3 border-t border-border/50" />
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium px-3 py-2">
+          SYSTEM
+        </p>
+        {systemNavItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
             onClick={() => setMobileOpen(false)}
             className={({ isActive }) =>
               cn(
@@ -170,7 +240,38 @@ export default function AdminSidebar({ isSuperAdmin }: AdminSidebarProps) {
       </nav>
 
       {/* Bottom section */}
-      <div className="p-3 border-t border-border/50">
+      <div className="p-3 border-t border-border/50 space-y-2">
+        {/* Admin Footer */}
+        <div className="flex items-center justify-between px-3 py-2 bg-muted/30 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6">
+              <AvatarFallback className="bg-primary text-white text-xs">
+                {getInitials(profile?.full_name)}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-xs font-medium truncate max-w-20">
+                {profile?.full_name || 'Admin'}
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                {isSuperAdmin ? 'সুপার অ্যাডমিন' : 'অ্যাডমিন'}
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              // TODO: Add logout functionality
+              window.location.href = '/auth';
+            }}
+            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+            title="লগআউট"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+        
         <NavLink
           to="/dashboard"
           className="flex items-center gap-2 px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
