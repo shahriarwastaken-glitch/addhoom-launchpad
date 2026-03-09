@@ -12,6 +12,12 @@ import AdminApiKeys from '@/components/admin/AdminApiKeys';
 import AdminNotifications from '@/components/admin/AdminNotifications';
 import AdminPlans from '@/components/admin/AdminPlans';
 import AdminPlanForm from '@/components/admin/AdminPlanForm';
+import AdminBranding from '@/components/admin/AdminBranding';
+import AdminFeatureFlags from '@/components/admin/AdminFeatureFlags';
+import AdminAnnouncements from '@/components/admin/AdminAnnouncements';
+import AdminCoupons from '@/components/admin/AdminCoupons';
+import AdminEmails from '@/components/admin/AdminEmails';
+import AdminAuditLog from '@/components/admin/AdminAuditLog';
 
 export default function AdminDashboardNew() {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -30,6 +36,12 @@ export default function AdminDashboardNew() {
           <Route path="plans" element={<AdminPlans />} />
           <Route path="plans/new" element={<AdminPlanForm />} />
           <Route path="plans/:id/edit" element={<AdminPlanForm />} />
+          <Route path="branding" element={<AdminBranding />} />
+          <Route path="feature-flags" element={<AdminFeatureFlags />} />
+          <Route path="announcements" element={<AdminAnnouncements />} />
+          <Route path="coupons" element={<AdminCoupons />} />
+          <Route path="emails" element={<AdminEmails />} />
+          <Route path="audit-log" element={<AdminAuditLog />} />
           {isSuperAdmin && (
             <Route path="admins" element={<AdminManageAdmins />} />
           )}
