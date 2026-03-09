@@ -67,9 +67,11 @@ export type Database = {
           is_winner: boolean
           language: string | null
           occasion: string | null
+          performance_rating: string | null
           platform: string | null
           product_name: string | null
           project_id: string | null
+          rated_at: string | null
           remixed_from_id: string | null
           score_reason: string | null
           source_url: string | null
@@ -90,9 +92,11 @@ export type Database = {
           is_winner?: boolean
           language?: string | null
           occasion?: string | null
+          performance_rating?: string | null
           platform?: string | null
           product_name?: string | null
           project_id?: string | null
+          rated_at?: string | null
           remixed_from_id?: string | null
           score_reason?: string | null
           source_url?: string | null
@@ -113,9 +117,11 @@ export type Database = {
           is_winner?: boolean
           language?: string | null
           occasion?: string | null
+          performance_rating?: string | null
           platform?: string | null
           product_name?: string | null
           project_id?: string | null
+          rated_at?: string | null
           remixed_from_id?: string | null
           score_reason?: string | null
           source_url?: string | null
