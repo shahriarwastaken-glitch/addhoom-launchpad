@@ -3,7 +3,7 @@ import { verifySuperAdmin } from '../_shared/adminAuth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 Deno.serve(async (req) => {
@@ -36,15 +36,30 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ success: false, message: 'User not found.' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Generate impersonation token (simple signed token stored in DB)
-    const token = crypto.randomUUID();
+    // Generate a magic link for the target user using admin API
+    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+      type: 'magiclink',
+      email: targetProfile.email!,
+    });
+
+    if (linkError || !linkData) {
+      console.error('Magic link error:', linkError);
+      return new Response(JSON.stringify({ success: false, message: 'Failed to generate impersonation session.' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // Extract the OTP token from the generated link properties
+    const otpToken = linkData.properties?.hashed_token;
+    const emailOtp = linkData.properties?.email_otp;
+
+    // Generate impersonation tracking token
+    const trackingToken = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
 
     // Store in admin_verification_codes as impersonation session
     await supabase.from('admin_verification_codes').insert({
       admin_id: admin.id,
       action_type: 'impersonation',
-      code: token,
+      code: trackingToken,
       expires_at: expiresAt,
       action_payload: { target_user_id, target_name: targetProfile.full_name, target_email: targetProfile.email },
     });
@@ -59,7 +74,9 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({
       success: true,
-      impersonation_token: token,
+      impersonation_token: trackingToken,
+      email_otp: emailOtp,
+      target_email: targetProfile.email,
       target_user: { id: targetProfile.id, name: targetProfile.full_name, email: targetProfile.email },
       expires_at: expiresAt,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
