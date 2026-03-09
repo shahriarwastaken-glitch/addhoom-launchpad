@@ -580,6 +580,7 @@ export default function AdminUsers() {
                 </Button>
               )}
 
+              <Tabs defaultValue="summary">
                 <TabsList className="w-full grid grid-cols-4">
                   <TabsTrigger value="summary" className="text-xs">সারসংক্ষেপ</TabsTrigger>
                   <TabsTrigger value="ads" className="text-xs">বিজ্ঞাপন</TabsTrigger>
