@@ -71,6 +71,15 @@ serve(async (req) => {
       );
     }
 
+    // Fetch workspace products for richer context
+    const { data: wsProducts } = await supabase
+      .from("workspace_products")
+      .select("*")
+      .eq("workspace_id", workspace_id)
+      .eq("is_active", true)
+      .order("display_order")
+      .limit(5);
+
     const shopName = workspace.shop_name || "My Shop";
     const industry = workspace.industry || "other";
     const brandTone = workspace.brand_tone || tone || "friendly";
@@ -78,6 +87,9 @@ serve(async (req) => {
     const keyProducts = workspace.key_products || "N/A";
     const uniqueSelling = workspace.unique_selling || "N/A";
     const priceRange = workspace.price_range || "mid_range";
+    const nicheTags = workspace.niche_tags?.join(", ") || "";
+    const primaryColor = workspace.brand_colors?.find((c: any) => c.role === "primary")?.hex || "";
+    const stylePrefs = workspace.style_preferences || {};
 
     const adTarget = target_audience || shopTarget;
     const adPlatforms = (platforms || ["facebook"]).join(", ");
@@ -118,16 +130,30 @@ serve(async (req) => {
         : "Generate half in Bangla, half in English — label each";
 
     // STEP 2 — Build prompt
+    // Build product catalog context
+    const productCatalog = (wsProducts || []).length > 0
+      ? `\nPRODUCT CATALOG (${wsProducts!.length} active products):\n${wsProducts!.map((p: any) =>
+          `- ${p.name}: ${p.description?.slice(0, 80) || "N/A"} | Price: ৳${p.price_bdt || "N/A"}${p.original_price_bdt ? ` (was ৳${p.original_price_bdt})` : ""}`
+        ).join("\n")}`
+      : "";
+
+    const styleContext = stylePrefs.dominant_style
+      ? `\nSTYLE PREFERENCES:\n- Dominant style: ${stylePrefs.dominant_style}\n- Preferred: ${stylePrefs.liked?.join(", ") || "N/A"}\n- Avoid: ${stylePrefs.disliked?.join(", ") || "N/A"}`
+      : "";
+
     const prompt = `Generate ${adCount} high-converting ad variations for a Bangladeshi e-commerce shop.
 
-SHOP CONTEXT (always stay true to this):
+BRAND DNA:
 - Shop name: ${shopName}
 - Industry: ${industry}
+- Niches: ${nicheTags || industry}
 - Brand tone: ${brandTone}
 - Shop's target audience: ${shopTarget}
 - Key products: ${keyProducts}
 - What makes them unique: ${uniqueSelling}
 - Price range positioning: ${priceRange}
+- Primary brand color: ${primaryColor || "not specified"}
+${productCatalog}${styleContext}
 
 PRODUCT TO ADVERTISE:
 - Product name: ${product_name}

@@ -1333,6 +1333,42 @@ export type Database = {
           },
         ]
       }
+      style_templates: {
+        Row: {
+          display_order: number | null
+          example_ad_url: string | null
+          id: string
+          industry_relevance: string[] | null
+          is_active: boolean | null
+          name: string
+          platform_fit: string[] | null
+          style_tags: string[]
+          thumbnail_url: string | null
+        }
+        Insert: {
+          display_order?: number | null
+          example_ad_url?: string | null
+          id?: string
+          industry_relevance?: string[] | null
+          is_active?: boolean | null
+          name: string
+          platform_fit?: string[] | null
+          style_tags: string[]
+          thumbnail_url?: string | null
+        }
+        Update: {
+          display_order?: number | null
+          example_ad_url?: string | null
+          id?: string
+          industry_relevance?: string[] | null
+          is_active?: boolean | null
+          name?: string
+          platform_fit?: string[] | null
+          style_tags?: string[]
+          thumbnail_url?: string | null
+        }
+        Relationships: []
+      }
       usage_logs: {
         Row: {
           created_at: string
@@ -1457,49 +1493,144 @@ export type Database = {
           },
         ]
       }
+      workspace_products: {
+        Row: {
+          ads_generated_count: number | null
+          category: string | null
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          images: Json | null
+          is_active: boolean | null
+          last_used_at: string | null
+          name: string
+          original_price_bdt: number | null
+          price_bdt: number | null
+          primary_image_url: string | null
+          source_url: string | null
+          tags: string[] | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          ads_generated_count?: number | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          images?: Json | null
+          is_active?: boolean | null
+          last_used_at?: string | null
+          name: string
+          original_price_bdt?: number | null
+          price_bdt?: number | null
+          primary_image_url?: string | null
+          source_url?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          ads_generated_count?: number | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          images?: Json | null
+          is_active?: boolean | null
+          last_used_at?: string | null
+          name?: string
+          original_price_bdt?: number | null
+          price_bdt?: number | null
+          primary_image_url?: string | null
+          source_url?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_products_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspaces: {
         Row: {
+          brand_colors: Json | null
+          brand_fonts: Json | null
+          brand_logo_url: string | null
           brand_tone: string | null
+          competitor_urls: string[] | null
           created_at: string
+          dna_last_updated: string | null
+          dna_score: number | null
           id: string
           industry: string | null
           key_products: string | null
           language: string
+          niche_tags: string[] | null
           owner_id: string
           platform: string | null
           price_range: string | null
+          scrape_data: Json | null
           shop_name: string
           shop_url: string | null
+          style_preferences: Json | null
           target_audience: string | null
           unique_selling: string | null
         }
         Insert: {
+          brand_colors?: Json | null
+          brand_fonts?: Json | null
+          brand_logo_url?: string | null
           brand_tone?: string | null
+          competitor_urls?: string[] | null
           created_at?: string
+          dna_last_updated?: string | null
+          dna_score?: number | null
           id?: string
           industry?: string | null
           key_products?: string | null
           language?: string
+          niche_tags?: string[] | null
           owner_id: string
           platform?: string | null
           price_range?: string | null
+          scrape_data?: Json | null
           shop_name: string
           shop_url?: string | null
+          style_preferences?: Json | null
           target_audience?: string | null
           unique_selling?: string | null
         }
         Update: {
+          brand_colors?: Json | null
+          brand_fonts?: Json | null
+          brand_logo_url?: string | null
           brand_tone?: string | null
+          competitor_urls?: string[] | null
           created_at?: string
+          dna_last_updated?: string | null
+          dna_score?: number | null
           id?: string
           industry?: string | null
           key_products?: string | null
           language?: string
+          niche_tags?: string[] | null
           owner_id?: string
           platform?: string | null
           price_range?: string | null
+          scrape_data?: Json | null
           shop_name?: string
           shop_url?: string | null
+          style_preferences?: Json | null
           target_audience?: string | null
           unique_selling?: string | null
         }
