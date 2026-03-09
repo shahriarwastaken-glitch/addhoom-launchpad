@@ -20,7 +20,7 @@ const items = [
   { icon: MessageSquare, bn: 'AI চ্যাট', en: 'AI Chat', url: '/dashboard/chat' },
   { icon: Search, bn: 'প্রতিযোগী', en: 'Competitors', url: '/dashboard/competitors' },
   { icon: Stethoscope, bn: 'অ্যাকাউন্ট ডাক্তার', en: 'Doctor', url: '/dashboard/doctor' },
-  { icon: PartyPopper, bn: 'উৎসব', en: 'Festival', url: '/dashboard/festival' },
+  
   { icon: Zap, bn: 'ধুম স্কোর', en: 'Dhoom Score', url: '/dashboard/dhoom-score' },
   { icon: BarChart3, bn: 'বিশ্লেষণ', en: 'Analytics', url: '/dashboard/analytics' },
   { icon: Settings, bn: 'সেটিংস', en: 'Settings', url: '/dashboard/settings' },
