@@ -240,7 +240,38 @@ export default function AdminSidebar({ isSuperAdmin }: AdminSidebarProps) {
       </nav>
 
       {/* Bottom section */}
-      <div className="p-3 border-t border-border/50">
+      <div className="p-3 border-t border-border/50 space-y-2">
+        {/* Admin Footer */}
+        <div className="flex items-center justify-between px-3 py-2 bg-muted/30 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6">
+              <AvatarFallback className="bg-primary text-white text-xs">
+                {getInitials(profile?.full_name)}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-xs font-medium truncate max-w-20">
+                {profile?.full_name || 'Admin'}
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                {isSuperAdmin ? 'সুপার অ্যাডমিন' : 'অ্যাডমিন'}
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              // TODO: Add logout functionality
+              window.location.href = '/auth';
+            }}
+            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+            title="লগআউট"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+        
         <NavLink
           to="/dashboard"
           className="flex items-center gap-2 px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
