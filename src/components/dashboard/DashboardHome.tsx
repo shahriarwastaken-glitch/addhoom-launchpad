@@ -3,7 +3,7 @@ import TodaysLoopWidget from './TodaysLoopWidget';
 import WelcomeBanner from './WelcomeBanner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Video, Brain, Shield, FolderOpen, Calendar, PartyPopper, Zap } from 'lucide-react';
+import { Sparkles, Video, Brain, Shield, FolderOpen, Calendar, BarChart3, Zap } from 'lucide-react';
 
 const DashboardHome = () => {
   const { t } = useLanguage();
