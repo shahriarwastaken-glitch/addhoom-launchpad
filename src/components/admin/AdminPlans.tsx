@@ -69,10 +69,12 @@ export default function AdminPlans() {
       // Transform data to include subscriber count
       const plansWithCounts = data.map(plan => ({
         ...plan,
+        limits: (plan.limits as Record<string, any>) || {},
+        features: (plan.features as any[]) || [],
         subscriber_count: plan.profiles?.length || 0
       }));
 
-      setPlans(plansWithCounts);
+      setPlans(plansWithCounts as Plan[]);
     } catch (error) {
       console.error('Error fetching plans:', error);
       toast.error('Failed to load plans');

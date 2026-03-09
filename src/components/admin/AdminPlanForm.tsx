@@ -138,8 +138,8 @@ export default function AdminPlanForm() {
       setFormData({
         ...data,
         price_annual_bdt: data.price_annual_bdt || null,
-        limits: data.limits || {},
-        features: data.features || [...DEFAULT_FEATURES]
+        limits: (data.limits as Record<string, any>) || {},
+        features: (data.features as any[]) || [...DEFAULT_FEATURES]
       });
     } catch (error) {
       console.error('Error fetching plan:', error);
