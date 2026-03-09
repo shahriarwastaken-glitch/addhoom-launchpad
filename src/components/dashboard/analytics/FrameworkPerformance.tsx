@@ -31,11 +31,11 @@ const FrameworkPerformance = ({ data, industry }: FrameworkPerformanceProps) => 
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={250}>
           <BarChart data={chartData} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" domain={[0, 100]} />
-            <YAxis type="category" dataKey="name" width={100} />
+            <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 12 }} />
+            <YAxis type="category" dataKey="name" width={84} tick={{ fontSize: 12 }} />
             <Tooltip 
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {

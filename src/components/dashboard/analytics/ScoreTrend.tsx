@@ -74,8 +74,8 @@ const ScoreTrend = ({ data }: ScoreTrendProps) => {
 
         {/* Trend Insight */}
         {isUpward ? (
-          <div className="border-l-4 border-green-500 bg-green-50 p-4 rounded-lg">
-            <p className="text-sm font-body-bn text-green-900">
+          <div className="border-l-4 border-brand-green bg-brand-green/10 p-4 rounded-lg">
+            <p className="text-sm font-body-bn text-brand-green">
               📈 {t('আপনার বিজ্ঞাপনের মান উন্নত হচ্ছে!', 'Your ad quality is improving!')}
             </p>
           </div>

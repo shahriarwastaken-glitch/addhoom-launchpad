@@ -142,9 +142,9 @@ const Analytics = () => {
   }
 
   return (
-    <div className="w-full max-w-[1100px] mx-auto px-6 py-10 space-y-8">
+    <div className="w-full max-w-[1100px] mx-auto px-4 md:px-6 py-6 md:py-10 space-y-8">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <h1 className="text-[28px] font-bold font-body-bn">{t('বিশ্লেষণ', 'Analytics')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -153,12 +153,20 @@ const Analytics = () => {
         </div>
 
         {/* Period Filter */}
-        <Tabs value={period} onValueChange={(v) => setPeriod(v as any)}>
-          <TabsList>
-            <TabsTrigger value="week">{t('এই সপ্তাহ', 'This Week')}</TabsTrigger>
-            <TabsTrigger value="month">{t('এই মাস', 'This Month')}</TabsTrigger>
-            <TabsTrigger value="3month">{t('৩ মাস', '3 Months')}</TabsTrigger>
-            <TabsTrigger value="all">{t('সব সময়', 'All Time')}</TabsTrigger>
+        <Tabs value={period} onValueChange={(v) => setPeriod(v as any)} className="w-full md:w-auto">
+          <TabsList className="grid w-full grid-cols-4 md:w-auto md:inline-flex">
+            <TabsTrigger value="week" className="px-2 text-[11px] md:px-3 md:text-sm">
+              {t('এই সপ্তাহ', 'This Week')}
+            </TabsTrigger>
+            <TabsTrigger value="month" className="px-2 text-[11px] md:px-3 md:text-sm">
+              {t('এই মাস', 'This Month')}
+            </TabsTrigger>
+            <TabsTrigger value="3month" className="px-2 text-[11px] md:px-3 md:text-sm">
+              {t('৩ মাস', '3 Months')}
+            </TabsTrigger>
+            <TabsTrigger value="all" className="px-2 text-[11px] md:px-3 md:text-sm">
+              {t('সব সময়', 'All Time')}
+            </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
