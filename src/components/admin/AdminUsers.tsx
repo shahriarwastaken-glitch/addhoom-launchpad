@@ -29,10 +29,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Download, ChevronLeft, ChevronRight, User, Edit, Loader2 } from 'lucide-react';
+import { Search, Download, ChevronLeft, ChevronRight, User, Edit, Loader2, Eye } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import AdminVerificationModal from './AdminVerificationModal';
+import { startImpersonation } from './ImpersonationBanner';
+import { useNavigate } from 'react-router-dom';
 
 interface UserData {
   id: string;
