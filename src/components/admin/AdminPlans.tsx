@@ -58,10 +58,7 @@ export default function AdminPlans() {
     try {
       const { data, error } = await supabase
         .from('plans')
-        .select(`
-          *,
-          profiles!profiles_plan_key_fkey(count)
-        `)
+        .select('*')
         .order('display_order', { ascending: true });
 
       if (error) throw error;
