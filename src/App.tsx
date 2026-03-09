@@ -84,6 +84,7 @@ const App = () => (
             <BrowserRouter>
               <UpgradeProvider>
                 <UpgradeBridge>
+                  <ImpersonationBanner />
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/auth" element={<Auth />} />
