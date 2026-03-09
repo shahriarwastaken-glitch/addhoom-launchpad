@@ -35,14 +35,26 @@ interface AdminSidebarProps {
   isSuperAdmin: boolean;
 }
 
-const navItems = [
+const mainNavItems = [
   { icon: LayoutDashboard, label: 'ওভারভিউ', path: '/admin' },
   { icon: Users, label: 'ব্যবহারকারী', path: '/admin/users' },
   { icon: DollarSign, label: 'রাজস্ব', path: '/admin/revenue' },
   { icon: Bot, label: 'AI পারফরম্যান্স', path: '/admin/ai' },
-  { icon: Bell, label: 'নোটিফিকেশন', path: '/admin/notifications' },
+];
+
+const controlNavItems = [
+  { icon: ClipboardList, label: 'প্ল্যান ম্যানেজার', path: '/admin/plans' },
+  { icon: Palette, label: 'ব্র্যান্ড সেটিংস', path: '/admin/branding' },
+  { icon: Flag, label: 'ফিচার ফ্ল্যাগ', path: '/admin/feature-flags' },
+  { icon: Megaphone, label: 'ঘোষণা', path: '/admin/announcements' },
+  { icon: Ticket, label: 'কুপন', path: '/admin/coupons' },
+];
+
+const systemNavItems = [
   { icon: Key, label: 'API কী', path: '/admin/api-keys' },
-  { icon: Settings, label: 'সেটিংস', path: '/admin/settings' },
+  { icon: Mail, label: 'ইমেইল টেমপ্লেট', path: '/admin/emails' },
+  { icon: Wrench, label: 'সিস্টেম সেটিংস', path: '/admin/settings' },
+  { icon: FileText, label: 'অডিট লগ', path: '/admin/audit-log' },
 ];
 
 export default function AdminSidebar({ isSuperAdmin }: AdminSidebarProps) {
