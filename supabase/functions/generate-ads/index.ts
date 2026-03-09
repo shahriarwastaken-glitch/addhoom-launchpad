@@ -71,6 +71,15 @@ serve(async (req) => {
       );
     }
 
+    // Fetch workspace products for richer context
+    const { data: wsProducts } = await supabase
+      .from("workspace_products")
+      .select("*")
+      .eq("workspace_id", workspace_id)
+      .eq("is_active", true)
+      .order("display_order")
+      .limit(5);
+
     const shopName = workspace.shop_name || "My Shop";
     const industry = workspace.industry || "other";
     const brandTone = workspace.brand_tone || tone || "friendly";
@@ -78,6 +87,9 @@ serve(async (req) => {
     const keyProducts = workspace.key_products || "N/A";
     const uniqueSelling = workspace.unique_selling || "N/A";
     const priceRange = workspace.price_range || "mid_range";
+    const nicheTags = workspace.niche_tags?.join(", ") || "";
+    const primaryColor = workspace.brand_colors?.find((c: any) => c.role === "primary")?.hex || "";
+    const stylePrefs = workspace.style_preferences || {};
 
     const adTarget = target_audience || shopTarget;
     const adPlatforms = (platforms || ["facebook"]).join(", ");
