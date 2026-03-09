@@ -58,21 +58,26 @@ export default function AdminPlans() {
     try {
       const { data, error } = await supabase
         .from('plans')
-        .select(`
-          *,
-          profiles!profiles_plan_key_fkey(count)
-        `)
+        .select('*')
         .order('display_order', { ascending: true });
 
       if (error) throw error;
 
-      // Transform data to include subscriber count
-      const plansWithCounts = data.map(plan => ({
-        ...plan,
-        limits: (plan.limits as Record<string, any>) || {},
-        features: (plan.features as any[]) || [],
-        subscriber_count: plan.profiles?.length || 0
-      }));
+      // Fetch subscriber counts separately
+      const plansWithCounts = await Promise.all(
+        data.map(async (plan) => {
+          const { count } = await supabase
+            .from('profiles')
+            .select('id', { count: 'exact', head: true })
+            .eq('plan_key', plan.plan_key);
+          return {
+            ...plan,
+            limits: (plan.limits as Record<string, any>) || {},
+            features: (plan.features as any[]) || [],
+            subscriber_count: count || 0,
+          };
+        })
+      );
 
       setPlans(plansWithCounts as Plan[]);
     } catch (error) {

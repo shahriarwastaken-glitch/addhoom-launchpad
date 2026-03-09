@@ -29,10 +29,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Download, ChevronLeft, ChevronRight, User, Edit, Loader2 } from 'lucide-react';
+import { Search, Download, ChevronLeft, ChevronRight, User, Edit, Loader2, Eye } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import AdminVerificationModal from './AdminVerificationModal';
+import { startImpersonation } from './ImpersonationBanner';
+import { useNavigate } from 'react-router-dom';
 
 interface UserData {
   id: string;
@@ -69,6 +71,9 @@ export default function AdminUsers() {
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [impersonating, setImpersonating] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const navigate = useNavigate();
 
   // Plan change state
   const [planChangeOpen, setPlanChangeOpen] = useState(false);
@@ -79,6 +84,38 @@ export default function AdminUsers() {
 
   // Verification modal state
   const [verificationOpen, setVerificationOpen] = useState(false);
+
+  useEffect(() => {
+    const checkSuperAdmin = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+      const { data } = await supabase
+        .from('admin_users')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+      setIsSuperAdmin(data?.role === 'super_admin');
+    };
+    checkSuperAdmin();
+  }, []);
+
+  const handleImpersonate = async (userId: string) => {
+    setImpersonating(true);
+    try {
+      const result = await startImpersonation(userId);
+      if (result) {
+        toast.success(`${result.targetName || result.targetEmail} হিসেবে লগইন করা হয়েছে`);
+        setSheetOpen(false);
+        navigate('/dashboard');
+      } else {
+        toast.error('Impersonation শুরু করতে সমস্যা হয়েছে।');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Impersonation শুরু করতে সমস্যা হয়েছে।');
+    } finally {
+      setImpersonating(false);
+    }
+  };
 
   const fetchUsers = async (page = 1) => {
     setLoading(true);
@@ -528,6 +565,20 @@ export default function AdminUsers() {
                   {selectedUser.profile.plan}
                 </Badge>
               </div>
+
+              {/* Impersonation Button - Super Admin Only */}
+              {isSuperAdmin && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                  onClick={() => handleImpersonate(selectedUser.profile.id)}
+                  disabled={impersonating}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  {impersonating ? 'লগইন হচ্ছে...' : 'এই ব্যবহারকারী হিসেবে দেখুন'}
+                </Button>
+              )}
 
               <Tabs defaultValue="summary">
                 <TabsList className="w-full grid grid-cols-4">
