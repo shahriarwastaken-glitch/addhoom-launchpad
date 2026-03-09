@@ -10,6 +10,8 @@ import AdminSettings from '@/components/admin/AdminSettings';
 import AdminManageAdmins from '@/components/admin/AdminManageAdmins';
 import AdminApiKeys from '@/components/admin/AdminApiKeys';
 import AdminNotifications from '@/components/admin/AdminNotifications';
+import AdminPlans from '@/components/admin/AdminPlans';
+import AdminPlanForm from '@/components/admin/AdminPlanForm';
 
 export default function AdminDashboardNew() {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -25,6 +27,9 @@ export default function AdminDashboardNew() {
           <Route path="notifications" element={<AdminNotifications />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="api-keys" element={<AdminApiKeys />} />
+          <Route path="plans" element={<AdminPlans />} />
+          <Route path="plans/new" element={<AdminPlanForm />} />
+          <Route path="plans/:id/edit" element={<AdminPlanForm />} />
           {isSuperAdmin && (
             <Route path="admins" element={<AdminManageAdmins />} />
           )}
