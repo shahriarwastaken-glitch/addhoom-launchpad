@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { NavLink } from '@/components/NavLink';
 import { supabase } from '@/integrations/supabase/client';
-import { Calendar, FolderOpen, MessageSquare, PartyPopper, Search, Settings, Shield, Stethoscope, Target, Video, Wand2, Zap } from 'lucide-react';
+import { Calendar, FolderOpen, MessageSquare, PartyPopper, Search, Settings, Shield, Stethoscope, Target, Video, Wand2, Zap, BarChart3 } from 'lucide-react';
 
 const navItems = [
   { icon: Target, bn: 'হোম', en: 'Home', url: '/dashboard' },
@@ -16,6 +16,7 @@ const navItems = [
   { icon: Stethoscope, bn: 'অ্যাকাউন্ট ডাক্তার', en: 'Doctor', url: '/dashboard/doctor' },
   { icon: PartyPopper, bn: 'উৎসব', en: 'Festival', url: '/dashboard/festival' },
   { icon: Zap, bn: 'ধুম স্কোর', en: 'Dhoom Score', url: '/dashboard/dhoom-score' },
+  { icon: BarChart3, bn: 'বিশ্লেষণ', en: 'Analytics', url: '/dashboard/analytics' },
   { icon: Settings, bn: 'সেটিংস', en: 'Settings', url: '/dashboard/settings' },
 ];
 
