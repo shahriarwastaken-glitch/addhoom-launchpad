@@ -157,7 +157,7 @@ export default function AdminPlanForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) {
-      toast.error('প্ল্যানের নাম আবশ্যক');
+      toast.error('Plan name is required');
       return;
     }
 
@@ -167,30 +167,32 @@ export default function AdminPlanForm() {
       const planData = {
         ...formData,
         plan_key: formData.plan_key || generatePlanKey(formData.name),
-        price_annual_bdt: formData.price_annual_bdt || null
+        price_annual_bdt: formData.price_annual_bdt || null,
       };
 
-      if (isEdit) {
-        const { error } = await supabase
-          .from('plans')
-          .update(planData)
-          .eq('id', id);
+      const { data: { session } } = await supabase.auth.getSession();
+      const fnName = isEdit ? 'admin-update-plan' : 'admin-create-plan';
+      const body = isEdit ? { id, ...planData } : planData;
 
-        if (error) throw error;
-        toast.success('প্ল্যান সফলভাবে আপডেট হয়েছে');
+      const { data, error } = await supabase.functions.invoke(fnName, {
+        body,
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+
+      if (error || !data?.success) {
+        throw new Error(data?.message || error?.message || 'Failed to save plan');
+      }
+
+      if (isEdit && data.subscribers_affected > 0) {
+        toast.success(`Plan updated. ${data.subscribers_affected} subscribers affected.`);
       } else {
-        const { error } = await supabase
-          .from('plans')
-          .insert([planData]);
-
-        if (error) throw error;
-        toast.success('নতুন প্ল্যান তৈরি হয়েছে');
+        toast.success(isEdit ? 'Plan updated successfully' : 'New plan created');
       }
 
       navigate('/admin/plans');
     } catch (error: any) {
       console.error('Error saving plan:', error);
-      toast.error(error.message || 'প্ল্যান সংরক্ষণে ব্যর্থ');
+      toast.error(error.message || 'Failed to save plan');
     } finally {
       setSaving(false);
     }

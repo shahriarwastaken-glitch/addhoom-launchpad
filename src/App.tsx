@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import PlanGate from "./pages/PlanGate";
 import Onboarding from "./pages/Onboarding";
 import ShopDNASetup from "./components/dashboard/ShopDNASetup";
+import ImpersonationBanner from "./components/admin/ImpersonationBanner";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,7 @@ const App = () => (
             <BrowserRouter>
               <UpgradeProvider>
                 <UpgradeBridge>
+                  <ImpersonationBanner />
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/auth" element={<Auth />} />

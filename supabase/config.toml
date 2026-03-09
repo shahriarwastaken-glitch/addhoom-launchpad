@@ -107,3 +107,18 @@ verify_jwt = false
 
 [functions.bulk-update-calendar]
 verify_jwt = false
+
+[functions.admin-create-plan]
+verify_jwt = false
+
+[functions.admin-update-plan]
+verify_jwt = false
+
+[functions.admin-delete-plan]
+verify_jwt = false
+
+[functions.start-impersonation]
+verify_jwt = false
+
+[functions.end-impersonation]
+verify_jwt = false
