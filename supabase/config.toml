@@ -122,3 +122,9 @@ verify_jwt = false
 
 [functions.end-impersonation]
 verify_jwt = false
+
+[functions.workspace-products]
+verify_jwt = false
+
+[functions.save-style-preferences]
+verify_jwt = false
