@@ -117,6 +117,7 @@ export default function AdminUsers() {
     }
   };
 
+  const fetchUsers = async (page = 1) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
