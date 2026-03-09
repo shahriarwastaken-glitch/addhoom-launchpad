@@ -10,6 +10,8 @@ interface ImpersonationState {
   targetEmail: string;
   targetUserId: string;
   token: string;
+  adminRefreshToken: string;
+  adminAccessToken: string;
 }
 
 export default function ImpersonationBanner() {
@@ -30,19 +32,42 @@ export default function ImpersonationBanner() {
     if (!state) return;
     setEnding(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      // Call end-impersonation with admin token (stored)
       await supabase.functions.invoke('end-impersonation', {
         body: { impersonation_token: state.token },
-        headers: { Authorization: `Bearer ${session?.access_token}` },
+        headers: { Authorization: `Bearer ${state.adminAccessToken}` },
       });
     } catch (err) {
       console.error('Error ending impersonation:', err);
+    }
+
+    try {
+      // Sign out from impersonated user session
+      await supabase.auth.signOut();
+
+      // Restore admin session
+      const { error } = await supabase.auth.setSession({
+        access_token: state.adminAccessToken,
+        refresh_token: state.adminRefreshToken,
+      });
+
+      if (error) {
+        console.error('Failed to restore admin session:', error);
+        // If restore fails, redirect to login
+        window.location.href = '/auth';
+        return;
+      }
+    } catch (err) {
+      console.error('Session restore error:', err);
+      window.location.href = '/auth';
+      return;
     } finally {
       sessionStorage.removeItem('addhoom_impersonation');
       setState(null);
       setEnding(false);
-      navigate(`/admin/users`);
     }
+
+    navigate('/admin/users', { replace: true });
   };
 
   if (!state?.active) return null;
@@ -70,27 +95,48 @@ export default function ImpersonationBanner() {
 // Helper to start impersonation from admin user detail
 export async function startImpersonation(targetUserId: string): Promise<ImpersonationState | null> {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
+    const { data: { session: adminSession } } = await supabase.auth.getSession();
+    if (!adminSession) throw new Error('Not authenticated');
+
+    // Store admin tokens before switching
+    const adminAccessToken = adminSession.access_token;
+    const adminRefreshToken = adminSession.refresh_token;
 
     const { data, error } = await supabase.functions.invoke('start-impersonation', {
       body: { target_user_id: targetUserId },
-      headers: { Authorization: `Bearer ${session.access_token}` },
+      headers: { Authorization: `Bearer ${adminAccessToken}` },
     });
 
     if (error || !data?.success) {
       throw new Error(data?.message || 'Failed to start impersonation');
     }
 
+    // Store impersonation state BEFORE switching session
     const impersonation: ImpersonationState = {
       active: true,
       targetName: data.target_user.name || '',
       targetEmail: data.target_user.email || '',
       targetUserId: data.target_user.id,
       token: data.impersonation_token,
+      adminAccessToken,
+      adminRefreshToken,
     };
 
     sessionStorage.setItem('addhoom_impersonation', JSON.stringify(impersonation));
+
+    // Now sign in as the target user using the OTP
+    const { error: otpError } = await supabase.auth.verifyOtp({
+      email: data.target_email,
+      token: data.email_otp,
+      type: 'email',
+    });
+
+    if (otpError) {
+      console.error('OTP verification error:', otpError);
+      sessionStorage.removeItem('addhoom_impersonation');
+      throw new Error('Failed to sign in as target user: ' + otpError.message);
+    }
+
     return impersonation;
   } catch (err) {
     console.error('Impersonation error:', err);
