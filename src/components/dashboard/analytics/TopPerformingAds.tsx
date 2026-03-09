@@ -32,9 +32,9 @@ const TopPerformingAds = ({ topAds }: TopPerformingAdsProps) => {
   const displayAds = getDisplayAds();
 
   const getScoreColor = (score: number) => {
-    if (score >= 70) return 'bg-green-100 text-green-700';
-    if (score >= 50) return 'bg-yellow-100 text-yellow-700';
-    return 'bg-red-100 text-red-700';
+    if (score >= 70) return 'bg-brand-green/15 text-brand-green';
+    if (score >= 50) return 'bg-brand-yellow/15 text-brand-yellow';
+    return 'bg-destructive/15 text-destructive';
   };
 
   return (
@@ -44,15 +44,15 @@ const TopPerformingAds = ({ topAds }: TopPerformingAdsProps) => {
           {t('আপনার সেরা বিজ্ঞাপন', 'Your Top Performing Ads')}
         </CardTitle>
         
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="mt-4">
-          <TabsList>
-            <TabsTrigger value="score" className="font-body-bn">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="mt-4 w-full">
+          <TabsList className="grid w-full grid-cols-3 md:w-auto md:inline-flex">
+            <TabsTrigger value="score" className="font-body-bn px-2 text-[11px] md:px-3 md:text-sm">
               {t('সেরা ধুম স্কোর', 'Best Score')}
             </TabsTrigger>
-            <TabsTrigger value="winners" className="font-body-bn">
+            <TabsTrigger value="winners" className="font-body-bn px-2 text-[11px] md:px-3 md:text-sm">
               {t('বিজয়ী ⭐', 'Winners ⭐')}
             </TabsTrigger>
-            <TabsTrigger value="performance" className="font-body-bn">
+            <TabsTrigger value="performance" className="font-body-bn px-2 text-[11px] md:px-3 md:text-sm">
               {t('ভালো ফলাফল ✓', 'Good Results ✓')}
             </TabsTrigger>
           </TabsList>
