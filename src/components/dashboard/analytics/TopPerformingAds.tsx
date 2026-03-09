@@ -32,9 +32,9 @@ const TopPerformingAds = ({ topAds }: TopPerformingAdsProps) => {
   const displayAds = getDisplayAds();
 
   const getScoreColor = (score: number) => {
-    if (score >= 70) return 'bg-green-100 text-green-700';
-    if (score >= 50) return 'bg-yellow-100 text-yellow-700';
-    return 'bg-red-100 text-red-700';
+    if (score >= 70) return 'bg-brand-green/15 text-brand-green';
+    if (score >= 50) return 'bg-brand-yellow/15 text-brand-yellow';
+    return 'bg-destructive/15 text-destructive';
   };
 
   return (

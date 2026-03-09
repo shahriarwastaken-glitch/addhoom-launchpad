@@ -30,11 +30,11 @@ const ScoreTrend = ({ data }: ScoreTrendProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={250}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis domain={[0, 100]} />
+            <XAxis dataKey="date" tick={{ fontSize: 12 }} interval="preserveStartEnd" minTickGap={16} />
+            <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
             <Tooltip 
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
@@ -50,8 +50,18 @@ const ScoreTrend = ({ data }: ScoreTrendProps) => {
                 return null;
               }}
             />
-            <ReferenceLine y={70} stroke="#22c55e" strokeDasharray="3 3" label={{ value: t('লঞ্চ জোন', 'Launch'), fill: '#22c55e', fontSize: 12 }} />
-            <ReferenceLine y={50} stroke="#eab308" strokeDasharray="3 3" label={{ value: t('টেস্ট জোন', 'Test'), fill: '#eab308', fontSize: 12 }} />
+            <ReferenceLine
+              y={70}
+              stroke="hsl(var(--brand-green))"
+              strokeDasharray="3 3"
+              label={{ value: t('লঞ্চ জোন', 'Launch'), fill: 'hsl(var(--brand-green))', fontSize: 12 }}
+            />
+            <ReferenceLine
+              y={50}
+              stroke="hsl(var(--brand-yellow))"
+              strokeDasharray="3 3"
+              label={{ value: t('টেস্ট জোন', 'Test'), fill: 'hsl(var(--brand-yellow))', fontSize: 12 }}
+            />
             <Line 
               type="monotone" 
               dataKey="score" 
