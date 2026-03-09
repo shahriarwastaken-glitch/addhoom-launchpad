@@ -130,16 +130,30 @@ serve(async (req) => {
         : "Generate half in Bangla, half in English — label each";
 
     // STEP 2 — Build prompt
+    // Build product catalog context
+    const productCatalog = (wsProducts || []).length > 0
+      ? `\nPRODUCT CATALOG (${wsProducts!.length} active products):\n${wsProducts!.map((p: any) =>
+          `- ${p.name}: ${p.description?.slice(0, 80) || "N/A"} | Price: ৳${p.price_bdt || "N/A"}${p.original_price_bdt ? ` (was ৳${p.original_price_bdt})` : ""}`
+        ).join("\n")}`
+      : "";
+
+    const styleContext = stylePrefs.dominant_style
+      ? `\nSTYLE PREFERENCES:\n- Dominant style: ${stylePrefs.dominant_style}\n- Preferred: ${stylePrefs.liked?.join(", ") || "N/A"}\n- Avoid: ${stylePrefs.disliked?.join(", ") || "N/A"}`
+      : "";
+
     const prompt = `Generate ${adCount} high-converting ad variations for a Bangladeshi e-commerce shop.
 
-SHOP CONTEXT (always stay true to this):
+BRAND DNA:
 - Shop name: ${shopName}
 - Industry: ${industry}
+- Niches: ${nicheTags || industry}
 - Brand tone: ${brandTone}
 - Shop's target audience: ${shopTarget}
 - Key products: ${keyProducts}
 - What makes them unique: ${uniqueSelling}
 - Price range positioning: ${priceRange}
+- Primary brand color: ${primaryColor || "not specified"}
+${productCatalog}${styleContext}
 
 PRODUCT TO ADVERTISE:
 - Product name: ${product_name}
