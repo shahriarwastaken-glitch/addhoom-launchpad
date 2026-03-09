@@ -85,7 +85,38 @@ export default function AdminUsers() {
   // Verification modal state
   const [verificationOpen, setVerificationOpen] = useState(false);
 
-  const fetchUsers = async (page = 1) => {
+  useEffect(() => {
+    const checkSuperAdmin = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+      const { data } = await supabase
+        .from('admin_users')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+      setIsSuperAdmin(data?.role === 'super_admin');
+    };
+    checkSuperAdmin();
+  }, []);
+
+  const handleImpersonate = async (userId: string) => {
+    setImpersonating(true);
+    try {
+      const result = await startImpersonation(userId);
+      if (result) {
+        toast.success(`${result.targetName || result.targetEmail} হিসেবে লগইন করা হয়েছে`);
+        setSheetOpen(false);
+        navigate('/dashboard');
+      } else {
+        toast.error('Impersonation শুরু করতে সমস্যা হয়েছে।');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Impersonation শুরু করতে সমস্যা হয়েছে।');
+    } finally {
+      setImpersonating(false);
+    }
+  };
+
     setLoading(true);
     try {
       const params = new URLSearchParams({
