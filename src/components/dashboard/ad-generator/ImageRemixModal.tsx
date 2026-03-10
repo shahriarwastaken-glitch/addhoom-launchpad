@@ -45,7 +45,7 @@ const ImageRemixModal = ({ ad, workspaceId, onClose, onRemixComplete }: ImageRem
   const [targetProductImage, setTargetProductImage] = useState<string | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { products } = useWorkspaceProducts(workspaceId);
+  const { products } = useWorkspaceProducts();
 
   const toggleItem = (arr: string[], item: string, setter: (v: string[]) => void) => {
     setter(arr.includes(item) ? arr.filter(x => x !== item) : [...arr, item]);
