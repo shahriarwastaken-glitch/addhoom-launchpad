@@ -957,7 +957,7 @@ function SwipeView({ entries, setEntries, t, lang, navigate, isMobile }: {
             {/* Festival indicator */}
             {festival && (
               <div className="bg-[hsl(var(--brand-yellow))]/10 border border-[hsl(var(--brand-yellow))]/30 rounded-xl p-2 mb-3">
-                <p className="text-xs text-[hsl(var(--brand-yellow))] font-medium font-bn">🎊 {festival}</p>
+                <p className="text-xs text-[hsl(var(--brand-yellow))] font-medium font-bn flex items-center gap-1"><PartyPopper size={12} /> {festival}</p>
               </div>
             )}
 
