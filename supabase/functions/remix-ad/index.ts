@@ -23,7 +23,7 @@ serve(async (req) => {
     const { data: { user } } = await userClient.auth.getUser();
     if (!user) return errorResponse(401, "লগইন করুন।", "Please log in.");
 
-    const { workspace_id, ad_id, num_variations = 5 } = await req.json();
+    const { workspace_id, ad_id, num_variations = 3, custom_prompt } = await req.json();
     if (!workspace_id || !ad_id) {
       return errorResponse(400, "অ্যাড আইডি দিন।", "Ad ID is required.");
     }
