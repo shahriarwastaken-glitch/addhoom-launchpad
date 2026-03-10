@@ -15,6 +15,7 @@ import ProjectDetail from '@/components/dashboard/ProjectDetail';
 import Settings from '@/components/dashboard/Settings';
 import DhoomScoreChecker from '@/components/dashboard/DhoomScoreChecker';
 import Analytics from '@/components/dashboard/Analytics';
+import StudioPage from '@/components/dashboard/studio/StudioPage';
 
 const Dashboard = () => {
   return (
