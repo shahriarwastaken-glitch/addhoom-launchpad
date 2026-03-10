@@ -33,7 +33,7 @@ interface Project {
   workspace_id: string;
   name: string;
   description: string | null;
-  emoji: string;
+  emoji: string | null;
   color: string;
   start_date: string | null;
   end_date: string | null;
