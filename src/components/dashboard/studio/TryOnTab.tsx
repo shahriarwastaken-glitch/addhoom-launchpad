@@ -11,6 +11,9 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import StepIndicator from './StepIndicator';
+import PromptEditor from './PromptEditor';
+import { buildTryOnPrompt } from './promptBuilders';
 
 type GarmentCategory = 'Top' | 'Bottom' | 'Full Body / Dress' | 'Outerwear' | 'Footwear' | 'Accessory';
 type ModelGender = 'female' | 'male';
@@ -85,6 +88,12 @@ const TryOnTab = () => {
   const [ageRange, setAgeRange] = useState<AgeRange>('20s');
   const [modelStyle, setModelStyle] = useState<ModelStyle>('commercial');
 
+  // Two-step flow
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [prompt, setPrompt] = useState('');
+  const [defaultPrompt, setDefaultPrompt] = useState('');
+  const [promptWasEnhanced, setPromptWasEnhanced] = useState(false);
+
   // Job queue state
   const [jobId, setJobId] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -131,6 +140,7 @@ const TryOnTab = () => {
           setActiveResult(0);
           setGenerating(false);
           setJobId(null);
+          setStep(3);
           toast.success(t('ট্রাই-অন তৈরি হয়েছে', 'Try-on generated'));
         }
         if (job.status === 'failed') {
@@ -157,10 +167,36 @@ const TryOnTab = () => {
     setResults([]);
     setPartialWarning(false);
     setGarmentReady(false);
-    setGarmentCategory('Top'); // default, simulating auto-detect
-    // Simulate bg removal processing
+    setGarmentCategory('Top');
     setTimeout(() => setGarmentReady(true), 1500);
+    setStep(1);
   }, [t]);
+
+  const canContinue = garmentFile && garmentReady && garmentCategory;
+
+  const handleContinue = () => {
+    if (!canContinue) return;
+    const bgLabel = background === 'lifestyle' ? `lifestyle_${lifestyleScene}` : background;
+    const bgMap: Record<string, string> = {
+      studio_white: 'Studio White',
+      studio_grey: 'Studio Grey',
+      lifestyle: 'Lifestyle',
+      transparent: 'Transparent',
+    };
+    const built = buildTryOnPrompt({
+      gender,
+      body,
+      skin,
+      pose,
+      age: advancedOpen ? ageRange : undefined,
+      style: advancedOpen ? modelStyle : undefined,
+      background: bgMap[background] || 'Studio White',
+    });
+    setDefaultPrompt(built);
+    setPrompt(built);
+    setPromptWasEnhanced(false);
+    setStep(2);
+  };
 
   const handleGenerate = async () => {
     if (!garmentFile || !garmentCategory || !activeWorkspace) return;
@@ -191,9 +227,12 @@ const TryOnTab = () => {
             garment_image_base64: base64,
             garment_category: garmentCategory,
             model_attributes: { gender, body, skin, pose },
+            model_prompt: prompt,
             background: background === 'lifestyle' ? `lifestyle_${lifestyleScene}` : background,
             variations,
             advanced: advancedOpen ? { age: ageRange, style: modelStyle } : undefined,
+            generation_prompt: prompt,
+            prompt_was_enhanced: promptWasEnhanced,
           },
         },
       });
@@ -228,6 +267,7 @@ const TryOnTab = () => {
             setActiveResult(0);
             setGenerating(false);
             setJobId(null);
+            setStep(3);
             if (status.output_urls?.length < variations) setPartialWarning(true);
             toast.success(t('ট্রাই-অন তৈরি হয়েছে', 'Try-on generated'));
           }
@@ -262,7 +302,7 @@ const TryOnTab = () => {
       if (error) throw error;
       if (data?.image_url) {
         setResults(prev => [...prev, data.image_url]);
-        setActiveResult(results.length); // select new one
+        setActiveResult(results.length);
         toast.success(t('মডেল সোয়াপ সম্পন্ন', 'Model swap complete'));
         setShowSwapPanel(false);
       }
@@ -292,7 +332,20 @@ const TryOnTab = () => {
     const poses: ModelPose[] = ['standing', 'walking', 'sitting', 'dynamic'];
     const nextPose = poses[(poses.indexOf(pose) + 1) % poses.length];
     setPose(nextPose);
-    handleGenerate();
+    // Rebuild prompt with new pose and go to step 2
+    const bgMap: Record<string, string> = {
+      studio_white: 'Studio White', studio_grey: 'Studio Grey',
+      lifestyle: 'Lifestyle', transparent: 'Transparent',
+    };
+    const built = buildTryOnPrompt({
+      gender, body, skin, pose: nextPose,
+      age: advancedOpen ? ageRange : undefined,
+      style: advancedOpen ? modelStyle : undefined,
+      background: bgMap[background] || 'Studio White',
+    });
+    setPrompt(built);
+    setDefaultPrompt(built);
+    setStep(2);
   };
 
   // Shared pill selector component
@@ -344,181 +397,205 @@ const TryOnTab = () => {
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
       {/* LEFT PANEL */}
       <div className="lg:col-span-2 space-y-6">
-        {/* SECTION 1: Garment Upload */}
-        <div className="space-y-3">
-          <div>
-            <h3 className="text-sm font-semibold">{t('গার্মেন্ট আপলোড', 'Upload Garment')}</h3>
-            <p className="text-xs text-muted-foreground">{t('ফ্ল্যাট-লে বা প্রোডাক্ট শট ভালো কাজ করে। ব্যাকগ্রাউন্ড আমরা রিমুভ করব।', 'Flat-lay or product shots work best. We\'ll handle background removal.')}</p>
-          </div>
+        <StepIndicator
+          currentStep={step}
+          labels={[t('অপশন', 'Options'), t('প্রম্পট', 'Prompt'), t('ফলাফল', 'Result')]}
+        />
 
-          {!garmentPreview ? (
-            <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-2xl p-8 cursor-pointer hover:border-primary/50 transition-colors">
-              <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-              <span className="text-sm text-muted-foreground">{t('গার্মেন্ট ফটো এখানে ড্র্যাগ করুন', 'Drag garment photo here')}</span>
-              <span className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP · Max 10MB</span>
-              <input type="file" accept="image/*" className="hidden" onChange={handleGarmentUpload} />
-            </label>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <img src={garmentPreview} alt="Garment" className="h-28 w-28 object-cover rounded-xl border" />
-                <div className="space-y-1">
-                  {!garmentReady ? (
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      {t('ব্যাকগ্রাউন্ড রিমুভ হচ্ছে...', 'Removing background...')}
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 text-xs text-green-600">
-                      <Check className="h-3.5 w-3.5" />
-                      {t('প্রস্তুত', 'Ready')}
-                    </div>
-                  )}
-                  <button onClick={() => { setGarmentFile(null); setGarmentPreview(null); setResults([]); setGarmentReady(false); }} className="text-xs text-primary hover:underline">
-                    {t('পরিবর্তন', 'Change')}
-                  </button>
-                </div>
+        {step === 1 && (
+          <>
+            {/* SECTION 1: Garment Upload */}
+            <div className="space-y-3">
+              <div>
+                <h3 className="text-sm font-semibold">{t('গার্মেন্ট আপলোড', 'Upload Garment')}</h3>
+                <p className="text-xs text-muted-foreground">{t('ফ্ল্যাট-লে বা প্রোডাক্ট শট ভালো কাজ করে। ব্যাকগ্রাউন্ড আমরা রিমুভ করব।', 'Flat-lay or product shots work best. We\'ll handle background removal.')}</p>
               </div>
 
-              {/* Auto-detected category */}
-              {garmentCategory && !showCategoryOverride && (
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted border border-border">
-                    {GARMENT_CATEGORIES.find(c => c.value === garmentCategory)?.icon} {garmentCategory}
-                  </span>
-                  <button onClick={() => setShowCategoryOverride(true)} className="text-[11px] text-primary hover:underline">
-                    {t('ভুল? পরিবর্তন করুন', 'Wrong? Change')}
-                  </button>
-                </div>
-              )}
+              {!garmentPreview ? (
+                <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-2xl p-8 cursor-pointer hover:border-primary/50 transition-colors">
+                  <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                  <span className="text-sm text-muted-foreground">{t('গার্মেন্ট ফটো এখানে ড্র্যাগ করুন', 'Drag garment photo here')}</span>
+                  <span className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP · Max 10MB</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleGarmentUpload} />
+                </label>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <img src={garmentPreview} alt="Garment" className="h-28 w-28 object-cover rounded-xl border" />
+                    <div className="space-y-1">
+                      {!garmentReady ? (
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          {t('ব্যাকগ্রাউন্ড রিমুভ হচ্ছে...', 'Removing background...')}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 text-xs text-green-600">
+                          <Check className="h-3.5 w-3.5" />
+                          {t('প্রস্তুত', 'Ready')}
+                        </div>
+                      )}
+                      <button onClick={() => { setGarmentFile(null); setGarmentPreview(null); setResults([]); setGarmentReady(false); setStep(1); }} className="text-xs text-primary hover:underline">
+                        {t('পরিবর্তন', 'Change')}
+                      </button>
+                    </div>
+                  </div>
 
-              {showCategoryOverride && (
-                <div className="flex flex-wrap gap-1.5">
-                  {GARMENT_CATEGORIES.map(cat => (
-                    <button
-                      key={cat.value}
-                      onClick={() => { setGarmentCategory(cat.value); setShowCategoryOverride(false); }}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
-                        garmentCategory === cat.value
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'border-border text-muted-foreground hover:border-primary/50'
-                      }`}
-                    >
-                      {cat.icon} {cat.label}
-                    </button>
-                  ))}
+                  {garmentCategory && !showCategoryOverride && (
+                    <div className="flex items-center gap-2">
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted border border-border">
+                        {GARMENT_CATEGORIES.find(c => c.value === garmentCategory)?.icon} {garmentCategory}
+                      </span>
+                      <button onClick={() => setShowCategoryOverride(true)} className="text-[11px] text-primary hover:underline">
+                        {t('ভুল? পরিবর্তন করুন', 'Wrong? Change')}
+                      </button>
+                    </div>
+                  )}
+
+                  {showCategoryOverride && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {GARMENT_CATEGORIES.map(cat => (
+                        <button key={cat.value}
+                          onClick={() => { setGarmentCategory(cat.value); setShowCategoryOverride(false); }}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+                            garmentCategory === cat.value
+                              ? 'bg-primary text-primary-foreground border-primary'
+                              : 'border-border text-muted-foreground hover:border-primary/50'
+                          }`}>
+                          {cat.icon} {cat.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
-        </div>
 
-        {/* SECTION 2: Model Attributes */}
-        <div className="space-y-3">
-          <div>
-            <h3 className="text-sm font-semibold">{t('মডেল বর্ণনা', 'Describe Your Model')}</h3>
-            <p className="text-xs text-muted-foreground">{t('AI আপনার বর্ণনা অনুযায়ী মডেল তৈরি করবে।', 'AI will generate a realistic model matching your description.')}</p>
+            {/* SECTION 2: Model Attributes */}
+            <div className="space-y-3">
+              <div>
+                <h3 className="text-sm font-semibold">{t('মডেল বর্ণনা', 'Describe Your Model')}</h3>
+                <p className="text-xs text-muted-foreground">{t('AI আপনার বর্ণনা অনুযায়ী মডেল তৈরি করবে।', 'AI will generate a realistic model matching your description.')}</p>
+              </div>
+
+              <PillSelect label={t('লিঙ্গ', 'Gender')} value={gender}
+                options={[
+                  { label: t('মহিলা', 'Female'), value: 'female', icon: <User2 className="h-3.5 w-3.5" /> },
+                  { label: t('পুরুষ', 'Male'), value: 'male', icon: <User2 className="h-3.5 w-3.5" /> },
+                ]}
+                onChange={setGender} />
+
+              <PillSelect label={t('শরীর', 'Body Type')} value={body}
+                options={[
+                  { label: t('স্লিম', 'Slim'), value: 'slim' },
+                  { label: t('গড়', 'Average'), value: 'average' },
+                  { label: t('প্লাস সাইজ', 'Plus Size'), value: 'plus' },
+                ]}
+                onChange={setBody} />
+
+              <SkinSelect label={t('ত্বকের রং', 'Skin Tone')} value={skin} onChange={setSkin} />
+
+              <PillSelect label={t('পোজ', 'Pose')} value={pose}
+                options={[
+                  { label: t('দাঁড়ানো', 'Standing'), value: 'standing' },
+                  { label: t('হাঁটা', 'Walking'), value: 'walking' },
+                  { label: t('বসা', 'Sitting'), value: 'sitting' },
+                  { label: t('ডায়নামিক', 'Dynamic'), value: 'dynamic' },
+                ]}
+                onChange={setPose} />
+            </div>
+
+            {/* SECTION 3: Background */}
+            <div className="space-y-3">
+              <PillSelect label={t('ব্যাকগ্রাউন্ড', 'Background')} value={background}
+                options={[
+                  { label: t('স্টুডিও হোয়াইট', 'Studio White'), value: 'studio_white' },
+                  { label: t('স্টুডিও গ্রে', 'Studio Grey'), value: 'studio_grey' },
+                  { label: t('লাইফস্টাইল', 'Lifestyle'), value: 'lifestyle' },
+                  { label: t('স্বচ্ছ', 'Transparent'), value: 'transparent' },
+                ]}
+                onChange={setBackground} />
+
+              {background === 'lifestyle' && (
+                <PillSelect label={t('দৃশ্য', 'Scene')} value={lifestyleScene}
+                  options={[
+                    { label: t('ইনডোর', 'Indoor'), value: 'indoor' },
+                    { label: t('আউটডোর', 'Outdoor'), value: 'outdoor' },
+                    { label: t('আরবান', 'Urban'), value: 'urban' },
+                    { label: t('মিনিমাল', 'Minimal'), value: 'minimal' },
+                  ]}
+                  onChange={setLifestyleScene} />
+              )}
+            </div>
+
+            {/* SECTION 4: Options */}
+            <div className="space-y-3">
+              <PillSelect label={t('ভ্যারিয়েশন', 'Variations')} value={String(variations)}
+                options={[{ label: '1', value: '1' }, { label: '2', value: '2' }, { label: '3', value: '3' }]}
+                onChange={(v) => setVariations(Number(v))} />
+
+              <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+                <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${advancedOpen ? 'rotate-180' : ''}`} />
+                  {t('অ্যাডভান্সড', 'Advanced')}
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-3 pt-2">
+                  <PillSelect label={t('বয়স', 'Age Range')} value={ageRange}
+                    options={[
+                      { label: t('টিন', 'Teen'), value: 'teen' },
+                      { label: '20s', value: '20s' },
+                      { label: '30s', value: '30s' },
+                      { label: '40s+', value: '40s+' },
+                    ]}
+                    onChange={setAgeRange} />
+                  <PillSelect label={t('স্টাইল', 'Style')} value={modelStyle}
+                    options={[
+                      { label: t('ন্যাচারাল', 'Natural'), value: 'natural' },
+                      { label: t('এডিটোরিয়াল', 'Editorial'), value: 'editorial' },
+                      { label: t('কমার্শিয়াল', 'Commercial'), value: 'commercial' },
+                    ]}
+                    onChange={setModelStyle} />
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+
+            {/* Continue Button */}
+            <Button onClick={handleContinue} disabled={!canContinue} className="w-full bg-primary hover:bg-primary/90">
+              <ArrowRight className="h-4 w-4 mr-2" />
+              {t('চালিয়ে যান', 'Continue')}
+            </Button>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <div className="space-y-1">
+              <h3 className="text-sm font-semibold">{t('মডেল বর্ণনা', 'Model Description')}</h3>
+              <p className="text-xs text-muted-foreground">{t('Fashn.ai যে মডেল তৈরি করবে তার বর্ণনা।', 'This describes the model Fashn.ai will generate.')}</p>
+            </div>
+            <PromptEditor
+              prompt={prompt}
+              onPromptChange={(p) => { setPrompt(p); if (p !== defaultPrompt) setPromptWasEnhanced(true); }}
+              defaultPrompt={defaultPrompt}
+              onBack={() => setStep(1)}
+              onGenerate={handleGenerate}
+              generating={generating}
+              generateLabel={t('ট্রাই-অন তৈরি করুন', 'Generate Try-On')}
+              generateIcon={<Shirt className="h-4 w-4 mr-2" />}
+              tabType="tryon"
+              costNote={`~$0.013 ${t('প্রতি জেনারেশন', 'per generation')} · 1 ${t('ইমেজ ক্রেডিট', 'image credit')}`}
+              helperNote={t('এটি আপনার মডেলের বর্ণনা, দৃশ্যের নয়। চেহারায় মনোযোগ দিন — লিঙ্গ, গড়ন, ত্বকের রং, পোজ।', 'This describes your model, not the scene. Focus on appearance — gender, build, skin tone, pose.')}
+            />
+          </>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">{t('ফলাফল প্রস্তুত! ডানদিকে দেখুন।', 'Result ready! See it on the right.')}</p>
+            <Button variant="outline" onClick={() => setStep(2)} className="w-full">
+              <Sparkles className="h-4 w-4 mr-2" />{t('প্রম্পট সম্পাদনা ও পুনরায় তৈরি', 'Edit Prompt & Regenerate')}
+            </Button>
           </div>
-
-          <PillSelect label={t('লিঙ্গ', 'Gender')} value={gender}
-            options={[
-              { label: t('মহিলা', 'Female'), value: 'female' as ModelGender, icon: <User2 className="h-3.5 w-3.5" /> },
-              { label: t('পুরুষ', 'Male'), value: 'male' as ModelGender, icon: <User2 className="h-3.5 w-3.5" /> },
-            ]}
-            onChange={setGender} />
-
-          <PillSelect label={t('শরীর', 'Body Type')} value={body}
-            options={[
-              { label: t('স্লিম', 'Slim'), value: 'slim' as ModelBody },
-              { label: t('গড়', 'Average'), value: 'average' as ModelBody },
-              { label: t('প্লাস সাইজ', 'Plus Size'), value: 'plus' as ModelBody },
-            ]}
-            onChange={setBody} />
-
-          <SkinSelect label={t('ত্বকের রং', 'Skin Tone')} value={skin} onChange={setSkin} />
-
-          <PillSelect label={t('পোজ', 'Pose')} value={pose}
-            options={[
-              { label: t('দাঁড়ানো', 'Standing'), value: 'standing' as ModelPose },
-              { label: t('হাঁটা', 'Walking'), value: 'walking' as ModelPose },
-              { label: t('বসা', 'Sitting'), value: 'sitting' as ModelPose },
-              { label: t('ডায়নামিক', 'Dynamic'), value: 'dynamic' as ModelPose },
-            ]}
-            onChange={setPose} />
-        </div>
-
-        {/* SECTION 3: Background */}
-        <div className="space-y-3">
-          <PillSelect label={t('ব্যাকগ্রাউন্ড', 'Background')} value={background}
-            options={[
-              { label: t('স্টুডিও হোয়াইট', 'Studio White'), value: 'studio_white' as Background },
-              { label: t('স্টুডিও গ্রে', 'Studio Grey'), value: 'studio_grey' as Background },
-              { label: t('লাইফস্টাইল', 'Lifestyle'), value: 'lifestyle' as Background },
-              { label: t('স্বচ্ছ', 'Transparent'), value: 'transparent' as Background },
-            ]}
-            onChange={setBackground} />
-
-          {background === 'lifestyle' && (
-            <PillSelect label={t('দৃশ্য', 'Scene')} value={lifestyleScene}
-              options={[
-                { label: t('ইনডোর', 'Indoor'), value: 'indoor' as LifestyleScene },
-                { label: t('আউটডোর', 'Outdoor'), value: 'outdoor' as LifestyleScene },
-                { label: t('আরবান', 'Urban'), value: 'urban' as LifestyleScene },
-                { label: t('মিনিমাল', 'Minimal'), value: 'minimal' as LifestyleScene },
-              ]}
-              onChange={setLifestyleScene} />
-          )}
-        </div>
-
-        {/* SECTION 4: Options */}
-        <div className="space-y-3">
-          <PillSelect label={t('ভ্যারিয়েশন', 'Variations')} value={String(variations)}
-            options={[
-              { label: '1', value: '1' },
-              { label: '2', value: '2' },
-              { label: '3', value: '3' },
-            ]}
-            onChange={(v) => setVariations(Number(v))} />
-
-          <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-            <CollapsibleTrigger className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${advancedOpen ? 'rotate-180' : ''}`} />
-              {t('অ্যাডভান্সড', 'Advanced')}
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-3 pt-2">
-              <PillSelect label={t('বয়স', 'Age Range')} value={ageRange}
-                options={[
-                  { label: t('টিন', 'Teen'), value: 'teen' as AgeRange },
-                  { label: '20s', value: '20s' as AgeRange },
-                  { label: '30s', value: '30s' as AgeRange },
-                  { label: '40s+', value: '40s+' as AgeRange },
-                ]}
-                onChange={setAgeRange} />
-              <PillSelect label={t('স্টাইল', 'Style')} value={modelStyle}
-                options={[
-                  { label: t('ন্যাচারাল', 'Natural'), value: 'natural' as ModelStyle },
-                  { label: t('এডিটোরিয়াল', 'Editorial'), value: 'editorial' as ModelStyle },
-                  { label: t('কমার্শিয়াল', 'Commercial'), value: 'commercial' as ModelStyle },
-                ]}
-                onChange={setModelStyle} />
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
-
-        {/* Generate Button */}
-        <div className="space-y-1.5">
-          <Button
-            onClick={handleGenerate}
-            disabled={!garmentFile || !garmentReady || !garmentCategory || generating}
-            className="w-full bg-primary hover:bg-primary/90"
-          >
-            {generating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Shirt className="h-4 w-4 mr-2" />}
-            {t('ট্রাই-অন তৈরি করুন', 'Generate Try-On')}
-          </Button>
-          <p className="text-[11px] text-muted-foreground text-center">
-            ~$0.013 {t('প্রতি জেনারেশন', 'per generation')} · 1 {t('ইমেজ ক্রেডিট', 'image credit')}
-          </p>
-        </div>
+        )}
       </div>
 
       {/* RIGHT PANEL */}
@@ -533,19 +610,13 @@ const TryOnTab = () => {
                 <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${Math.max(progress, 10)}%` }} />
               </div>
               <div className="flex justify-between text-[11px] text-muted-foreground">
-                <span>
-                  {t('ভ্যারিয়েশন', 'Variation')} {completedVariations} {t('এর মধ্যে', 'of')} {variations} {t('সম্পন্ন', 'complete')}
-                </span>
+                <span>{t('ভ্যারিয়েশন', 'Variation')} {completedVariations} {t('এর মধ্যে', 'of')} {variations} {t('সম্পন্ন', 'complete')}</span>
                 <span>~{Math.ceil(timeRemaining / 1000)}s {t('বাকি', 'remaining')}</span>
               </div>
             </div>
           ) : results.length > 0 ? (
             <div className="w-full space-y-4">
-              <img
-                src={getCdnImageUrl(results[activeResult], { width: 1200, quality: 90 })}
-                alt="Try-on result"
-                className="w-full max-h-[500px] object-contain rounded-xl"
-              />
+              <img src={getCdnImageUrl(results[activeResult], { width: 1200, quality: 90 })} alt="Try-on result" className="w-full max-h-[500px] object-contain rounded-xl" />
               {results.length > 1 && (
                 <div className="flex gap-2 justify-center">
                   {results.map((r, i) => (
@@ -567,21 +638,16 @@ const TryOnTab = () => {
                 </div>
               )}
 
-              {/* Primary CTA */}
               <Button onClick={handleMakeAd} className="w-full bg-primary hover:bg-primary/90">
                 <ArrowRight className="h-4 w-4 mr-2" />
                 {t('এটি দিয়ে অ্যাড তৈরি করুন', 'Make an Ad with This')}
               </Button>
 
-              {/* Secondary actions */}
               <div className="flex gap-2 flex-wrap">
                 <Button variant="ghost" size="sm" onClick={() => {
                   setShowSwapPanel(!showSwapPanel);
                   if (!showSwapPanel) {
-                    setSwapGender(gender);
-                    setSwapBody(body);
-                    setSwapSkin(skin);
-                    setSwapPose(pose);
+                    setSwapGender(gender); setSwapBody(body); setSwapSkin(skin); setSwapPose(pose);
                   }
                 }}>
                   <RefreshCw className="h-3.5 w-3.5 mr-1.5" />{t('মডেল সোয়াপ', 'Swap Model')}
@@ -604,30 +670,28 @@ const TryOnTab = () => {
                     <h4 className="text-sm font-semibold">{t('মডেল সোয়াপ করুন — পোশাক রাখুন', 'Swap the model — keep the outfit')}</h4>
                     <p className="text-xs text-muted-foreground">{t('রিজেনারেশন ছাড়াই কে পরছে তা পরিবর্তন করুন।', 'Change who\'s wearing it without regenerating from scratch.')}</p>
                   </div>
-
                   <PillSelect label={t('লিঙ্গ', 'Gender')} value={swapGender}
                     options={[
-                      { label: t('মহিলা', 'Female'), value: 'female' as ModelGender, icon: <User2 className="h-3.5 w-3.5" /> },
-                      { label: t('পুরুষ', 'Male'), value: 'male' as ModelGender, icon: <User2 className="h-3.5 w-3.5" /> },
+                      { label: t('মহিলা', 'Female'), value: 'female', icon: <User2 className="h-3.5 w-3.5" /> },
+                      { label: t('পুরুষ', 'Male'), value: 'male', icon: <User2 className="h-3.5 w-3.5" /> },
                     ]}
                     onChange={setSwapGender} />
                   <PillSelect label={t('শরীর', 'Body Type')} value={swapBody}
                     options={[
-                      { label: t('স্লিম', 'Slim'), value: 'slim' as ModelBody },
-                      { label: t('গড়', 'Average'), value: 'average' as ModelBody },
-                      { label: t('প্লাস সাইজ', 'Plus Size'), value: 'plus' as ModelBody },
+                      { label: t('স্লিম', 'Slim'), value: 'slim' },
+                      { label: t('গড়', 'Average'), value: 'average' },
+                      { label: t('প্লাস সাইজ', 'Plus Size'), value: 'plus' },
                     ]}
                     onChange={setSwapBody} />
                   <SkinSelect label={t('ত্বকের রং', 'Skin Tone')} value={swapSkin} onChange={setSwapSkin} />
                   <PillSelect label={t('পোজ', 'Pose')} value={swapPose}
                     options={[
-                      { label: t('দাঁড়ানো', 'Standing'), value: 'standing' as ModelPose },
-                      { label: t('হাঁটা', 'Walking'), value: 'walking' as ModelPose },
-                      { label: t('বসা', 'Sitting'), value: 'sitting' as ModelPose },
-                      { label: t('ডায়নামিক', 'Dynamic'), value: 'dynamic' as ModelPose },
+                      { label: t('দাঁড়ানো', 'Standing'), value: 'standing' },
+                      { label: t('হাঁটা', 'Walking'), value: 'walking' },
+                      { label: t('বসা', 'Sitting'), value: 'sitting' },
+                      { label: t('ডায়নামিক', 'Dynamic'), value: 'dynamic' },
                     ]}
                     onChange={setSwapPose} />
-
                   <Button onClick={handleSwapModel} disabled={swapping} className="w-full bg-primary hover:bg-primary/90">
                     {swapping ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
                     {t('মডেল সোয়াপ করুন', 'Swap Model')}
@@ -636,7 +700,6 @@ const TryOnTab = () => {
               )}
             </div>
           ) : (
-            /* Empty state */
             <div className="text-center space-y-4">
               <div className="flex items-center justify-center gap-8">
                 <div className="text-center space-y-2">
