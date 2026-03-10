@@ -449,13 +449,15 @@ const AIMotionTab = () => {
               </div>
 
               {/* Continue Button */}
-              <Button
-                onClick={handleContinue}
-                disabled={!canContinue}
-                className="w-full bg-primary hover:bg-primary/90"
-              >
-                {t('চালিয়ে যান', 'Continue')} <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <div className="sticky bottom-0 pt-3 pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 bg-gradient-to-t from-background via-background to-transparent">
+                <Button
+                  onClick={handleContinue}
+                  disabled={!canContinue}
+                  className="w-full bg-primary hover:bg-primary/90"
+                >
+                  {t('চালিয়ে যান', 'Continue')} <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
             </motion.div>
           )}
 
