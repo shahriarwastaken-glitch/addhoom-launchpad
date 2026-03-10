@@ -5,13 +5,17 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUpgrade } from '@/contexts/UpgradeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Film, Sparkles } from 'lucide-react';
 import StageIndicator from './video/StageIndicator';
 import VideoSetup from './video/VideoSetup';
 import VideoProcessing from './video/VideoProcessing';
 import VideoResultView from './video/VideoResult';
 import ScriptPreviewModal from './video/ScriptPreviewModal';
+import AIMotionTab from './video/AIMotionTab';
 import type { VideoStage, VideoFormData, VideoScript, VideoResult, ProcessingStep } from './video/types';
 import { DEFAULT_FORM } from './video/types';
+
+type VideoTab = 'slideshow' | 'ai_motion';
 
 const SLIDE_VARIANTS = {
   enter: (direction: number) => ({ x: direction > 0 ? 300 : -300, opacity: 0 }),
@@ -24,6 +28,7 @@ const VideoAd = () => {
   const { t, lang } = useLanguage();
   const { showUpgrade } = useUpgrade();
 
+  const [activeTab, setActiveTab] = useState<VideoTab>('slideshow');
   const [stage, setStage] = useState<VideoStage>(1);
   const [direction, setDirection] = useState(1);
   const [form, setForm] = useState<VideoFormData>(DEFAULT_FORM);
@@ -237,6 +242,41 @@ const VideoAd = () => {
 
   return (
     <div className="h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden -m-3 sm:-m-6 md:-m-8">
+      {/* Tab Switcher */}
+      <div className="flex items-center gap-1 px-4 sm:px-6 pt-4 pb-2">
+        <button
+          onClick={() => setActiveTab('slideshow')}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            activeTab === 'slideshow'
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+          }`}
+        >
+          <Film size={14} />
+          {t('স্লাইডশো', 'Slideshow')}
+        </button>
+        <button
+          onClick={() => setActiveTab('ai_motion')}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all relative ${
+            activeTab === 'ai_motion'
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+          }`}
+        >
+          <Sparkles size={14} />
+          {t('AI মোশন', 'AI Motion')}
+          <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-primary text-primary-foreground shadow-sm">
+            {t('নতুন', 'New')} ✨
+          </span>
+        </button>
+      </div>
+
+      {activeTab === 'ai_motion' ? (
+        <div className="flex-1 overflow-hidden">
+          <AIMotionTab />
+        </div>
+      ) : (
+      <>
       {/* Stage indicator */}
       <StageIndicator currentStage={stage} />
 
@@ -342,6 +382,8 @@ const VideoAd = () => {
           />
         )}
       </AnimatePresence>
+      </>
+      )}
     </div>
   );
 };
