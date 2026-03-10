@@ -63,7 +63,7 @@ export interface AnalyticsData {
   }>;
   language_comparison: {
     bn: { count: number; avg_score: number };
-    banglish: { count: number; avg_score: number };
+    en: { count: number; avg_score: number };
   };
   unrated_ads: any[];
   workspace_industry: string | null;
