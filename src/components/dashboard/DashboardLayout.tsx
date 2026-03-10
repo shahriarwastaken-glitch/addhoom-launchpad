@@ -13,8 +13,8 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 const mobileItems = [
   { icon: Target, bn: 'হোম', en: 'Home', url: '/dashboard' },
   { icon: Wand2, bn: 'অ্যাড তৈরি', en: 'Create Ad', url: '/dashboard/generate' },
+  { icon: Sparkles, bn: 'স্টুডিও', en: 'Studio', url: '/dashboard/studio' },
   { icon: Video, bn: 'ভিডিও', en: 'Video', url: '/dashboard/video' },
-  { icon: MessageSquare, bn: 'চ্যাট', en: 'Chat', url: '/dashboard/chat' },
   { icon: Settings, bn: 'সেটিংস', en: 'Settings', url: '/dashboard/settings' },
 ];
 
