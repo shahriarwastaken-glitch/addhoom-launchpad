@@ -414,6 +414,18 @@ async function testGeminiKey(apiKey: string) {
   }
 }
 
+async function testPiapiKey(apiKey: string) {
+  const response = await fetch('https://api.piapi.ai/api/v1/user/profile', {
+    headers: { 'x-api-key': apiKey },
+  });
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('Invalid API key');
+    }
+    throw new Error('PiAPI test failed');
+  }
+}
+
 async function testResendKey(apiKey: string) {
   const response = await fetch('https://api.resend.com/domains', {
     headers: { Authorization: `Bearer ${apiKey}` },
