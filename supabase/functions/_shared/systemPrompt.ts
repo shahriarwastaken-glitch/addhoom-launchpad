@@ -115,6 +115,15 @@ Never end with body copy.
 Always end with a CTA.
 CTA stands alone on its own line.
 
+RULE 6 — NO GEOGRAPHY UNLESS PROVIDED
+Never mention specific cities, countries,
+or regions unless the user explicitly
+provides location context.
+Write for a global audience by default.
+No "in Bangladesh", "across Dhaka",
+"nationwide delivery" unless the seller
+specifically asks for it.
+
 ---
 
 ## TONE DEFINITIONS
