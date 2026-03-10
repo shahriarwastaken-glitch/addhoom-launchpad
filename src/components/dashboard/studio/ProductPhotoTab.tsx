@@ -13,6 +13,12 @@ import type { SceneType, SceneConfig, ImageFormat, ExportFormat } from './types'
 import StepIndicator from './StepIndicator';
 import PromptEditor from './PromptEditor';
 import { buildProductPhotoPrompt } from './promptBuilders';
+import type { LightingMood, ColorMood, CameraAngle, BackgroundComplexity, TimeOfDay, ProductFocus } from '@/components/dashboard/ad-generator/types';
+import {
+  LIGHTING_OPTIONS, COLOR_MOOD_OPTIONS, CAMERA_ANGLE_OPTIONS,
+  BACKGROUND_OPTIONS, TIME_OF_DAY_OPTIONS, PRODUCT_FOCUS_OPTIONS,
+  SCENE_STYLE_DEFAULTS,
+} from '@/components/dashboard/ad-generator/types';
 
 interface SceneOption {
   key: SceneType;
@@ -49,6 +55,31 @@ function getCdnImageUrl(fullUrl: string, opts: { width?: number; quality?: numbe
   return `${transformed}?${params.toString()}`;
 }
 
+// Reusable pill selector for visual controls
+const VisualPillGroup = ({
+  label, options, value, onChange, t,
+}: {
+  label: string;
+  options: { label: string; labelEn: string; value: string; emoji: string }[];
+  value: string;
+  onChange: (v: string) => void;
+  t: (bn: string, en: string) => string;
+}) => (
+  <div className="space-y-1.5">
+    <span className="text-xs font-medium text-muted-foreground">{label}</span>
+    <div className="flex flex-wrap gap-1.5">
+      {options.map(opt => (
+        <button key={opt.value} onClick={() => onChange(opt.value)}
+          className={`h-9 px-3.5 rounded-full text-xs font-medium border transition-all ${
+            value === opt.value ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/50'
+          }`}>
+          <span className="mr-1">{opt.emoji}</span>{t(opt.label, opt.labelEn)}
+        </button>
+      ))}
+    </div>
+  </div>
+);
+
 const ProductPhotoTab = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -61,6 +92,14 @@ const ProductPhotoTab = () => {
   const [format, setFormat] = useState<ImageFormat>('1:1');
   const [exportFormat, setExportFormat] = useState<ExportFormat>('png');
   const [transparentBg, setTransparentBg] = useState(false);
+
+  // 6 visual controls
+  const [lightingMood, setLightingMood] = useState<LightingMood>('soft');
+  const [colorMood, setColorMood] = useState<ColorMood>('neutral');
+  const [cameraAngle, setCameraAngle] = useState<CameraAngle>('front');
+  const [backgroundComplexity, setBackgroundComplexity] = useState<BackgroundComplexity>('minimal');
+  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>('golden');
+  const [productFocus, setProductFocus] = useState<ProductFocus>('hero');
 
   // Two-step flow
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -129,6 +168,23 @@ const ProductPhotoTab = () => {
     setStep(1);
   }, [t]);
 
+  // Apply smart defaults when scene changes
+  const handleSceneChange = (newScene: SceneType) => {
+    setScene(newScene);
+    setSceneConfig({});
+    const defaults = SCENE_STYLE_DEFAULTS[newScene];
+    if (defaults) {
+      setLightingMood(defaults.lightingMood);
+      setColorMood(defaults.colorMood);
+      setCameraAngle(defaults.cameraAngle);
+      setBackgroundComplexity(defaults.backgroundComplexity);
+      setTimeOfDay(defaults.timeOfDay);
+      setProductFocus(defaults.productFocus);
+      const sceneNames = SCENES.find(s => s.key === newScene);
+      toast.success(t(`${sceneNames?.labelBn || newScene} সিনের জন্য ডিফল্ট আপডেট হয়েছে`, `Defaults updated for ${sceneNames?.labelEn || newScene} scene`), { duration: 2000 });
+    }
+  };
+
   const canContinue = productFile && scene;
 
   const handleContinue = () => {
@@ -138,6 +194,12 @@ const ProductPhotoTab = () => {
       scene: scene!,
       sceneConfig: sceneConfig as Record<string, string>,
       format,
+      lightingMood,
+      colorMood,
+      cameraAngle,
+      backgroundComplexity,
+      timeOfDay,
+      productFocus,
     });
     setDefaultPrompt(built);
     setPrompt(built);
@@ -284,7 +346,7 @@ const ProductPhotoTab = () => {
               <h3 className="text-sm font-semibold">{t('সিন বাছাই', 'Choose Scene')}</h3>
               <div className="grid grid-cols-2 gap-2">
                 {SCENES.map(s => (
-                  <button key={s.key} onClick={() => { setScene(s.key); setSceneConfig({}); }}
+                  <button key={s.key} onClick={() => handleSceneChange(s.key)}
                     className={`flex items-start gap-3 p-3 rounded-xl border-2 text-left transition-all ${
                       scene === s.key ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'
                     }`}>
@@ -311,7 +373,7 @@ const ProductPhotoTab = () => {
                     <PillSelect label={t('ব্যাকড্রপ', 'Backdrop')} value={sceneConfig.backdrop || 'white'}
                       options={[{ label: 'White', value: 'white' }, { label: 'Light Grey', value: 'light grey' }, { label: 'Black', value: 'black' }, { label: 'Warm Beige', value: 'warm beige' }]}
                       onChange={v => updateConfig('backdrop', v)} />
-                    <PillSelect label={t('লাইটিং', 'Lighting')} value={sceneConfig.lightingDirection || 'left'}
+                    <PillSelect label={t('লাইটিং ডিরেকশন', 'Lighting Direction')} value={sceneConfig.lightingDirection || 'left'}
                       options={[{ label: t('বাম', 'Left'), value: 'left' }, { label: t('ডান', 'Right'), value: 'right' }, { label: t('উপর', 'Top'), value: 'top' }]}
                       onChange={v => updateConfig('lightingDirection', v as any)} />
                   </>
@@ -348,6 +410,21 @@ const ProductPhotoTab = () => {
                 )}
               </div>
             )}
+
+            {/* Divider */}
+            <div className="flex items-center gap-2 pt-1">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-[12px] uppercase tracking-wider text-muted-foreground">{t('ভিজ্যুয়াল কন্ট্রোল', 'Visual Controls')}</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+
+            {/* 6 Visual Controls */}
+            <VisualPillGroup label={t('লাইটিং', 'Lighting')} options={LIGHTING_OPTIONS} value={lightingMood} onChange={v => setLightingMood(v as LightingMood)} t={t} />
+            <VisualPillGroup label={t('কালার মুড', 'Color Mood')} options={COLOR_MOOD_OPTIONS} value={colorMood} onChange={v => setColorMood(v as ColorMood)} t={t} />
+            <VisualPillGroup label={t('ক্যামেরা অ্যাঙ্গেল', 'Camera Angle')} options={CAMERA_ANGLE_OPTIONS} value={cameraAngle} onChange={v => setCameraAngle(v as CameraAngle)} t={t} />
+            <VisualPillGroup label={t('ব্যাকগ্রাউন্ড', 'Background')} options={BACKGROUND_OPTIONS} value={backgroundComplexity} onChange={v => setBackgroundComplexity(v as BackgroundComplexity)} t={t} />
+            <VisualPillGroup label={t('দিনের সময়', 'Time of Day')} options={TIME_OF_DAY_OPTIONS} value={timeOfDay} onChange={v => setTimeOfDay(v as TimeOfDay)} t={t} />
+            <VisualPillGroup label={t('প্রোডাক্ট ফোকাস', 'Product Focus')} options={PRODUCT_FOCUS_OPTIONS} value={productFocus} onChange={v => setProductFocus(v as ProductFocus)} t={t} />
 
             {/* Format & Export */}
             <div className="space-y-3">

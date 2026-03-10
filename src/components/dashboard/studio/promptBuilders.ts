@@ -1,10 +1,99 @@
 // Pure TypeScript template builders — zero API cost
 
+import type { LightingMood, ColorMood, CameraAngle, BackgroundComplexity, TimeOfDay, ProductFocus } from '@/components/dashboard/ad-generator/types';
+
+// ── Shared prompt maps for the 6 visual controls ──
+
+const LIGHTING: Record<LightingMood, string> = {
+  soft: 'soft diffused lighting, gentle shadows, even illumination, studio softbox quality',
+  dramatic: 'dramatic high-contrast lighting, deep shadows, strong directional light, cinematic chiaroscuro effect',
+  natural: 'natural ambient lighting, soft outdoor light, warm sunlight feel, realistic shadows',
+  bright: 'bright clean lighting, high key, minimal shadows, airy and light feel, commercial photography brightness',
+};
+
+const COLOR: Record<ColorMood, string> = {
+  warm: 'warm color grading, golden amber tones, rich earthy palette, cozy inviting atmosphere',
+  cool: 'cool color grading, blue and grey tones, clean crisp palette, modern minimalist feel',
+  neutral: 'neutral color grading, balanced tones, true-to-life colors, clean professional palette',
+  bold: 'bold vibrant color grading, saturated tones, high impact palette, energetic visual punch',
+};
+
+const ANGLE: Record<CameraAngle, string> = {
+  front: 'straight-on front facing angle, product fully visible, symmetrical composition',
+  three_quarter: '3/4 angle perspective, slight diagonal view, adds depth and dimension to the product',
+  overhead: 'overhead flat lay perspective, bird\'s eye view, product shot from directly above',
+  closeup: 'close-up detail shot, tight crop on product, texture and detail emphasized, macro photography feel',
+};
+
+const BACKGROUND: Record<BackgroundComplexity, string> = {
+  minimal: 'minimal clean background, almost empty, product is the sole focus, negative space dominant',
+  moderate: 'moderately styled background, a few complementary elements, balanced composition between product and environment',
+  rich: 'richly detailed background, full environmental context, props and scene elements tell a story around the product',
+};
+
+const TIME: Record<TimeOfDay, string> = {
+  morning: 'fresh morning light, soft directional sunlight, cool crisp atmosphere, gentle long shadows',
+  golden: 'warm golden hour light, rich amber glow, long soft shadows, magic hour photography',
+  midday: 'bright midday light, strong even illumination, clean sharp shadows, high noon energy',
+  night: 'night atmosphere, artificial warm lighting, dramatic shadows, moody ambient light, urban or studio night feel',
+};
+
+const FOCUS: Record<ProductFocus, string> = {
+  hero: 'product is the undisputed hero of the frame, large and centered, commands full attention, everything else supports the product',
+  environmental: 'product lives naturally in its environment, context and lifestyle story equally important, product integrated into the scene',
+  detail: 'detail and texture focused composition, product craftsmanship emphasized, close attention to material and finish quality',
+};
+
+// ── Ad Image prompt ──
+
+export function buildAdImagePrompt(config: {
+  productName: string;
+  style: string;
+  brandColors: string[];
+  format: string;
+  lightingMood?: LightingMood;
+  colorMood?: ColorMood;
+  cameraAngle?: CameraAngle;
+  backgroundComplexity?: BackgroundComplexity;
+  timeOfDay?: TimeOfDay;
+  productFocus?: ProductFocus;
+}): string {
+  const styleDescriptions: Record<string, string> = {
+    clean: 'professional studio photography setup, seamless paper backdrop, clean empty surface, soft drop shadow',
+    lifestyle: 'realistic lifestyle environment, complementary props that enhance the product story, shallow depth of field, soft bokeh background',
+    creative: 'smooth bold color gradient background, subtle grain texture overlay, modern editorial advertising aesthetic, clean minimal environment',
+    sale: 'vibrant sale campaign aesthetic, bold contrasting colors, dynamic composition, high energy, attention-grabbing commercial photography',
+  };
+
+  const name = config.productName || 'the product';
+  const styleDesc = styleDescriptions[config.style] || styleDescriptions.clean;
+  const colorNote = config.brandColors.length > 0
+    ? `Incorporate brand colors subtly: ${config.brandColors.join(', ')}.`
+    : '';
+
+  const lighting = config.lightingMood ? `LIGHTING: ${LIGHTING[config.lightingMood]}.` : '';
+  const color = config.colorMood ? `COLOR: ${COLOR[config.colorMood]}.` : '';
+  const angle = config.cameraAngle ? `COMPOSITION: ${ANGLE[config.cameraAngle]}.` : '';
+  const bg = config.backgroundComplexity ? `BACKGROUND: ${BACKGROUND[config.backgroundComplexity]}.` : '';
+  const time = config.timeOfDay ? `TIME: ${TIME[config.timeOfDay]}.` : '';
+  const focus = config.productFocus ? `PRODUCT ROLE: ${FOCUS[config.productFocus]}.` : '';
+
+  return `Product advertisement photography of ${name}. ${styleDesc}. ${angle} ${focus} ${bg} ${lighting} ${time} ${color} ${colorNote} RULES: Product appears exactly once, same orientation, colors, proportions as reference image. No text, watermarks, or labels. Full product visible, not cropped. QUALITY: 8K, perfect exposure, professional color grading, luxury brand campaign quality.`.replace(/\s{2,}/g, ' ').trim();
+}
+
+// ── Product Photo prompt ──
+
 export function buildProductPhotoPrompt(config: {
   productName?: string;
   scene: string;
   sceneConfig: Record<string, string>;
   format: string;
+  lightingMood?: LightingMood;
+  colorMood?: ColorMood;
+  cameraAngle?: CameraAngle;
+  backgroundComplexity?: BackgroundComplexity;
+  timeOfDay?: TimeOfDay;
+  productFocus?: ProductFocus;
 }): string {
   const sceneDescriptions: Record<string, string> = {
     onWhite: `pure white seamless background, product perfectly centered, soft overhead lighting with fill light, subtle soft drop shadow beneath product, clean clinical marketplace-ready presentation`,
@@ -17,8 +106,17 @@ export function buildProductPhotoPrompt(config: {
   const name = config.productName || 'the product';
   const sceneDesc = sceneDescriptions[config.scene] || sceneDescriptions.onWhite;
 
-  return `Professional product photography of ${name}. ${sceneDesc}. Product appears exactly once, full product visible, same colors and proportions as reference image. No text, watermarks, or labels. 8K resolution, perfect exposure, professional color grading.`;
+  const lighting = config.lightingMood ? `LIGHTING: ${LIGHTING[config.lightingMood]}.` : '';
+  const color = config.colorMood ? `COLOR: ${COLOR[config.colorMood]}.` : '';
+  const angle = config.cameraAngle ? `COMPOSITION: ${ANGLE[config.cameraAngle]}.` : '';
+  const bg = config.backgroundComplexity ? `BACKGROUND: ${BACKGROUND[config.backgroundComplexity]}.` : '';
+  const time = config.timeOfDay ? `TIME: ${TIME[config.timeOfDay]}.` : '';
+  const focus = config.productFocus ? `PRODUCT ROLE: ${FOCUS[config.productFocus]}.` : '';
+
+  return `Professional product photography of ${name}. ${sceneDesc}. ${angle} ${focus} ${bg} ${lighting} ${time} ${color} Product appears exactly once, full product visible, same colors and proportions as reference image. No text, watermarks, or labels. 8K resolution, perfect exposure, professional color grading.`.replace(/\s{2,}/g, ' ').trim();
 }
+
+// ── Try-On prompt ──
 
 export function buildTryOnPrompt(config: {
   gender: string;
@@ -66,25 +164,4 @@ export function buildTryOnPrompt(config: {
   parts.push('professional fashion photography, full body shot, well lit');
 
   return parts.join(', ');
-}
-
-export function buildAdImagePrompt(config: {
-  productName: string;
-  style: string;
-  brandColors: string[];
-  format: string;
-}): string {
-  const styleDescriptions: Record<string, string> = {
-    clean: `professional studio photography setup, seamless paper backdrop, softbox lighting from upper left, subtle rim light from right, clean empty surface, soft drop shadow`,
-    lifestyle: `realistic lifestyle environment, warm natural light, complementary props that enhance the product story, shallow depth of field, soft bokeh background`,
-    creative: `smooth bold color gradient background, subtle grain texture overlay, modern editorial advertising aesthetic, clean minimal environment`,
-    sale: `vibrant sale campaign aesthetic, bold contrasting colors, dynamic composition, high energy, attention-grabbing commercial photography`,
-  };
-
-  const styleDesc = styleDescriptions[config.style] || styleDescriptions.clean;
-  const colorNote = config.brandColors.length > 0
-    ? `Brand accent colors to incorporate: ${config.brandColors.join(', ')}.`
-    : '';
-
-  return `Product advertisement photography of ${config.productName}. ${styleDesc}. The product is centered and perfectly lit, appearing exactly once with natural shadows. ${colorNote} No text, watermarks, or labels anywhere. Ultra sharp, 8K quality, perfect exposure, professional color grading, luxury brand campaign quality.`;
 }
