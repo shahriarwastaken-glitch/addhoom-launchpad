@@ -8,7 +8,11 @@ import {
   Target, AlertTriangle, BookOpen, CheckCircle, Zap, Gift,
   Smile, Briefcase, Flame, Square, Smartphone, Monitor,
   Sparkles, Palette, Camera, Upload, Rocket, History,
+  ArrowRight,
 } from 'lucide-react';
+import StepIndicator from '@/components/dashboard/studio/StepIndicator';
+import PromptEditor from '@/components/dashboard/studio/PromptEditor';
+import { buildAdImagePrompt } from '@/components/dashboard/studio/promptBuilders';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   GeneratorMode, GeneratorFormData, PLATFORMS, FRAMEWORKS,
