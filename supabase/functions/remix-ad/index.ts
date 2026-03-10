@@ -102,10 +102,11 @@ Return ONLY valid JSON array:
 [{"headline":"...","body":"...","cta":"...","dhoom_score":0,"copy_score":0,"score_reason":"...","improvement_note":"one sentence on what was improved vs original"}]`;
     }
 
-    // STEP 5 — Call Gemini
+    // STEP 5 — Call Gemini with custom prompt or generated prompt
+    const finalPrompt = custom_prompt || prompt;
     let aiResponse: string;
     try {
-      aiResponse = await callGemini(prompt, ADDHOOM_SYSTEM_PROMPT);
+      aiResponse = await callGemini(finalPrompt, ADDHOOM_SYSTEM_PROMPT);
     } catch (e) {
       console.error("Gemini error:", e);
       return errorResponse(503, "AI এখন ব্যস্ত।", "AI is busy right now.");
