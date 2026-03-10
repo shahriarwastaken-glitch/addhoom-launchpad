@@ -5,7 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import {
   ArrowLeft, Pencil, Plus, FolderOpen, Star, Trophy, Zap, Flame,
-  TrendingUp, Copy, RefreshCw, Check, X, Search, Filter
+  TrendingUp, Copy, RefreshCw, Check, X, Search, Filter,
+  Target, ShoppingBag, PartyPopper, Sparkles, Briefcase, Megaphone, Rocket, Heart
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
