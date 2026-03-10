@@ -864,11 +864,11 @@ function SwipeView({ entries, setEntries, t, lang, navigate, isMobile }: {
   if (currentIdx >= pendingEntries.length && pendingEntries.length === 0 && entries.length > 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center">
-        <div className="text-4xl mb-4">🎉</div>
+        <PartyPopper size={36} className="text-primary mb-4" />
         <h3 className="text-xl font-bold text-foreground mb-2 font-bn">{t('সব কনটেন্ট রিভিউ হয়ে গেছে!', 'All content reviewed!')}</h3>
         <div className="space-y-1 text-sm text-muted-foreground mb-6">
-          <p>✓ {t(`নিশ্চিত করা হয়েছে: ${toBn(confirmedCount)}টি`, `Confirmed: ${confirmedCount}`)}</p>
-          <p>✕ {t(`বাদ দেওয়া হয়েছে: ${toBn(skippedCount)}টি`, `Skipped: ${skippedCount}`)}</p>
+          <p className="flex items-center gap-1"><Check size={12} /> {lang === 'bn' ? `নিশ্চিত করা হয়েছে: ${toBn(confirmedCount)}টি` : `Confirmed: ${confirmedCount}`}</p>
+          <p className="flex items-center gap-1"><X size={12} /> {lang === 'bn' ? `বাদ দেওয়া হয়েছে: ${toBn(skippedCount)}টি` : `Skipped: ${skippedCount}`}</p>
         </div>
       </div>
     );
