@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useState } from 'react';
+import { Heart, Flag } from 'lucide-react';
 
 const Footer = () => {
   const { t } = useLanguage();
@@ -10,7 +11,7 @@ const Footer = () => {
       <div className="max-w-[1200px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1.5fr] gap-10 lg:gap-8">
           <div>
-            <Link to="/" className="flex items-center gap-2.5"><div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center"><span className="font-bn text-[18px] font-bold text-primary-foreground leading-none">আ</span></div><span className="font-en text-[22px] font-[800] text-primary-foreground tracking-[-0.02em]">AdDhoom</span></Link>
+            <Link to="/" className="flex items-center gap-2.5"><div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center"><span className="font-en text-[18px] font-bold text-primary-foreground leading-none">A</span></div><span className="font-en text-[22px] font-[800] text-primary-foreground tracking-[-0.02em]">AdDhoom</span></Link>
             <p className="mt-3 font-bn text-lg font-bold text-primary-foreground">{t('বিজ্ঞাপন দাও। ধুম তোলো।', 'Advertise. Explode.')}</p>
             <p className="mt-2 font-bn text-sm text-primary-foreground/50 max-w-[260px]">{t('বাংলাদেশের ই-কমার্স উদ্যোক্তাদের জন্য AI-চালিত বিজ্ঞাপন টুল।', 'AI-powered ad tool for BD e-commerce.')}</p>
             <div className="flex gap-2 mt-6">{['F','I','L'].map(s => (<a key={s} href="#" className="w-9 h-9 rounded-full bg-primary-foreground/5 border border-primary-foreground/10 flex items-center justify-center text-primary-foreground/70 hover:bg-primary/20 hover:border-primary hover:text-primary-foreground transition-all text-xs font-bold">{s}</a>))}</div>
@@ -33,8 +34,8 @@ const Footer = () => {
           </div>
         </div>
         <div className="mt-12 pt-6 border-t border-primary-foreground/[0.06] flex flex-col sm:flex-row justify-between items-center gap-2 text-[13px] text-primary-foreground/30">
-          <span>© ২০২৫ AdDhoom. {t('সর্বস্বত্ব সংরক্ষিত।','All rights reserved.')}</span>
-          <span>🇧🇩 Made with ❤️ in Bangladesh</span>
+          <span>{t('© ২০২৫ AdDhoom. সর্বস্বত্ব সংরক্ষিত।', '© 2025 AdDhoom. All rights reserved.')}</span>
+          <span className="flex items-center gap-1.5"><Flag className="w-3 h-3 text-brand-green" /> Made with <Heart className="w-3 h-3 text-destructive" /> in Bangladesh</span>
         </div>
       </div>
     </footer>

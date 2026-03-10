@@ -27,7 +27,7 @@ const Pricing = () => {
         <div className="grid md:grid-cols-2 gap-6 max-w-[800px] mx-auto items-start">
           <div className={`bg-card rounded-3xl border border-border p-10 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7'}`} style={{ transitionDelay: '200ms' }}>
             <span className="font-en text-base font-semibold text-muted-foreground tracking-[0.1em] uppercase">Pro</span>
-            <div className="mt-4 flex items-baseline gap-1"><span className="font-mono font-bold text-foreground" style={{ fontSize: 'clamp(40px, 5vw, 52px)' }}>{annual ? '৳২,৩৯৯' : '৳২,৯৯৯'}</span><span className="font-bn text-lg text-muted-foreground">/{t('মাস', 'mo')}</span></div>
+            <div className="mt-4 flex items-baseline gap-1"><span className="font-mono font-bold text-foreground" style={{ fontSize: 'clamp(40px, 5vw, 52px)' }}>{t(annual ? '৳২,৩৯৯' : '৳২,৯৯৯', annual ? '৳2,399' : '৳2,999')}</span><span className="font-bn text-lg text-muted-foreground">/{t('মাস', 'mo')}</span></div>
             {annual && <span className="inline-block mt-2 text-xs font-semibold text-brand-green bg-brand-green/10 rounded-full px-3 py-1">{t('৳৭,২০০ বাঁচবেন বছরে', 'Save ৳7,200/year')}</span>}
             <p className="mt-3 font-bn text-[15px] text-muted-foreground">{t('একক দোকানের জন্য পারফেক্ট', 'Perfect for single shops')}</p>
             <div className="h-px bg-border my-6" />
@@ -37,7 +37,7 @@ const Pricing = () => {
           <div className={`relative bg-primary rounded-3xl p-10 text-primary-foreground scale-[1.02] shadow-[0_24px_80px_rgba(255,81,0,0.35)] transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-7'}`} style={{ transitionDelay: '300ms' }}>
             <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-card text-primary text-xs font-body font-semibold rounded-full px-5 py-1.5">{t('সবচেয়ে জনপ্রিয়', 'Most Popular')}</span>
             <span className="font-en text-base font-semibold text-primary-foreground/70 tracking-[0.1em] uppercase">Agency</span>
-            <div className="mt-4 flex items-baseline gap-1"><span className="font-mono font-bold text-primary-foreground" style={{ fontSize: 'clamp(40px, 5vw, 52px)' }}>{annual ? '৳৬,৩৯৯' : '৳৭,৯৯৯'}</span><span className="font-bn text-lg text-primary-foreground/60">/{t('মাস', 'mo')}</span></div>
+            <div className="mt-4 flex items-baseline gap-1"><span className="font-mono font-bold text-primary-foreground" style={{ fontSize: 'clamp(40px, 5vw, 52px)' }}>{t(annual ? '৳৬,৩৯৯' : '৳৭,৯৯৯', annual ? '৳6,399' : '৳7,999')}</span><span className="font-bn text-lg text-primary-foreground/60">/{t('মাস', 'mo')}</span></div>
             <p className="mt-3 font-bn text-[15px] text-primary-foreground/75">{t('একাধিক ক্লায়েন্ট ম্যানেজ করুন', 'Manage multiple clients')}</p>
             <div className="h-px bg-primary-foreground/20 my-6" />
             <ul className="space-y-3">{agencyFeatures.map(f => (<li key={f} className="flex items-start gap-2.5 text-sm"><Check className="w-4 h-4 text-primary-foreground/90 shrink-0 mt-0.5" /><span className="font-bn text-primary-foreground">{f}</span></li>))}</ul>

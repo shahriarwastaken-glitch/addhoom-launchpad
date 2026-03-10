@@ -31,7 +31,7 @@ const FeatureBento = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 auto-rows-auto">
           {/* Dhoom Score */}
           <div className={`lg:col-span-7 bg-card rounded-3xl border border-border p-8 relative overflow-hidden hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(0,0,0,0.08)] ${cls(100)}`} style={{ transitionDelay: '100ms' }}>
-            <span className="absolute -top-2 left-4 font-mono text-[140px] font-bold text-primary/[0.04] leading-none select-none">৮৭</span>
+            <span className="absolute -top-2 left-4 font-mono text-[140px] font-bold text-primary/[0.04] leading-none select-none">87</span>
             <div className="relative z-[1] grid md:grid-cols-2 gap-6">
               <div>
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3"><Target className="w-8 h-8 text-primary" /></div>
@@ -58,7 +58,7 @@ const FeatureBento = () => {
             <h3 className="mt-3 font-en text-[22px] font-bold">{t('৯০ দিনের কনটেন্ট ক্যালেন্ডার', '90-Day Content Calendar')}</h3>
             <p className="mt-2 font-bn text-[15px] text-primary-foreground/65 leading-relaxed">{t('ঈদ, পূজা, বৈশাখ — সব উৎসবের আগেই বিজ্ঞাপন রেডি।', 'Eid, Puja, Boishakh — ads ready before every festival.')}</p>
             <div className="mt-6 grid grid-cols-7 gap-1 text-center text-[10px]">
-              {['র','স','ম','বু','বৃ','শু','শ'].map(d => <span key={d} className="text-primary-foreground/40 font-bn">{d}</span>)}
+              {(t('র,স,ম,বু,বৃ,শু,শ', 'S,M,T,W,T,F,S') as string).split(',').map(d => <span key={d} className="text-primary-foreground/40 font-bn">{d}</span>)}
               {Array.from({length:28},(_,i) => {const f=[5,12,19].includes(i); const today=i===8; return (<div key={i} className={`aspect-square rounded-md flex items-center justify-center text-[9px] ${today?'bg-primary-foreground text-foreground border border-primary font-bold':f?'bg-primary/30 text-primary':'bg-primary-foreground/5 text-primary-foreground/40'}`}>{i+1}</div>);})}
             </div>
             <div className="mt-4 space-y-2">
@@ -72,7 +72,7 @@ const FeatureBento = () => {
             <span className="text-xs font-semibold text-brand-green bg-brand-green/10 rounded-full px-2.5 py-0.5">{t('ইন্টেলিজেন্স', 'Intelligence')}</span>
             <h3 className="mt-3 font-bn text-xl font-bold text-foreground">{t('প্রতিযোগী কী করছে দেখুন', 'See What Competitors Do')}</h3>
             <p className="mt-2 font-bn text-sm text-muted-foreground leading-relaxed">{t('Facebook Ad Library থেকে প্রতিযোগীদের সেরা বিজ্ঞাপন খুঁজে পাল্টা কৌশল তৈরি করুন।', 'Find competitor best ads and create counter strategies.')}</p>
-            <div className="mt-4 flex items-center gap-3 text-xs"><span className="bg-secondary rounded-lg px-3 py-2 font-bn">Shadhin Mart: 12 ads</span><ArrowRight className="w-4 h-4 text-muted-foreground" /><span className="bg-brand-green/10 text-brand-green rounded-lg px-3 py-2 font-bn">{t('আপনি: AI কৌশল', 'You: AI Strategy')} ✓</span></div>
+            <div className="mt-4 flex items-center gap-3 text-xs"><span className="bg-secondary rounded-lg px-3 py-2 font-bn">{t('Shadhin Mart: ১২ ads', 'Shadhin Mart: 12 ads')}</span><ArrowRight className="w-4 h-4 text-muted-foreground" /><span className="bg-brand-green/10 text-brand-green rounded-lg px-3 py-2 font-bn flex items-center gap-1">{t('আপনি: AI কৌশল', 'You: AI Strategy')} <CheckCircle2 className="w-3 h-3" /></span></div>
           </div>
           {/* URL to Ad */}
           <div className={`lg:col-span-3 bg-secondary rounded-3xl p-7 hover:-translate-y-1 ${cls(400)}`} style={{ transitionDelay: '400ms' }}>
@@ -81,7 +81,7 @@ const FeatureBento = () => {
             <h3 className="mt-3 font-bn text-xl font-bold text-foreground">{t('লিংক দিন, বিজ্ঞাপন পান', 'Give Link, Get Ad')}</h3>
             <p className="mt-2 font-bn text-sm text-muted-foreground">{t('Daraz এর লিংক দিন — AI অটো বিজ্ঞাপন বানাবে।', 'Give a Daraz link — AI creates ads automatically.')}</p>
             <div className="mt-4 flex items-center gap-2 bg-card rounded-xl p-2.5 border border-border"><span className="text-xs text-muted-foreground truncate flex-1 font-body">daraz.com.bd/product/...</span><div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center shrink-0"><ArrowRight className="w-3.5 h-3.5 text-primary-foreground" /></div></div>
-            <p className="mt-2 text-xs text-primary font-bn font-semibold">→ {t('৫টি বিজ্ঞাপন কপি তৈরি', '5 ad copies created')}</p>
+            <p className="mt-2 text-xs text-primary font-bn font-semibold flex items-center gap-1"><ArrowRight className="w-3 h-3" /> {t('৫টি বিজ্ঞাপন কপি তৈরি', '5 ad copies created')}</p>
           </div>
           {/* Video Ad */}
           <div className={`lg:col-span-4 rounded-3xl p-7 text-primary-foreground hover:-translate-y-1 ${cls(500)}`} style={{ background: 'linear-gradient(135deg, #6C3FE8, #8B5CF6)', transitionDelay: '500ms' }}>
@@ -109,7 +109,7 @@ const FeatureBento = () => {
             <h3 className="mt-3 font-bn text-xl font-bold text-foreground">{t('অ্যাকাউন্ট হেলথ স্কোর', 'Account Health Score')}</h3>
             <p className="mt-2 font-bn text-sm text-muted-foreground">{t('বিজ্ঞাপন কৌশলের দুর্বলতা খুঁজে সমাধান দেয় AI।', 'AI finds weaknesses and gives solutions.')}</p>
             <div className="mt-4 flex items-start gap-4">
-              <span className="font-mono text-4xl font-bold text-brand-green">৭৮</span>
+              <span className="font-mono text-4xl font-bold text-brand-green">78</span>
               <div className="space-y-1.5 text-xs font-bn">
                 <div className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-brand-green" /> {t('সক্রিয় ক্যাম্পেইন', 'Active campaigns')}</div>
                 <div className="flex items-center gap-1.5"><AlertTriangle className="w-3.5 h-3.5 text-brand-yellow" /> {t('CTA বৈচিত্র্য কম', 'Low CTA variety')}</div>
