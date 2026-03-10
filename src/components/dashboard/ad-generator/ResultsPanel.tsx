@@ -454,7 +454,7 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
     { label: t('ভাষা', 'Language Execution'), value: ad.scores?.language_execution ?? null, weight: '10%' },
   ];
 
-  const barColor = (v: number) => v > 80 ? '#00B96B' : v >= 60 ? '#FFB800' : '#EF4444';
+  const barColor = (v: number | null) => v === null ? '#9E9E9E' : v > 80 ? '#00B96B' : v >= 60 ? '#FFB800' : '#EF4444';
 
   return (
     <motion.div
