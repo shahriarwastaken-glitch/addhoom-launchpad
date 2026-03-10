@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { callGemini, ADDHOOM_SYSTEM_PROMPT, corsHeaders, errorResponse, jsonResponse, logUsage } from "../_shared/addhoom.ts";
 import { aiError, unauthorizedError } from "../_shared/errors.ts";
+import { DHOOM_SCORE_SYSTEM_PROMPT } from "../_shared/adCopyPrompt.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -27,7 +28,7 @@ serve(async (req) => {
       return errorResponse(400, "হেডলাইন বা বডি দিন।", "Provide headline or body.");
     }
 
-    const prompt = `You are evaluating a ${platform || "facebook"} ad for the Bangladesh e-commerce market.
+    const prompt = `You are evaluating a ${platform || "facebook"} ad using the Copy That! Megacourse framework.
 Provide an honest, detailed, expert evaluation.
 
 AD TO EVALUATE:
@@ -39,21 +40,33 @@ CTA: ${cta || "(none)"}
 
 EVALUATE ON THESE DIMENSIONS (score each 0-100):
 
-1. HOOK STRENGTH (0-100): Does the headline stop someone mid-scroll? Is it specific? Does it create curiosity or urgency?
+1. HOOK STRENGTH (25%): Does the hook stop a distracted scroller? Does it create an open loop? Is it genuinely "new"? Does it answer "why should I care, right now, for me?" Are generic banned hooks avoided?
 
-2. BENGALI AUTHENTICITY (0-100, only if language is bn): Does it sound like natural spoken Bangla? Or does it feel translated? Is "আপনি" used correctly? Are BD-specific phrases used?
+2. EMOTIONAL RESONANCE (20%): Does the copy appeal to real desires — not just product features? Does the reader feel understood? Is there a moment where they think "this person gets me"? Does it enter the conversation already in the reader's head?
 
-3. FRAMEWORK EXECUTION (0-100): Identify which framework (AIDA/PAS/FOMO/other) this follows and how well it executes that framework.
+3. OBJECTION HANDLING (20%): Are major objections acknowledged and addressed with OCPB? Is proof specific enough to be credible? Vague assertions = low score. Named sources, real numbers = high score.
 
-4. CTA STRENGTH (0-100): Is the CTA clear and specific? Does it create urgency? Is it appropriate for BD market (Inbox করুন, এখনই অর্ডার করুন, etc.)?
+4. OFFER CLARITY (15%): Is the offer clearly and compellingly laid out? Is the CTA singular and direct? Is there a reason to act NOW? Does it close on a forward-looking benefit?
 
-5. MOBILE READABILITY (0-100): Will this read well on a small phone screen? Is the first line compelling enough? Is it too long?
+5. AWARENESS FIT (10%): Is the copy calibrated to the right awareness stage? Does the hook match what a reader at that stage needs to see?
 
-6. BD MARKET FIT (0-100): Overall fit for Bangladeshi buyers. Does it match BD pricing psychology, cultural context, and buying behavior?
+6. LANGUAGE EXECUTION (10%): Is copy tight? No filler words? Is "you" used constantly? Are claims backed with "because"? Is it specific or vague? Does it sound like a real person or like marketing?
 
 CALCULATE:
-- dhoom_score: weighted average (hook 25% + framework 20% + cta 20% + bd_fit 20% + mobile 15%)
-- copy_score: weighted average (hook 30% + bengali_auth 25% + framework 25% + cta 20%) — skip bengali_auth if English ad, reweight
+- dhoom_score: weighted average using the weights above
+- copy_score: same as dhoom_score for this evaluation
+
+Score tiers:
+0-39: Skip (grey)
+40-59: Test It (yellow)
+60-79: Launch (green)
+80-100: ধুম! (orange)
+
+Calibration:
+Exceptional Copy That! compliant ad: 82-90
+Solid ad with good bones: 68-75
+Generic competent ad: 50-60
+Filler-heavy, vague: below 45
 
 Return ONLY valid JSON:
 {
@@ -62,20 +75,20 @@ Return ONLY valid JSON:
   "grade": "one of: S (90-100) | A (80-89) | B (70-79) | C (60-69) | D (50-59) | F (below 50)",
   "scores": {
     "hook_strength": number,
-    "bengali_authenticity": number,
-    "framework_execution": number,
-    "cta_strength": number,
-    "mobile_readability": number,
-    "bd_market_fit": number
+    "emotional_resonance": number,
+    "objection_handling": number,
+    "offer_clarity": number,
+    "awareness_fit": number,
+    "language_execution": number
   },
-  "identified_framework": "AIDA | PAS | FOMO | before_after | social_proof | unclear",
+  "identified_framework": "PAS | AIDA | FOMO | Story | Direct | OCPB | unclear",
   "what_works": ["array of 2-3 specific things that are strong"],
   "what_to_improve": ["array of 2-3 specific, actionable improvements"],
   "improved_headline": "a better version of the headline",
   "improved_cta": "a better version of the CTA"
 }`;
 
-    const rawResult = await callGemini(prompt, ADDHOOM_SYSTEM_PROMPT);
+    const rawResult = await callGemini(prompt, DHOOM_SCORE_SYSTEM_PROMPT);
     if (!rawResult) {
       const err = aiError(language || "bn");
       return errorResponse(err.code, err.message, err.message);

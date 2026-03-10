@@ -22,6 +22,11 @@ export interface AdResult {
   improvement_note?: string;
   remixed_from_id?: string;
   image_url?: string;
+  // Copy That! fields
+  awareness_stage?: string;
+  sophistication_level?: string;
+  key_desire_hit?: string;
+  brief_completeness?: number;
 }
 
 export interface ImageResult {
@@ -39,7 +44,7 @@ export interface GeneratorFormData {
   productDesc: string;
   price: string;
   platforms: string[];
-  language: 'bn' | 'en';
+  language: 'bn' | 'en' | 'banglish';
   framework: string;
   occasion: string;
   tone: string;
@@ -50,14 +55,65 @@ export interface GeneratorFormData {
   imageStyle: 'clean' | 'creative' | 'lifestyle' | 'sale';
   brandColorPrimary: string;
   brandColorSecondary: string;
-  // New visual controls
+  // Visual controls
   lightingMood: LightingMood;
   colorMood: ColorMood;
   cameraAngle: CameraAngle;
   backgroundComplexity: BackgroundComplexity;
   timeOfDay: TimeOfDay;
   productFocus: ProductFocus;
+  // Copy That! advanced fields
+  targetReader: string;
+  awarenessStage: string;
+  sophistication: string;
+  oneIdea: string;
+  desires: string;
+  notions: string;
+  identification: string;
+  offer: string;
+  oneAction: string;
 }
+
+export const COPY_PLATFORMS = [
+  { label: 'Facebook', value: 'facebook' },
+  { label: 'Instagram', value: 'instagram' },
+  { label: 'TikTok', value: 'tiktok' },
+  { label: 'Email', value: 'email' },
+  { label: 'Sales Page', value: 'sales_page' },
+  { label: 'WhatsApp', value: 'whatsapp' },
+];
+
+export const COPY_LANGUAGES = [
+  { label: 'English', value: 'en' as const },
+  { label: 'বাংলা', value: 'bn' as const },
+  { label: 'Banglish', value: 'banglish' as const },
+];
+
+export const COPY_TONES = [
+  { label: 'Friendly', labelBn: 'বন্ধুসুলভ', value: 'friendly' },
+  { label: 'Bold', labelBn: 'সাহসী', value: 'bold' },
+  { label: 'Professional', labelBn: 'পেশাদার', value: 'professional' },
+  { label: 'Urgent', labelBn: 'জরুরি', value: 'urgent' },
+  { label: 'Playful', labelBn: 'খেলাধুলা', value: 'playful' },
+  { label: 'Elegant', labelBn: 'মার্জিত', value: 'elegant' },
+  { label: 'Conversational', labelBn: 'কথোপকথন', value: 'conversational' },
+  { label: 'Aggressive', labelBn: 'আক্রমণাত্মক', value: 'aggressive' },
+];
+
+export const AWARENESS_STAGES = [
+  { label: 'Brand New', labelBn: 'নতুন', value: 'unaware', icon: 'seedling', desc: "They've never heard of anything like this", descBn: 'এরকম কিছু সম্পর্কে কখনো শোনেনি' },
+  { label: 'Has the Problem', labelBn: 'সমস্যা আছে', value: 'problem_aware', icon: 'frown', desc: "They know they have a problem but don't know solutions exist", descBn: 'সমস্যা আছে জানে কিন্তু সমাধান জানে না' },
+  { label: 'Knows Solutions', labelBn: 'সমাধান জানে', value: 'solution_aware', icon: 'search', desc: "They've seen similar products but not yours", descBn: 'একই ধরনের পণ্য দেখেছে কিন্তু আপনারটি না' },
+  { label: 'Comparing', labelBn: 'তুলনা করছে', value: 'product_aware', icon: 'thinking', desc: "They're choosing between yours and competitors", descBn: 'আপনার ও প্রতিযোগীদের মধ্যে বেছে নিচ্ছে' },
+  { label: 'Ready to Buy', labelBn: 'কিনতে প্রস্তুত', value: 'most_aware', icon: 'check', desc: 'They know your product, just need a reason now', descBn: 'আপনার পণ্য জানে, শুধু কারণ দরকার' },
+];
+
+export const SOPHISTICATION_LEVELS = [
+  { label: 'Fresh Market', labelBn: 'নতুন বাজার', value: 'low' },
+  { label: 'Some Exposure', labelBn: 'কিছু এক্সপোজার', value: 'medium' },
+  { label: 'Seen It All', labelBn: 'সব দেখেছে', value: 'high' },
+  { label: 'Max Saturation', labelBn: 'সর্বোচ্চ', value: 'maximum' },
+];
 
 export const PLATFORMS = [
   { label: 'Facebook', labelEn: 'Facebook', value: 'facebook', icon: 'facebook', color: '#1877F2', bg: '#E8F0FE' },
@@ -162,7 +218,6 @@ export const SCENE_STYLE_DEFAULTS: Record<string, SceneStyleDefaults> = {
   creative: { lightingMood: 'dramatic', colorMood: 'bold', cameraAngle: 'front', backgroundComplexity: 'minimal', timeOfDay: 'midday', productFocus: 'hero' },
   lifestyle: { lightingMood: 'natural', colorMood: 'warm', cameraAngle: 'three_quarter', backgroundComplexity: 'moderate', timeOfDay: 'golden', productFocus: 'environmental' },
   sale: { lightingMood: 'bright', colorMood: 'bold', cameraAngle: 'front', backgroundComplexity: 'minimal', timeOfDay: 'midday', productFocus: 'hero' },
-  // Studio scene defaults (for ProductPhotoTab)
   onWhite: { lightingMood: 'soft', colorMood: 'neutral', cameraAngle: 'front', backgroundComplexity: 'minimal', timeOfDay: 'midday', productFocus: 'hero' },
   studio: { lightingMood: 'soft', colorMood: 'neutral', cameraAngle: 'front', backgroundComplexity: 'minimal', timeOfDay: 'midday', productFocus: 'hero' },
   flatlay: { lightingMood: 'bright', colorMood: 'neutral', cameraAngle: 'overhead', backgroundComplexity: 'moderate', timeOfDay: 'midday', productFocus: 'hero' },
@@ -179,4 +234,20 @@ export const LOADING_TIPS_EN = [
   'Posting ads on Facebook between 7-10 PM gets more engagement.',
   '৳999 pricing sells more than ৳1,000 — psychology works!',
   'Ads with Dhoom Score 75+ get 3× more clicks on average.',
+];
+
+export const COPY_LOADING_MESSAGES = [
+  'Identifying your reader\'s desires...',
+  'Finding the right hook...',
+  'Overcoming objections...',
+  'Choosing the strongest angle...',
+  'Polishing the copy...',
+];
+
+export const COPY_LOADING_MESSAGES_BN = [
+  'পাঠকের ইচ্ছা শনাক্ত করা হচ্ছে...',
+  'সঠিক হুক খুঁজে বের করা হচ্ছে...',
+  'আপত্তি দূর করা হচ্ছে...',
+  'সবচেয়ে শক্তিশালী কোণ বাছাই করা হচ্ছে...',
+  'কপি পরিমার্জন করা হচ্ছে...',
 ];
