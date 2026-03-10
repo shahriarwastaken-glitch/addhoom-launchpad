@@ -1,6 +1,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { motion } from 'framer-motion';
+import { XCircle, CheckCircle2 } from 'lucide-react';
 
 const rows = [
   { feature: { bn: 'ক্যাম্পেইন সেটআপ', en: 'Campaign Setup' }, without: { bn: '৪–৬ ঘণ্টা', en: '4-6 hours' }, with_: { bn: '৫ মিনিট', en: '5 minutes' }, gain: { bn: '৫০x দ্রুত', en: '50x faster' } },
@@ -20,7 +21,7 @@ const BeforeAfter = () => {
       <div className="container mx-auto max-w-5xl">
         <div className="text-center mb-12">
           <span className="section-label">{t('পার্থক্য দেখুন', 'See the Difference')}</span>
-          <h2 className="mt-3 font-heading-bn font-bold text-foreground" style={{ fontSize: 'clamp(28px, 4vw, 52px)' }}>
+          <h2 className="mt-3 font-heading-bn font-bold text-foreground" style={{ fontSize: 'clamp(28px, 4vw, 42px)' }}>
             {t('AdDhoom ছাড়া বনাম AdDhoom দিয়ে', 'Without vs With AdDhoom')}
           </h2>
         </div>
@@ -35,8 +36,8 @@ const BeforeAfter = () => {
             <thead>
               <tr className="border-b border-border">
                 <th className="p-4 text-left font-heading-bn font-semibold text-foreground">{t('ফিচার', 'Feature')}</th>
-                <th className="p-4 text-left font-heading-bn font-semibold text-foreground">{t('AdDhoom ছাড়া', 'Without AdDhoom')} 🔴</th>
-                <th className="p-4 text-left font-heading-bn font-semibold text-foreground">{t('AdDhoom দিয়ে', 'With AdDhoom')} 🟢</th>
+                <th className="p-4 text-left font-heading-bn font-semibold text-foreground"><span className="flex items-center gap-1.5"><XCircle className="w-4 h-4 text-destructive" /> {t('AdDhoom ছাড়া', 'Without AdDhoom')}</span></th>
+                <th className="p-4 text-left font-heading-bn font-semibold text-foreground"><span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-brand-green" /> {t('AdDhoom দিয়ে', 'With AdDhoom')}</span></th>
                 <th className="p-4 text-left font-heading-bn font-semibold text-foreground">{t('পার্থক্য', 'Gain')}</th>
               </tr>
             </thead>
@@ -70,11 +71,11 @@ const BeforeAfter = () => {
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="bg-destructive/5 rounded-xl p-3">
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">🔴 {t('ছাড়া', 'Without')}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1 mb-1"><XCircle className="w-3 h-3 text-destructive" /> {t('ছাড়া', 'Without')}</span>
                   <span className="text-foreground font-body-bn">{t(row.without.bn, row.without.en)}</span>
                 </div>
                 <div className="bg-brand-green/5 rounded-xl p-3">
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">🟢 {t('দিয়ে', 'With')}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1 mb-1"><CheckCircle2 className="w-3 h-3 text-brand-green" /> {t('দিয়ে', 'With')}</span>
                   <span className="text-foreground font-body-bn">{t(row.with_.bn, row.with_.en)}</span>
                 </div>
               </div>

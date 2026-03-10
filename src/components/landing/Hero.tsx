@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Play, Zap, TrendingUp, Star, Target } from 'lucide-react';
+import { Play, Zap, TrendingUp, Star, Target, Flag } from 'lucide-react';
 
 const DhoomScoreRing = ({ score, size = 72 }: { score: number; size?: number }) => {
   const r = (size - 8) / 2;
@@ -30,7 +30,7 @@ const Hero = () => {
   useEffect(() => { setTimeout(() => setVisible(true), 100); }, []);
 
   const avatarColors = ['bg-primary', 'bg-brand-green', 'bg-brand-purple', 'bg-brand-yellow', 'bg-[#E4405F]'];
-  const initials = ['রা', 'সা', 'তা', 'মা', 'ফা'];
+  const initials = ['RA', 'SK', 'TI', 'MA', 'FA'];
 
   return (
     <section className="relative pt-[140px] pb-24 px-6 bg-background overflow-hidden">
@@ -39,7 +39,7 @@ const Hero = () => {
       <div className="max-w-[1200px] mx-auto grid lg:grid-cols-[1.5fr_1fr] gap-16 items-center">
         <div>
           <div className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
-            <span className="landing-pill"><span>🇧🇩</span> Made for Bangladesh · Powered by AI</span>
+            <span className="landing-pill"><Flag className="w-3.5 h-3.5 inline-block mr-1 text-brand-green" /> Made for Bangladesh · Powered by AI</span>
           </div>
           <h1 className={`mt-6 transition-all duration-700 delay-150 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
             <span className="block font-bn font-bold text-foreground" style={{ fontSize: 'clamp(42px, 6vw, 72px)', lineHeight: 1.1 }}>{t('AI দিয়ে বানাও', 'Create with AI')}</span>
@@ -57,12 +57,12 @@ const Hero = () => {
             <button className="font-body text-[15px] font-medium text-muted-foreground border border-border rounded-full px-7 py-4 hover:border-primary hover:text-primary transition-all duration-200 flex items-center gap-2"><Play className="w-4 h-4" /> {t('ডেমো দেখুন', 'Watch Demo')}</button>
           </div>
           <div className={`mt-4 flex flex-wrap gap-x-3 gap-y-1 text-xs font-body text-muted-foreground transition-all duration-700 delay-[600ms] ${visible ? 'opacity-100' : 'opacity-0'}`}>
-            <span>✓ {t('৩০ সেকেন্ডে সেটআপ', '30s setup')}</span><span>·</span><span>✓ {t('বাংলায় সম্পূর্ণ', 'Fully in Bengali')}</span><span>·</span><span>✓ {t('সহজ পেমেন্ট', 'Easy payment')}</span>
+            <span className="flex items-center gap-1"><Zap className="w-3 h-3 text-primary" /> {t('৩০ সেকেন্ডে সেটআপ', '30s setup')}</span><span>·</span><span className="flex items-center gap-1"><Zap className="w-3 h-3 text-primary" /> {t('বাংলায় সম্পূর্ণ', 'Fully in Bengali')}</span><span>·</span><span className="flex items-center gap-1"><Zap className="w-3 h-3 text-primary" /> {t('সহজ পেমেন্ট', 'Easy payment')}</span>
           </div>
         </div>
         <div className={`relative transition-all duration-700 delay-300 ${visible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
           <div className="absolute -top-3 -right-2 z-10 bg-card rounded-full px-3 py-1.5 shadow-warm border-l-2 border-primary rotate-[8deg] animate-float text-[11px] font-bn font-semibold flex items-center gap-1.5"><Zap className="w-3 h-3 text-primary" /> {t('বাংলাদেশের #১ AI Ad টুল', '#1 BD AI Ad Tool')}</div>
-          <div className="absolute -bottom-4 -left-4 z-10 bg-card rounded-full px-3 py-1.5 shadow-warm border-l-2 border-brand-green rotate-[-6deg] animate-float text-[11px] font-bn font-semibold" style={{ animationDelay: '2s' }}><span className="flex items-center gap-1.5"><TrendingUp className="w-3 h-3 text-brand-green" /> {t('৩.২× ROAS উন্নতি গড়ে', '3.2× avg ROAS boost')}</span></div>
+          <div className="absolute -bottom-4 -left-4 z-10 bg-card rounded-full px-3 py-1.5 shadow-warm border-l-2 border-brand-green rotate-[-6deg] animate-float text-[11px] font-bn font-semibold" style={{ animationDelay: '2s' }}><span className="flex items-center gap-1.5"><TrendingUp className="w-3 h-3 text-brand-green" /> {t('৩.২× ROAS উন্নতি গড়ে', '3.2x avg ROAS boost')}</span></div>
           <div className="bg-card rounded-3xl shadow-[0_24px_80px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)] p-7 animate-float" style={{ animationDuration: '5s' }}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2"><div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center"><Target className="w-4 h-4 text-primary" /></div><span className="font-bn text-sm font-semibold text-foreground">{t('ধুম স্কোর বিশ্লেষণ', 'Dhoom Score Analysis')}</span></div>
