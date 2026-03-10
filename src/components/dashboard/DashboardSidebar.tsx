@@ -14,6 +14,7 @@ import { Target, Video, Calendar, MessageSquare, Search, Stethoscope, FolderOpen
 const items = [
   { icon: Target, bn: 'হোম', en: 'Home', url: '/dashboard' },
   { icon: Wand2, bn: 'অ্যাড তৈরি', en: 'Create Ad', url: '/dashboard/generate' },
+  { icon: Sparkles, bn: 'স্টুডিও', en: 'Studio', url: '/dashboard/studio', badge: 'New' },
   { icon: Video, bn: 'ভিডিও অ্যাড', en: 'Video Ads', url: '/dashboard/video' },
   { icon: FolderOpen, bn: 'প্রজেক্ট', en: 'Projects', url: '/dashboard/projects' },
   { icon: Calendar, bn: 'ক্যালেন্ডার', en: 'Calendar', url: '/dashboard/calendar' },
