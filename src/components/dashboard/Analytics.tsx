@@ -221,7 +221,7 @@ const Analytics = () => {
       )}
 
       {/* Section 8: Language Performance */}
-      {(data.language_comparison.bn.count > 0 || data.language_comparison.en.count > 0) && (
+      {(data.language_comparison?.bn?.count > 0 || data.language_comparison?.en?.count > 0) && (
         <LanguagePerformance data={data.language_comparison} />
       )}
     </div>
