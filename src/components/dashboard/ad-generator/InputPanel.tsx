@@ -633,7 +633,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
             prompt={imagePrompt}
             setPrompt={setImagePrompt}
             defaultPrompt={imageDefaultPrompt}
-            onGenerate={(finalPrompt) => onGenerate(finalPrompt)}
+            onGenerate={(finalPrompt: string) => onGenerate(finalPrompt)}
             onBack={() => setImageStep(1)}
             generating={generating}
           />

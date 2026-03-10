@@ -64,6 +64,16 @@ const defaultForm: GeneratorFormData = {
   backgroundComplexity: 'minimal',
   timeOfDay: 'golden',
   productFocus: 'hero',
+  // Copy That! advanced fields
+  targetReader: '',
+  awarenessStage: 'solution_aware',
+  sophistication: 'medium',
+  oneIdea: '',
+  desires: '',
+  notions: '',
+  identification: '',
+  offer: '',
+  oneAction: '',
 };
 
 export interface SelectedCopyContext {
