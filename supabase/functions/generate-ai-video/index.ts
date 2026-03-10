@@ -66,7 +66,7 @@ serve(async (req) => {
     // Step 2: Call Kling via PiAPI
     const klingPayload: Record<string, unknown> = {
       model: 'kling',
-      task_type: input_mode === 'multiple' ? 'video_generation' : 'image2video',
+      task_type: 'video_generation',
       input: {
         image_url: imageUrls[0],
         prompt: motion_prompt,
