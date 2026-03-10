@@ -333,7 +333,7 @@ serve(async (req) => {
               method: "POST",
               headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
               body: JSON.stringify({
-                model: "google/gemini-2.5-flash-lite",
+                model: "google/gemini-3.1-flash-lite-preview",
                 messages: [
                   { role: "user", content: `Give this conversation a title in 4-6 words. Match the language. Be specific.\nUser: ${message}\nAssistant: ${fullText.substring(0, 200)}\nReturn ONLY the title.` }
                 ],
