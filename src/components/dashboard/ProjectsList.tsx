@@ -282,7 +282,7 @@ const ProjectsList = () => {
                 {/* Top row */}
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-2xl shrink-0">{p.emoji || '📁'}</span>
+                    {(() => { const PIco = QUICK_ICONS.find(i => i.key === p.emoji)?.icon || FolderOpen; return <PIco size={22} className="shrink-0" style={{ color: p.color || '#FF5100' }} />; })()}
                     <h3 className="font-heading-bn font-bold text-foreground text-lg truncate">{p.name}</h3>
                   </div>
                   <div className="relative shrink-0">
