@@ -97,6 +97,35 @@ function buildSystemPrompt(workspace: any, summary: string | null): string {
   return [LAYER_1_IDENTITY, buildLayer2(workspace), buildLayer3(summary), LAYER_4_SESSION].filter(Boolean).join("\n\n");
 }
 
+const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const GEMINI_MODEL = "gemini-2.5-flash";
+
+function getGeminiKey(): string {
+  const key = Deno.env.get("GEMINI_API_KEY");
+  if (!key) throw new Error("GEMINI_API_KEY is not configured");
+  return key;
+}
+
+// Helper: call Gemini non-streaming
+async function geminiGenerate(contents: any[], systemPrompt: string, maxTokens?: number): Promise<string> {
+  const apiKey = getGeminiKey();
+  const body: any = {
+    contents,
+    systemInstruction: { parts: [{ text: systemPrompt }] },
+  };
+  if (maxTokens) {
+    body.generationConfig = { maxOutputTokens: maxTokens };
+  }
+  const resp = await fetch(`${GEMINI_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) return "";
+  const data = await resp.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -196,85 +225,65 @@ serve(async (req) => {
       const recentMessages = existingMessages.slice(existingMessages.length - 10);
 
       try {
-        const sumResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash-lite",
-            messages: [{
-              role: "user",
-              content: `Summarize these conversation messages into 3-5 key points about what was discussed and what decisions were made. Focus on: strategies decided, products discussed, advice given that was accepted. Be concise. In the same language as the conversation.\n\n${summary ? "Previous summary:\n" + summary + "\n\n" : ""}New messages to summarize:\n${oldMessages.map((m: any) => `[${m.role}]: ${m.content}`).join("\n")}`,
-            }],
-            max_tokens: 300,
-          }),
-        });
-        if (sumResp.ok) {
-          const sumData = await sumResp.json();
-          const newSummary = sumData.choices?.[0]?.message?.content?.trim();
-          if (newSummary) {
-            summary = newSummary;
-            existingMessages = recentMessages;
-            // Persist trimmed messages + summary
-            await supabase.from("ai_conversations").update({
-              messages: recentMessages,
-              summary: newSummary,
-            }).eq("id", convId);
-          }
+        const sumText = await geminiGenerate(
+          [{ role: "user", parts: [{ text: `Summarize these conversation messages into 3-5 key points about what was discussed and what decisions were made. Focus on: strategies decided, products discussed, advice given that was accepted. Be concise. In the same language as the conversation.\n\n${summary ? "Previous summary:\n" + summary + "\n\n" : ""}New messages to summarize:\n${oldMessages.map((m: any) => `[${m.role}]: ${m.content}`).join("\n")}` }] }],
+          "You are a conversation summarizer.",
+          300
+        );
+        if (sumText) {
+          summary = sumText;
+          existingMessages = recentMessages;
+          await supabase.from("ai_conversations").update({
+            messages: recentMessages,
+            summary: sumText,
+          }).eq("id", convId);
         }
       } catch (e) {
         console.warn("Summarization failed, continuing with full history:", e);
       }
     }
 
-    // STEP 4 — Build OpenAI-format message history
-    const messageHistory = existingMessages.map((m: any) => ({
-      role: m.role === "user" ? "user" as const : "assistant" as const,
-      content: m.content,
+    // STEP 4 — Build Gemini-format message history
+    const geminiContents = existingMessages.map((m: any) => ({
+      role: m.role === "user" ? "user" : "model",
+      parts: [{ text: m.content }],
     }));
-    messageHistory.push({ role: "user" as const, content: message });
+    geminiContents.push({ role: "user", parts: [{ text: message }] });
 
-    // STEP 5 — Build system prompt (now includes summary from Layer 3)
+    // STEP 5 — Build system prompt
     const systemPrompt = buildSystemPrompt(workspace, summary);
 
-    // STEP 6 — Call AI Gateway with streaming
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    // STEP 6 — Call Gemini with streaming
+    const apiKey = getGeminiKey();
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messageHistory,
-        ],
-        stream: true,
-        max_tokens: 1200,
-        temperature: 0.6,
-      }),
-    });
+    const aiResponse = await fetch(
+      `${GEMINI_BASE}/${GEMINI_MODEL}:streamGenerateContent?alt=sse&key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: geminiContents,
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          generationConfig: {
+            maxOutputTokens: 1200,
+            temperature: 0.6,
+          },
+        }),
+      }
+    );
 
     if (!aiResponse.ok) {
+      const errText = await aiResponse.text();
+      console.error("Gemini API error:", aiResponse.status, errText);
       if (aiResponse.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later.", message_bn: "অনুরোধ সীমা ছাড়িয়ে গেছে। একটু পরে চেষ্টা করুন।" }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "Credits exhausted.", message_bn: "AI ক্রেডিট শেষ।" }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const errText = await aiResponse.text();
-      console.error("AI Gateway error:", aiResponse.status, errText);
-      throw new Error("AI Gateway error");
+      throw new Error("Gemini API error");
     }
 
-    // We need to tee the stream: one for client, one for collecting full text to save
+    // Transform Gemini SSE to OpenAI-compatible SSE so frontend code doesn't need changes
     const [streamForClient, streamForSave] = aiResponse.body!.tee();
 
     // Collect full response text in background for DB save
@@ -299,8 +308,8 @@ serve(async (req) => {
           if (jsonStr === "[DONE]") continue;
           try {
             const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) fullText += content;
+            const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) fullText += text;
           } catch { /* partial */ }
         }
       }
@@ -316,7 +325,6 @@ serve(async (req) => {
           updated_at: ts,
         }).eq("id", convId);
       } else {
-        // Generate title from first message
         const title = message.substring(0, 50) + (message.length > 50 ? "..." : "");
         const { data: newConv } = await supabase.from("ai_conversations").insert({
           workspace_id,
@@ -329,23 +337,13 @@ serve(async (req) => {
         // Auto-generate better title in background
         if (convId) {
           try {
-            const titleResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-              method: "POST",
-              headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-              body: JSON.stringify({
-                model: "google/gemini-2.5-flash-lite",
-                messages: [
-                  { role: "user", content: `Give this conversation a title in 4-6 words. Match the language. Be specific.\nUser: ${message}\nAssistant: ${fullText.substring(0, 200)}\nReturn ONLY the title.` }
-                ],
-                max_tokens: 30,
-              }),
-            });
-            if (titleResp.ok) {
-              const titleData = await titleResp.json();
-              const genTitle = titleData.choices?.[0]?.message?.content?.trim();
-              if (genTitle && genTitle.length > 2 && genTitle.length < 80) {
-                await supabase.from("ai_conversations").update({ title: genTitle }).eq("id", convId);
-              }
+            const genTitle = await geminiGenerate(
+              [{ role: "user", parts: [{ text: `Give this conversation a title in 4-6 words. Match the language. Be specific.\nUser: ${message}\nAssistant: ${fullText.substring(0, 200)}\nReturn ONLY the title.` }] }],
+              "You are a title generator.",
+              30
+            );
+            if (genTitle && genTitle.length > 2 && genTitle.length < 80) {
+              await supabase.from("ai_conversations").update({ title: genTitle.trim() }).eq("id", convId);
             }
           } catch { /* title gen failed, keep fallback */ }
         }
@@ -373,31 +371,57 @@ serve(async (req) => {
       return convId;
     })();
 
-    // We need to send the conversation_id as the first SSE event, then stream the rest
+    // Transform Gemini SSE → OpenAI-compatible SSE
     const encoder = new TextEncoder();
     const clientReader = streamForClient.getReader();
+    const clientDecoder = new TextDecoder();
 
     const outputStream = new ReadableStream({
       async start(controller) {
         // Send conversation_id as first custom event
-        // Wait briefly for convId to be set if new conversation
         if (!conversation_id) {
-          // Give the save promise a moment to create the conversation
           await new Promise(r => setTimeout(r, 100));
         }
         const metaEvent = `data: ${JSON.stringify({ meta: { conversation_id: convId || conversation_id } })}\n\n`;
         controller.enqueue(encoder.encode(metaEvent));
 
-        // Pipe through AI stream
+        // Read Gemini SSE and transform to OpenAI format
+        let sseBuffer = "";
         while (true) {
           const { done, value } = await clientReader.read();
           if (done) break;
-          controller.enqueue(value);
+          sseBuffer += clientDecoder.decode(value, { stream: true });
+
+          let nlIdx: number;
+          while ((nlIdx = sseBuffer.indexOf("\n")) !== -1) {
+            let line = sseBuffer.slice(0, nlIdx);
+            sseBuffer = sseBuffer.slice(nlIdx + 1);
+            if (line.endsWith("\r")) line = line.slice(0, -1);
+            if (!line.startsWith("data: ")) continue;
+            const jsonStr = line.slice(6).trim();
+            if (jsonStr === "[DONE]") {
+              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+              continue;
+            }
+            try {
+              const parsed = JSON.parse(jsonStr);
+              const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (text) {
+                // Emit as OpenAI-compatible SSE
+                const openaiChunk = {
+                  choices: [{ delta: { content: text }, index: 0 }],
+                };
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify(openaiChunk)}\n\n`));
+              }
+            } catch { /* partial json, skip */ }
+          }
         }
 
-        // Wait for save to complete and get final convId
+        // Send DONE signal
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+
+        // Wait for save to complete
         const finalConvId = await savePromise;
-        // Send final meta with confirmed conversation_id
         const finalMeta = `data: ${JSON.stringify({ meta: { conversation_id: finalConvId, final: true } })}\n\n`;
         controller.enqueue(encoder.encode(finalMeta));
 

@@ -6,6 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const GEMINI_IMAGE_MODEL = "gemini-2.0-flash-exp";
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -37,8 +40,8 @@ serve(async (req) => {
       throw new Error('Missing required fields');
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    if (!GEMINI_API_KEY) throw new Error('GEMINI_API_KEY not configured');
 
     // Build upscale prompt based on mode
     const modePrompts: Record<string, string> = {
@@ -49,23 +52,19 @@ serve(async (req) => {
 
     const basePrompt = modePrompts[mode] || modePrompts.standard;
 
-    // IMPROVEMENT 4: Handle 6x and 8x with two-pass approach
-    // For scales > 4, we do two passes through Gemini
     const needsTwoPass = scale > 4;
     
-    // First pass: always upscale at base quality
     const firstPassPrompt = `${basePrompt} Target: ${needsTwoPass ? '4x' : `${scale}x`} the original resolution.`;
 
-    const firstPassResult = await callGeminiUpscale(LOVABLE_API_KEY, image_base64, firstPassPrompt);
+    const firstPassResult = await callGeminiUpscale(GEMINI_API_KEY, image_base64, firstPassPrompt);
     
     let finalBase64 = firstPassResult;
 
-    // Second pass for 6x and 8x
     if (needsTwoPass) {
       const secondScale = scale === 6 ? '1.5x' : '2x';
       const secondPassPrompt = `${basePrompt} This image has already been upscaled once. Upscale it ${secondScale} more. Maintain absolute fidelity — no artifacts, no hallucinated details.`;
       
-      finalBase64 = await callGeminiUpscale(LOVABLE_API_KEY, firstPassResult, secondPassPrompt);
+      finalBase64 = await callGeminiUpscale(GEMINI_API_KEY, finalBase64, secondPassPrompt);
     }
 
     // Store result
@@ -79,7 +78,6 @@ serve(async (req) => {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/ad-images/${storedPath}`;
 
-    // Save to ad_images
     await supabase.from('ad_images').insert({
       workspace_id,
       image_url: imageUrl,
@@ -89,7 +87,6 @@ serve(async (req) => {
       studio_config: { scale, mode, two_pass: needsTwoPass },
     });
 
-    // Log usage
     await supabase.from('usage_logs').insert({
       user_id: user.id,
       workspace_id,
@@ -113,36 +110,30 @@ serve(async (req) => {
 });
 
 async function callGeminiUpscale(apiKey: string, imageBase64: string, prompt: string): Promise<string> {
-  const geminiRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+  const geminiRes = await fetch(`${GEMINI_BASE}/${GEMINI_IMAGE_MODEL}:generateContent?key=${apiKey}`, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'google/gemini-2.5-flash-image',
-      messages: [
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: prompt },
-            {
-              type: 'image_url',
-              image_url: { url: `data:image/png;base64,${imageBase64}` },
-            },
-          ],
-        },
-      ],
-      modalities: ['image', 'text'],
+      contents: [{
+        role: 'user',
+        parts: [
+          { text: prompt },
+          { inlineData: { mimeType: 'image/png', data: imageBase64 } },
+        ],
+      }],
+      generationConfig: {
+        responseModalities: ['TEXT', 'IMAGE'],
+      },
     }),
   });
 
   const geminiData = await geminiRes.json();
-  const generatedImage = geminiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+  const parts = geminiData.candidates?.[0]?.content?.parts || [];
+  const imagePart = parts.find((p: any) => p.inlineData);
 
-  if (!generatedImage) {
+  if (!imagePart) {
     throw new Error('Upscale pass failed');
   }
 
-  return generatedImage.replace(/^data:image\/\w+;base64,/, '');
+  return imagePart.inlineData.data;
 }

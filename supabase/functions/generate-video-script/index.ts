@@ -6,6 +6,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const GEMINI_MODEL = "gemini-2.5-flash";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -21,11 +24,11 @@ serve(async (req) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");
+
     // Caption generation mode
     if (body.action === 'caption') {
-      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-      if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
-
       const captionPrompt = `Write a ${body.platform} post caption for a video ad about "${body.product_name}".
 Language: ${body.language === 'bn' ? 'Bengali' : 'English'}
 Platform: ${body.platform}
@@ -33,24 +36,22 @@ ${body.platform === 'instagram' ? 'Include 10-15 relevant hashtags.' : 'Include 
 Keep it engaging, mobile-friendly, and under 300 characters for the main text.
 Return ONLY the caption text, nothing else.`;
 
-      const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const aiRes = await fetch(`${GEMINI_BASE}/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash-lite",
-          messages: [{ role: "user", content: captionPrompt }],
+          contents: [{ role: "user", parts: [{ text: captionPrompt }] }],
         }),
       });
 
       if (!aiRes.ok) {
         const status = aiRes.status;
         if (status === 429) return new Response(JSON.stringify({ error: "Rate limited" }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        if (status === 402) return new Response(JSON.stringify({ error: "Payment required" }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        throw new Error("AI error");
+        throw new Error("Gemini API error");
       }
 
       const aiData = await aiRes.json();
-      const caption = aiData.choices?.[0]?.message?.content || "";
+      const caption = aiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
       return new Response(JSON.stringify({ success: true, caption }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -59,9 +60,6 @@ Return ONLY the caption text, nothing else.`;
 
     // Fetch workspace for shop DNA
     const { data: workspace } = await supabase.from("workspaces").select("*").eq("id", workspace_id).single();
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const priceInfo = original_price_bdt && offer_price_bdt
       ? `Original price: ৳${original_price_bdt} → Offer price: ৳${offer_price_bdt}`
@@ -107,24 +105,22 @@ Rules:
 - Keep text SHORT - max 8 words per headline for mobile readability
 - Style "${style}": ${style === 'bold' ? 'bright colors, big price display' : style === 'luxury' ? 'premium feel, dark tones' : style === 'story' ? 'emotional narrative' : 'clean, minimal'}`;
 
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiRes = await fetch(`${GEMINI_BASE}/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [{ role: "user", content: prompt }],
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
       }),
     });
 
     if (!aiRes.ok) {
       const status = aiRes.status;
       if (status === 429) return new Response(JSON.stringify({ error: "Rate limited, please try again later" }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      if (status === 402) return new Response(JSON.stringify({ error: "Payment required" }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      throw new Error(`AI gateway error: ${status}`);
+      throw new Error(`Gemini API error: ${status}`);
     }
 
     const aiData = await aiRes.json();
-    let content = aiData.choices?.[0]?.message?.content || "";
+    let content = aiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     // Clean JSON
     content = content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
@@ -133,7 +129,6 @@ Rules:
     try {
       script = JSON.parse(content);
     } catch {
-      // Try to extract JSON from response
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         script = JSON.parse(jsonMatch[0]);

@@ -1,6 +1,15 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { ADDHOOM_SYSTEM_PROMPT } from "./systemPrompt.ts";
 
+const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const DEFAULT_MODEL = "gemini-2.5-flash";
+
+function getGeminiKey(): string {
+  const key = Deno.env.get("GEMINI_API_KEY");
+  if (!key) throw new Error("GEMINI_API_KEY is not configured");
+  return key;
+}
+
 // Get system prompt from database or fallback to default
 export async function getSystemPrompt(): Promise<string> {
   try {
@@ -27,32 +36,25 @@ export async function callGemini(
   jsonMode: boolean = false
 ): Promise<string | null> {
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const key = getGeminiKey();
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(`${GEMINI_BASE}/${DEFAULT_MODEL}:generateContent?key=${key}`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: prompt },
-        ],
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] },
       }),
     });
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("Lovable AI Gateway error:", response.status, err);
+      console.error("Gemini API error:", response.status, err);
       return null;
     }
 
     const data = await response.json();
-    let text = data.choices?.[0]?.message?.content ?? null;
+    let text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
 
     if (text && jsonMode) {
       text = text.replace(/```json/g, "").replace(/```/g, "").trim();
@@ -70,39 +72,35 @@ export async function callGeminiChat(
   systemPrompt: string
 ): Promise<string | null> {
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const key = getGeminiKey();
 
-    const openaiMessages = messages.map((m) => ({
-      role: m.role === "model" ? "assistant" as const : "user" as const,
-      content: m.content,
+    const contents = messages.map((m) => ({
+      role: m.role === "assistant" || m.role === "model" ? "model" : "user",
+      parts: [{ text: m.content }],
     }));
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(`${GEMINI_BASE}/${DEFAULT_MODEL}:generateContent?key=${key}`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...openaiMessages,
-        ],
+        contents,
+        systemInstruction: { parts: [{ text: systemPrompt }] },
       }),
     });
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("Lovable AI Gateway error:", response.status, err);
+      console.error("Gemini API error:", response.status, err);
       return null;
     }
 
     const data = await response.json();
-    return data.choices?.[0]?.message?.content ?? null;
+    return data.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
   } catch (error) {
     console.error("callGeminiChat error:", error);
     return null;
   }
 }
+
+// Export for use in other functions
+export { GEMINI_BASE, DEFAULT_MODEL, getGeminiKey };

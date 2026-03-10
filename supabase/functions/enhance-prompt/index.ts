@@ -6,6 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const GEMINI_MODEL = "gemini-2.5-flash";
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -26,8 +29,8 @@ serve(async (req) => {
     const { prompt, tab_type } = await req.json();
     if (!prompt) throw new Error('Missing prompt');
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    if (!GEMINI_API_KEY) throw new Error('GEMINI_API_KEY not configured');
 
     const systemPrompt = `You are an expert AI image generation prompt writer.
 The user has written a prompt for generating a product/fashion advertisement image.
@@ -44,18 +47,12 @@ Rules:
 - Maximum 500 characters
 - Return ONLY the enhanced prompt, no explanation, no preamble`;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const response = await fetch(`${GEMINI_BASE}/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-lite',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Enhance this ${tab_type || 'image generation'} prompt:\n\n${prompt}` },
-        ],
+        contents: [{ role: "user", parts: [{ text: `Enhance this ${tab_type || 'image generation'} prompt:\n\n${prompt}` }] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] },
       }),
     });
 
@@ -65,19 +62,11 @@ Rules:
           status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: 'Payment required.' }), {
-          status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      throw new Error('AI gateway error');
+      throw new Error('Gemini API error');
     }
 
     const data = await response.json();
-    const enhanced = data.choices?.[0]?.message?.content?.trim() || prompt;
-
-    // TODO: deduct enhancement credit when credit system is built
-    // await deductCredit(user.id, 'prompt_enhancement', 1)
+    const enhanced = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || prompt;
 
     return new Response(JSON.stringify({ enhanced_prompt: enhanced }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
