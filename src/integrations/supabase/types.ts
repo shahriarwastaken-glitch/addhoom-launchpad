@@ -168,6 +168,8 @@ export type Database = {
           remix_type: string | null
           remixed_from_id: string | null
           sd_prompt: string | null
+          studio_config: Json | null
+          studio_source: string | null
           style: string
           text_config: Json | null
           workspace_id: string
@@ -187,6 +189,8 @@ export type Database = {
           remix_type?: string | null
           remixed_from_id?: string | null
           sd_prompt?: string | null
+          studio_config?: Json | null
+          studio_source?: string | null
           style?: string
           text_config?: Json | null
           workspace_id: string
@@ -206,6 +210,8 @@ export type Database = {
           remix_type?: string | null
           remixed_from_id?: string | null
           sd_prompt?: string | null
+          studio_config?: Json | null
+          studio_source?: string | null
           style?: string
           text_config?: Json | null
           workspace_id?: string

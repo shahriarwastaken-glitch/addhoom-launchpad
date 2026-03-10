@@ -1,0 +1,1 @@
+ALTER TABLE public.ad_images ADD COLUMN IF NOT EXISTS studio_source text, ADD COLUMN IF NOT EXISTS studio_config jsonb DEFAULT '{}'::jsonb;
