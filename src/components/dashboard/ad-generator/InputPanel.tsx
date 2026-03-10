@@ -142,6 +142,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
   };
 
   const handleFileSelect = (file: File) => {
+    if (!file.type.startsWith('image/')) return;
     if (file.size > 5 * 1024 * 1024) return;
     updateField('productImage', file);
     const reader = new FileReader();
@@ -153,7 +154,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files[0];
-    if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
+    if (file && file.type.startsWith('image/')) {
       handleFileSelect(file);
     }
   };
@@ -399,7 +400,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/png,image/jpeg"
+                accept="image/*"
                 className="hidden"
                 onChange={e => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
               />

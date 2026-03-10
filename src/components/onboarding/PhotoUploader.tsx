@@ -54,7 +54,7 @@ const PhotoUploader = ({ onSubmit, loading }: Props) => {
           <Upload size={28} className="mx-auto text-muted-foreground mb-2" />
           <p className="text-sm text-muted-foreground">Drag photos here or click to browse</p>
           <p className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP · Max 10MB each</p>
-          <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple
+          <input ref={inputRef} type="file" accept="image/*" multiple
             onChange={e => handleFiles(e.target.files)} className="hidden" />
         </div>
       )}
