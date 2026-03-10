@@ -10,6 +10,7 @@ import {
   Pencil, AlertTriangle, Info, Loader2, Tags, X, Plus, Palette,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { resetAllTooltips } from '@/components/ui/OnceTooltip';
 import VisualIdentitySection from '@/components/dashboard/VisualIdentitySection';
 import ProductsGrid, { ProductEditModal } from '@/components/dashboard/ProductsGrid';
 import DNAScoreIndicator from '@/components/dashboard/DNAScoreIndicator';
@@ -236,6 +237,19 @@ const Settings = () => {
                   }`}>{opt.icon} {opt.label}</button>
               ))}
             </div>
+          </div>
+
+          {/* Reset Tooltips */}
+          <div className="px-1 mb-6">
+            <button
+              onClick={() => {
+                resetAllTooltips();
+                toast.success(t('সব টুলটিপ রিসেট হয়েছে', 'All tooltips have been reset'));
+              }}
+              className="text-xs text-muted-foreground hover:text-primary hover:underline transition-colors"
+            >
+              {t('সব টুলটিপ রিসেট করুন', 'Reset all tooltips')}
+            </button>
           </div>
 
           {/* Subscription */}

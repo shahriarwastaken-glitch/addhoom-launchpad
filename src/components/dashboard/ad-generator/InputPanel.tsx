@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import OnceTooltip from '@/components/ui/OnceTooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   PenLine, ImageIcon, Facebook, Instagram, ShoppingBag, Search,
@@ -309,8 +309,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
             <FieldGroup label={t('বিজ্ঞাপনের কৌশল (Framework)', 'Ad Framework')}>
               <div className="grid grid-cols-2 gap-2">
                 {FRAMEWORKS.map(f => (
-                  <Tooltip key={f.value}>
-                    <TooltipTrigger asChild>
+                  <OnceTooltip key={f.value} id={`framework_${f.value}`} content={t(f.tooltip, f.tooltipEn)} side="top" className="bg-foreground text-background text-[11px] font-heading-bn">
                       <button
                         onClick={() => updateField('framework', f.value)}
                         className={`px-3 py-2 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 flex items-center justify-center gap-1.5 ${
@@ -321,11 +320,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
                       >
                         {FRAMEWORK_ICONS[f.icon]} {t(f.label, f.labelEn)}
                       </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="bg-foreground text-background text-[11px] font-heading-bn">
-                      {t(f.tooltip, f.tooltipEn)}
-                    </TooltipContent>
-                  </Tooltip>
+                  </OnceTooltip>
                 ))}
               </div>
             </FieldGroup>
