@@ -1593,6 +1593,8 @@ export type Database = {
           created_at: string
           dna_last_updated: string | null
           dna_score: number | null
+          dna_source: string | null
+          extraction_quality: string | null
           id: string
           industry: string | null
           key_products: string | null
@@ -1617,6 +1619,8 @@ export type Database = {
           created_at?: string
           dna_last_updated?: string | null
           dna_score?: number | null
+          dna_source?: string | null
+          extraction_quality?: string | null
           id?: string
           industry?: string | null
           key_products?: string | null
@@ -1641,6 +1645,8 @@ export type Database = {
           created_at?: string
           dna_last_updated?: string | null
           dna_score?: number | null
+          dna_source?: string | null
+          extraction_quality?: string | null
           id?: string
           industry?: string | null
           key_products?: string | null

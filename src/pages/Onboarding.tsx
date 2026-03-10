@@ -4,16 +4,20 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Check, ChevronDown, ChevronRight, Crown, Globe, Lock,
+  Check, ChevronRight, Crown, Globe, Lock,
   Pencil, Search, ShoppingBag, Sparkles, Store, Target,
   MessageSquare, Package, Star, DollarSign, Factory, Zap,
-  Palette, Type, Image as ImageIcon, Tags, X, Plus, ArrowLeft,
+  Palette, Type, Image as ImageIcon, Tags, X, Plus, ArrowLeft, Info, AlertTriangle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import VisualIdentitySection from '@/components/dashboard/VisualIdentitySection';
 import ProductsGrid, { ProductEditModal } from '@/components/dashboard/ProductsGrid';
 import DNAScoreIndicator from '@/components/dashboard/DNAScoreIndicator';
 import StyleCalibration from '@/components/dashboard/StyleCalibration';
+import EntryPointCards, { type EntryPointType } from '@/components/onboarding/EntryPointCards';
+import ManualEntryForm from '@/components/onboarding/ManualEntryForm';
+import TemplateSelector from '@/components/onboarding/TemplateSelector';
+import PhotoUploader from '@/components/onboarding/PhotoUploader';
 import type { WorkspaceProduct } from '@/hooks/useWorkspaceProducts';
 
 type ShopDNA = {
@@ -50,7 +54,7 @@ const plans = [
 ];
 
 const ANALYZING_STEPS = [
-  { icon: Search, text: 'Analyzing website...' },
+  { icon: Search, text: 'Analyzing source...' },
   { icon: Palette, text: 'Extracting brand colors & fonts...' },
   { icon: Package, text: 'Building product catalog...' },
   { icon: Sparkles, text: 'Understanding brand identity...' },
@@ -64,11 +68,11 @@ const Onboarding = () => {
   const [direction, setDirection] = useState(1);
 
   // Step 1
+  const [entryPoint, setEntryPoint] = useState<EntryPointType | null>(null);
   const [shopUrl, setShopUrl] = useState('');
-  const [platform, setPlatform] = useState<string | null>(null);
-  const [showManual, setShowManual] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzeStep, setAnalyzeStep] = useState(0);
+  const [extractionQuality, setExtractionQuality] = useState<string>('full');
 
   // Step 2
   const [dna, setDna] = useState<ShopDNA | null>(null);
@@ -83,16 +87,8 @@ const Onboarding = () => {
   const [showProductModal, setShowProductModal] = useState(false);
   const [newTag, setNewTag] = useState('');
 
-  // Step 3 — style calibration (handled by component)
-
   // Step 4 — plan
   const [planLoading, setPlanLoading] = useState<string | null>(null);
-
-  // Manual fields
-  const [manualDna, setManualDna] = useState<ShopDNA>({
-    shop_name: '', industry: '', brand_tone: '', target_audience: '',
-    key_products: '', unique_selling: '', price_range: '', niche_tags: [],
-  });
 
   useEffect(() => {
     if (!loading && !user) navigate('/auth', { replace: true });
@@ -109,21 +105,12 @@ const Onboarding = () => {
     setStep(s);
   };
 
-  // Step 1 → analyze
-  const handleAnalyze = async () => {
-    if (!shopUrl.trim() && !showManual) return;
-    if (!activeWorkspace) return;
-
-    if (showManual) {
-      setDna(manualDna);
-      goTo(2);
-      return;
-    }
-
+  // Invoke the edge function for URL-based entry points
+  const handleUrlAnalyze = async (platform: string) => {
+    if (!shopUrl.trim() || !activeWorkspace) return;
     setAnalyzing(true);
     setAnalyzeStep(0);
 
-    // Animate through steps
     const interval = setInterval(() => {
       setAnalyzeStep(prev => {
         if (prev >= ANALYZING_STEPS.length - 1) { clearInterval(interval); return prev; }
@@ -133,35 +120,134 @@ const Onboarding = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('setup-shop-dna', {
-        body: { workspace_id: activeWorkspace.id, url: shopUrl.trim(), platform: platform || 'website' },
+        body: { workspace_id: activeWorkspace.id, url: shopUrl.trim(), platform },
       });
       clearInterval(interval);
       setAnalyzeStep(ANALYZING_STEPS.length - 1);
 
       if (error || !data?.success) {
-        toast.error('Could not extract info. Please enter details manually.');
-        setShowManual(true);
+        toast.error('Could not extract info. Please try another method.');
         setAnalyzing(false);
         return;
       }
 
-      setDna({
-        ...data.dna,
-        niche_tags: data.dna?.niche_tags || [],
-      });
-      setBrandColors(data.brand_colors || []);
-      setBrandFonts(data.brand_fonts || { source: 'extracted' });
-      setBrandLogoUrl(data.brand_logo_url || null);
-      setProducts(data.products || []);
-      setDnaScore(data.dna_score || 0);
-
+      applyResults(data);
       setTimeout(() => { setAnalyzing(false); goTo(2); }, 800);
     } catch {
       clearInterval(interval);
-      toast.error('Something went wrong. Please enter details manually.');
-      setShowManual(true);
+      toast.error('Something went wrong.');
       setAnalyzing(false);
     }
+  };
+
+  // Manual form submit
+  const handleManualSubmit = async (formData: any) => {
+    if (!activeWorkspace) return;
+    setAnalyzing(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('setup-shop-dna', {
+        body: { workspace_id: activeWorkspace.id, platform: 'manual', payload: { form_data: formData } },
+      });
+      if (error || !data?.success) {
+        // Fallback: use form data directly
+        setDna({
+          shop_name: formData.shop_name,
+          industry: formData.industry,
+          brand_tone: formData.brand_tone,
+          target_audience: formData.target_audience,
+          key_products: formData.key_products,
+          unique_selling: '',
+          price_range: formData.price_range,
+          niche_tags: [],
+        });
+        setExtractionQuality('manual');
+        setAnalyzing(false);
+        goTo(2);
+        return;
+      }
+      applyResults(data);
+      setAnalyzing(false);
+      goTo(2);
+    } catch {
+      toast.error('Something went wrong.');
+      setAnalyzing(false);
+    }
+  };
+
+  // Template submit
+  const handleTemplateSelect = async (industry: string, templateData: any) => {
+    if (!activeWorkspace) return;
+    setAnalyzing(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('setup-shop-dna', {
+        body: { workspace_id: activeWorkspace.id, platform: 'template', payload: { industry, template_data: templateData } },
+      });
+      if (error || !data?.success) {
+        // Fallback
+        setDna({
+          shop_name: 'My Shop',
+          industry,
+          ...templateData,
+          niche_tags: templateData.niche_tags || [],
+        });
+        setExtractionQuality('template');
+        setAnalyzing(false);
+        goTo(2);
+        return;
+      }
+      applyResults(data);
+      setAnalyzing(false);
+      goTo(2);
+    } catch {
+      setAnalyzing(false);
+      toast.error('Something went wrong.');
+    }
+  };
+
+  // Photo upload submit
+  const handlePhotosSubmit = async (base64Images: string[]) => {
+    if (!activeWorkspace) return;
+    setAnalyzing(true);
+    setAnalyzeStep(0);
+
+    const interval = setInterval(() => {
+      setAnalyzeStep(prev => {
+        if (prev >= ANALYZING_STEPS.length - 1) { clearInterval(interval); return prev; }
+        return prev + 1;
+      });
+    }, 2500);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('setup-shop-dna', {
+        body: { workspace_id: activeWorkspace.id, platform: 'photos', payload: { images: base64Images } },
+      });
+      clearInterval(interval);
+      setAnalyzeStep(ANALYZING_STEPS.length - 1);
+
+      if (error || !data?.success) {
+        toast.error('Could not analyze photos. Please try manually.');
+        setAnalyzing(false);
+        return;
+      }
+      applyResults(data);
+      setTimeout(() => { setAnalyzing(false); goTo(2); }, 800);
+    } catch {
+      clearInterval(interval);
+      toast.error('Something went wrong.');
+      setAnalyzing(false);
+    }
+  };
+
+  const applyResults = (data: any) => {
+    setDna({ ...data.dna, niche_tags: data.dna?.niche_tags || [] });
+    setBrandColors(data.brand_colors || []);
+    setBrandFonts(data.brand_fonts || { source: 'extracted' });
+    setBrandLogoUrl(data.brand_logo_url || null);
+    setProducts(data.products || []);
+    setDnaScore(data.dna_score || 0);
+    setExtractionQuality(data.extraction_quality || 'full');
   };
 
   // Step 2 → save DNA
@@ -258,7 +344,6 @@ const Onboarding = () => {
         body: { action: 'add', workspace_id: activeWorkspace.id, product: data },
       });
     }
-    // Refresh products
     const { data: refreshed } = await supabase.functions.invoke('workspace-products', {
       body: { action: 'list', workspace_id: activeWorkspace.id, active_only: false },
     });
@@ -296,6 +381,45 @@ const Onboarding = () => {
     { key: 'price_range', icon: <DollarSign size={14} className="text-primary" />, label: 'Price Range' },
   ];
 
+  // Count missing fields for quality banner
+  const missingFieldCount = dna ? dnaFields.filter(f => !dna[f.key]).length : 0;
+
+  // URL input for website/facebook/daraz
+  const renderUrlInput = () => {
+    const placeholders: Record<string, string> = {
+      website: 'https://yourshop.com',
+      facebook: 'facebook.com/yourpagename',
+      daraz: 'daraz.com.bd/shop/yourshop',
+    };
+    const labels: Record<string, string> = {
+      website: 'Your website URL',
+      facebook: 'Your Facebook Page URL',
+      daraz: 'Your Daraz Store URL',
+    };
+    return (
+      <div className="mt-5 space-y-4">
+        <div>
+          <label className="text-sm font-semibold text-foreground mb-1.5 block">{labels[entryPoint!]}</label>
+          <div className="relative">
+            <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+            <input type="url" value={shopUrl} onChange={e => setShopUrl(e.target.value)}
+              placeholder={placeholders[entryPoint!]}
+              className="w-full bg-card border-2 border-border rounded-2xl pl-11 pr-5 py-4 text-base focus:outline-none focus:border-primary transition-colors placeholder:text-muted-foreground" />
+          </div>
+        </div>
+        {entryPoint === 'facebook' && (
+          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <Info size={12} /> Facebook limits what we can read. We'll extract what's publicly visible and you can fill in the rest.
+          </p>
+        )}
+        <button onClick={() => handleUrlAnalyze(entryPoint!)} disabled={!shopUrl.trim()}
+          className="w-full bg-gradient-cta text-primary-foreground rounded-2xl py-4 text-base font-bold shadow-orange-glow hover:scale-[1.01] transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+          Continue →
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <div className="grain-overlay" />
@@ -309,8 +433,6 @@ const Onboarding = () => {
             </div>
             <span className="font-en text-lg font-[800] text-foreground tracking-[-0.02em]">AdDhoom</span>
           </div>
-
-          {/* Step Indicator */}
           <div className="flex items-center gap-0">
             {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((s, i) => (
               <div key={s} className="flex items-center">
@@ -327,7 +449,6 @@ const Onboarding = () => {
               </div>
             ))}
           </div>
-
           {step < TOTAL_STEPS && (
             <button onClick={() => setShowSkipConfirm(true)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Skip</button>
           )}
@@ -354,78 +475,40 @@ const Onboarding = () => {
       {/* Main Content */}
       <div className="pt-20 pb-12 px-6 max-w-[680px] mx-auto min-h-screen flex flex-col justify-center">
         <AnimatePresence mode="wait" custom={direction}>
-          {/* STEP 1 — Shop Link */}
+          {/* STEP 1 — Entry Point Selection */}
           {step === 1 && !analyzing && (
             <motion.div key="step1" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_TRANSITION}>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Step 1 of {TOTAL_STEPS}</p>
-              <h1 className="text-3xl font-bold text-foreground mb-2">Where's your shop?</h1>
+              <h1 className="text-3xl font-bold text-foreground mb-2">How do you want to set up your shop?</h1>
               <p className="text-muted-foreground mb-8 leading-relaxed">
-                Paste your link — AI will extract brand colors, fonts, products & more.
+                Choose how you want to get started. You can always edit everything later.
               </p>
 
-              <div className="space-y-4">
-                <div className="relative">
-                  <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                  <input
-                    type="url" value={shopUrl} onChange={e => setShopUrl(e.target.value)}
-                    placeholder="Your Daraz / Facebook / website link"
-                    className="w-full bg-card border-2 border-border rounded-2xl pl-11 pr-5 py-4 text-base focus:outline-none focus:border-primary transition-colors placeholder:text-muted-foreground"
-                  />
-                </div>
+              <EntryPointCards selected={entryPoint} onSelect={setEntryPoint} />
 
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Or choose a platform:</p>
-                  <div className="flex gap-2 flex-wrap">
-                    {[
-                      { id: 'facebook', label: 'Facebook Page', icon: <Globe size={14} /> },
-                      { id: 'daraz', label: 'Daraz Store', icon: <ShoppingBag size={14} /> },
-                      { id: 'website', label: 'Website', icon: <Search size={14} /> },
-                    ].map(p => (
-                      <button key={p.id} onClick={() => setPlatform(p.id)}
-                        className={`text-sm rounded-full px-4 py-2.5 border transition-all flex items-center gap-1.5 ${
-                          platform === p.id ? 'border-primary bg-primary/10 text-primary font-semibold' : 'border-border text-muted-foreground hover:border-primary/50'
-                        }`}>
-                        {p.icon} {p.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <button onClick={() => setShowManual(!showManual)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  <ChevronDown size={14} className={`transition-transform ${showManual ? 'rotate-180' : ''}`} /> No link? Enter details manually
-                </button>
-
-                <AnimatePresence>
-                  {showManual && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="space-y-3 overflow-hidden">
-                      {[
-                        { key: 'shop_name', label: 'Shop Name', placeholder: 'e.g. Fashion Dhaka' },
-                        { key: 'industry', label: 'Industry', placeholder: 'e.g. Fashion & Clothing' },
-                        { key: 'key_products', label: 'Key Products', placeholder: 'e.g. Sarees, Kurtis' },
-                        { key: 'target_audience', label: 'Target Audience', placeholder: 'e.g. Women 18-35, Dhaka' },
-                        { key: 'brand_tone', label: 'Brand Voice', placeholder: 'e.g. Friendly, Modern' },
-                        { key: 'unique_selling', label: 'Unique Selling Point', placeholder: 'What makes you different?' },
-                        { key: 'price_range', label: 'Price Range', placeholder: 'e.g. budget, mid_range, premium' },
-                      ].map(f => (
-                        <div key={f.key}>
-                          <label className="text-xs font-semibold text-foreground mb-1 block">{f.label}</label>
-                          <input type="text" value={manualDna[f.key as keyof ShopDNA] as string}
-                            onChange={e => setManualDna({ ...manualDna, [f.key]: e.target.value })}
-                            placeholder={f.placeholder}
-                            className="w-full bg-card border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary transition-colors placeholder:text-muted-foreground" />
-                        </div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Lock size={12} /> We only view public info. No login needed.</p>
-
-                <button onClick={handleAnalyze} disabled={!shopUrl.trim() && !showManual}
-                  className="w-full bg-gradient-cta text-primary-foreground rounded-2xl py-4 text-base font-bold shadow-orange-glow hover:scale-[1.01] transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-                  Next <ChevronRight size={18} />
-                </button>
-              </div>
+              {/* Per-entry-point flow below cards */}
+              <AnimatePresence mode="wait">
+                {entryPoint && ['website', 'facebook', 'daraz'].includes(entryPoint) && (
+                  <motion.div key="url-input" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+                    {renderUrlInput()}
+                  </motion.div>
+                )}
+                {entryPoint === 'photos' && (
+                  <motion.div key="photos" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+                    <PhotoUploader onSubmit={handlePhotosSubmit} />
+                  </motion.div>
+                )}
+                {entryPoint === 'manual' && (
+                  <motion.div key="manual" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+                    <ManualEntryForm onSubmit={handleManualSubmit} />
+                  </motion.div>
+                )}
+                {entryPoint === 'template' && (
+                  <motion.div key="template" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+                    <TemplateSelector onSelect={handleTemplateSelect} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           )}
 
@@ -439,13 +522,8 @@ const Onboarding = () => {
               </div>
               <div className="space-y-3 max-w-sm mx-auto">
                 {ANALYZING_STEPS.map((s, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: i <= analyzeStep ? 1 : 0.3, x: 0 }}
-                    transition={{ delay: i * 0.1, duration: 0.3 }}
-                    className="flex items-center gap-3"
-                  >
+                  <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: i <= analyzeStep ? 1 : 0.3, x: 0 }} transition={{ delay: i * 0.1, duration: 0.3 }}
+                    className="flex items-center gap-3">
                     {i < analyzeStep ? (
                       <Check size={16} className="text-[hsl(var(--brand-green))] flex-shrink-0" />
                     ) : i === analyzeStep ? (
@@ -453,9 +531,7 @@ const Onboarding = () => {
                     ) : (
                       <s.icon size={16} className="text-muted-foreground/40 flex-shrink-0" />
                     )}
-                    <span className={`text-sm ${i <= analyzeStep ? 'text-foreground' : 'text-muted-foreground/40'}`}>
-                      {s.text}
-                    </span>
+                    <span className={`text-sm ${i <= analyzeStep ? 'text-foreground' : 'text-muted-foreground/40'}`}>{s.text}</span>
                   </motion.div>
                 ))}
               </div>
@@ -471,6 +547,24 @@ const Onboarding = () => {
               </h1>
               <p className="text-muted-foreground mb-5 text-sm">Review and edit if needed, then continue.</p>
 
+              {/* Extraction Quality Banner */}
+              {extractionQuality === 'partial' && (
+                <div className="mb-4 p-3 rounded-xl border border-[hsl(40,100%,50%)]/30 bg-[hsl(40,100%,50%)]/[0.08] flex items-start gap-2">
+                  <AlertTriangle size={16} className="text-[hsl(40,100%,40%)] flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-foreground">
+                    Some fields couldn't be extracted automatically. Please review and fill in any missing fields below.
+                  </p>
+                </div>
+              )}
+              {(extractionQuality === 'manual' || extractionQuality === 'template') && (
+                <div className="mb-4 p-3 rounded-xl border border-[hsl(var(--brand-purple))]/20 bg-[hsl(var(--brand-purple))]/[0.06] flex items-start gap-2">
+                  <Info size={16} className="text-[hsl(var(--brand-purple))] flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-foreground">
+                    You can always update this information later in Settings → Shop DNA.
+                  </p>
+                </div>
+              )}
+
               {/* Tabs */}
               <div className="bg-secondary rounded-xl p-1 flex mb-6">
                 {(['brand', 'products'] as const).map(tab => (
@@ -478,14 +572,20 @@ const Onboarding = () => {
                     className={`flex-1 py-2.5 rounded-[10px] text-sm font-semibold transition-all flex items-center justify-center gap-1.5 ${
                       activeTab === tab ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
                     }`}>
-                    {tab === 'brand' ? <><Palette size={14} /> Brand Info</> : <><Package size={14} /> Products ({products.length})</>}
+                    {tab === 'brand' ? (
+                      <>
+                        <Palette size={14} /> Brand Info
+                        {missingFieldCount > 0 && <span className="text-[10px] bg-primary/15 text-primary rounded-full px-1.5 py-0.5 font-bold">{missingFieldCount} missing</span>}
+                      </>
+                    ) : (
+                      <><Package size={14} /> Products ({products.length})</>
+                    )}
                   </button>
                 ))}
               </div>
 
               {activeTab === 'brand' ? (
                 <div className="space-y-6">
-                  {/* Visual Identity */}
                   <VisualIdentitySection
                     brandColors={brandColors}
                     brandFonts={brandFonts}
@@ -493,32 +593,33 @@ const Onboarding = () => {
                     onUpdateColors={setBrandColors}
                     onUpdateFonts={setBrandFonts}
                   />
-
                   <div className="h-px bg-border" />
-
-                  {/* Brand Info Fields */}
                   <div className="space-y-3">
-                    {dnaFields.map((field, i) => (
-                      <motion.div key={field.key} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05, duration: 0.3 }}
-                        className="bg-card rounded-[14px] p-4 border-l-4 border-l-primary">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
-                            {field.icon} {field.label}
-                          </span>
-                          <button onClick={() => setEditingField(editingField === field.key ? null : field.key)}
-                            className="text-muted-foreground hover:text-primary transition-colors"><Pencil size={14} /></button>
-                        </div>
-                        {editingField === field.key ? (
-                          <input autoFocus value={(dna[field.key] as string) || ''} onChange={e => updateDna(field.key, e.target.value)}
-                            onBlur={() => setEditingField(null)} onKeyDown={e => e.key === 'Enter' && setEditingField(null)}
-                            className="w-full bg-transparent border-b border-primary text-base font-semibold focus:outline-none text-foreground" />
-                        ) : (
-                          <p className={`text-base font-semibold ${dna[field.key] ? 'text-foreground' : 'text-muted-foreground italic'}`}>
-                            {(dna[field.key] as string) || 'Not detected — click pencil'}
-                          </p>
-                        )}
-                      </motion.div>
-                    ))}
+                    {dnaFields.map((field, i) => {
+                      const isEmpty = !dna[field.key];
+                      return (
+                        <motion.div key={field.key} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05, duration: 0.3 }}
+                          className={`bg-card rounded-[14px] p-4 border-l-4 ${isEmpty ? 'border-l-primary' : 'border-l-primary'}`}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
+                              {field.icon} {field.label} {isEmpty && <span className="text-primary">*</span>}
+                            </span>
+                            <button onClick={() => setEditingField(editingField === field.key ? null : field.key)}
+                              className="text-muted-foreground hover:text-primary transition-colors"><Pencil size={14} /></button>
+                          </div>
+                          {editingField === field.key ? (
+                            <input autoFocus value={(dna[field.key] as string) || ''} onChange={e => updateDna(field.key, e.target.value)}
+                              onBlur={() => setEditingField(null)} onKeyDown={e => e.key === 'Enter' && setEditingField(null)}
+                              placeholder="Not found — add manually"
+                              className={`w-full bg-transparent border-b text-base font-semibold focus:outline-none text-foreground ${isEmpty ? 'border-primary' : 'border-primary'}`} />
+                          ) : (
+                            <p className={`text-base font-semibold ${dna[field.key] ? 'text-foreground' : 'text-muted-foreground italic'}`}>
+                              {(dna[field.key] as string) || 'Not found — click pencil to add'}
+                            </p>
+                          )}
+                        </motion.div>
+                      );
+                    })}
                   </div>
 
                   {/* Niche Tags */}
@@ -544,7 +645,6 @@ const Onboarding = () => {
                   </div>
                 </div>
               ) : (
-                /* Products Tab */
                 <ProductsGrid
                   products={products}
                   onToggleActive={handleProductToggle}
@@ -552,6 +652,13 @@ const Onboarding = () => {
                   onDelete={handleProductDelete}
                   onAdd={() => { setEditingProduct({}); setShowProductModal(true); }}
                 />
+              )}
+
+              {/* Missing fields nudge */}
+              {missingFieldCount > 0 && (
+                <p className="text-xs text-muted-foreground text-center mt-3">
+                  {missingFieldCount} field{missingFieldCount > 1 ? 's' : ''} empty — AI works better with more information
+                </p>
               )}
 
               {/* Bottom: DNA Score + Next */}
@@ -569,10 +676,7 @@ const Onboarding = () => {
           {step === 3 && (
             <motion.div key="step3" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_TRANSITION}>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Step 3 of {TOTAL_STEPS}</p>
-              <StyleCalibration
-                onComplete={handleStyleComplete}
-                onSkip={() => goTo(4)}
-              />
+              <StyleCalibration onComplete={handleStyleComplete} onSkip={() => goTo(4)} />
             </motion.div>
           )}
 
