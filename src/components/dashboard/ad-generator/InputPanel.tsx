@@ -631,11 +631,14 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
         {mode === 'image' && imageStep === 2 && (
           <PromptEditor
             prompt={imagePrompt}
-            setPrompt={setImagePrompt}
+            onPromptChange={setImagePrompt}
             defaultPrompt={imageDefaultPrompt}
             onGenerate={() => onGenerate(imagePrompt)}
             onBack={() => setImageStep(1)}
             generating={generating}
+            generateLabel={t('ইমেজ তৈরি করুন', 'Generate Image')}
+            generateIcon={<Sparkles size={18} />}
+            tabType="ad_image"
           />
         )}
 
