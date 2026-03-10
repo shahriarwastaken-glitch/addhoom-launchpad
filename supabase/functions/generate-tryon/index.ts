@@ -12,6 +12,51 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function buildModelPrompt(attrs: {
+  gender: string;
+  body: string;
+  skin: string;
+  pose: string;
+  age?: string;
+  style?: string;
+}): string {
+  const poseDesc: Record<string, string> = {
+    standing: 'standing naturally, facing forward',
+    walking: 'walking naturally, slight movement',
+    sitting: 'sitting relaxed, full body visible',
+    dynamic: 'dynamic confident pose, fashion forward',
+  };
+  const bodyDesc: Record<string, string> = {
+    slim: 'slim build',
+    average: 'average athletic build',
+    plus: 'plus size curvy build',
+  };
+  const skinDesc: Record<string, string> = {
+    fair: 'fair complexion',
+    light: 'light skin tone',
+    medium: 'medium brown skin tone',
+    tan: 'tan olive skin tone',
+    dark: 'deep dark skin tone',
+  };
+  const ageDesc: Record<string, string> = {
+    teen: 'teenage',
+    '20s': 'in their 20s',
+    '30s': 'in their 30s',
+    '40s+': 'in their 40s',
+  };
+  const styleDesc: Record<string, string> = {
+    natural: 'natural look',
+    editorial: 'editorial high fashion',
+    commercial: 'commercial catalog style',
+  };
+
+  let prompt = `${attrs.gender} fashion model, ${bodyDesc[attrs.body] || 'average athletic build'}, ${skinDesc[attrs.skin] || 'medium brown skin tone'}, ${poseDesc[attrs.pose] || 'standing naturally'}`;
+  if (attrs.age) prompt += `, ${ageDesc[attrs.age] || ''}`;
+  if (attrs.style) prompt += `, ${styleDesc[attrs.style] || ''}`;
+  prompt += ', professional fashion photography, neutral studio background, full body shot';
+  return prompt.trim();
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -25,7 +70,6 @@ serve(async (req) => {
 
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) throw new Error('Missing authorization');
-
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) throw new Error('Unauthorized');
@@ -33,45 +77,52 @@ serve(async (req) => {
     const {
       workspace_id,
       garment_image_base64,
-      model_id,
       garment_category,
-      background,
+      model_attributes,
+      background = 'studio_white',
       variations = 1,
+      advanced,
     } = await req.json();
 
-    if (!workspace_id || !garment_image_base64 || !model_id || !garment_category) {
+    if (!workspace_id || !garment_image_base64 || !garment_category || !model_attributes) {
       throw new Error('Missing required fields');
     }
 
     const FASHN_API_KEY = Deno.env.get('FASHN_API_KEY');
     if (!FASHN_API_KEY) throw new Error('FASHN_API_KEY not configured');
-
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 
-    // IMPROVEMENT 2: Cache uploaded garments using content hash
-    const garmentUrl = await getOrUploadGarment(supabase, garment_image_base64, workspace_id, SUPABASE_URL);
+    // Step 1: Background removal via Fashn.ai
+    const garmentCutout = await fashnRemoveBackground(garment_image_base64, FASHN_API_KEY);
 
-    // Model image URL
-    const modelUrl = `${SUPABASE_URL}/storage/v1/object/public/ad-images/models/${model_id}.jpg`;
+    // Step 2: Cache processed garment
+    const garmentUrl = await getOrUploadGarment(supabase, garmentCutout, workspace_id, SUPABASE_URL);
 
-    // Map garment category
+    // Step 3: Build model prompt
+    const modelPrompt = buildModelPrompt({
+      ...model_attributes,
+      ...(advanced || {}),
+    });
+
+    // Step 4: Map category
     const categoryMap: Record<string, string> = {
       'Top': 'tops',
       'Bottom': 'bottoms',
       'Full Body / Dress': 'one-pieces',
       'Outerwear': 'tops',
       'Footwear': 'tops',
+      'Accessory': 'tops',
     };
-
     const category = categoryMap[garment_category] || 'tops';
 
-    // IMPROVEMENT 1: Parallel predictions with Promise.allSettled
+    // Step 5: Parallel product-to-model predictions
     const predictionPromises = Array.from(
       { length: Math.min(variations, 3) },
-      (_, i) => runFashnPrediction({
-        modelUrl,
+      (_, i) => runProductToModel({
         garmentUrl,
         category,
+        modelPrompt,
+        background,
         variationIndex: i,
         workspaceId: workspace_id,
         fashnApiKey: FASHN_API_KEY,
@@ -81,16 +132,12 @@ serve(async (req) => {
     );
 
     const settled = await Promise.allSettled(predictionPromises);
-
     const results = settled
       .filter((r): r is PromiseFulfilledResult<string> => r.status === 'fulfilled')
       .map(r => r.value);
-
     const failedCount = settled.filter(r => r.status === 'rejected').length;
 
-    if (results.length === 0) {
-      throw new Error('All variations failed');
-    }
+    if (results.length === 0) throw new Error('All variations failed');
 
     // Save to ad_images
     const inserts = results.map(url => ({
@@ -100,15 +147,15 @@ serve(async (req) => {
       text_config: {},
       studio_source: 'tryon',
       studio_config: {
-        model_id,
+        model_attributes,
         garment_category,
         background,
+        model_prompt: modelPrompt,
+        pipeline_version: 'tryon_v2',
       },
     }));
-
     const { data: saved } = await supabase.from('ad_images').insert(inserts).select();
 
-    // Log usage
     await supabase.from('usage_logs').insert({
       user_id: user.id,
       workspace_id,
@@ -133,7 +180,25 @@ serve(async (req) => {
   }
 });
 
-// IMPROVEMENT 2: Garment caching with content hash
+// Fashn.ai background removal
+async function fashnRemoveBackground(imageBase64: string, apiKey: string): Promise<string> {
+  const response = await fetch('https://api.fashn.ai/v1/background-remove', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({ image: imageBase64 }),
+  });
+  if (!response.ok) {
+    console.error('BG removal failed:', response.status);
+    return imageBase64; // fallback to original
+  }
+  const result = await response.json();
+  return result.image || imageBase64;
+}
+
+// Garment caching with content hash
 async function getOrUploadGarment(
   supabase: any,
   imageBase64: string,
@@ -148,17 +213,14 @@ async function getOrUploadGarment(
 
   const cachePath = `garment-cache/${workspaceId}/${hash}.jpg`;
 
-  // Check if already uploaded
   const { data: existing } = await supabase
-    .storage
-    .from('ad-images')
+    .storage.from('ad-images')
     .list(`garment-cache/${workspaceId}`, { search: hash });
 
   if (existing && existing.length > 0) {
     return `${supabaseUrl}/storage/v1/object/public/ad-images/${cachePath}`;
   }
 
-  // Upload new
   const garmentBytes = Uint8Array.from(atob(imageBase64), c => c.charCodeAt(0));
   await supabase.storage.from('ad-images').upload(cachePath, garmentBytes, {
     contentType: 'image/jpeg',
@@ -169,11 +231,12 @@ async function getOrUploadGarment(
   return `${supabaseUrl}/storage/v1/object/public/ad-images/${cachePath}`;
 }
 
-// IMPROVEMENT 1 + 3: Parallel prediction with exponential backoff polling
-async function runFashnPrediction(config: {
-  modelUrl: string;
+// Product-to-model prediction with exponential backoff
+async function runProductToModel(config: {
   garmentUrl: string;
   category: string;
+  modelPrompt: string;
+  background: string;
   variationIndex: number;
   workspaceId: string;
   fashnApiKey: string;
@@ -187,9 +250,10 @@ async function runFashnPrediction(config: {
       'Authorization': `Bearer ${config.fashnApiKey}`,
     },
     body: JSON.stringify({
-      model_image: config.modelUrl,
       garment_image: config.garmentUrl,
       category: config.category,
+      model_description: config.modelPrompt,
+      background: config.background,
       mode: 'quality',
       num_samples: 1,
     }),
@@ -197,23 +261,20 @@ async function runFashnPrediction(config: {
 
   const startData = await startRes.json();
   const predictionId = startData.id;
-
   if (!predictionId) {
     console.error('Fashn.ai start error:', startData);
     throw new Error('Failed to start try-on generation');
   }
 
-  // IMPROVEMENT 3: Exponential backoff polling
+  // Exponential backoff polling
   for (let attempt = 0; attempt < BACKOFF_SCHEDULE.length; attempt++) {
     await sleep(BACKOFF_SCHEDULE[attempt]);
-
     const statusRes = await fetch(`https://api.fashn.ai/v1/status/${predictionId}`, {
       headers: { 'Authorization': `Bearer ${config.fashnApiKey}` },
     });
     const status = await statusRes.json();
 
     if (status.status === 'completed' && status.output?.[0]) {
-      // Download and store
       const imageRes = await fetch(status.output[0]);
       const imageBuffer = await imageRes.arrayBuffer();
       const storedPath = `tryon/${config.workspaceId}/${Date.now()}_${config.variationIndex}.jpg`;
