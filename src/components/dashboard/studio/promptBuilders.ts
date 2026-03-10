@@ -9,6 +9,7 @@ const LIGHTING: Record<LightingMood, string> = {
   dramatic: 'dramatic high-contrast lighting, deep shadows, strong directional light, cinematic chiaroscuro effect',
   natural: 'natural ambient lighting, soft outdoor light, warm sunlight feel, realistic shadows',
   bright: 'bright clean lighting, high key, minimal shadows, airy and light feel, commercial photography brightness',
+  golden: 'warm golden hour light, rich amber glow, long soft shadows, magic hour photography',
 };
 
 const COLOR: Record<ColorMood, string> = {
