@@ -166,7 +166,7 @@ const ProjectDetail = () => {
       <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-2">
         <div>
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{project.emoji || '📁'}</span>
+            {(() => { const PIco = ICON_MAP[project.emoji || 'folder'] || FolderOpen; return <PIco size={28} className="text-primary" />; })()}
             <h2 className="text-2xl font-heading-bn font-bold text-foreground">{project.name}</h2>
           </div>
           {project.description && (
