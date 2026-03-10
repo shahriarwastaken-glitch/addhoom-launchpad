@@ -132,7 +132,7 @@ const ProjectDetail = () => {
     for (const adId of ids) {
       await supabase.from('ad_creatives').update({ project_id: id } as any).eq('id', adId);
     }
-    toast.success(t(`${lang === 'bn' ? toBn(ids.length) : ids.length}টি বিজ্ঞাপন যোগ হয়েছে`, `${ids.length} ads added`));
+    toast.success(lang === 'bn' ? `${toBn(ids.length)}টি বিজ্ঞাপন যোগ হয়েছে` : `${ids.length} ads added`);
     setShowAdPicker(false);
     fetchData();
   };
