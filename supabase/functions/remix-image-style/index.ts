@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { serverError, unauthorizedError } from "../_shared/errors.ts";
+import { piapiGenerateImage, downloadImage } from "../_shared/piapi.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -35,12 +36,12 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) return new Response(JSON.stringify({ success: false, message: "AI not configured" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    // Step 1: Analyze winning image style
+    // Step 1: Analyze winning image style using LLM
     const analyzeResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3.1-flash-lite-preview",
         messages: [{
           role: "user",
           content: [
@@ -73,19 +74,30 @@ Return ONLY valid JSON:
       } catch { /* use defaults */ }
     }
 
-    // Step 2: Generate with style applied to target product
-    const targetImageUrl = target_product_cutout_url || target_product_image_base64;
+    // Step 2: Generate with style applied to target product via PiAPI
+    let targetImageUrl = target_product_cutout_url || target_product_image_base64;
     if (!targetImageUrl) {
       return new Response(JSON.stringify({ success: false, message: "Target product image required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const imageUri = targetImageUrl.startsWith("data:") ? targetImageUrl : targetImageUrl;
+    // If base64, upload to get a URL
+    if (targetImageUrl.startsWith("data:")) {
+      const base64Match = targetImageUrl.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (base64Match) {
+        const rawBytes = Uint8Array.from(atob(base64Match[2]), c => c.charCodeAt(0));
+        const tmpPath = `${workspace_id}/style-src-${Date.now()}.png`;
+        await supabase.storage.from("ad-images").upload(tmpPath, rawBytes, { contentType: "image/png", upsert: true });
+        const { data: tmpUrl } = supabase.storage.from("ad-images").getPublicUrl(tmpPath);
+        targetImageUrl = tmpUrl.publicUrl;
+      }
+    }
+
     const count = Math.min(variations, 3);
     const images: any[] = [];
 
     for (let i = 0; i < count; i++) {
       try {
-        const prompt = `You are given a product image. Generate a premium advertising image applying a specific visual style.
+        const prompt = `Generate a premium advertising image applying a specific visual style.
 
 PRODUCT FIDELITY RULES:
 - Product must appear EXACTLY ONCE, maintain exact orientation/shape/colors
@@ -106,29 +118,16 @@ Variation ${i + 1}: Create a subtle interpretation of this style.
 
 QUALITY: Editorial luxury brand campaign, 8K, perfect exposure.`;
 
-        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash-image",
-            messages: [{ role: "user", content: [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: imageUri } }] }],
-            modalities: ["image", "text"],
-          }),
+        const resultUrl = await piapiGenerateImage({
+          prompt,
+          sourceImageUrl: targetImageUrl,
+          aspectRatio: "1:1",
+          resolution: "1K",
         });
 
-        if (!response.ok) { console.error("Style transfer gen failed:", await response.text()); continue; }
-        const result = await response.json();
-        const genImages = result.choices?.[0]?.message?.images;
-        if (!genImages?.length) continue;
-
-        const base64Data = genImages[0].image_url.url;
-        const base64Clean = base64Data.replace(/^data:image\/\w+;base64,/, "");
-        const binaryString = atob(base64Clean);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let b = 0; b < binaryString.length; b++) bytes[b] = binaryString.charCodeAt(b);
-
+        const imageBytes = await downloadImage(resultUrl);
         const fileName = `${workspace_id}/${Date.now()}-style-${i}.png`;
-        const { error: uploadError } = await supabase.storage.from("ad-images").upload(fileName, bytes, { contentType: "image/png", upsert: true });
+        const { error: uploadError } = await supabase.storage.from("ad-images").upload(fileName, imageBytes, { contentType: "image/png", upsert: true });
         if (uploadError) continue;
 
         const { data: publicUrl } = supabase.storage.from("ad-images").getPublicUrl(fileName);

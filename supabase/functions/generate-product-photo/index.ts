@@ -1,40 +1,20 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { piapiGenerateImage, downloadImage } from "../_shared/piapi.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// IMPROVEMENT 5: Stronger product fidelity block
 const PRODUCT_FIDELITY_BLOCK = `
 PRODUCT FIDELITY — ABSOLUTE RULES:
-
-MUST DO:
 - The product appears EXACTLY ONCE
-- Same orientation as the reference image
-- Same shape and proportions — no distortion
-- Same colors — do not shift hues or saturation
-- Same surface texture — leather stays leather, matte stays matte, glossy stays glossy
-- Same size relative to the scene
+- Same orientation, shape, proportions, colors, and surface texture as the reference
 - Realistic shadows that match scene lighting
-- Realistic reflections only where physically accurate (glass, shiny surfaces)
-
-MUST NOT:
-- Do not duplicate the product anywhere
-- Do not show the product twice (not even as a reflection or shadow)
-- Do not alter, stylize, or reimagine the product design
-- Do not add logos, text, or markings that are not on the original product
-- Do not change the product color
-- Do not show partial product (full product must be visible)
+- Do not duplicate, stylize, distort, or reimagine the product
 - Do not add text, words, prices, watermarks, or labels anywhere
-- Do not crop the product at the frame edge
-
-REFERENCE IMAGE INSTRUCTION:
-The provided image is your single source of truth for what the product looks like.
-Treat it as a photograph, not a sketch.
-Reproduce it exactly as shown.
-Generate only the environment around it.
+- Full product must be visible — do not crop at frame edge
 `;
 
 const SCENE_PROMPTS: Record<string, string | ((c: any) => string)> = {
@@ -77,8 +57,14 @@ serve(async (req) => {
       throw new Error('Missing required fields');
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
+    // Upload source image to storage to get URL for PiAPI
+    const srcBytes = Uint8Array.from(atob(product_image_base64), c => c.charCodeAt(0));
+    const srcPath = `product-photo/${workspace_id}/src_${Date.now()}.png`;
+    await supabase.storage.from('ad-images').upload(srcPath, srcBytes, {
+      contentType: 'image/png', upsert: true,
+    });
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+    const sourceUrl = `${SUPABASE_URL}/storage/v1/object/public/ad-images/${srcPath}`;
 
     // Build scene prompt
     const promptBuilder = SCENE_PROMPTS[scene];
@@ -86,8 +72,7 @@ serve(async (req) => {
       ? promptBuilder(scene_config)
       : (promptBuilder || SCENE_PROMPTS.onWhite);
 
-    // IMPROVEMENT 5: Include strong product fidelity block
-    const fullPrompt = `You are given a product image. Place this product in a professional scene.
+    const fullPrompt = `Place this product in a professional scene.
 
 ${PRODUCT_FIDELITY_BLOCK}
 
@@ -100,50 +85,22 @@ ${transparent_bg ? 'Generate on pure white background only.' : ''}
 
 QUALITY: 8K, perfect exposure, professional color grading, luxury brand campaign quality.`;
 
-    // Call Gemini via Lovable AI Gateway
-    const geminiRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-image',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: fullPrompt },
-              {
-                type: 'image_url',
-                image_url: { url: `data:image/png;base64,${product_image_base64}` },
-              },
-            ],
-          },
-        ],
-        modalities: ['image', 'text'],
-      }),
+    // Generate via PiAPI Nano Banana Pro
+    const resultUrl = await piapiGenerateImage({
+      prompt: fullPrompt,
+      sourceImageUrl: sourceUrl,
+      aspectRatio: format,
+      resolution: '2K',
     });
 
-    const geminiData = await geminiRes.json();
-    const generatedImage = geminiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-
-    if (!generatedImage) {
-      throw new Error('Image generation failed');
-    }
-
-    // Extract base64 data
-    const base64Data = generatedImage.replace(/^data:image\/\w+;base64,/, '');
-    const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-
-    // Store result
+    // Download and store result
+    const imageBytes = await downloadImage(resultUrl);
     const ext = export_format === 'jpg' ? 'jpg' : 'png';
     const storedPath = `product-photo/${workspace_id}/${Date.now()}.${ext}`;
     await supabase.storage.from('ad-images').upload(storedPath, imageBytes, {
       contentType: `image/${ext === 'jpg' ? 'jpeg' : 'png'}`, upsert: true,
     });
 
-    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/ad-images/${storedPath}`;
 
     // Save to ad_images

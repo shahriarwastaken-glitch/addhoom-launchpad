@@ -12,9 +12,17 @@ const SERVICES = [
   {
     service_name: 'gemini',
     display_name: 'Google Gemini API',
-    description: 'AI text generation for ads, chat, analysis',
+    description: 'Ad copy, Dhoom Score, prompt enhancement, AI chat, Shop DNA extraction (gemini-3.1-flash-lite-preview)',
     docs_url: 'https://aistudio.google.com/apikey',
     icon: '🤖',
+    is_critical: true,
+  },
+  {
+    service_name: 'piapi',
+    display_name: 'PiAPI (Nano Banana Pro + Kling 3.0)',
+    description: 'Image generation (Nano Banana Pro), AI Motion Video (Kling 2.6)',
+    docs_url: 'https://piapi.ai/docs',
+    icon: '🎨',
     is_critical: true,
   },
   {
@@ -28,7 +36,7 @@ const SERVICES = [
   {
     service_name: 'shotstack',
     display_name: 'Shotstack Video API',
-    description: 'AI video ad generation and rendering',
+    description: 'Slideshow video ad rendering',
     docs_url: 'https://shotstack.io/docs',
     icon: '🎬',
     is_critical: false,
@@ -330,7 +338,7 @@ async function performKeyTest(supabase: any, keyId: string, serviceName: string,
 
 async function testGeminiKey(apiKey: string) {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

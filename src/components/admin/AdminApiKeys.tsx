@@ -99,6 +99,7 @@ interface KeyLog {
 
 const SERVICE_COLORS: Record<string, string> = {
   gemini: '#6C3FE8',
+  piapi: '#FF8C00',
   sslcommerz: '#E2136E',
   shotstack: '#00B96B',
   meta_ad_library: '#1877F2',
@@ -112,6 +113,11 @@ const SETUP_GUIDES: Record<string, string[]> = {
     '২. "Get API Key" বাটনে ক্লিক করুন',
     '৩. নতুন প্রজেক্ট তৈরি করুন বা বিদ্যমান প্রজেক্ট বেছে নিন',
     '৪. API Key কপি করুন এবং এখানে পেস্ট করুন',
+  ],
+  piapi: [
+    '১. piapi.ai তে অ্যাকাউন্ট তৈরি করুন',
+    '২. Dashboard থেকে API Key কপি করুন',
+    '৩. Nano Banana Pro (image) ও Kling (video) এর জন্য ব্যবহৃত হবে',
   ],
   sslcommerz: [
     '১. SSLCommerz Developer Portal এ যান',

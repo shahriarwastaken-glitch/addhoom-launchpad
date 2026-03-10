@@ -72,6 +72,15 @@ serve(async (req) => {
         prompt: motion_prompt,
         duration: 5,
         aspect_ratio: aspect_ratio || '9:16',
+        mode: 'std',
+        version: '2.6',
+      },
+      config: {
+        service_mode: 'public',
+        webhook_config: {
+          endpoint: '',
+          secret: '',
+        },
       },
     };
 
@@ -85,7 +94,7 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': PIAPI_KEY,
+        'x-api-key': PIAPI_KEY,
       },
       body: JSON.stringify(klingPayload),
     });
@@ -112,7 +121,7 @@ serve(async (req) => {
       await new Promise(r => setTimeout(r, BACKOFF[i]));
 
       const pollRes = await fetch(`https://api.piapi.ai/api/v1/task/${taskId}`, {
-        headers: { 'X-API-Key': PIAPI_KEY },
+        headers: { 'x-api-key': PIAPI_KEY },
       });
 
       if (!pollRes.ok) {
