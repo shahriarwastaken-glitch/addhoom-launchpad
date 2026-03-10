@@ -1,10 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const BACKOFF_SCHEDULE = [2000, 3000, 5000, 8000, 12000, 18000, 25000, 35000];
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -42,13 +49,8 @@ serve(async (req) => {
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 
-    // Upload garment to temp storage
-    const garmentPath = `temp/${workspace_id}/${Date.now()}_garment.jpg`;
-    const garmentBytes = Uint8Array.from(atob(garment_image_base64), c => c.charCodeAt(0));
-    await supabase.storage.from('ad-images').upload(garmentPath, garmentBytes, {
-      contentType: 'image/jpeg', upsert: true,
-    });
-    const garmentUrl = `${SUPABASE_URL}/storage/v1/object/public/ad-images/${garmentPath}`;
+    // IMPROVEMENT 2: Cache uploaded garments using content hash
+    const garmentUrl = await getOrUploadGarment(supabase, garment_image_base64, workspace_id, SUPABASE_URL);
 
     // Model image URL
     const modelUrl = `${SUPABASE_URL}/storage/v1/object/public/ad-images/models/${model_id}.jpg`;
@@ -62,65 +64,33 @@ serve(async (req) => {
       'Footwear': 'tops',
     };
 
-    const results: string[] = [];
+    const category = categoryMap[garment_category] || 'tops';
 
-    for (let i = 0; i < Math.min(variations, 3); i++) {
-      // Start prediction
-      const startRes = await fetch('https://api.fashn.ai/v1/run', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${FASHN_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model_image: modelUrl,
-          garment_image: garmentUrl,
-          category: categoryMap[garment_category] || 'tops',
-          mode: 'quality',
-          num_samples: 1,
-        }),
-      });
+    // IMPROVEMENT 1: Parallel predictions with Promise.allSettled
+    const predictionPromises = Array.from(
+      { length: Math.min(variations, 3) },
+      (_, i) => runFashnPrediction({
+        modelUrl,
+        garmentUrl,
+        category,
+        variationIndex: i,
+        workspaceId: workspace_id,
+        fashnApiKey: FASHN_API_KEY,
+        supabase,
+        supabaseUrl: SUPABASE_URL,
+      })
+    );
 
-      const startData = await startRes.json();
-      const predictionId = startData.id;
+    const settled = await Promise.allSettled(predictionPromises);
 
-      if (!predictionId) {
-        console.error('Fashn.ai start error:', startData);
-        throw new Error('Failed to start try-on generation');
-      }
+    const results = settled
+      .filter((r): r is PromiseFulfilledResult<string> => r.status === 'fulfilled')
+      .map(r => r.value);
 
-      // Poll for result (max 60s)
-      let resultUrl: string | null = null;
-      for (let attempt = 0; attempt < 12; attempt++) {
-        await new Promise(r => setTimeout(r, 5000));
+    const failedCount = settled.filter(r => r.status === 'rejected').length;
 
-        const statusRes = await fetch(`https://api.fashn.ai/v1/status/${predictionId}`, {
-          headers: { 'Authorization': `Bearer ${FASHN_API_KEY}` },
-        });
-        const status = await statusRes.json();
-
-        if (status.status === 'completed' && status.output?.[0]) {
-          resultUrl = status.output[0];
-          break;
-        }
-        if (status.status === 'failed') {
-          throw new Error('Try-on generation failed');
-        }
-      }
-
-      if (!resultUrl) throw new Error('Generation timed out');
-
-      // Download and store
-      const imageRes = await fetch(resultUrl);
-      const imageBuffer = await imageRes.arrayBuffer();
-      const storedPath = `tryon/${workspace_id}/${Date.now()}_${i}.jpg`;
-
-      await supabase.storage.from('ad-images').upload(storedPath, new Uint8Array(imageBuffer), {
-        contentType: 'image/jpeg', upsert: true,
-      });
-
-      const storedUrl = `${SUPABASE_URL}/storage/v1/object/public/ad-images/${storedPath}`;
-      results.push(storedUrl);
+    if (results.length === 0) {
+      throw new Error('All variations failed');
     }
 
     // Save to ad_images
@@ -144,10 +114,16 @@ serve(async (req) => {
       user_id: user.id,
       workspace_id,
       feature: 'tryon',
-      tokens_used: variations,
+      tokens_used: results.length,
     });
 
-    return new Response(JSON.stringify({ images: results, saved }), {
+    return new Response(JSON.stringify({
+      images: results,
+      saved,
+      requested: variations,
+      generated: results.length,
+      partial: failedCount > 0,
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error: any) {
@@ -157,3 +133,104 @@ serve(async (req) => {
     });
   }
 });
+
+// IMPROVEMENT 2: Garment caching with content hash
+async function getOrUploadGarment(
+  supabase: any,
+  imageBase64: string,
+  workspaceId: string,
+  supabaseUrl: string,
+): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(imageBase64);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 16);
+
+  const cachePath = `garment-cache/${workspaceId}/${hash}.jpg`;
+
+  // Check if already uploaded
+  const { data: existing } = await supabase
+    .storage
+    .from('ad-images')
+    .list(`garment-cache/${workspaceId}`, { search: hash });
+
+  if (existing && existing.length > 0) {
+    return `${supabaseUrl}/storage/v1/object/public/ad-images/${cachePath}`;
+  }
+
+  // Upload new
+  const garmentBytes = Uint8Array.from(atob(imageBase64), c => c.charCodeAt(0));
+  await supabase.storage.from('ad-images').upload(cachePath, garmentBytes, {
+    contentType: 'image/jpeg',
+    cacheControl: '86400',
+    upsert: false,
+  });
+
+  return `${supabaseUrl}/storage/v1/object/public/ad-images/${cachePath}`;
+}
+
+// IMPROVEMENT 1 + 3: Parallel prediction with exponential backoff polling
+async function runFashnPrediction(config: {
+  modelUrl: string;
+  garmentUrl: string;
+  category: string;
+  variationIndex: number;
+  workspaceId: string;
+  fashnApiKey: string;
+  supabase: any;
+  supabaseUrl: string;
+}): Promise<string> {
+  const startRes = await fetch('https://api.fashn.ai/v1/run', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${config.fashnApiKey}`,
+    },
+    body: JSON.stringify({
+      model_image: config.modelUrl,
+      garment_image: config.garmentUrl,
+      category: config.category,
+      mode: 'quality',
+      num_samples: 1,
+    }),
+  });
+
+  const startData = await startRes.json();
+  const predictionId = startData.id;
+
+  if (!predictionId) {
+    console.error('Fashn.ai start error:', startData);
+    throw new Error('Failed to start try-on generation');
+  }
+
+  // IMPROVEMENT 3: Exponential backoff polling
+  for (let attempt = 0; attempt < BACKOFF_SCHEDULE.length; attempt++) {
+    await sleep(BACKOFF_SCHEDULE[attempt]);
+
+    const statusRes = await fetch(`https://api.fashn.ai/v1/status/${predictionId}`, {
+      headers: { 'Authorization': `Bearer ${config.fashnApiKey}` },
+    });
+    const status = await statusRes.json();
+
+    if (status.status === 'completed' && status.output?.[0]) {
+      // Download and store
+      const imageRes = await fetch(status.output[0]);
+      const imageBuffer = await imageRes.arrayBuffer();
+      const storedPath = `tryon/${config.workspaceId}/${Date.now()}_${config.variationIndex}.jpg`;
+
+      await config.supabase.storage.from('ad-images').upload(storedPath, new Uint8Array(imageBuffer), {
+        contentType: 'image/jpeg',
+        upsert: true,
+      });
+
+      return `${config.supabaseUrl}/storage/v1/object/public/ad-images/${storedPath}`;
+    }
+
+    if (status.status === 'failed') {
+      throw new Error(`Fashn.ai failed: ${status.error || 'Unknown error'}`);
+    }
+  }
+
+  throw new Error('Generation timed out after maximum wait time');
+}
