@@ -265,9 +265,6 @@ const VideoAd = () => {
         >
           <Sparkles size={14} />
           {t('AI মোশন', 'AI Motion')}
-          <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-primary text-primary-foreground shadow-sm">
-            {t('নতুন', 'New')} ✨
-          </span>
         </button>
       </div>
 
