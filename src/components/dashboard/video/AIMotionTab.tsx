@@ -477,10 +477,51 @@ const AIMotionTab = () => {
 
           {step === 3 && (
             <motion.div key="result" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
+              {/* Mobile: inline video + processing */}
+              <div className="lg:hidden">
+                {generating ? (
+                  <div className="text-center space-y-3 py-6">
+                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                      <Loader2 size={24} className="text-primary animate-spin" />
+                    </div>
+                    <p className="text-sm font-medium text-foreground">
+                      {t('আপনার AI ভিডিও তৈরি হচ্ছে...', 'Generating your AI video...')}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t(PROCESSING_MESSAGES[processingMsgIdx].bn, PROCESSING_MESSAGES[processingMsgIdx].en)}
+                    </p>
+                    <div className="w-40 h-1.5 rounded-full bg-muted overflow-hidden mx-auto">
+                      <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: '60%' }} />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">~30-60 {t('সেকেন্ড', 'seconds')}</p>
+                  </div>
+                ) : resultVideoUrl ? (
+                  <div className="relative rounded-xl overflow-hidden border border-border bg-background">
+                    <video
+                      ref={videoRef}
+                      src={resultVideoUrl}
+                      autoPlay
+                      loop
+                      muted={videoMuted}
+                      playsInline
+                      className="w-full max-h-[40vh] object-contain bg-black"
+                    />
+                    <div className="absolute bottom-2 right-2 flex gap-2">
+                      <button
+                        onClick={() => setVideoMuted(!videoMuted)}
+                        className="w-8 h-8 rounded-full bg-background/80 backdrop-blur flex items-center justify-center"
+                      >
+                        {videoMuted ? <VolumeOff size={14} /> : <Volume2 size={14} />}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+
               {resultVideoUrl ? (
                 <>
-                  <div className="p-4 rounded-xl border border-primary/20 bg-primary/[0.03]">
-                    <p className="text-sm font-semibold text-foreground mb-1">{t('ভিডিও তৈরি সম্পন্ন!', 'Video generation complete!')}</p>
+                  <div className="p-3 rounded-xl border border-primary/20 bg-primary/[0.03]">
+                    <p className="text-sm font-semibold text-foreground mb-0.5">{t('ভিডিও তৈরি সম্পন্ন!', 'Video generation complete!')}</p>
                     <p className="text-xs text-muted-foreground">{t('5 সেকেন্ডের AI মোশন ভিডিও', '5-second AI motion video')}</p>
                   </div>
 
@@ -496,18 +537,18 @@ const AIMotionTab = () => {
                     <Sparkles className="h-4 w-4 mr-2" /> {t('ভ্যারিয়েশন তৈরি', 'Generate Variation')}
                   </Button>
                 </>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground text-sm">
+              ) : !generating ? (
+                <div className="text-center py-6 text-muted-foreground text-sm">
                   {t('ভিডিও প্রস্তুত হলে এখানে দেখাবে', 'Video will appear here when ready')}
                 </div>
-              )}
+              ) : null}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Right Panel - hidden on mobile for step 1 */}
-      <div className={`flex-1 flex items-center justify-center p-4 sm:p-6 bg-secondary/30 overflow-hidden ${step === 1 ? 'hidden lg:flex' : ''}`}>
+      {/* Right Panel - hidden on mobile for step 1 & 3 (inline on mobile) */}
+      <div className={`flex-1 flex items-center justify-center p-4 sm:p-6 bg-secondary/30 overflow-hidden ${step === 1 || step === 3 ? 'hidden lg:flex' : ''}`}>
         {step === 1 && (
           <div className="text-center max-w-sm">
             {imagePreviews.length > 0 ? (
