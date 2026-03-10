@@ -462,7 +462,7 @@ function GenerateModal({ t, lang, activeWorkspace, hasExisting, onClose, onCompl
               {t('পরিকল্পনা তৈরি হয়েছে!', 'Plan generated!')}
             </h3>
             <p className="text-sm text-muted-foreground mb-1 font-bn">
-              {t(`মোট ${toBn(totalItems)}টি কনটেন্ট আইটেম।`, `Total ${totalItems} content items.`)}
+              {lang === 'bn' ? `মোট ${toBn(totalItems)}টি কনটেন্ট আইটেম।` : `Total ${totalItems} content items.`}
             </p>
             {festivalsCovered.length > 0 && (
               <p className="text-xs text-primary mb-4 font-bn">
