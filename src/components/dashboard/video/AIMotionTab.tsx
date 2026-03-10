@@ -391,14 +391,6 @@ const AIMotionTab = () => {
                     )}
                   </div>
                 )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple={inputMode === 'multiple'}
-                  className="hidden"
-                  onChange={e => e.target.files && handleFiles(e.target.files)}
-                />
               </div>
 
               {/* Motion Style */}
