@@ -160,7 +160,7 @@ const AdGeneratorPage = () => {
       .then(({ data }) => { if (data) setProjectInfo(data); });
   }, [projectId]);
 
-  const handleGenerate = useCallback(async () => {
+  const handleGenerate = useCallback(async (promptsOrSingle?: Record<string, string> | string) => {
     if (!activeWorkspace) {
       toast.error(t('প্রথমে একটি শপ তৈরি করুন', 'Create a shop first'));
       return;
@@ -172,7 +172,7 @@ const AdGeneratorPage = () => {
         : t('পণ্যের নাম দিন', 'Enter product name'));
       return;
     }
-    if (form.platforms.length === 0) {
+    if (mode === 'copy' && form.platforms.length === 0) {
       toast.error(t('কমপক্ষে একটি প্ল্যাটফর্ম নির্বাচন করুন', 'Select at least one platform'));
       return;
     }
@@ -191,7 +191,6 @@ const AdGeneratorPage = () => {
             language: form.language || lang,
             tone: form.tone,
             variations: form.numVariations,
-            // Advanced Copy That! fields
             target_reader: form.targetReader || undefined,
             awareness_stage: form.awarenessStage || undefined,
             sophistication: form.sophistication || undefined,
@@ -220,6 +219,7 @@ const AdGeneratorPage = () => {
           toast.error(data?.message || t('সমস্যা হয়েছে', 'Something went wrong'));
         }
       } else {
+        // Image mode — scene-based generation
         let product_image_base64: string | undefined;
         let product_image_mime_type = "image/jpeg";
         if (form.productImagePreview) {
@@ -234,29 +234,22 @@ const AdGeneratorPage = () => {
           return;
         }
 
-        const adHeadline = form.price 
-          ? `${form.productName} — মাত্র ৳${form.price}`
-          : form.productName;
+        const finalPrompts = (typeof promptsOrSingle === 'object' && promptsOrSingle !== null)
+          ? promptsOrSingle as Record<string, string>
+          : {};
+        const selectedScenes = form.selectedScenes;
 
         const { data, error } = await supabase.functions.invoke('generate-ad-image', {
           body: {
             workspace_id: activeWorkspace.id,
             product_name: form.productName,
-            product_description: form.productDesc,
-            format: form.imageFormat,
-            style: form.imageStyle,
-            brand_color_primary: form.brandColorPrimary,
-            brand_color_secondary: form.brandColorSecondary,
-            ad_headline: adHeadline,
-            ad_body: form.productDesc,
-            language: lang,
-            num_variations: form.numVariations,
+            selected_scenes: selectedScenes,
+            final_prompts: finalPrompts,
+            lighting_mood: form.lightingMood,
+            camera_angle: form.cameraAngle,
+            additional_details: form.additionalDetails,
             product_image_base64,
             product_image_mime_type,
-            framework: form.framework,
-            occasion: form.occasion,
-            tone: form.tone,
-            platforms: form.platforms,
           },
         });
 
@@ -265,15 +258,16 @@ const AdGeneratorPage = () => {
         if (data?.success && data.images) {
           const imageAds: AdResult[] = data.images.map((img: any) => ({
             id: img.id,
-            headline: t(`ভার্শন ${img.variation_number}`, `Version ${img.variation_number}`),
-            body: img.sd_prompt || '',
+            headline: img.scene ? `${img.scene.charAt(0).toUpperCase() + img.scene.slice(1)}` : 'Generated',
+            body: img.prompt || '',
             cta: '',
             dhoom_score: img.dhoom_score || 70,
             copy_score: 0,
-            platform: form.platforms[0] || 'facebook',
-            framework: form.framework,
+            platform: 'facebook',
+            framework: '',
             is_winner: false,
-            image_url: img.image_url || '',
+            image_url: img.url || img.image_url || '',
+            scene: img.scene,
           }));
           setResults(imageAds);
           setHasImageResult(true);
