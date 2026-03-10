@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, Loader2, X, Check, Sparkles,
   Calendar as CalendarIcon, List, Layers, Zap, Filter,
-  Search, Edit3, Trash2, AlertTriangle, Keyboard, ChevronDown
+  Search, Edit3, Trash2, AlertTriangle, Keyboard, ChevronDown, PartyPopper
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
