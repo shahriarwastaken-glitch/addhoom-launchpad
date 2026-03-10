@@ -296,10 +296,10 @@ const TryOnTab = () => {
   };
 
   // Shared pill selector component
-  const PillSelect = <T extends string>({ label, value, options, onChange }: {
-    label: string; value: T;
-    options: { label: string; value: T; icon?: React.ReactNode }[];
-    onChange: (v: T) => void;
+  const PillSelect = ({ label, value, options, onChange }: {
+    label: string; value: string;
+    options: { label: string; value: string; icon?: React.ReactNode }[];
+    onChange: (v: any) => void;
   }) => (
     <div className="space-y-1.5">
       <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">{label}</span>
