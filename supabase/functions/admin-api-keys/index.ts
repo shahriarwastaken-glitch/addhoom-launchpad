@@ -327,6 +327,11 @@ async function performKeyTest(supabase: any, keyId: string, serviceName: string,
         testResult = 'success';
         break;
 
+      case 'piapi':
+        await testPiapiKey(keyValue);
+        testResult = 'success';
+        break;
+
       case 'resend':
         await testResendKey(keyValue);
         testResult = 'success';
