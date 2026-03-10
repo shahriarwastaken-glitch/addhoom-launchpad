@@ -62,7 +62,7 @@ interface InputPanelProps {
   setMode: (m: GeneratorMode) => void;
   form: GeneratorFormData;
   setForm: (fn: (prev: GeneratorFormData) => GeneratorFormData) => void;
-  onGenerate: () => void;
+  onGenerate: (prompt?: string) => void;
   generating: boolean;
   onToggleImageHistory?: () => void;
   generateBtnRef?: React.RefObject<HTMLButtonElement>;
@@ -74,6 +74,11 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const historyCount = useMemo(() => getImageHistory().length, []);
+
+  // Two-step prompt flow for image mode
+  const [imageStep, setImageStep] = useState<1 | 2>(1);
+  const [imagePrompt, setImagePrompt] = useState('');
+  const [imageDefaultPrompt, setImageDefaultPrompt] = useState('');
 
   const copyLoadingTexts = [t('চিন্তা করছি...', 'Thinking...'), t('লিখছি...', 'Writing...'), t('স্কোর করছি...', 'Scoring...')];
   const imageLoadingTexts = [t('প্রম্পট তৈরি হচ্ছে...', 'Creating prompt...'), t('AI ছবি আঁকছে...', 'AI drawing...'), t('ফিনিশিং টাচ...', 'Finishing touches...')];
