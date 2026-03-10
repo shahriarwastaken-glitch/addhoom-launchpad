@@ -3,16 +3,16 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 interface LanguagePerformanceProps {
   data: {
-    bn: { count: number; avg_score: number };
-    en: { count: number; avg_score: number };
+    bn?: { count: number; avg_score: number };
+    en?: { count: number; avg_score: number };
   };
 }
 
 const LanguagePerformance = ({ data }: LanguagePerformanceProps) => {
   const { t } = useLanguage();
 
-  const bnAvg = Math.round(data.bn.avg_score);
-  const enAvg = Math.round(data.en.avg_score);
+  const bnAvg = Math.round(data.bn?.avg_score ?? 0);
+  const enAvg = Math.round(data.en?.avg_score ?? 0);
   
   const winner = bnAvg > enAvg ? 'bn' : 'en';
 
@@ -42,7 +42,7 @@ const LanguagePerformance = ({ data }: LanguagePerformanceProps) => {
                   {bnAvg}
                 </p>
                 <p className="text-[10px] md:text-sm text-muted-foreground mt-1 md:mt-2">
-                  {data.bn.count} {t('টি বিজ্ঞাপন', 'ads')}
+                  {data.bn?.count ?? 0} {t('টি বিজ্ঞাপন', 'ads')}
                 </p>
               </div>
             </CardContent>
@@ -57,7 +57,7 @@ const LanguagePerformance = ({ data }: LanguagePerformanceProps) => {
                   {enAvg}
                 </p>
                 <p className="text-[10px] md:text-sm text-muted-foreground mt-1 md:mt-2">
-                  {data.en.count} {t('টি বিজ্ঞাপন', 'ads')}
+                  {data.en?.count ?? 0} {t('টি বিজ্ঞাপন', 'ads')}
                 </p>
               </div>
             </CardContent>

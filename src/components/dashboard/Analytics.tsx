@@ -62,8 +62,8 @@ export interface AnalyticsData {
     avg_score: number;
   }>;
   language_comparison: {
-    bn: { count: number; avg_score: number };
-    en: { count: number; avg_score: number };
+    bn?: { count: number; avg_score: number };
+    en?: { count: number; avg_score: number };
   };
   unrated_ads: any[];
   workspace_industry: string | null;
@@ -221,7 +221,7 @@ const Analytics = () => {
       )}
 
       {/* Section 8: Language Performance */}
-      {(data.language_comparison.bn.count > 0 || data.language_comparison.en.count > 0) && (
+      {(data.language_comparison?.bn?.count > 0 || data.language_comparison?.en?.count > 0) && (
         <LanguagePerformance data={data.language_comparison} />
       )}
     </div>
