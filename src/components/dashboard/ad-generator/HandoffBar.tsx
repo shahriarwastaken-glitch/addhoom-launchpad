@@ -1,4 +1,4 @@
-import { Check, ImageIcon, Calendar, ArrowRight } from 'lucide-react';
+import { Check, ImageIcon, Calendar, ArrowRight, PartyPopper } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { GeneratorMode } from './types';
 
