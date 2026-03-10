@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, RefreshCw, Sparkles, Download, ArrowLeft, ImageIcon } from 'lucide-react';
+import { X, RefreshCw, Sparkles, Download, ArrowLeft, ImageIcon, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
