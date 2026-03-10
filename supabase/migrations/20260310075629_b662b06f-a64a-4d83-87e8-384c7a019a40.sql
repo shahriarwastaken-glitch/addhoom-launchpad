@@ -1,0 +1,1 @@
+ALTER TABLE public.ad_images ADD COLUMN IF NOT EXISTS generation_prompt text, ADD COLUMN IF NOT EXISTS prompt_was_enhanced boolean DEFAULT false;

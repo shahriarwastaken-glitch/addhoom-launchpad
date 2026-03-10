@@ -10,6 +10,9 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { SceneType, SceneConfig, ImageFormat, ExportFormat } from './types';
+import StepIndicator from './StepIndicator';
+import PromptEditor from './PromptEditor';
+import { buildProductPhotoPrompt } from './promptBuilders';
 
 interface SceneOption {
   key: SceneType;
@@ -59,6 +62,12 @@ const ProductPhotoTab = () => {
   const [exportFormat, setExportFormat] = useState<ExportFormat>('png');
   const [transparentBg, setTransparentBg] = useState(false);
 
+  // Two-step flow
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [prompt, setPrompt] = useState('');
+  const [defaultPrompt, setDefaultPrompt] = useState('');
+  const [promptWasEnhanced, setPromptWasEnhanced] = useState(false);
+
   // Job queue state
   const [jobId, setJobId] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -66,8 +75,8 @@ const ProductPhotoTab = () => {
   const [progress, setProgress] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
-  const pollRef = useRef<NodeJS.Timeout | null>(null);
-  const msgRef = useRef<NodeJS.Timeout | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const msgRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     return () => {
@@ -90,6 +99,7 @@ const ProductPhotoTab = () => {
             setResultUrl(job.output_urls?.[0] || null);
             setGenerating(false);
             setJobId(null);
+            setStep(3);
             toast.success(t('ফটো তৈরি হয়েছে', 'Photo generated'));
           }
           if (job.status === 'failed') {
@@ -116,7 +126,24 @@ const ProductPhotoTab = () => {
     reader.onload = () => setProductPreview(reader.result as string);
     reader.readAsDataURL(file);
     setResultUrl(null);
+    setStep(1);
   }, [t]);
+
+  const canContinue = productFile && scene;
+
+  const handleContinue = () => {
+    if (!canContinue) return;
+    const built = buildProductPhotoPrompt({
+      productName: '',
+      scene: scene!,
+      sceneConfig: sceneConfig as Record<string, string>,
+      format,
+    });
+    setDefaultPrompt(built);
+    setPrompt(built);
+    setPromptWasEnhanced(false);
+    setStep(2);
+  };
 
   const handleGenerate = async () => {
     if (!productFile || !scene || !activeWorkspace) return;
@@ -147,6 +174,8 @@ const ProductPhotoTab = () => {
             format,
             export_format: exportFormat,
             transparent_bg: transparentBg,
+            generation_prompt: prompt,
+            prompt_was_enhanced: promptWasEnhanced,
           },
         },
       });
@@ -175,6 +204,7 @@ const ProductPhotoTab = () => {
             setResultUrl(status.output_urls?.[0] || null);
             setGenerating(false);
             setJobId(null);
+            setStep(3);
             toast.success(t('ফটো তৈরি হয়েছে', 'Photo generated'));
           }
           if (status.status === 'failed') {
@@ -219,123 +249,153 @@ const ProductPhotoTab = () => {
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
       {/* LEFT PANEL */}
       <div className="lg:col-span-2 space-y-6">
-        {/* Product Upload */}
-        <div className="space-y-3">
-          <div>
-            <h3 className="text-sm font-semibold">{t('পণ্য আপলোড', 'Upload Product')}</h3>
-            <p className="text-xs text-muted-foreground">{t('যেকোনো পণ্যের ফটো। আমরা প্রফেশনাল সিনে রাখব।', 'Any product photo. We\'ll place it in a professional scene.')}</p>
-          </div>
-          {!productPreview ? (
-            <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-2xl p-8 cursor-pointer hover:border-primary/50 transition-colors">
-              <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-              <span className="text-sm text-muted-foreground">{t('পণ্যের ফটো এখানে ড্র্যাগ করুন', 'Drag product photo here')}</span>
-              <span className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP · Max 10MB</span>
-              <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
-            </label>
-          ) : (
-            <div className="flex items-center gap-3">
-              <img src={productPreview} alt="Product" className="h-28 w-28 object-cover rounded-xl border" />
-              <button onClick={() => { setProductFile(null); setProductPreview(null); setResultUrl(null); }} className="text-xs text-primary hover:underline">
-                {t('পরিবর্তন', 'Change')}
-              </button>
-            </div>
-          )}
-        </div>
+        <StepIndicator
+          currentStep={step}
+          labels={[t('অপশন', 'Options'), t('প্রম্পট', 'Prompt'), t('ফলাফল', 'Result')]}
+        />
 
-        {/* Scene Selection */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold">{t('সিন বাছাই', 'Choose Scene')}</h3>
-          <div className="grid grid-cols-2 gap-2">
-            {SCENES.map(s => (
-              <button key={s.key} onClick={() => { setScene(s.key); setSceneConfig({}); }}
-                className={`flex items-start gap-3 p-3 rounded-xl border-2 text-left transition-all ${
-                  scene === s.key ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'
-                }`}>
-                <s.icon className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-sm font-medium">{t(s.labelBn, s.labelEn)}</p>
-                  <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">{t(s.descBn, s.descEn)}</p>
+        {step === 1 && (
+          <>
+            {/* Product Upload */}
+            <div className="space-y-3">
+              <div>
+                <h3 className="text-sm font-semibold">{t('পণ্য আপলোড', 'Upload Product')}</h3>
+                <p className="text-xs text-muted-foreground">{t('যেকোনো পণ্যের ফটো। আমরা প্রফেশনাল সিনে রাখব।', 'Any product photo. We\'ll place it in a professional scene.')}</p>
+              </div>
+              {!productPreview ? (
+                <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-2xl p-8 cursor-pointer hover:border-primary/50 transition-colors">
+                  <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                  <span className="text-sm text-muted-foreground">{t('পণ্যের ফটো এখানে ড্র্যাগ করুন', 'Drag product photo here')}</span>
+                  <span className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP · Max 10MB</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+                </label>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <img src={productPreview} alt="Product" className="h-28 w-28 object-cover rounded-xl border" />
+                  <button onClick={() => { setProductFile(null); setProductPreview(null); setResultUrl(null); }} className="text-xs text-primary hover:underline">
+                    {t('পরিবর্তন', 'Change')}
+                  </button>
                 </div>
-              </button>
-            ))}
-          </div>
-        </div>
+              )}
+            </div>
 
-        {/* Scene Details */}
-        {scene && (
-          <div className="space-y-3 animate-in slide-in-from-top-2">
-            {scene === 'onWhite' && (
-              <PillSelect label={t('ছায়া', 'Shadow')} value={sceneConfig.shadow || 'soft'}
-                options={[{ label: t('নরম ছায়া', 'Soft Shadow'), value: 'soft' }, { label: t('ছায়া নেই', 'No Shadow'), value: 'none' }]}
-                onChange={v => updateConfig('shadow', v)} />
+            {/* Scene Selection */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold">{t('সিন বাছাই', 'Choose Scene')}</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {SCENES.map(s => (
+                  <button key={s.key} onClick={() => { setScene(s.key); setSceneConfig({}); }}
+                    className={`flex items-start gap-3 p-3 rounded-xl border-2 text-left transition-all ${
+                      scene === s.key ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'
+                    }`}>
+                    <s.icon className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">{t(s.labelBn, s.labelEn)}</p>
+                      <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">{t(s.descBn, s.descEn)}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Scene Details */}
+            {scene && (
+              <div className="space-y-3 animate-in slide-in-from-top-2">
+                {scene === 'onWhite' && (
+                  <PillSelect label={t('ছায়া', 'Shadow')} value={sceneConfig.shadow || 'soft'}
+                    options={[{ label: t('নরম ছায়া', 'Soft Shadow'), value: 'soft' }, { label: t('ছায়া নেই', 'No Shadow'), value: 'none' }]}
+                    onChange={v => updateConfig('shadow', v)} />
+                )}
+                {scene === 'studio' && (
+                  <>
+                    <PillSelect label={t('ব্যাকড্রপ', 'Backdrop')} value={sceneConfig.backdrop || 'white'}
+                      options={[{ label: 'White', value: 'white' }, { label: 'Light Grey', value: 'light grey' }, { label: 'Black', value: 'black' }, { label: 'Warm Beige', value: 'warm beige' }]}
+                      onChange={v => updateConfig('backdrop', v)} />
+                    <PillSelect label={t('লাইটিং', 'Lighting')} value={sceneConfig.lightingDirection || 'left'}
+                      options={[{ label: t('বাম', 'Left'), value: 'left' }, { label: t('ডান', 'Right'), value: 'right' }, { label: t('উপর', 'Top'), value: 'top' }]}
+                      onChange={v => updateConfig('lightingDirection', v as any)} />
+                  </>
+                )}
+                {scene === 'lifestyle' && (
+                  <>
+                    <PillSelect label={t('সারফেস', 'Surface')} value={sceneConfig.surface || 'marble'}
+                      options={[{ label: 'Marble', value: 'marble' }, { label: 'Wood', value: 'wood' }, { label: 'Fabric', value: 'fabric' }, { label: 'Concrete', value: 'concrete' }]}
+                      onChange={v => updateConfig('surface', v)} />
+                    <PillSelect label={t('মুড', 'Mood')} value={sceneConfig.mood || 'warm'}
+                      options={[{ label: t('উষ্ণ', 'Warm'), value: 'warm' }, { label: t('ঠান্ডা', 'Cool'), value: 'cool' }, { label: t('নিরপেক্ষ', 'Neutral'), value: 'neutral' }]}
+                      onChange={v => updateConfig('mood', v as any)} />
+                  </>
+                )}
+                {scene === 'flatlay' && (
+                  <>
+                    <PillSelect label={t('সারফেস', 'Surface')} value={sceneConfig.surface || 'marble'}
+                      options={[{ label: 'Marble', value: 'marble' }, { label: 'Linen', value: 'linen' }, { label: 'Dark Wood', value: 'dark wood' }, { label: 'Pastel', value: 'pastel' }]}
+                      onChange={v => updateConfig('surface', v)} />
+                    <PillSelect label={t('প্রপস', 'Props')} value={sceneConfig.propsDensity || 'minimal'}
+                      options={[{ label: t('ন্যূনতম', 'Minimal'), value: 'minimal' }, { label: t('মাঝারি', 'Moderate'), value: 'moderate' }, { label: t('সমৃদ্ধ', 'Rich'), value: 'rich' }]}
+                      onChange={v => updateConfig('propsDensity', v as any)} />
+                  </>
+                )}
+                {scene === 'outdoor' && (
+                  <>
+                    <PillSelect label={t('সময়', 'Time')} value={sceneConfig.timeOfDay || 'golden'}
+                      options={[{ label: t('সকাল', 'Morning'), value: 'morning' }, { label: t('গোল্ডেন আওয়ার', 'Golden Hour'), value: 'golden' }, { label: t('মেঘলা', 'Overcast'), value: 'overcast' }]}
+                      onChange={v => updateConfig('timeOfDay', v as any)} />
+                    <PillSelect label={t('পরিবেশ', 'Environment')} value={sceneConfig.environment || 'garden'}
+                      options={[{ label: t('বাগান', 'Garden'), value: 'garden' }, { label: t('শহুরে', 'Urban'), value: 'urban' }, { label: t('সমুদ্র', 'Beach'), value: 'beach' }, { label: t('বন', 'Forest'), value: 'forest' }]}
+                      onChange={v => updateConfig('environment', v as any)} />
+                  </>
+                )}
+              </div>
             )}
-            {scene === 'studio' && (
-              <>
-                <PillSelect label={t('ব্যাকড্রপ', 'Backdrop')} value={sceneConfig.backdrop || 'white'}
-                  options={[{ label: 'White', value: 'white' }, { label: 'Light Grey', value: 'light grey' }, { label: 'Black', value: 'black' }, { label: 'Warm Beige', value: 'warm beige' }]}
-                  onChange={v => updateConfig('backdrop', v)} />
-                <PillSelect label={t('লাইটিং', 'Lighting')} value={sceneConfig.lightingDirection || 'left'}
-                  options={[{ label: t('বাম', 'Left'), value: 'left' }, { label: t('ডান', 'Right'), value: 'right' }, { label: t('উপর', 'Top'), value: 'top' }]}
-                  onChange={v => updateConfig('lightingDirection', v as any)} />
-              </>
-            )}
-            {scene === 'lifestyle' && (
-              <>
-                <PillSelect label={t('সারফেস', 'Surface')} value={sceneConfig.surface || 'marble'}
-                  options={[{ label: 'Marble', value: 'marble' }, { label: 'Wood', value: 'wood' }, { label: 'Fabric', value: 'fabric' }, { label: 'Concrete', value: 'concrete' }]}
-                  onChange={v => updateConfig('surface', v)} />
-                <PillSelect label={t('মুড', 'Mood')} value={sceneConfig.mood || 'warm'}
-                  options={[{ label: t('উষ্ণ', 'Warm'), value: 'warm' }, { label: t('ঠান্ডা', 'Cool'), value: 'cool' }, { label: t('নিরপেক্ষ', 'Neutral'), value: 'neutral' }]}
-                  onChange={v => updateConfig('mood', v as any)} />
-              </>
-            )}
-            {scene === 'flatlay' && (
-              <>
-                <PillSelect label={t('সারফেস', 'Surface')} value={sceneConfig.surface || 'marble'}
-                  options={[{ label: 'Marble', value: 'marble' }, { label: 'Linen', value: 'linen' }, { label: 'Dark Wood', value: 'dark wood' }, { label: 'Pastel', value: 'pastel' }]}
-                  onChange={v => updateConfig('surface', v)} />
-                <PillSelect label={t('প্রপস', 'Props')} value={sceneConfig.propsDensity || 'minimal'}
-                  options={[{ label: t('ন্যূনতম', 'Minimal'), value: 'minimal' }, { label: t('মাঝারি', 'Moderate'), value: 'moderate' }, { label: t('সমৃদ্ধ', 'Rich'), value: 'rich' }]}
-                  onChange={v => updateConfig('propsDensity', v as any)} />
-              </>
-            )}
-            {scene === 'outdoor' && (
-              <>
-                <PillSelect label={t('সময়', 'Time')} value={sceneConfig.timeOfDay || 'golden'}
-                  options={[{ label: t('সকাল', 'Morning'), value: 'morning' }, { label: t('গোল্ডেন আওয়ার', 'Golden Hour'), value: 'golden' }, { label: t('মেঘলা', 'Overcast'), value: 'overcast' }]}
-                  onChange={v => updateConfig('timeOfDay', v as any)} />
-                <PillSelect label={t('পরিবেশ', 'Environment')} value={sceneConfig.environment || 'garden'}
-                  options={[{ label: t('বাগান', 'Garden'), value: 'garden' }, { label: t('শহুরে', 'Urban'), value: 'urban' }, { label: t('সমুদ্র', 'Beach'), value: 'beach' }, { label: t('বন', 'Forest'), value: 'forest' }]}
-                  onChange={v => updateConfig('environment', v as any)} />
-              </>
-            )}
-          </div>
+
+            {/* Format & Export */}
+            <div className="space-y-3">
+              <PillSelect label={t('ফরম্যাট', 'Format')} value={format}
+                options={[{ label: '1:1', value: '1:1' }, { label: '4:5', value: '4:5' }, { label: '9:16', value: '9:16' }, { label: '16:9', value: '16:9' }]}
+                onChange={v => setFormat(v as ImageFormat)} />
+              <PillSelect label={t('এক্সপোর্ট', 'Export')} value={exportFormat}
+                options={[{ label: 'PNG', value: 'png' }, { label: 'JPG', value: 'jpg' }]}
+                onChange={v => setExportFormat(v as ExportFormat)} />
+              {scene === 'onWhite' && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={transparentBg} onChange={e => setTransparentBg(e.target.checked)} className="rounded border-border" />
+                  <span className="text-xs">{t('স্বচ্ছ ব্যাকগ্রাউন্ড', 'Transparent background')}</span>
+                </label>
+              )}
+            </div>
+
+            {/* Continue Button */}
+            <Button onClick={handleContinue} disabled={!canContinue} className="w-full bg-primary hover:bg-primary/90">
+              <ArrowRight className="h-4 w-4 mr-2" />
+              {t('চালিয়ে যান', 'Continue')}
+            </Button>
+          </>
         )}
 
-        {/* Format & Export */}
-        <div className="space-y-3">
-          <PillSelect label={t('ফরম্যাট', 'Format')} value={format}
-            options={[{ label: '1:1', value: '1:1' }, { label: '4:5', value: '4:5' }, { label: '9:16', value: '9:16' }, { label: '16:9', value: '16:9' }]}
-            onChange={v => setFormat(v as ImageFormat)} />
-          <PillSelect label={t('এক্সপোর্ট', 'Export')} value={exportFormat}
-            options={[{ label: 'PNG', value: 'png' }, { label: 'JPG', value: 'jpg' }]}
-            onChange={v => setExportFormat(v as ExportFormat)} />
-          {scene === 'onWhite' && (
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={transparentBg} onChange={e => setTransparentBg(e.target.checked)} className="rounded border-border" />
-              <span className="text-xs">{t('স্বচ্ছ ব্যাকগ্রাউন্ড', 'Transparent background')}</span>
-            </label>
-          )}
-        </div>
+        {step === 2 && (
+          <PromptEditor
+            prompt={prompt}
+            onPromptChange={(p) => { setPrompt(p); if (p !== defaultPrompt) setPromptWasEnhanced(true); }}
+            defaultPrompt={defaultPrompt}
+            onBack={() => setStep(1)}
+            onGenerate={handleGenerate}
+            generating={generating}
+            generateLabel={t('প্রোডাক্ট ফটো তৈরি করুন', 'Generate Product Photo')}
+            generateIcon={<Camera className="h-4 w-4 mr-2" />}
+            tabType="product_photo"
+            costNote={`~$0.04 ${t('প্রতি জেনারেশন', 'per generation')} · 1 ${t('ইমেজ ক্রেডিট', 'image credit')}`}
+          />
+        )}
 
-        {/* Generate */}
-        <div className="space-y-1.5">
-          <Button onClick={handleGenerate} disabled={!productFile || !scene || generating} className="w-full bg-primary hover:bg-primary/90">
-            {generating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Camera className="h-4 w-4 mr-2" />}
-            {t('প্রোডাক্ট ফটো তৈরি করুন', 'Generate Product Photo')}
-          </Button>
-          <p className="text-[11px] text-muted-foreground text-center">~$0.04 {t('প্রতি জেনারেশন', 'per generation')} · 1 {t('ইমেজ ক্রেডিট', 'image credit')}</p>
-        </div>
+        {step === 3 && (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">{t('ফলাফল প্রস্তুত! ডানদিকে দেখুন।', 'Result ready! See it on the right.')}</p>
+            <Button variant="outline" onClick={() => setStep(2)} className="w-full">
+              <RotateCcw className="h-4 w-4 mr-2" />{t('প্রম্পট সম্পাদনা ও পুনরায় তৈরি', 'Edit Prompt & Regenerate')}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* RIGHT PANEL */}
@@ -358,10 +418,10 @@ const ProductPhotoTab = () => {
                 <ArrowRight className="h-4 w-4 mr-2" />{t('এটি দিয়ে অ্যাড তৈরি করুন', 'Make an Ad with This')}
               </Button>
               <div className="flex gap-2 flex-wrap">
-                <Button variant="ghost" size="sm" onClick={() => { setResultUrl(null); handleGenerate(); }}>
+                <Button variant="ghost" size="sm" onClick={() => { setResultUrl(null); setStep(2); }}>
                   <RotateCcw className="h-3.5 w-3.5 mr-1.5" />{t('ভ্যারিয়েশন', 'Generate Variation')}
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => { setScene(null); setResultUrl(null); }}>
+                <Button variant="ghost" size="sm" onClick={() => { setScene(null); setResultUrl(null); setStep(1); }}>
                   <RotateCcw className="h-3.5 w-3.5 mr-1.5" />{t('সিন পরিবর্তন', 'Change Scene')}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => {

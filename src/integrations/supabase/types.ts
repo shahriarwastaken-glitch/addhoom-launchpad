@@ -160,10 +160,12 @@ export type Database = {
           dhoom_score: number | null
           format: string
           gemini_prompt: string | null
+          generation_prompt: string | null
           id: string
           image_url: string | null
           is_winner: boolean | null
           product_name: string | null
+          prompt_was_enhanced: boolean | null
           remix_config: Json | null
           remix_type: string | null
           remixed_from_id: string | null
@@ -181,10 +183,12 @@ export type Database = {
           dhoom_score?: number | null
           format?: string
           gemini_prompt?: string | null
+          generation_prompt?: string | null
           id?: string
           image_url?: string | null
           is_winner?: boolean | null
           product_name?: string | null
+          prompt_was_enhanced?: boolean | null
           remix_config?: Json | null
           remix_type?: string | null
           remixed_from_id?: string | null
@@ -202,10 +206,12 @@ export type Database = {
           dhoom_score?: number | null
           format?: string
           gemini_prompt?: string | null
+          generation_prompt?: string | null
           id?: string
           image_url?: string | null
           is_winner?: boolean | null
           product_name?: string | null
+          prompt_was_enhanced?: boolean | null
           remix_config?: Json | null
           remix_type?: string | null
           remixed_from_id?: string | null
