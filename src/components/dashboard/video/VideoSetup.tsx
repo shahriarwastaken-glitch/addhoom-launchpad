@@ -181,15 +181,15 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
           <SectionPill step={1} title={t('পণ্যের ছবি আপলোড', 'Upload Product Images')} />
 
           {form.imagePreviews.length === 0 ? (
-            <div
+            <label
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
               onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
-              onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-[20px] min-h-[180px] flex flex-col items-center justify-center cursor-pointer transition-all ${
+              className={`block border-2 border-dashed rounded-[20px] min-h-[180px] flex flex-col items-center justify-center cursor-pointer transition-all ${
                 dragOver ? 'border-primary bg-primary/[0.04] scale-[1.01]' : 'border-border bg-secondary hover:border-primary/40'
               }`}
             >
+              <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={e => { e.target.files && handleFiles(e.target.files); e.target.value = ''; }} />
               {dragOver ? (
                 <p className="text-primary font-heading-bn font-semibold text-lg">{t('ছেড়ে দিন!', 'Drop here!')}</p>
               ) : (
@@ -200,7 +200,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
                   <p className="text-xs text-primary italic mt-1">{t('ভালো ফলাফলের জন্য ৩-৫টি ছবি দিন', 'Use 3-5 images for best results')}</p>
                 </>
               )}
-            </div>
+            </label>
           ) : (
             <div className="border-2 border-dashed border-border rounded-[20px] p-4 bg-secondary">
               <div className="flex gap-3 overflow-x-auto pb-2">
