@@ -41,11 +41,11 @@ const gradeTextColors: Record<string, string> = {
 
 const dimensionLabels: Record<string, { bn: string; en: string }> = {
   hook_strength: { bn: 'হুক শক্তি', en: 'Hook Strength' },
-  bengali_authenticity: { bn: 'বাংলা স্বাভাবিকতা', en: 'Bengali Authenticity' },
-  framework_execution: { bn: 'ফ্রেমওয়ার্ক', en: 'Framework' },
-  cta_strength: { bn: 'CTA শক্তি', en: 'CTA Strength' },
-  mobile_readability: { bn: 'মোবাইল রিডেবিলিটি', en: 'Mobile Readability' },
-  bd_market_fit: { bn: 'BD মার্কেট ফিট', en: 'BD Market Fit' },
+  emotional_resonance: { bn: 'আবেগ', en: 'Emotional Resonance' },
+  objection_handling: { bn: 'আপত্তি হ্যান্ডলিং', en: 'Objection Handling' },
+  offer_clarity: { bn: 'অফার স্পষ্টতা', en: 'Offer Clarity' },
+  awareness_fit: { bn: 'সচেতনতা ফিট', en: 'Awareness Fit' },
+  language_execution: { bn: 'ভাষা', en: 'Language Execution' },
 };
 
 function scoreColor(score: number) {
