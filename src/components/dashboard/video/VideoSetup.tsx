@@ -238,7 +238,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
               </p>
             </div>
           )}
-          <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={e => e.target.files && handleFiles(e.target.files)} />
+          
         </div>
 
         {/* SECTION B: Product Info */}
