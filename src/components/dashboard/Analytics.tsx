@@ -62,8 +62,8 @@ export interface AnalyticsData {
     avg_score: number;
   }>;
   language_comparison: {
-    bn: { count: number; avg_score: number };
-    en: { count: number; avg_score: number };
+    bn?: { count: number; avg_score: number };
+    en?: { count: number; avg_score: number };
   };
   unrated_ads: any[];
   workspace_industry: string | null;
