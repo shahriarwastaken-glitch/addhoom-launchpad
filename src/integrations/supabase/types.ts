@@ -55,7 +55,9 @@ export type Database = {
       ad_creatives: {
         Row: {
           ai_generated: boolean
+          awareness_stage: string | null
           body: string | null
+          brief_completeness: number | null
           copy_score: number | null
           created_at: string
           cta: string | null
@@ -65,8 +67,10 @@ export type Database = {
           id: string
           improvement_note: string | null
           is_winner: boolean
+          key_desire_hit: string | null
           language: string | null
           occasion: string | null
+          one_idea: string | null
           performance_rating: string | null
           platform: string | null
           product_name: string | null
@@ -74,13 +78,17 @@ export type Database = {
           rated_at: string | null
           remixed_from_id: string | null
           score_reason: string | null
+          sophistication_level: string | null
           source_url: string | null
+          target_reader: string | null
           tone: string | null
           workspace_id: string
         }
         Insert: {
           ai_generated?: boolean
+          awareness_stage?: string | null
           body?: string | null
+          brief_completeness?: number | null
           copy_score?: number | null
           created_at?: string
           cta?: string | null
@@ -90,8 +98,10 @@ export type Database = {
           id?: string
           improvement_note?: string | null
           is_winner?: boolean
+          key_desire_hit?: string | null
           language?: string | null
           occasion?: string | null
+          one_idea?: string | null
           performance_rating?: string | null
           platform?: string | null
           product_name?: string | null
@@ -99,13 +109,17 @@ export type Database = {
           rated_at?: string | null
           remixed_from_id?: string | null
           score_reason?: string | null
+          sophistication_level?: string | null
           source_url?: string | null
+          target_reader?: string | null
           tone?: string | null
           workspace_id: string
         }
         Update: {
           ai_generated?: boolean
+          awareness_stage?: string | null
           body?: string | null
+          brief_completeness?: number | null
           copy_score?: number | null
           created_at?: string
           cta?: string | null
@@ -115,8 +129,10 @@ export type Database = {
           id?: string
           improvement_note?: string | null
           is_winner?: boolean
+          key_desire_hit?: string | null
           language?: string | null
           occasion?: string | null
+          one_idea?: string | null
           performance_rating?: string | null
           platform?: string | null
           product_name?: string | null
@@ -124,7 +140,9 @@ export type Database = {
           rated_at?: string | null
           remixed_from_id?: string | null
           score_reason?: string | null
+          sophistication_level?: string | null
           source_url?: string | null
+          target_reader?: string | null
           tone?: string | null
           workspace_id?: string
         }
