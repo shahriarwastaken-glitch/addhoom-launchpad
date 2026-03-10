@@ -57,6 +57,12 @@ const defaultForm: GeneratorFormData = {
   imageStyle: 'clean',
   brandColorPrimary: '#FF5100',
   brandColorSecondary: '#FFFFFF',
+  lightingMood: 'soft',
+  colorMood: 'neutral',
+  cameraAngle: 'front',
+  backgroundComplexity: 'minimal',
+  timeOfDay: 'golden',
+  productFocus: 'hero',
 };
 
 // Selected copy context for handoff
