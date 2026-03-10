@@ -177,7 +177,7 @@ const ContentCalendar = () => {
               className="flex items-center gap-1 text-xs bg-destructive/10 text-destructive px-2 py-1 rounded-full"
             >
               <AlertTriangle size={12} />
-              {t(`${toBn(overdueCount)}টি অতিক্রান্ত`, `${overdueCount} overdue`)}
+              {lang === 'bn' ? `${toBn(overdueCount)}টি অতিক্রান্ত` : `${overdueCount} overdue`}
             </button>
           )}
         </div>
