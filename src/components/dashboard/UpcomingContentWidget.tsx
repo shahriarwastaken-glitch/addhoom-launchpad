@@ -3,19 +3,19 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Zap, ChevronRight, Sparkles, AlertTriangle } from 'lucide-react';
+import { Calendar, Zap, ChevronRight, Sparkles, AlertTriangle, PartyPopper, Flag, Heart, Moon, Star, Flower2, Gift } from 'lucide-react';
 
 const toBn = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
 
 const BD_FESTIVALS = [
-  { name: 'পহেলা বৈশাখ', en: 'Pohela Boishakh', month: 4, day: 14, color: '#E53E3E', emoji: '🎊' },
-  { name: 'বিজয় দিবস', en: 'Victory Day', month: 12, day: 16, color: '#276749', emoji: '🇧🇩' },
-  { name: 'ভালোবাসা দিবস', en: "Valentine's Day", month: 2, day: 14, color: '#E53E3E', emoji: '❤️' },
-  { name: 'ঈদুল ফিতর', en: 'Eid ul-Fitr', month: 3, day: 31, color: '#276749', emoji: '🌙' },
-  { name: 'ঈদুল আযহা', en: 'Eid ul-Adha', month: 6, day: 7, color: '#276749', emoji: '🐑' },
-  { name: 'রমজান', en: 'Ramadan', month: 3, day: 1, color: '#553C9A', emoji: '🌙' },
-  { name: 'দুর্গা পূজা', en: 'Durga Puja', month: 10, day: 2, color: '#D53F8C', emoji: '🪷' },
-  { name: 'মাতৃ দিবস', en: "Mother's Day", month: 5, day: 11, color: '#D53F8C', emoji: '💐' },
+  { name: 'পহেলা বৈশাখ', en: 'Pohela Boishakh', month: 4, day: 14, color: '#E53E3E', icon: PartyPopper },
+  { name: 'বিজয় দিবস', en: 'Victory Day', month: 12, day: 16, color: '#276749', icon: Flag },
+  { name: 'ভালোবাসা দিবস', en: "Valentine's Day", month: 2, day: 14, color: '#E53E3E', icon: Heart },
+  { name: 'ঈদুল ফিতর', en: 'Eid ul-Fitr', month: 3, day: 31, color: '#276749', icon: Moon },
+  { name: 'ঈদুল আযহা', en: 'Eid ul-Adha', month: 6, day: 7, color: '#276749', icon: Star },
+  { name: 'রমজান', en: 'Ramadan', month: 3, day: 1, color: '#553C9A', icon: Moon },
+  { name: 'দুর্গা পূজা', en: 'Durga Puja', month: 10, day: 2, color: '#D53F8C', icon: Flower2 },
+  { name: 'মাতৃ দিবস', en: "Mother's Day", month: 5, day: 11, color: '#D53F8C', icon: Gift },
 ];
 
 const TYPE_COLORS: Record<string, { bg: string; text: string }> = {
