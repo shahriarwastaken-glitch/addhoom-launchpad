@@ -193,7 +193,9 @@ async function getApiKeys(supabase: any) {
   }
 
   return getApiKeysWithUsage(supabase, keys || []);
+}
 
+async function getApiKeysWithUsage(supabase: any, keys: any[]) {
   // Get last 7 days usage for each service
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -214,7 +216,7 @@ async function getApiKeys(supabase: any) {
   });
 
   // Attach usage to each key
-  const keysWithUsage = (keys || []).map((key: any) => ({
+  const keysWithUsage = keys.map((key: any) => ({
     ...key,
     usage_last_7_days: usageByService[key.service_name] || [],
     total_calls_this_month: calculateMonthlyTotal(usageByService[key.service_name] || []),
