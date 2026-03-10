@@ -8,8 +8,11 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
-const GEMINI_IMAGE_MODEL = "gemini-2.0-flash-exp";
+const BACKOFF = [2000, 3000, 5000, 8000, 12000, 18000];
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -40,14 +43,16 @@ serve(async (req) => {
       });
     }
 
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) {
-      return new Response(JSON.stringify({ success: false, message: "AI not configured" }), {
+    const PIAPI_KEY = Deno.env.get("PIAPI_KEY");
+    if (!PIAPI_KEY) {
+      return new Response(JSON.stringify({ success: false, message: "PiAPI not configured" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Extract raw base64 data
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+    // Upload source image to storage to get a URL for PiAPI
     let rawBase64 = image_base64;
     let mimeType = "image/png";
     if (image_base64.startsWith("data:")) {
@@ -58,59 +63,95 @@ serve(async (req) => {
       }
     }
 
-    const response = await fetch(`${GEMINI_BASE}/${GEMINI_IMAGE_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
+    const srcBytes = Uint8Array.from(atob(rawBase64), c => c.charCodeAt(0));
+    const srcPath = `${workspace_id}/rmbg_src_${Date.now()}.png`;
+    await supabase.storage.from("ad-images").upload(srcPath, srcBytes, {
+      contentType: mimeType, upsert: true,
+    });
+    const { data: srcPublicUrl } = supabase.storage.from("ad-images").getPublicUrl(srcPath);
+    const sourceImageUrl = srcPublicUrl.publicUrl;
+
+    // Call PiAPI background-remove
+    const createRes = await fetch("https://api.piapi.ai/api/v1/task", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "x-api-key": PIAPI_KEY,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        contents: [{
-          role: "user",
-          parts: [
-            {
-              text: `Remove the background from this product image completely. Output ONLY the product itself on a pure solid white background (#FFFFFF). Keep every detail of the product exactly as it is - same colors, same shape, same textures. The product should be centered with some padding around it. Do NOT add any text, labels, shadows, or decorative elements. Just the product on white.`,
-            },
-            { inlineData: { mimeType, data: rawBase64 } },
-          ],
-        }],
-        generationConfig: {
-          responseModalities: ["TEXT", "IMAGE"],
+        model: "Qubico/image-toolkit",
+        task_type: "background-remove",
+        input: {
+          image: sourceImageUrl,
+          rmbg_model: "RMBG-2.0",
         },
+        config: { webhook_config: { endpoint: "", secret: "" } },
       }),
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error(`BG removal failed (${response.status}):`, errText);
+    if (!createRes.ok) {
+      const errBody = await createRes.text();
+      console.error(`PiAPI bg-remove start failed [${createRes.status}]:`, errBody);
       return new Response(JSON.stringify({
-        success: true,
-        cutout_url: null,
-        background_removed: false,
+        success: true, cutout_url: null, background_removed: false,
         message: "Background removal failed, using original",
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const result = await response.json();
-    // Gemini native image output format
-    const parts = result.candidates?.[0]?.content?.parts || [];
-    const imagePart = parts.find((p: any) => p.inlineData);
-
-    if (!imagePart) {
+    const createData = await createRes.json();
+    const taskId = createData?.data?.task_id;
+    if (!taskId) {
+      console.error("No task_id returned:", createData);
       return new Response(JSON.stringify({
         success: true, cutout_url: null, background_removed: false,
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Upload cutout to storage
-    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const base64Clean = imagePart.inlineData.data;
-    const binaryString = atob(base64Clean);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let b = 0; b < binaryString.length; b++) {
-      bytes[b] = binaryString.charCodeAt(b);
+    console.log("PiAPI bg-remove task started:", taskId);
+
+    // Poll for completion
+    let resultImageUrl = "";
+    for (const delay of BACKOFF) {
+      await sleep(delay);
+      const statusRes = await fetch(`https://api.piapi.ai/api/v1/task/${taskId}`, {
+        headers: { "x-api-key": PIAPI_KEY },
+      });
+      if (!statusRes.ok) continue;
+
+      const statusData = await statusRes.json();
+      const status = statusData?.data?.status;
+
+      if (status === "completed") {
+        resultImageUrl = statusData?.data?.output?.image_url
+          || statusData?.data?.output?.image_urls?.[0]
+          || "";
+        break;
+      }
+      if (status === "failed") {
+        console.error("PiAPI bg-remove failed:", statusData?.data?.error);
+        break;
+      }
     }
+
+    if (!resultImageUrl) {
+      return new Response(JSON.stringify({
+        success: true, cutout_url: null, background_removed: false,
+        message: "Background removal timed out, using original",
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // Download result and upload to our storage
+    const imgRes = await fetch(resultImageUrl);
+    if (!imgRes.ok) {
+      return new Response(JSON.stringify({
+        success: true, cutout_url: null, background_removed: false,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const imgBytes = new Uint8Array(await imgRes.arrayBuffer());
 
     const fileName = `${workspace_id}/${Date.now()}-cutout.png`;
     const { error: uploadError } = await supabase.storage
-      .from("ad-images").upload(fileName, bytes, { contentType: "image/png", upsert: true });
+      .from("ad-images").upload(fileName, imgBytes, { contentType: "image/png", upsert: true });
 
     if (uploadError) {
       console.error("Cutout upload error:", uploadError);
