@@ -12,7 +12,7 @@ const SERVICES = [
   {
     service_name: 'gemini',
     display_name: 'Google Gemini API',
-    description: 'Ad copy, Dhoom Score, prompt enhancement, AI chat, Shop DNA extraction (gemini-2.5-flash-lite)',
+    description: 'Ad copy, Dhoom Score, prompt enhancement, AI chat, Shop DNA extraction, Account Doctor (gemini-3.1-flash-lite-preview)',
     docs_url: 'https://aistudio.google.com/apikey',
     icon: '🤖',
     is_critical: true,
@@ -20,9 +20,17 @@ const SERVICES = [
   {
     service_name: 'piapi',
     display_name: 'PiAPI (Nano Banana Pro + Kling 3.0)',
-    description: 'Image generation (Nano Banana Pro), AI Motion Video (Kling 2.6)',
+    description: 'Image generation (Nano Banana Pro), AI Motion Video (Kling 3.0), Image upscaling',
     docs_url: 'https://piapi.ai/docs',
     icon: '🎨',
+    is_critical: true,
+  },
+  {
+    service_name: 'fashn',
+    display_name: 'Fashn.ai',
+    description: 'Virtual Try-On, background removal for apparel',
+    docs_url: 'https://docs.fashn.ai',
+    icon: '👗',
     is_critical: true,
   },
   {
@@ -156,6 +164,7 @@ async function getApiKeys(supabase: any) {
   const SECRET_MAP: Record<string, string> = {
     gemini: 'GEMINI_API_KEY',
     piapi: 'PIAPI_KEY',
+    fashn: 'FASHN_API_KEY',
     sslcommerz: 'SSLCOMMERZ_STORE_ID',
     resend: 'RESEND_API_KEY',
     meta_ad_library: 'META_ACCESS_TOKEN',

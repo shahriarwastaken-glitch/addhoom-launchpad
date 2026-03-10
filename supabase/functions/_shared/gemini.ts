@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { ADDHOOM_SYSTEM_PROMPT } from "./systemPrompt.ts";
 
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
-const DEFAULT_MODEL = "gemini-2.5-flash";
+const DEFAULT_MODEL = "gemini-3.1-flash-lite-preview";
 
 function getGeminiKey(): string {
   const key = Deno.env.get("GEMINI_API_KEY");
