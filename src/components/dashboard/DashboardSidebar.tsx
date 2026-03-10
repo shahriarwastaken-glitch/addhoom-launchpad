@@ -9,11 +9,12 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
 } from '@/components/ui/sidebar';
-import { Target, Video, Calendar, MessageSquare, Search, Stethoscope, FolderOpen, Settings, Shield, Zap, Wand2, BarChart3 } from 'lucide-react';
+import { Target, Video, Calendar, MessageSquare, Search, Stethoscope, FolderOpen, Settings, Shield, Zap, Wand2, BarChart3, Sparkles } from 'lucide-react';
 
 const items = [
   { icon: Target, bn: 'হোম', en: 'Home', url: '/dashboard' },
   { icon: Wand2, bn: 'অ্যাড তৈরি', en: 'Create Ad', url: '/dashboard/generate' },
+  { icon: Sparkles, bn: 'স্টুডিও', en: 'Studio', url: '/dashboard/studio', badge: 'New' },
   { icon: Video, bn: 'ভিডিও অ্যাড', en: 'Video Ads', url: '/dashboard/video' },
   { icon: FolderOpen, bn: 'প্রজেক্ট', en: 'Projects', url: '/dashboard/projects' },
   { icon: Calendar, bn: 'ক্যালেন্ডার', en: 'Calendar', url: '/dashboard/calendar' },
@@ -63,7 +64,16 @@ const DashboardSidebar = () => {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} end={item.url === '/dashboard'} className="hover:bg-secondary" activeClassName="bg-primary/10 text-primary font-medium">
                       <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span className="font-body-bn text-sm">{t(item.bn, item.en)}</span>}
+                      {!collapsed && (
+                        <span className="font-body-bn text-sm flex items-center gap-1.5">
+                          {t(item.bn, item.en)}
+                          {'badge' in item && item.badge && (
+                            <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full font-medium leading-none">
+                              {item.badge}
+                            </span>
+                          )}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

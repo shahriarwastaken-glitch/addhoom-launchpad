@@ -15,6 +15,7 @@ import ProjectDetail from '@/components/dashboard/ProjectDetail';
 import Settings from '@/components/dashboard/Settings';
 import DhoomScoreChecker from '@/components/dashboard/DhoomScoreChecker';
 import Analytics from '@/components/dashboard/Analytics';
+import StudioPage from '@/components/dashboard/studio/StudioPage';
 
 const Dashboard = () => {
   return (
@@ -22,6 +23,7 @@ const Dashboard = () => {
       <Routes>
         <Route index element={<DashboardHome />} />
         <Route path="generate" element={<AdGeneratorPage />} />
+        <Route path="studio" element={<StudioPage />} />
         <Route path="ad-history" element={<AdHistory />} />
         <Route path="video" element={<VideoAd />} />
         <Route path="video/history" element={<VideoHistory />} />
