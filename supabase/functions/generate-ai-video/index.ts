@@ -121,7 +121,7 @@ serve(async (req) => {
       await new Promise(r => setTimeout(r, BACKOFF[i]));
 
       const pollRes = await fetch(`https://api.piapi.ai/api/v1/task/${taskId}`, {
-        headers: { 'X-API-Key': PIAPI_KEY },
+        headers: { 'x-api-key': PIAPI_KEY },
       });
 
       if (!pollRes.ok) {

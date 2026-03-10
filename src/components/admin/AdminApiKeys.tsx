@@ -114,6 +114,11 @@ const SETUP_GUIDES: Record<string, string[]> = {
     '৩. নতুন প্রজেক্ট তৈরি করুন বা বিদ্যমান প্রজেক্ট বেছে নিন',
     '৪. API Key কপি করুন এবং এখানে পেস্ট করুন',
   ],
+  piapi: [
+    '১. piapi.ai তে অ্যাকাউন্ট তৈরি করুন',
+    '২. Dashboard থেকে API Key কপি করুন',
+    '৩. Nano Banana Pro (image) ও Kling (video) এর জন্য ব্যবহৃত হবে',
+  ],
   sslcommerz: [
     '১. SSLCommerz Developer Portal এ যান',
     '২. Merchant Account তৈরি করুন',
