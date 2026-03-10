@@ -397,19 +397,11 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
 
             {/* Product Image Upload */}
             <FieldGroup label={t('পণ্যের ছবি আপলোড', 'Upload Product Image')}>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={e => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-              />
-              <div
-                onClick={() => fileInputRef.current?.click()}
+              <label
                 onDragOver={e => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={handleDrop}
-                className={`rounded-2xl border-2 border-dashed p-7 text-center cursor-pointer transition-all duration-200 ${
+                className={`block rounded-2xl border-2 border-dashed p-7 text-center cursor-pointer transition-all duration-200 ${
                   dragOver
                     ? 'border-primary bg-primary/5'
                     : form.productImagePreview
@@ -417,13 +409,21 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
                       : 'border-border bg-secondary hover:border-primary hover:bg-primary/[0.03]'
                 }`}
               >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => { e.target.files?.[0] && handleFileSelect(e.target.files[0]); e.target.value = ''; }}
+                />
                 {form.productImagePreview ? (
                   <div className="flex items-center gap-3">
                     <img src={form.productImagePreview} alt="Preview" className="w-20 h-20 rounded-lg object-cover" />
                     <div className="text-left">
                       <p className="text-sm font-heading-bn text-foreground truncate max-w-[140px]">{form.productImage?.name}</p>
                       <button
-                        onClick={e => { e.stopPropagation(); updateField('productImage', null); updateField('productImagePreview', null); }}
+                        type="button"
+                        onClick={e => { e.preventDefault(); e.stopPropagation(); updateField('productImage', null); updateField('productImagePreview', null); }}
                         className="text-xs text-primary font-heading-bn mt-1"
                       >
                         {t('পরিবর্তন করুন', 'Change')}
@@ -437,7 +437,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
                     <p className="text-xs text-muted-foreground mt-1">{t('PNG, JPG • সর্বোচ্চ 5MB', 'PNG, JPG • Max 5MB')}</p>
                   </>
                 )}
-              </div>
+              </label>
             </FieldGroup>
 
             {/* Image Format */}

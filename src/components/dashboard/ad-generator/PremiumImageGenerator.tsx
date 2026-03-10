@@ -264,25 +264,24 @@ const PremiumImageGenerator = ({ onBack, onResultsGenerated }: Props) => {
 
           {/* Product Image Upload */}
           <div>
-            <label className="block text-[13px] font-semibold text-foreground mb-1.5">Product Image *</label>
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
-              onChange={e => e.target.files?.[0] && handleFileSelect(e.target.files[0])} />
-            <div
-              onClick={() => fileInputRef.current?.click()}
+            <span className="block text-[13px] font-semibold text-foreground mb-1.5">Product Image *</span>
+            <label
               onDragOver={e => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
-              className={`rounded-[20px] border-2 border-dashed p-8 text-center cursor-pointer transition-all ${
+              className={`block rounded-[20px] border-2 border-dashed p-8 text-center cursor-pointer transition-all ${
                 dragOver ? 'border-primary bg-primary/5' : productImagePreview ? 'border-border bg-secondary' : 'border-border hover:border-primary hover:bg-primary/[0.03]'
               }`}
             >
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+                onChange={e => { e.target.files?.[0] && handleFileSelect(e.target.files[0]); e.target.value = ''; }} />
               {productImagePreview ? (
                 <div className="flex items-center gap-3">
                   <img src={productImagePreview} alt="Product" className="w-[120px] h-[120px] rounded-xl object-cover" />
                   <div className="text-left">
                     <p className="text-sm font-semibold text-foreground truncate max-w-[140px]">{productImage?.name}</p>
                     <p className="text-xs text-muted-foreground mt-1">Background will be removed automatically</p>
-                    <button onClick={e => { e.stopPropagation(); setProductImage(null); setProductImagePreview(null); }}
+                    <button type="button" onClick={e => { e.preventDefault(); e.stopPropagation(); setProductImage(null); setProductImagePreview(null); }}
                       className="text-xs text-primary mt-2">Change</button>
                   </div>
                 </div>
@@ -293,7 +292,7 @@ const PremiumImageGenerator = ({ onBack, onResultsGenerated }: Props) => {
                   <p className="text-xs text-muted-foreground mt-1">or click to browse — JPG, PNG, WEBP · Max 10MB</p>
                 </>
               )}
-            </div>
+            </label>
           </div>
 
           {/* Headline */}
