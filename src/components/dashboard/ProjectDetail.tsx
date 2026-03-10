@@ -204,7 +204,7 @@ const ProjectDetail = () => {
         {[
           { label: t('মোট বিজ্ঞাপন', 'Total Ads'), value: dn(totalAds), suffix: t('টি', ''), color: 'text-foreground' },
           { label: t('গড় ধুম স্কোর', 'Avg Dhoom Score'), value: dn(avgScore), suffix: '', color: scoreColor(avgScore) },
-          { label: t('বিজয়ী বিজ্ঞাপন', 'Winner Ads'), value: dn(winners), suffix: '⭐', color: 'text-foreground' },
+          { label: t('বিজয়ী বিজ্ঞাপন', 'Winner Ads'), value: dn(winners), suffix: '', color: 'text-foreground' },
           { label: t('সেরা স্কোর', 'Best Score'), value: dn(bestScore), suffix: '', color: scoreColor(bestScore) },
         ].map(stat => (
           <div key={stat.label} className="bg-card rounded-2xl border border-border p-4">
