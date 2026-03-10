@@ -217,7 +217,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           </NavLink>
         ))}
       </nav>
-    </>
+    </SidebarProvider>
   );
 };
 
