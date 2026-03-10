@@ -163,8 +163,11 @@ const AdGeneratorPage = () => {
       toast.error(t('প্রথমে একটি শপ তৈরি করুন', 'Create a shop first'));
       return;
     }
-    if (!form.productName.trim()) {
-      toast.error(t('পণ্যের নাম দিন', 'Enter product name'));
+    const productText = mode === 'copy' ? form.productDesc : form.productName;
+    if (!productText.trim()) {
+      toast.error(mode === 'copy'
+        ? t('আপনি কী বিক্রি করছেন তা লিখুন', 'Describe what you are selling')
+        : t('পণ্যের নাম দিন', 'Enter product name'));
       return;
     }
     if (form.platforms.length === 0) {
@@ -181,15 +184,21 @@ const AdGeneratorPage = () => {
         const { data, error } = await supabase.functions.invoke('generate-ads', {
           body: {
             workspace_id: activeWorkspace.id,
-            product_name: form.productName,
-            description: form.productDesc,
-            price_bdt: form.price ? parseInt(form.price) : undefined,
-            platforms: form.platforms,
-            language: lang,
-            framework: form.framework,
-            occasion: form.occasion,
+            product: form.productDesc,
+            platform: form.platforms[0] || 'facebook',
+            language: form.language || lang,
             tone: form.tone,
-            num_variations: form.numVariations,
+            variations: form.numVariations,
+            // Advanced Copy That! fields
+            target_reader: form.targetReader || undefined,
+            awareness_stage: form.awarenessStage || undefined,
+            sophistication: form.sophistication || undefined,
+            one_idea: form.oneIdea || undefined,
+            desires: form.desires || undefined,
+            notions: form.notions || undefined,
+            identification: form.identification || undefined,
+            offer: form.offer || undefined,
+            one_action: form.oneAction || undefined,
             project_id: projectId || undefined,
           },
         });
