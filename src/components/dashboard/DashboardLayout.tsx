@@ -77,6 +77,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           {/* Top Header */}
           <header className="h-14 flex items-center justify-between border-b border-border bg-card px-2 sm:px-4 flex-shrink-0">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <SidebarTrigger className="hidden md:flex mr-1" />
               {/* Workspace selector */}
               <div className="relative min-w-0">
                 <button
