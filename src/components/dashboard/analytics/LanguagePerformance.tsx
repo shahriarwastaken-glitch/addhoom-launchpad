@@ -3,8 +3,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 interface LanguagePerformanceProps {
   data: {
-    bn: { count: number; avg_score: number };
-    en: { count: number; avg_score: number };
+    bn?: { count: number; avg_score: number };
+    en?: { count: number; avg_score: number };
   };
 }
 
