@@ -288,10 +288,10 @@ serve(async (req) => {
         avg_score: languageMap.get('bn') ? 
           languageMap.get('bn').reduce((a, b) => a + b, 0) / languageMap.get('bn').length : 0
       },
-      banglish: {
-        count: languageMap.get('banglish')?.length || 0,
-        avg_score: languageMap.get('banglish') ? 
-          languageMap.get('banglish').reduce((a, b) => a + b, 0) / languageMap.get('banglish').length : 0
+      en: {
+        count: languageMap.get('en')?.length || 0,
+        avg_score: languageMap.get('en') ? 
+          languageMap.get('en').reduce((a, b) => a + b, 0) / languageMap.get('en').length : 0
       }
     }
 

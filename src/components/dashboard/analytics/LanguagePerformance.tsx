@@ -4,7 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 interface LanguagePerformanceProps {
   data: {
     bn: { count: number; avg_score: number };
-    banglish: { count: number; avg_score: number };
+    en: { count: number; avg_score: number };
   };
 }
 
@@ -12,9 +12,9 @@ const LanguagePerformance = ({ data }: LanguagePerformanceProps) => {
   const { t } = useLanguage();
 
   const bnAvg = Math.round(data.bn.avg_score);
-  const banglishAvg = Math.round(data.banglish.avg_score);
+  const enAvg = Math.round(data.en.avg_score);
   
-  const winner = bnAvg > banglishAvg ? 'bn' : 'banglish';
+  const winner = bnAvg > enAvg ? 'bn' : 'en';
 
   const getScoreColor = (score: number) => {
     if (score >= 70) return 'text-green-600';
@@ -24,38 +24,40 @@ const LanguagePerformance = ({ data }: LanguagePerformanceProps) => {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="font-body-bn text-xl">
-          {t('বাংলা নাকি Banglish — কোনটা বেশি ভালো?', 'Bangla vs Banglish Performance')}
+      <CardHeader className="px-4 md:px-6">
+        <CardTitle className="font-body-bn text-lg md:text-xl">
+          {t('বাংলা নাকি English — কোনটা বেশি ভালো?', 'Bangla vs English Performance')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <CardContent className="px-4 md:px-6 space-y-4 md:space-y-6">
+        <div className="grid grid-cols-2 gap-3 md:gap-4">
           {/* Bangla */}
           <Card className={winner === 'bn' ? 'border-primary border-2' : ''}>
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
               <div className="text-center">
-                <p className="text-lg font-semibold font-body-bn mb-2">বাংলা</p>
-                <p className={`text-4xl font-bold ${getScoreColor(bnAvg)}`}>
+                <p className="text-sm md:text-lg font-semibold font-body-bn mb-1 md:mb-2">
+                  {t('বাংলা', 'Bangla')}
+                </p>
+                <p className={`text-2xl md:text-4xl font-bold ${getScoreColor(bnAvg)}`}>
                   {bnAvg}
                 </p>
-                <p className="text-sm text-muted-foreground mt-2 font-body-bn">
+                <p className="text-[10px] md:text-sm text-muted-foreground mt-1 md:mt-2">
                   {data.bn.count} {t('টি বিজ্ঞাপন', 'ads')}
                 </p>
               </div>
             </CardContent>
           </Card>
 
-          {/* Banglish */}
-          <Card className={winner === 'banglish' ? 'border-primary border-2' : ''}>
-            <CardContent className="pt-6">
+          {/* English */}
+          <Card className={winner === 'en' ? 'border-primary border-2' : ''}>
+            <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
               <div className="text-center">
-                <p className="text-lg font-semibold mb-2">Banglish</p>
-                <p className={`text-4xl font-bold ${getScoreColor(banglishAvg)}`}>
-                  {banglishAvg}
+                <p className="text-sm md:text-lg font-semibold mb-1 md:mb-2">English</p>
+                <p className={`text-2xl md:text-4xl font-bold ${getScoreColor(enAvg)}`}>
+                  {enAvg}
                 </p>
-                <p className="text-sm text-muted-foreground mt-2 font-body-bn">
-                  {data.banglish.count} {t('টি বিজ্ঞাপন', 'ads')}
+                <p className="text-[10px] md:text-sm text-muted-foreground mt-1 md:mt-2">
+                  {data.en.count} {t('টি বিজ্ঞাপন', 'ads')}
                 </p>
               </div>
             </CardContent>
@@ -63,11 +65,11 @@ const LanguagePerformance = ({ data }: LanguagePerformanceProps) => {
         </div>
 
         {/* Winner Insight */}
-        <div className="border-l-4 border-primary bg-primary/5 p-4 rounded-lg">
-          <p className="text-sm font-body-bn">
+        <div className="border-l-4 border-primary bg-primary/5 p-3 md:p-4 rounded-lg">
+          <p className="text-xs md:text-sm font-body-bn">
             {winner === 'bn' 
               ? t('আপনার শপের জন্য বাংলা বেশি কার্যকর', 'Bangla is more effective for your shop')
-              : t('আপনার শপের জন্য Banglish বেশি কার্যকর', 'Banglish is more effective for your shop')
+              : t('আপনার শপের জন্য English বেশি কার্যকর', 'English is more effective for your shop')
             }
           </p>
         </div>
