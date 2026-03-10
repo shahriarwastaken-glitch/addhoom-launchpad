@@ -114,10 +114,10 @@ const SETUP_GUIDES: Record<string, string[]> = {
     '৩. নতুন প্রজেক্ট তৈরি করুন বা বিদ্যমান প্রজেক্ট বেছে নিন',
     '৪. API Key কপি করুন এবং এখানে পেস্ট করুন',
   ],
-  piapi: [
-    '১. piapi.ai তে অ্যাকাউন্ট তৈরি করুন',
+  wavespeed: [
+    '১. wavespeed.ai তে অ্যাকাউন্ট তৈরি করুন',
     '২. Dashboard থেকে API Key কপি করুন',
-    '৩. Nano Banana Pro (image) ও Kling (video) এর জন্য ব্যবহৃত হবে',
+    '৩. Nano Banana Pro (image), Seedance (video), ও Upscaler এর জন্য ব্যবহৃত হবে',
   ],
   sslcommerz: [
     '১. SSLCommerz Developer Portal এ যান',
@@ -141,12 +141,6 @@ const SETUP_GUIDES: Record<string, string[]> = {
     '২. API Keys সেকশনে যান',
     '৩. নতুন API Key তৈরি করুন',
     '৪. Key কপি করুন (একবারই দেখা যাবে)',
-  ],
-  replicate: [
-    '১. replicate.com এ অ্যাকাউন্ট তৈরি করুন',
-    '২. Account Settings → API Tokens এ যান',
-    '৩. নতুন Token তৈরি করুন',
-    '৪. Token কপি করুন এবং এখানে পেস্ট করুন',
   ],
 };
 

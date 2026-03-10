@@ -18,11 +18,11 @@ const SERVICES = [
     is_critical: true,
   },
   {
-    service_name: 'piapi',
-    display_name: 'PiAPI (Nano Banana Pro + Kling 3.0)',
-    description: 'Image generation (Nano Banana Pro), AI Motion Video (Kling 3.0), Image upscaling',
-    docs_url: 'https://piapi.ai/docs',
-    icon: '🎨',
+    service_name: 'wavespeed',
+    display_name: 'WaveSpeed AI',
+    description: 'Image generation (Nano Banana Pro), AI Motion Video (Seedance V1.5 Pro Fast), Image upscaling',
+    docs_url: 'https://wavespeed.ai/docs',
+    icon: '⚡',
     is_critical: true,
   },
   {
