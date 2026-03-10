@@ -547,8 +547,8 @@ const AIMotionTab = () => {
         </AnimatePresence>
       </div>
 
-      {/* Right Panel - hidden on mobile for step 1 */}
-      <div className={`flex-1 flex items-center justify-center p-4 sm:p-6 bg-secondary/30 overflow-hidden ${step === 1 ? 'hidden lg:flex' : ''}`}>
+      {/* Right Panel - hidden on mobile for step 1 & 3 (inline on mobile) */}
+      <div className={`flex-1 flex items-center justify-center p-4 sm:p-6 bg-secondary/30 overflow-hidden ${step === 1 || step === 3 ? 'hidden lg:flex' : ''}`}>
         {step === 1 && (
           <div className="text-center max-w-sm">
             {imagePreviews.length > 0 ? (
