@@ -382,6 +382,8 @@ const VideoAd = () => {
           />
         )}
       </AnimatePresence>
+      </>
+      )}
     </div>
   );
 };
