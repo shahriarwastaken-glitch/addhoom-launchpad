@@ -1529,16 +1529,22 @@ export type Database = {
           completed_at: string | null
           created_at: string
           dhoom_score: number | null
+          duration_seconds: number | null
           file_size_bytes: number | null
           font_style: string | null
           format: string
           id: string
+          input_mode: string | null
+          motion_prompt: string | null
+          motion_style: string | null
           music_track: string
           product_name: string | null
           render_id: string | null
           script: Json | null
+          source_images: string[] | null
           status: string
           style: string
+          video_type: string | null
           video_url: string | null
           voiceover_enabled: boolean | null
           workspace_id: string
@@ -1547,16 +1553,22 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           dhoom_score?: number | null
+          duration_seconds?: number | null
           file_size_bytes?: number | null
           font_style?: string | null
           format?: string
           id?: string
+          input_mode?: string | null
+          motion_prompt?: string | null
+          motion_style?: string | null
           music_track?: string
           product_name?: string | null
           render_id?: string | null
           script?: Json | null
+          source_images?: string[] | null
           status?: string
           style?: string
+          video_type?: string | null
           video_url?: string | null
           voiceover_enabled?: boolean | null
           workspace_id: string
@@ -1565,16 +1577,22 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           dhoom_score?: number | null
+          duration_seconds?: number | null
           file_size_bytes?: number | null
           font_style?: string | null
           format?: string
           id?: string
+          input_mode?: string | null
+          motion_prompt?: string | null
+          motion_style?: string | null
           music_track?: string
           product_name?: string | null
           render_id?: string | null
           script?: Json | null
+          source_images?: string[] | null
           status?: string
           style?: string
+          video_type?: string | null
           video_url?: string | null
           voiceover_enabled?: boolean | null
           workspace_id?: string
