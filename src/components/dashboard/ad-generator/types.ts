@@ -1,5 +1,12 @@
 export type GeneratorMode = 'copy' | 'image';
 
+export type LightingMood = 'soft' | 'dramatic' | 'natural' | 'bright';
+export type ColorMood = 'warm' | 'cool' | 'neutral' | 'bold';
+export type CameraAngle = 'front' | 'three_quarter' | 'overhead' | 'closeup';
+export type BackgroundComplexity = 'minimal' | 'moderate' | 'rich';
+export type TimeOfDay = 'morning' | 'golden' | 'midday' | 'night';
+export type ProductFocus = 'hero' | 'environmental' | 'detail';
+
 export interface AdResult {
   id?: string;
   headline: string;
@@ -43,6 +50,13 @@ export interface GeneratorFormData {
   imageStyle: 'clean' | 'creative' | 'lifestyle' | 'sale';
   brandColorPrimary: string;
   brandColorSecondary: string;
+  // New visual controls
+  lightingMood: LightingMood;
+  colorMood: ColorMood;
+  cameraAngle: CameraAngle;
+  backgroundComplexity: BackgroundComplexity;
+  timeOfDay: TimeOfDay;
+  productFocus: ProductFocus;
 }
 
 export const PLATFORMS = [
@@ -93,6 +107,67 @@ export const IMAGE_STYLES = [
   { label: 'লাইফস্টাইল', labelEn: 'Lifestyle', value: 'lifestyle' as const, icon: 'camera' },
   { label: 'সেল/অফার', labelEn: 'Sale/Offer', value: 'sale' as const, icon: 'flame' },
 ];
+
+export const LIGHTING_OPTIONS = [
+  { label: 'সফ্ট', labelEn: 'Soft', value: 'soft' as const, emoji: '🌤' },
+  { label: 'ড্রামাটিক', labelEn: 'Dramatic', value: 'dramatic' as const, emoji: '⚡' },
+  { label: 'ন্যাচারাল', labelEn: 'Natural', value: 'natural' as const, emoji: '🌿' },
+  { label: 'ব্রাইট', labelEn: 'Bright', value: 'bright' as const, emoji: '☀️' },
+];
+
+export const COLOR_MOOD_OPTIONS = [
+  { label: 'উষ্ণ', labelEn: 'Warm', value: 'warm' as const, emoji: '🍂' },
+  { label: 'কুল', labelEn: 'Cool', value: 'cool' as const, emoji: '❄️' },
+  { label: 'নিউট্রাল', labelEn: 'Neutral', value: 'neutral' as const, emoji: '⚪' },
+  { label: 'বোল্ড', labelEn: 'Bold', value: 'bold' as const, emoji: '🎨' },
+];
+
+export const CAMERA_ANGLE_OPTIONS = [
+  { label: 'ফ্রন্ট', labelEn: 'Front', value: 'front' as const, emoji: '📷' },
+  { label: '৩/৪ অ্যাঙ্গেল', labelEn: '3/4 Angle', value: 'three_quarter' as const, emoji: '↗️' },
+  { label: 'ওভারহেড', labelEn: 'Overhead', value: 'overhead' as const, emoji: '⬆️' },
+  { label: 'ক্লোজ-আপ', labelEn: 'Close-up', value: 'closeup' as const, emoji: '🔍' },
+];
+
+export const BACKGROUND_OPTIONS = [
+  { label: 'মিনিমাল', labelEn: 'Minimal', value: 'minimal' as const, emoji: '✦' },
+  { label: 'মডারেট', labelEn: 'Moderate', value: 'moderate' as const, emoji: '◈' },
+  { label: 'রিচ', labelEn: 'Rich', value: 'rich' as const, emoji: '❋' },
+];
+
+export const TIME_OF_DAY_OPTIONS = [
+  { label: 'সকাল', labelEn: 'Morning', value: 'morning' as const, emoji: '🌅' },
+  { label: 'গোল্ডেন আওয়ার', labelEn: 'Golden Hour', value: 'golden' as const, emoji: '🌇' },
+  { label: 'দুপুর', labelEn: 'Midday', value: 'midday' as const, emoji: '☀️' },
+  { label: 'রাত', labelEn: 'Night', value: 'night' as const, emoji: '🌙' },
+];
+
+export const PRODUCT_FOCUS_OPTIONS = [
+  { label: 'হিরো', labelEn: 'Hero', value: 'hero' as const, emoji: '⭐' },
+  { label: 'এনভায়রনমেন্টাল', labelEn: 'Environmental', value: 'environmental' as const, emoji: '🌿' },
+  { label: 'ডিটেইল', labelEn: 'Detail', value: 'detail' as const, emoji: '🔎' },
+];
+
+export type SceneStyleDefaults = {
+  lightingMood: LightingMood;
+  colorMood: ColorMood;
+  cameraAngle: CameraAngle;
+  backgroundComplexity: BackgroundComplexity;
+  timeOfDay: TimeOfDay;
+  productFocus: ProductFocus;
+};
+
+export const SCENE_STYLE_DEFAULTS: Record<string, SceneStyleDefaults> = {
+  clean: { lightingMood: 'soft', colorMood: 'neutral', cameraAngle: 'front', backgroundComplexity: 'minimal', timeOfDay: 'midday', productFocus: 'hero' },
+  creative: { lightingMood: 'dramatic', colorMood: 'bold', cameraAngle: 'front', backgroundComplexity: 'minimal', timeOfDay: 'midday', productFocus: 'hero' },
+  lifestyle: { lightingMood: 'natural', colorMood: 'warm', cameraAngle: 'three_quarter', backgroundComplexity: 'moderate', timeOfDay: 'golden', productFocus: 'environmental' },
+  sale: { lightingMood: 'bright', colorMood: 'bold', cameraAngle: 'front', backgroundComplexity: 'minimal', timeOfDay: 'midday', productFocus: 'hero' },
+  // Studio scene defaults (for ProductPhotoTab)
+  onWhite: { lightingMood: 'soft', colorMood: 'neutral', cameraAngle: 'front', backgroundComplexity: 'minimal', timeOfDay: 'midday', productFocus: 'hero' },
+  studio: { lightingMood: 'soft', colorMood: 'neutral', cameraAngle: 'front', backgroundComplexity: 'minimal', timeOfDay: 'midday', productFocus: 'hero' },
+  flatlay: { lightingMood: 'bright', colorMood: 'neutral', cameraAngle: 'overhead', backgroundComplexity: 'moderate', timeOfDay: 'midday', productFocus: 'hero' },
+  outdoor: { lightingMood: 'natural', colorMood: 'warm', cameraAngle: 'three_quarter', backgroundComplexity: 'rich', timeOfDay: 'golden', productFocus: 'environmental' },
+};
 
 export const LOADING_TIPS = [
   'Facebook এ সন্ধ্যা ৭-১০টায় বিজ্ঞাপন পোস্ট করলে বেশি এনগেজমেন্ট পাওয়া যায়।',
