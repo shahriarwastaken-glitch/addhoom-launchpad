@@ -393,14 +393,29 @@ const ImageRemixPanel = ({ image, workspaceId, onClose, onRemixComplete }: Image
             </motion.div>
           )}
 
-          {/* STEP 3: Results */}
-          {step === 'results' && (
+          {step === 'results' && (() => {
+            const validResults = results.filter(img => img.image_url && img.image_url !== '');
+            const failedCount = results.length - validResults.length;
+            return (
             <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3">
               <h4 className="text-sm font-bold font-heading-bn text-foreground">
-                {t('আপনার রিমিক্স', 'Your Remixes')} — {results.length} {t('টি তৈরি হয়েছে', 'generated')}
+                {failedCount > 0
+                  ? t(`আপনার রিমিক্স — ${validResults.length}/${results.length}টি তৈরি হয়েছে`, `Your Remixes — ${validResults.length} of ${results.length} generated`)
+                  : t(`আপনার রিমিক্স — ${validResults.length}টি তৈরি হয়েছে`, `Your Remixes — ${validResults.length} generated`)
+                }
               </h4>
+              {failedCount > 0 && (
+                <div className="flex items-center gap-2 rounded-lg border px-3 py-2"
+                  style={{ background: 'rgba(255,184,0,0.08)', borderColor: 'rgba(255,184,0,0.3)' }}
+                >
+                  <AlertTriangle size={14} className="text-amber-500 shrink-0" />
+                  <p className="text-[12px] font-heading-bn text-foreground">
+                    {t(`${failedCount}টি ব্যর্থ হয়েছে — নিচে পুনরায় চেষ্টা করুন`, `${failedCount} failed — retry below`)}
+                  </p>
+                </div>
+              )}
               <div className="space-y-3">
-                {results.map((img, i) => (
+                {validResults.map((img, i) => (
                   <div key={img.id || i} className="rounded-xl border border-border overflow-hidden bg-card">
                     <img src={img.image_url} alt={`Remix ${i + 1}`} className="w-full h-auto object-cover" loading="lazy" />
                     <div className="flex items-center gap-2 p-2.5">
@@ -428,9 +443,23 @@ const ImageRemixPanel = ({ image, workspaceId, onClose, onRemixComplete }: Image
                     </div>
                   </div>
                 ))}
+                {/* Failed slot cards */}
+                {failedCount > 0 && Array.from({ length: failedCount }).map((_, i) => (
+                  <div key={`failed-${i}`} className="flex flex-col items-center justify-center gap-2.5 rounded-xl border-[1.5px] border-dashed border-border bg-secondary/30 py-8">
+                    <AlertTriangle size={20} className="text-muted-foreground" />
+                    <p className="text-xs font-heading-bn text-muted-foreground">{t('ব্যর্থ হয়েছে', 'Failed')}</p>
+                    <button
+                      onClick={() => { setResults([]); setStep('controls'); }}
+                      className="px-3 py-1.5 rounded-lg border border-input text-[11px] font-bold text-foreground hover:bg-secondary transition-colors flex items-center gap-1"
+                    >
+                      <RefreshCw size={11} /> {t('পুনরায় চেষ্টা', 'Retry')}
+                    </button>
+                  </div>
+                ))}
               </div>
             </motion.div>
-          )}
+            );
+          })()}
         </AnimatePresence>
       </div>
 
