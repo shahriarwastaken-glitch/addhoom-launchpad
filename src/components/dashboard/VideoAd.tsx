@@ -242,6 +242,41 @@ const VideoAd = () => {
 
   return (
     <div className="h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden -m-3 sm:-m-6 md:-m-8">
+      {/* Tab Switcher */}
+      <div className="flex items-center gap-1 px-4 sm:px-6 pt-4 pb-2">
+        <button
+          onClick={() => setActiveTab('slideshow')}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            activeTab === 'slideshow'
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+          }`}
+        >
+          <Film size={14} />
+          {t('স্লাইডশো', 'Slideshow')}
+        </button>
+        <button
+          onClick={() => setActiveTab('ai_motion')}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all relative ${
+            activeTab === 'ai_motion'
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+          }`}
+        >
+          <Sparkles size={14} />
+          {t('AI মোশন', 'AI Motion')}
+          <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-primary text-primary-foreground shadow-sm">
+            {t('নতুন', 'New')} ✨
+          </span>
+        </button>
+      </div>
+
+      {activeTab === 'ai_motion' ? (
+        <div className="flex-1 overflow-hidden">
+          <AIMotionTab />
+        </div>
+      ) : (
+      <>
       {/* Stage indicator */}
       <StageIndicator currentStage={stage} />
 
