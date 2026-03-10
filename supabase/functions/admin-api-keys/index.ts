@@ -164,6 +164,7 @@ async function getApiKeys(supabase: any) {
   const SECRET_MAP: Record<string, string> = {
     gemini: 'GEMINI_API_KEY',
     piapi: 'PIAPI_KEY',
+    fashn: 'FASHN_API_KEY',
     sslcommerz: 'SSLCOMMERZ_STORE_ID',
     resend: 'RESEND_API_KEY',
     meta_ad_library: 'META_ACCESS_TOKEN',
