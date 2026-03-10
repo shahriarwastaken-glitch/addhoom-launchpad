@@ -61,7 +61,7 @@ const ProjectsList = () => {
   // Form state
   const [formName, setFormName] = useState('');
   const [formDesc, setFormDesc] = useState('');
-  const [formEmoji, setFormEmoji] = useState('📁');
+  const [formEmoji, setFormEmoji] = useState('folder');
   const [formColor, setFormColor] = useState('#FF5100');
   const [formStartDate, setFormStartDate] = useState('');
   const [formEndDate, setFormEndDate] = useState('');
