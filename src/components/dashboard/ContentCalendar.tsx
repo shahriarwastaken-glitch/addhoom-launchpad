@@ -357,7 +357,7 @@ function GenerateModal({ t, lang, activeWorkspace, hasExisting, onClose, onCompl
             {upcomingFests.length > 0 && (
               <p className="text-xs text-primary mb-4 font-bn">
                 {t('আগামী ৯০ দিনে: ', 'In next 90 days: ')}
-                {upcomingFests.map(f => `${lang === 'bn' ? f.name : f.en} (${t(`${toBn(f.daysUntil)} দিন বাকি`, `${f.daysUntil} days`)})`).join(', ')}
+                {upcomingFests.map(f => `${lang === 'bn' ? f.name : f.en} (${lang === 'bn' ? `${toBn(f.daysUntil)} দিন বাকি` : `${f.daysUntil} days`})`).join(', ')}
               </p>
             )}
 
