@@ -249,7 +249,7 @@ const Settings = () => {
                 </p>
               </div>
               {profile?.plan === 'free' && (
-                <button onClick={() => showUpgrade?.('settings')} className="bg-gradient-cta text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform">
+                <button onClick={() => showUpgrade?.('general')} className="bg-gradient-cta text-primary-foreground rounded-full px-5 py-2 text-sm font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform">
                   {t('আপগ্রেড করুন', 'Upgrade')}
                 </button>
               )}
