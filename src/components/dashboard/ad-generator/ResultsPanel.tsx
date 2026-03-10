@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Copy, RefreshCw, Star, ChevronDown, Image as ImageIcon, Check, Rocket, Zap, BarChart3, RotateCcw, Lightbulb, Flame, TrendingUp, Download, Clock, Trash2, FolderPlus, FolderOpen, CheckCircle2, Calendar, X } from 'lucide-react';
+import { Copy, RefreshCw, Star, ChevronDown, Image as ImageIcon, Check, Rocket, Zap, BarChart3, RotateCcw, Lightbulb, Flame, TrendingUp, Download, Clock, Trash2, FolderPlus, FolderOpen, CheckCircle2, Calendar, X, AlertTriangle } from 'lucide-react';
 import FeatureTooltip from '@/components/ui/FeatureTooltip';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -268,13 +268,31 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
     );
   }
 
-  // RESULTS STATE
+  // RESULTS STATE — filter out failed/null image results
+  const validResults = results.filter(ad => {
+    if (mode === 'image' && (!ad.image_url || ad.image_url === '')) return false;
+    return true;
+  });
+  const failedCount = results.length - validResults.length;
+  const requestedCount = results.length;
+  const successCount = validResults.length;
+
+  const countLabel = failedCount > 0
+    ? t(
+        `${toBengali(successCount)}/${toBengali(requestedCount)}টি বিজ্ঞাপন তৈরি হয়েছে`,
+        `${successCount} of ${requestedCount} ads generated`
+      )
+    : t(
+        `${toBengali(successCount)}টি বিজ্ঞাপন তৈরি হয়েছে`,
+        `${successCount} ads generated`
+      );
+
   return (
     <div className="h-full overflow-y-auto p-6 lg:p-7">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-bold font-heading-bn text-foreground">
-          {t(`${toBengali(results.length)}টি বিজ্ঞাপন তৈরি হয়েছে`, `${results.length} ads generated`)}
+          {countLabel}
         </h3>
         <div className="flex gap-2">
           <button onClick={copyAll} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn text-foreground hover:bg-secondary transition-colors">
@@ -285,6 +303,21 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
           </button>
         </div>
       </div>
+
+      {/* Partial results warning banner */}
+      {failedCount > 0 && (
+        <div className="flex items-center gap-2.5 rounded-lg border px-3.5 py-2.5 mb-4"
+          style={{ background: 'rgba(255,184,0,0.08)', borderColor: 'rgba(255,184,0,0.3)' }}
+        >
+          <AlertTriangle size={16} className="text-amber-500 shrink-0" />
+          <p className="text-[13px] font-heading-bn text-foreground">
+            {t(
+              `${toBengali(successCount)}/${toBengali(requestedCount)}টি ভেরিয়েশন তৈরি হয়েছে। ${toBengali(failedCount)}টি ব্যর্থ হয়েছে — নিচে পুনরায় চেষ্টা করুন।`,
+              `${successCount} of ${requestedCount} variations generated. ${failedCount} failed — retry below.`
+            )}
+          </p>
+        </div>
+      )}
 
       {/* CONNECTION 5: Project prompt */}
       {showProjectPrompt && (
@@ -298,17 +331,17 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
 
       {/* Platform tags */}
       <div className="flex flex-wrap gap-1.5 mb-5">
-        {[...new Set(results.map(r => r.platform))].map(p => (
+        {[...new Set(validResults.map(r => r.platform))].map(p => (
           <span key={p} className="px-2.5 py-0.5 rounded-full bg-secondary text-[12px] font-heading-bn text-muted-foreground capitalize">{p}</span>
         ))}
-        {results[0]?.framework && (
-          <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-[12px] font-heading-bn text-primary">{results[0].framework}</span>
+        {validResults[0]?.framework && (
+          <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-[12px] font-heading-bn text-primary">{validResults[0].framework}</span>
         )}
       </div>
 
       {/* Ad Cards */}
       <div className="space-y-4">
-        {results.map((ad, i) => (
+        {validResults.map((ad, i) => (
             <AdCopyCard
               key={ad.id || i}
               ad={ad}
@@ -323,6 +356,25 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
               delay={i * 0.1}
               projectId={projectId}
             />
+        ))}
+
+        {/* Failed slot retry cards */}
+        {failedCount > 0 && Array.from({ length: failedCount }).map((_, i) => (
+          <div
+            key={`failed-${i}`}
+            className="flex flex-col items-center justify-center gap-3 rounded-xl border-[1.5px] border-dashed border-border bg-secondary/30 py-10"
+          >
+            <AlertTriangle size={24} className="text-muted-foreground" />
+            <p className="text-sm font-heading-bn text-muted-foreground">
+              {t('এই ভেরিয়েশন তৈরি হয়নি', 'This variation failed')}
+            </p>
+            <button
+              onClick={onRegenerate}
+              className="px-4 py-2 rounded-lg border border-input text-xs font-bold font-heading-bn text-foreground hover:bg-secondary transition-colors flex items-center gap-1.5"
+            >
+              <RefreshCw size={12} /> {t('পুনরায় চেষ্টা করুন', 'Retry')}
+            </button>
+          </div>
         ))}
       </div>
     </div>
