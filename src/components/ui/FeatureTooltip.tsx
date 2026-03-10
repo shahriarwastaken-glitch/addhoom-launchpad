@@ -96,8 +96,8 @@ const FeatureTooltip = ({ tooltipKey, children, position = 'top', className = ''
                 <div className="pointer-events-auto bg-card border border-border rounded-xl shadow-warm-lg px-4 py-3 max-w-[260px] relative">
                   <div className={`absolute w-0 h-0 border-[6px] ${arrowClasses[position]}`} />
 
-                  <p className="text-sm font-body-en text-foreground leading-relaxed mb-2">
-                    {tooltip.emoji} {tooltip.text}
+                  <p className="text-sm font-body-en text-foreground leading-relaxed mb-2 flex items-start gap-1.5">
+                    <tooltip.Icon className="w-4 h-4 text-primary shrink-0 mt-0.5" /> {tooltip.text}
                   </p>
 
                   <button
