@@ -11,8 +11,8 @@ interface LanguagePerformanceProps {
 const LanguagePerformance = ({ data }: LanguagePerformanceProps) => {
   const { t } = useLanguage();
 
-  const bnAvg = Math.round(data.bn.avg_score);
-  const enAvg = Math.round(data.en.avg_score);
+  const bnAvg = Math.round(data.bn?.avg_score ?? 0);
+  const enAvg = Math.round(data.en?.avg_score ?? 0);
   
   const winner = bnAvg > enAvg ? 'bn' : 'en';
 
