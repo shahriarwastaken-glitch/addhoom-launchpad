@@ -1361,6 +1361,68 @@ export type Database = {
           },
         ]
       }
+      studio_jobs: {
+        Row: {
+          attempt_count: number | null
+          completed_at: string | null
+          completed_variations: number | null
+          error_message: string | null
+          id: string
+          input_config: Json
+          job_type: string
+          max_attempts: number | null
+          output_urls: string[] | null
+          queued_at: string | null
+          started_at: string | null
+          status: string
+          total_variations: number | null
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          attempt_count?: number | null
+          completed_at?: string | null
+          completed_variations?: number | null
+          error_message?: string | null
+          id?: string
+          input_config?: Json
+          job_type: string
+          max_attempts?: number | null
+          output_urls?: string[] | null
+          queued_at?: string | null
+          started_at?: string | null
+          status?: string
+          total_variations?: number | null
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          attempt_count?: number | null
+          completed_at?: string | null
+          completed_variations?: number | null
+          error_message?: string | null
+          id?: string
+          input_config?: Json
+          job_type?: string
+          max_attempts?: number | null
+          output_urls?: string[] | null
+          queued_at?: string | null
+          started_at?: string | null
+          status?: string
+          total_variations?: number | null
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_jobs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       style_templates: {
         Row: {
           display_order: number | null

@@ -6,6 +6,37 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// IMPROVEMENT 5: Stronger product fidelity block
+const PRODUCT_FIDELITY_BLOCK = `
+PRODUCT FIDELITY — ABSOLUTE RULES:
+
+MUST DO:
+- The product appears EXACTLY ONCE
+- Same orientation as the reference image
+- Same shape and proportions — no distortion
+- Same colors — do not shift hues or saturation
+- Same surface texture — leather stays leather, matte stays matte, glossy stays glossy
+- Same size relative to the scene
+- Realistic shadows that match scene lighting
+- Realistic reflections only where physically accurate (glass, shiny surfaces)
+
+MUST NOT:
+- Do not duplicate the product anywhere
+- Do not show the product twice (not even as a reflection or shadow)
+- Do not alter, stylize, or reimagine the product design
+- Do not add logos, text, or markings that are not on the original product
+- Do not change the product color
+- Do not show partial product (full product must be visible)
+- Do not add text, words, prices, watermarks, or labels anywhere
+- Do not crop the product at the frame edge
+
+REFERENCE IMAGE INSTRUCTION:
+The provided image is your single source of truth for what the product looks like.
+Treat it as a photograph, not a sketch.
+Reproduce it exactly as shown.
+Generate only the environment around it.
+`;
+
 const SCENE_PROMPTS: Record<string, string | ((c: any) => string)> = {
   onWhite: `Pure white seamless background. Product centered, perfectly lit from above with soft fill light. Subtle soft drop shadow beneath product. Clean, clinical, marketplace-ready. No props, no environment, just the product.`,
   studio: (config: any) => `Professional studio photography. ${config.backdrop || 'White'} seamless backdrop. Softbox lighting from ${config.lightingDirection || 'left'}, subtle rim light opposite side. Clean empty surface with soft realistic shadow. Ultra premium commercial photography.`,
@@ -55,13 +86,10 @@ serve(async (req) => {
       ? promptBuilder(scene_config)
       : (promptBuilder || SCENE_PROMPTS.onWhite);
 
+    // IMPROVEMENT 5: Include strong product fidelity block
     const fullPrompt = `You are given a product image. Place this product in a professional scene.
 
-PRODUCT FIDELITY — CRITICAL:
-- Product appears EXACTLY ONCE
-- Same orientation, shape, colors, proportions
-- Do not stylize or alter the product
-- Generate only the environment around it
+${PRODUCT_FIDELITY_BLOCK}
 
 NO TEXT: No words, labels, prices, watermarks.
 
@@ -72,7 +100,7 @@ ${transparent_bg ? 'Generate on pure white background only.' : ''}
 
 QUALITY: 8K, perfect exposure, professional color grading, luxury brand campaign quality.`;
 
-    // Call Gemini via Lovable AI Gateway for image generation
+    // Call Gemini via Lovable AI Gateway
     const geminiRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {

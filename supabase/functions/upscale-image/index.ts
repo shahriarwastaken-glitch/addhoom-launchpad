@@ -47,44 +47,29 @@ serve(async (req) => {
       smooth_skin: 'Upscale this image to higher resolution. Smooth skin textures naturally while preserving facial features and expressions. Maintain all other details, colors, and composition exactly.',
     };
 
-    const prompt = modePrompts[mode] || modePrompts.standard;
+    const basePrompt = modePrompts[mode] || modePrompts.standard;
 
-    // Use Gemini for upscaling via image editing
-    const geminiRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-image',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: prompt },
-              {
-                type: 'image_url',
-                image_url: { url: `data:image/png;base64,${image_base64}` },
-              },
-            ],
-          },
-        ],
-        modalities: ['image', 'text'],
-      }),
-    });
+    // IMPROVEMENT 4: Handle 6x and 8x with two-pass approach
+    // For scales > 4, we do two passes through Gemini
+    const needsTwoPass = scale > 4;
+    
+    // First pass: always upscale at base quality
+    const firstPassPrompt = `${basePrompt} Target: ${needsTwoPass ? '4x' : `${scale}x`} the original resolution.`;
 
-    const geminiData = await geminiRes.json();
-    const generatedImage = geminiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    const firstPassResult = await callGeminiUpscale(LOVABLE_API_KEY, image_base64, firstPassPrompt);
+    
+    let finalBase64 = firstPassResult;
 
-    if (!generatedImage) {
-      throw new Error('Upscale failed');
+    // Second pass for 6x and 8x
+    if (needsTwoPass) {
+      const secondScale = scale === 6 ? '1.5x' : '2x';
+      const secondPassPrompt = `${basePrompt} This image has already been upscaled once. Upscale it ${secondScale} more. Maintain absolute fidelity — no artifacts, no hallucinated details.`;
+      
+      finalBase64 = await callGeminiUpscale(LOVABLE_API_KEY, firstPassResult, secondPassPrompt);
     }
 
-    // Extract base64 and store
-    const base64Data = generatedImage.replace(/^data:image\/\w+;base64,/, '');
-    const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-
+    // Store result
+    const imageBytes = Uint8Array.from(atob(finalBase64), c => c.charCodeAt(0));
     const ext = export_format === 'jpg' ? 'jpg' : 'png';
     const storedPath = `upscaled/${workspace_id}/${Date.now()}.${ext}`;
     await supabase.storage.from('ad-images').upload(storedPath, imageBytes, {
@@ -101,7 +86,7 @@ serve(async (req) => {
       style: 'upscaled',
       text_config: {},
       studio_source: 'upscaler',
-      studio_config: { scale, mode },
+      studio_config: { scale, mode, two_pass: needsTwoPass },
     });
 
     // Log usage
@@ -109,15 +94,13 @@ serve(async (req) => {
       user_id: user.id,
       workspace_id,
       feature: 'upscaler',
-      tokens_used: 1,
+      tokens_used: needsTwoPass ? 2 : 1,
     });
-
-    // Estimate upscaled size (Gemini doesn't guarantee exact scale)
-    const upscaled_size = `upscaled`;
 
     return new Response(JSON.stringify({
       image_url: imageUrl,
-      upscaled_size,
+      upscaled_scale: `${scale}x`,
+      two_pass: needsTwoPass,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -128,3 +111,38 @@ serve(async (req) => {
     });
   }
 });
+
+async function callGeminiUpscale(apiKey: string, imageBase64: string, prompt: string): Promise<string> {
+  const geminiRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-2.5-flash-image',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            {
+              type: 'image_url',
+              image_url: { url: `data:image/png;base64,${imageBase64}` },
+            },
+          ],
+        },
+      ],
+      modalities: ['image', 'text'],
+    }),
+  });
+
+  const geminiData = await geminiRes.json();
+  const generatedImage = geminiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+
+  if (!generatedImage) {
+    throw new Error('Upscale pass failed');
+  }
+
+  return generatedImage.replace(/^data:image\/\w+;base64,/, '');
+}
