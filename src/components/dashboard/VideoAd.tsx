@@ -5,13 +5,17 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUpgrade } from '@/contexts/UpgradeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Film, Sparkles } from 'lucide-react';
 import StageIndicator from './video/StageIndicator';
 import VideoSetup from './video/VideoSetup';
 import VideoProcessing from './video/VideoProcessing';
 import VideoResultView from './video/VideoResult';
 import ScriptPreviewModal from './video/ScriptPreviewModal';
+import AIMotionTab from './video/AIMotionTab';
 import type { VideoStage, VideoFormData, VideoScript, VideoResult, ProcessingStep } from './video/types';
 import { DEFAULT_FORM } from './video/types';
+
+type VideoTab = 'slideshow' | 'ai_motion';
 
 const SLIDE_VARIANTS = {
   enter: (direction: number) => ({ x: direction > 0 ? 300 : -300, opacity: 0 }),
