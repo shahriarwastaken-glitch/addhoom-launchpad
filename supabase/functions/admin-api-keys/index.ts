@@ -148,6 +148,54 @@ async function getApiKeys(supabase: any) {
 
   if (error) throw error;
 
+  // Auto-create placeholder rows for services missing from the table
+  const existingServices = new Set((keys || []).map((k: any) => k.service_name));
+  const missingServices = SERVICES.filter(s => !existingServices.has(s.service_name));
+
+  // Check env secrets for missing services to mark them as active
+  const SECRET_MAP: Record<string, string> = {
+    gemini: 'GEMINI_API_KEY',
+    piapi: 'PIAPI_KEY',
+    sslcommerz: 'SSLCOMMERZ_STORE_ID',
+    resend: 'RESEND_API_KEY',
+    meta_ad_library: 'META_ACCESS_TOKEN',
+    shotstack: 'SHOTSTACK_API_KEY',
+  };
+
+  if (missingServices.length > 0) {
+    const inserts = missingServices.map(s => {
+      const envKey = SECRET_MAP[s.service_name];
+      const secretValue = envKey ? Deno.env.get(envKey) : null;
+      const hasSecret = !!secretValue && secretValue !== '';
+      return {
+        service_name: s.service_name,
+        display_name: s.display_name,
+        key_value: secretValue || 'PLACEHOLDER',
+        key_preview: hasSecret ? '...' + secretValue!.slice(-4) : '...NONE',
+        description: s.description,
+        docs_url: s.docs_url,
+        icon: s.icon,
+        is_critical: s.is_critical,
+        status: hasSecret ? 'active' : 'inactive',
+      };
+    });
+    await supabase.from('api_keys').insert(inserts);
+
+    // Re-fetch to include newly inserted rows
+    const { data: allKeys, error: err2 } = await supabase
+      .from('api_keys')
+      .select('id, service_name, display_name, key_preview, environment, status, last_tested_at, last_test_result, last_test_error, expires_at, monthly_limit, monthly_usage, notes, description, docs_url, icon, is_critical, created_at, updated_at, rotated_at')
+      .order('is_critical', { ascending: false })
+      .order('service_name');
+    if (!err2 && allKeys) {
+      return getApiKeysWithUsage(supabase, allKeys);
+    }
+  }
+
+  return getApiKeysWithUsage(supabase, keys || []);
+}
+
+async function getApiKeysWithUsage(supabase: any, keys: any[]) {
   // Get last 7 days usage for each service
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -168,7 +216,7 @@ async function getApiKeys(supabase: any) {
   });
 
   // Attach usage to each key
-  const keysWithUsage = (keys || []).map((key: any) => ({
+  const keysWithUsage = keys.map((key: any) => ({
     ...key,
     usage_last_7_days: usageByService[key.service_name] || [],
     total_calls_this_month: calculateMonthlyTotal(usageByService[key.service_name] || []),
@@ -279,6 +327,11 @@ async function performKeyTest(supabase: any, keyId: string, serviceName: string,
         testResult = 'success';
         break;
 
+      case 'piapi':
+        await testPiapiKey(keyValue);
+        testResult = 'success';
+        break;
+
       case 'resend':
         await testResendKey(keyValue);
         testResult = 'success';
@@ -358,6 +411,18 @@ async function testGeminiKey(apiKey: string) {
       throw new Error('Rate limited - key valid but over quota');
     }
     throw new Error(data.error?.message || 'Gemini test failed');
+  }
+}
+
+async function testPiapiKey(apiKey: string) {
+  const response = await fetch('https://api.piapi.ai/api/v1/user/profile', {
+    headers: { 'x-api-key': apiKey },
+  });
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('Invalid API key');
+    }
+    throw new Error('PiAPI test failed');
   }
 }
 
