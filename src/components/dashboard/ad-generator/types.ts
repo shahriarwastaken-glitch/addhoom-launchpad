@@ -27,6 +27,15 @@ export interface AdResult {
   sophistication_level?: string;
   key_desire_hit?: string;
   brief_completeness?: number;
+  // Dimension scores
+  scores?: {
+    hook_strength?: number;
+    emotional_resonance?: number;
+    objection_handling?: number;
+    offer_clarity?: number;
+    awareness_fit?: number;
+    language_execution?: number;
+  };
 }
 
 export interface ImageResult {
