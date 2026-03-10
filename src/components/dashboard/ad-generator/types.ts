@@ -1,8 +1,12 @@
 export type GeneratorMode = 'copy' | 'image';
 
-export type LightingMood = 'soft' | 'dramatic' | 'natural' | 'bright';
+export type SceneKey = 'studio' | 'lifestyle' | 'luxury';
+
+export type LightingMood = 'soft' | 'dramatic' | 'natural' | 'bright' | 'golden';
+export type CameraAngle = 'front' | 'three_quarter' | 'overhead' | 'closeup' | 'cinematic';
+
+// Legacy types kept for compatibility
 export type ColorMood = 'warm' | 'cool' | 'neutral' | 'bold';
-export type CameraAngle = 'front' | 'three_quarter' | 'overhead' | 'closeup';
 export type BackgroundComplexity = 'minimal' | 'moderate' | 'rich';
 export type TimeOfDay = 'morning' | 'golden' | 'midday' | 'night';
 export type ProductFocus = 'hero' | 'environmental' | 'detail';
@@ -22,6 +26,7 @@ export interface AdResult {
   improvement_note?: string;
   remixed_from_id?: string;
   image_url?: string;
+  scene?: SceneKey;
   // Copy That! fields
   awareness_stage?: string;
   sophistication_level?: string;
@@ -46,6 +51,7 @@ export interface ImageResult {
   format: string;
   variation_number: number;
   is_winner?: boolean;
+  scene?: SceneKey;
 }
 
 export interface GeneratorFormData {
@@ -71,6 +77,9 @@ export interface GeneratorFormData {
   backgroundComplexity: BackgroundComplexity;
   timeOfDay: TimeOfDay;
   productFocus: ProductFocus;
+  // Scene selection (image mode v4)
+  selectedScenes: SceneKey[];
+  additionalDetails: string;
   // Copy That! advanced fields
   targetReader: string;
   awarenessStage: string;
@@ -124,6 +133,29 @@ export const SOPHISTICATION_LEVELS = [
   { label: 'Max Saturation', labelBn: 'সর্বোচ্চ', value: 'maximum' },
 ];
 
+export const IMAGE_LIGHTING_OPTIONS = [
+  { label: 'সফ্ট', labelEn: 'Soft', value: 'soft' as const, emoji: '🌤' },
+  { label: 'ড্রামাটিক', labelEn: 'Dramatic', value: 'dramatic' as const, emoji: '⚡' },
+  { label: 'ন্যাচারাল', labelEn: 'Natural', value: 'natural' as const, emoji: '🌿' },
+  { label: 'ব্রাইট', labelEn: 'Bright', value: 'bright' as const, emoji: '☀️' },
+  { label: 'গোল্ডেন আওয়ার', labelEn: 'Golden Hour', value: 'golden' as const, emoji: '🌇' },
+];
+
+export const IMAGE_CAMERA_OPTIONS = [
+  { label: 'ফ্রন্ট', labelEn: 'Front', value: 'front' as const, emoji: '📷' },
+  { label: '৩/৪ অ্যাঙ্গেল', labelEn: '3/4 Angle', value: 'three_quarter' as const, emoji: '↗️' },
+  { label: 'ওভারহেড', labelEn: 'Overhead', value: 'overhead' as const, emoji: '⬆️' },
+  { label: 'ক্লোজ-আপ', labelEn: 'Close-up', value: 'closeup' as const, emoji: '🔍' },
+  { label: 'সিনেম্যাটিক', labelEn: 'Cinematic', value: 'cinematic' as const, emoji: '🎬' },
+];
+
+export const SCENE_OPTIONS: { label: string; labelBn: string; value: SceneKey; desc: string; descBn: string; icon: string }[] = [
+  { label: 'Studio', labelBn: 'স্টুডিও', value: 'studio', desc: 'Clean white backdrop', descBn: 'পরিষ্কার সাদা ব্যাকড্রপ', icon: 'target' },
+  { label: 'Lifestyle', labelBn: 'লাইফস্টাইল', value: 'lifestyle', desc: 'Natural warm interior', descBn: 'উষ্ণ প্রাকৃতিক ইন্টেরিয়র', icon: 'home' },
+  { label: 'Luxury', labelBn: 'লাক্সারি', value: 'luxury', desc: 'Dark dramatic premium', descBn: 'ডার্ক ড্রামাটিক প্রিমিয়াম', icon: 'sparkles' },
+];
+
+// Legacy exports for backward compatibility
 export const PLATFORMS = [
   { label: 'Facebook', labelEn: 'Facebook', value: 'facebook', icon: 'facebook', color: '#1877F2', bg: '#E8F0FE' },
   { label: 'Instagram', labelEn: 'Instagram', value: 'instagram', icon: 'instagram', color: '#E4405F', bg: '#FCE4EC' },
