@@ -44,19 +44,18 @@ const PhotoUploader = ({ onSubmit, loading }: Props) => {
       <p className="text-xs text-muted-foreground">Upload 1-5 photos. AI will analyze them to understand your products and brand style.</p>
 
       {previews.length < 5 && (
-        <div
-          onClick={() => inputRef.current?.click()}
+        <label
           onDragOver={e => { e.preventDefault(); e.currentTarget.classList.add('border-primary'); }}
           onDragLeave={e => e.currentTarget.classList.remove('border-primary')}
           onDrop={e => { e.preventDefault(); e.currentTarget.classList.remove('border-primary'); handleFiles(e.dataTransfer.files); }}
-          className="border-2 border-dashed border-border rounded-2xl p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+          className="block border-2 border-dashed border-border rounded-2xl p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
         >
           <Upload size={28} className="mx-auto text-muted-foreground mb-2" />
           <p className="text-sm text-muted-foreground">Drag photos here or click to browse</p>
           <p className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP · Max 10MB each</p>
           <input ref={inputRef} type="file" accept="image/*" multiple
-            onChange={e => handleFiles(e.target.files)} className="hidden" />
-        </div>
+            onChange={e => { handleFiles(e.target.files); e.target.value = ''; }} className="hidden" />
+        </label>
       )}
 
       {previews.length > 0 && (

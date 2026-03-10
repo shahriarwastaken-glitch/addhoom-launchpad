@@ -374,12 +374,13 @@ const AIMotionTab = () => {
                         </div>
                       ))}
                       {imagePreviews.length < (inputMode === 'single' ? 1 : 4) && (
-                        <button
-                          onClick={() => fileInputRef.current?.click()}
-                          className="w-20 h-20 rounded-lg border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                        <label
+                          className="w-20 h-20 rounded-lg border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer"
                         >
+                          <input type="file" accept="image/*" multiple={inputMode === 'multiple'} className="hidden"
+                            onChange={e => { e.target.files && handleImageUpload(e.target.files); e.target.value = ''; }} />
                           <span className="text-lg">+</span>
-                        </button>
+                        </label>
                       )}
                     </div>
                     {inputMode === 'multiple' && imagePreviews.length > 1 && (

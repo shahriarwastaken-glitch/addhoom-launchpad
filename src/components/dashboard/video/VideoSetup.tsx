@@ -224,13 +224,13 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
                   </div>
                 ))}
                 {form.images.length < MAX_IMAGES && (
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-[100px] h-[100px] shrink-0 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                  <label
+                    className="w-[100px] h-[100px] shrink-0 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer"
                   >
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={e => { e.target.files && handleFiles(e.target.files); e.target.value = ''; }} />
                     <span className="text-lg">+</span>
                     <span className="text-[10px] font-heading-bn">{t('আরো যোগ', 'Add more')}</span>
-                  </button>
+                  </label>
                 )}
               </div>
               <p className="text-xs text-muted-foreground font-heading-bn mt-2">
