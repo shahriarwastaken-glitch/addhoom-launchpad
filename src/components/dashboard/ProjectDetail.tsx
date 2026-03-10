@@ -13,6 +13,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const toBn = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
 
+const ICON_MAP: Record<string, React.ElementType> = {
+  folder: FolderOpen, target: Target, flame: Flame, shopping: ShoppingBag,
+  party: PartyPopper, sparkles: Sparkles, briefcase: Briefcase, megaphone: Megaphone,
+  rocket: Rocket, heart: Heart,
+};
+
 interface ProjectData {
   id: string;
   name: string;
