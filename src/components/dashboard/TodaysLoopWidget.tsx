@@ -58,8 +58,8 @@ const TodaysLoopWidget = () => {
           {t("আজকের লুপ", "Today's Loop")}
         </h3>
         {allDone && (
-          <span className="text-xs font-heading-bn font-semibold text-primary animate-pulse">
-            🔥 {t('লুপ সম্পন্ন!', 'Loop Complete!')}
+          <span className="text-xs font-heading-bn font-semibold text-primary animate-pulse flex items-center gap-1">
+            <Zap size={12} className="text-primary" /> {t('লুপ সম্পন্ন!', 'Loop Complete!')}
           </span>
         )}
       </div>
