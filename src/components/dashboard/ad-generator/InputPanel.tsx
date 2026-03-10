@@ -399,7 +399,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/png,image/jpeg"
+                accept="image/*"
                 className="hidden"
                 onChange={e => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
               />
