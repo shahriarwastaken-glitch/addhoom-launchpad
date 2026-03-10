@@ -64,7 +64,16 @@ const DashboardSidebar = () => {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} end={item.url === '/dashboard'} className="hover:bg-secondary" activeClassName="bg-primary/10 text-primary font-medium">
                       <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span className="font-body-bn text-sm">{t(item.bn, item.en)}</span>}
+                      {!collapsed && (
+                        <span className="font-body-bn text-sm flex items-center gap-1.5">
+                          {t(item.bn, item.en)}
+                          {'badge' in item && item.badge && (
+                            <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full font-medium leading-none">
+                              {item.badge}
+                            </span>
+                          )}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
