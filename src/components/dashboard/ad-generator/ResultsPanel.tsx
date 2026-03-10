@@ -435,21 +435,23 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
     'bg-gradient-to-br from-[#CD7F32] to-[#B8680A]',
   ];
 
-  const scoreLabel = (s: number) => {
-    if (s >= 70) return { icon: <Flame size={14} />, text: t(`ধুম! ${s}`, `Dhoom! ${s}`), bg: '#E8FFF4', color: '#00B96B' };
-    if (s >= 50) return { icon: <TrendingUp size={14} />, text: t(`ভালো ${s}`, `Good ${s}`), bg: '#FFFBEB', color: '#D97706' };
-    return { icon: <Zap size={14} />, text: t(`আরো কাজ দরকার ${s}`, `Needs work ${s}`), bg: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))' };
+  const scoreLabel = (s: number | null | undefined) => {
+    if (s === null || s === undefined || isNaN(s)) return { icon: <AlertTriangle size={14} />, text: t('স্কোর পাওয়া যায়নি', 'Score unavailable'), bg: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))' };
+    if (s >= 80) return { icon: <Flame size={14} />, text: t(`ধুম! ${s}`, `Dhoom! ${s}`), bg: '#FFF3E8', color: '#FF5100' };
+    if (s >= 60) return { icon: <TrendingUp size={14} />, text: t(`লঞ্চ ${s}`, `Launch ${s}`), bg: '#E8FFF4', color: '#00B96B' };
+    if (s >= 40) return { icon: <TrendingUp size={14} />, text: t(`টেস্ট করুন ${s}`, `Test It ${s}`), bg: '#FFFBEB', color: '#FFB800' };
+    return { icon: <Zap size={14} />, text: t(`স্কিপ ${s}`, `Skip ${s}`), bg: 'hsl(var(--muted))', color: '#9E9E9E' };
   };
 
   const dhoomLabel = scoreLabel(ad.dhoom_score);
 
   const scoreBars = [
-    { label: t('হুক শক্তি', 'Hook Strength'), value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 15 - 5)) },
-    { label: t('বাংলা ভাষা', 'Language'), value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 15)) },
-    { label: t('কৌশল প্রয়োগ', 'Framework'), value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 10 - 8)) },
-    { label: t('CTA শক্তি', 'CTA Strength'), value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 10 - 3)) },
-    { label: t('মোবাইল পাঠ', 'Mobile Read'), value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 12)) },
-    { label: t('বাজার ফিট', 'Market Fit'), value: Math.min(100, ad.dhoom_score + Math.floor(Math.random() * 10 - 2)) },
+    { label: t('হুক শক্তি', 'Hook Strength'), value: ad.scores?.hook_strength ?? null, weight: '25%' },
+    { label: t('আবেগ', 'Emotional Resonance'), value: ad.scores?.emotional_resonance ?? null, weight: '20%' },
+    { label: t('আপত্তি হ্যান্ডলিং', 'Objection Handling'), value: ad.scores?.objection_handling ?? null, weight: '20%' },
+    { label: t('অফার স্পষ্টতা', 'Offer Clarity'), value: ad.scores?.offer_clarity ?? null, weight: '15%' },
+    { label: t('সচেতনতা ফিট', 'Awareness Fit'), value: ad.scores?.awareness_fit ?? null, weight: '10%' },
+    { label: t('ভাষা', 'Language Execution'), value: ad.scores?.language_execution ?? null, weight: '10%' },
   ];
 
   const barColor = (v: number) => v > 80 ? '#00B96B' : v >= 60 ? '#FFB800' : '#EF4444';

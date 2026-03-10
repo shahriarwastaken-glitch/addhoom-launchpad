@@ -12,11 +12,11 @@ interface Evaluation {
   grade: string;
   scores: {
     hook_strength: number;
-    bengali_authenticity: number;
-    framework_execution: number;
-    cta_strength: number;
-    mobile_readability: number;
-    bd_market_fit: number;
+    emotional_resonance: number;
+    objection_handling: number;
+    offer_clarity: number;
+    awareness_fit: number;
+    language_execution: number;
   };
   identified_framework: string;
   what_works: string[];
