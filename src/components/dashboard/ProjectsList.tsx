@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import {
   FolderOpen, Plus, Archive, MoreVertical, Pencil, Trash2,
-  CalendarDays, Trophy, Star, ArrowRight, Check, X, FolderArchive, RotateCcw
+  CalendarDays, Trophy, Star, ArrowRight, Check, X, FolderArchive, RotateCcw,
+  Target, Flame, ShoppingBag, PartyPopper, Sparkles, Briefcase, Megaphone, Rocket, Heart
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
