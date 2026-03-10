@@ -104,28 +104,13 @@ export async function logUsage(
   });
 }
 
-async function getApiKey(keyName: string): Promise<string> {
-  // Try reading from api_keys table first (admin-managed)
-  try {
-    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
-    const sb = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-    const { data } = await sb
-      .from("api_keys")
-      .select("key_value")
-      .eq("service_name", keyName)
-      .eq("status", "active")
-      .maybeSingle();
-    if (data?.key_value) return data.key_value;
-  } catch (e) {
-    console.warn("Could not read api_keys table, falling back to env:", e);
-  }
-  // Fallback to env var
-  const envVal = Deno.env.get(keyName);
-  if (!envVal) throw new Error(`${keyName} not configured`);
-  return envVal;
+const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const DEFAULT_MODEL = "gemini-2.5-flash";
+
+function getGeminiKey(): string {
+  const key = Deno.env.get("GEMINI_API_KEY");
+  if (!key) throw new Error("GEMINI_API_KEY is not configured");
+  return key;
 }
 
 export async function getSystemPrompt(): Promise<string> {
@@ -149,35 +134,26 @@ export async function getSystemPrompt(): Promise<string> {
 }
 
 export async function callGemini(prompt: string, systemPrompt: string = ADDHOOM_SYSTEM_PROMPT): Promise<string> {
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+  const apiKey = getGeminiKey();
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const response = await fetch(`${GEMINI_BASE}/${DEFAULT_MODEL}:generateContent?key=${apiKey}`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash-lite",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: prompt },
-      ],
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      systemInstruction: { parts: [{ text: systemPrompt }] },
     }),
   });
 
   if (!response.ok) {
     const err = await response.text();
-    console.error("Lovable AI Gateway error:", response.status, err);
+    console.error("Gemini API error:", response.status, err);
     if (response.status === 429) throw new Error("Rate limit exceeded. Please try again later.");
-    if (response.status === 402) throw new Error("AI credits exhausted. Please add funds.");
-    throw new Error(`AI Gateway error: ${response.status}`);
+    throw new Error(`Gemini API error: ${response.status}`);
   }
 
   const data = await response.json();
-  let text = data.choices?.[0]?.message?.content || "";
-  // Clean JSON if wrapped in markdown
+  let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
   text = text.replace(/```json/g, "").replace(/```/g, "").trim();
   return text;
 }
@@ -186,39 +162,31 @@ export async function callGeminiMultiturn(
   messages: Array<{ role: string; parts: Array<{ text: string }> }>,
   systemPrompt: string = ADDHOOM_SYSTEM_PROMPT
 ): Promise<string> {
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+  const apiKey = getGeminiKey();
 
-  const openaiMessages = messages.map((m) => ({
-    role: m.role === "model" ? "assistant" as const : "user" as const,
-    content: m.parts.map(p => p.text).join("\n"),
+  const contents = messages.map((m) => ({
+    role: m.role === "model" ? "model" : "user",
+    parts: m.parts,
   }));
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const response = await fetch(`${GEMINI_BASE}/${DEFAULT_MODEL}:generateContent?key=${apiKey}`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash-lite",
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...openaiMessages,
-      ],
+      contents,
+      systemInstruction: { parts: [{ text: systemPrompt }] },
     }),
   });
 
   if (!response.ok) {
     const err = await response.text();
-    console.error("Lovable AI Gateway error:", response.status, err);
+    console.error("Gemini API error:", response.status, err);
     if (response.status === 429) throw new Error("Rate limit exceeded. Please try again later.");
-    if (response.status === 402) throw new Error("AI credits exhausted. Please add funds.");
-    throw new Error(`AI Gateway error: ${response.status}`);
+    throw new Error(`Gemini API error: ${response.status}`);
   }
 
   const data = await response.json();
-  return data.choices?.[0]?.message?.content || "";
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 }
 
 export const corsHeaders = {

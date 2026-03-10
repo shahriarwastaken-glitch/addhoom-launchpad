@@ -9,6 +9,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const GEMINI_MODEL = "gemini-2.5-flash";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -33,20 +36,24 @@ serve(async (req) => {
     const { data: sourceAd } = await supabase.from("ad_images").select("*").eq("id", source_image_id).eq("workspace_id", workspace_id).single();
     if (!sourceAd) return new Response(JSON.stringify({ success: false, message: "Source image not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) return new Response(JSON.stringify({ success: false, message: "AI not configured" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) return new Response(JSON.stringify({ success: false, message: "AI not configured" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    // Step 1: Analyze winning image style using LLM
-    const analyzeResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [{
-          role: "user",
-          content: [
-            { type: "image_url", image_url: { url: sourceAd.image_url } },
-            { type: "text", text: `Analyze this winning ad image and extract its visual style for reproduction.
+    // Step 1: Download source image and analyze style using Gemini vision
+    let imageBase64 = "";
+    let imageMimeType = "image/png";
+    try {
+      const imgResp = await fetch(sourceAd.image_url);
+      const imgBuffer = await imgResp.arrayBuffer();
+      const bytes = new Uint8Array(imgBuffer);
+      imageBase64 = btoa(String.fromCharCode(...bytes));
+      const ct = imgResp.headers.get("content-type");
+      if (ct) imageMimeType = ct;
+    } catch (e) {
+      console.warn("Could not download source image for analysis:", e);
+    }
+
+    const analyzePrompt = `Analyze this winning ad image and extract its visual style for reproduction.
 The user says these qualities made it work: ${(winning_qualities || []).join(", ")}
 
 Extract and describe precisely:
@@ -58,20 +65,33 @@ Extract and describe precisely:
 6. Overall aesthetic in 3-5 words
 
 Return ONLY valid JSON:
-{"scene_description":"...","lighting":"...","composition":"...","color_grading":"...","mood":"...","style_summary":"..."}` },
-          ],
-        }],
-      }),
-    });
+{"scene_description":"...","lighting":"...","composition":"...","color_grading":"...","mood":"...","style_summary":"..."}`;
 
     let styleAnalysis = { scene_description: "Clean studio", lighting: "Soft diffused", composition: "Centered product", color_grading: "Neutral warm", mood: "Premium", style_summary: "Clean premium studio" };
-    if (analyzeResponse.ok) {
-      try {
-        const analyzeResult = await analyzeResponse.json();
-        const content = analyzeResult.choices?.[0]?.message?.content || "";
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) styleAnalysis = JSON.parse(jsonMatch[0]);
-      } catch { /* use defaults */ }
+
+    if (imageBase64) {
+      const analyzeResponse = await fetch(`${GEMINI_BASE}/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{
+            role: "user",
+            parts: [
+              { inlineData: { mimeType: imageMimeType, data: imageBase64 } },
+              { text: analyzePrompt },
+            ],
+          }],
+        }),
+      });
+
+      if (analyzeResponse.ok) {
+        try {
+          const analyzeResult = await analyzeResponse.json();
+          const content = analyzeResult.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) styleAnalysis = JSON.parse(jsonMatch[0]);
+        } catch { /* use defaults */ }
+      }
     }
 
     // Step 2: Generate with style applied to target product via PiAPI

@@ -8,6 +8,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const GEMINI_IMAGE_MODEL = "gemini-2.0-flash-exp";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -37,41 +40,46 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) {
       return new Response(JSON.stringify({ success: false, message: "AI not configured" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const imageUri = image_base64.startsWith("data:") ? image_base64 : `data:image/png;base64,${image_base64}`;
+    // Extract raw base64 data
+    let rawBase64 = image_base64;
+    let mimeType = "image/png";
+    if (image_base64.startsWith("data:")) {
+      const match = image_base64.match(/^data:(image\/\w+);base64,(.+)$/);
+      if (match) {
+        mimeType = match[1];
+        rawBase64 = match[2];
+      }
+    }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(`${GEMINI_BASE}/${GEMINI_IMAGE_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
-        messages: [{
+        contents: [{
           role: "user",
-          content: [
+          parts: [
             {
-              type: "text",
               text: `Remove the background from this product image completely. Output ONLY the product itself on a pure solid white background (#FFFFFF). Keep every detail of the product exactly as it is - same colors, same shape, same textures. The product should be centered with some padding around it. Do NOT add any text, labels, shadows, or decorative elements. Just the product on white.`,
             },
-            { type: "image_url", image_url: { url: imageUri } },
+            { inlineData: { mimeType, data: rawBase64 } },
           ],
         }],
-        modalities: ["image", "text"],
+        generationConfig: {
+          responseModalities: ["TEXT", "IMAGE"],
+        },
       }),
     });
 
     if (!response.ok) {
       const errText = await response.text();
       console.error(`BG removal failed (${response.status}):`, errText);
-      // Fallback: return original image
       return new Response(JSON.stringify({
         success: true,
         cutout_url: null,
@@ -81,9 +89,11 @@ serve(async (req) => {
     }
 
     const result = await response.json();
-    const generatedImages = result.choices?.[0]?.message?.images;
+    // Gemini native image output format
+    const parts = result.candidates?.[0]?.content?.parts || [];
+    const imagePart = parts.find((p: any) => p.inlineData);
 
-    if (!generatedImages || generatedImages.length === 0) {
+    if (!imagePart) {
       return new Response(JSON.stringify({
         success: true, cutout_url: null, background_removed: false,
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -91,8 +101,7 @@ serve(async (req) => {
 
     // Upload cutout to storage
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const base64Data = generatedImages[0].image_url.url;
-    const base64Clean = base64Data.replace(/^data:image\/\w+;base64,/, "");
+    const base64Clean = imagePart.inlineData.data;
     const binaryString = atob(base64Clean);
     const bytes = new Uint8Array(binaryString.length);
     for (let b = 0; b < binaryString.length; b++) {
