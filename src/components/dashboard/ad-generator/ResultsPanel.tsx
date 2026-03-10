@@ -562,13 +562,13 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
                     <div className="flex-1 h-1 rounded-full bg-border overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
-                        animate={{ width: `${bar.value}%` }}
+                        animate={{ width: `${bar.value ?? 0}%` }}
                         transition={{ duration: 0.6, delay: 0.1 }}
                         className="h-full rounded-full"
                         style={{ backgroundColor: barColor(bar.value) }}
                       />
                     </div>
-                    <span className="text-[11px] font-mono text-muted-foreground w-8 text-right">{bar.value}%</span>
+                    <span className="text-[11px] font-mono text-muted-foreground w-8 text-right">{bar.value !== null ? `${bar.value}%` : '—'}</span>
                   </div>
                 ))}
                 {ad.score_reason && (
