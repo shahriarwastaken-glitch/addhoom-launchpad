@@ -42,7 +42,7 @@ const LanguagePerformance = ({ data }: LanguagePerformanceProps) => {
                   {bnAvg}
                 </p>
                 <p className="text-[10px] md:text-sm text-muted-foreground mt-1 md:mt-2">
-                  {data.bn.count} {t('টি বিজ্ঞাপন', 'ads')}
+                  {data.bn?.count ?? 0} {t('টি বিজ্ঞাপন', 'ads')}
                 </p>
               </div>
             </CardContent>
