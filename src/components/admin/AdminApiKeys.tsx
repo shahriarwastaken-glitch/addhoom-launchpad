@@ -99,12 +99,12 @@ interface KeyLog {
 
 const SERVICE_COLORS: Record<string, string> = {
   gemini: '#6C3FE8',
-  piapi: '#FF8C00',
+  wavespeed: '#FF8C00',
   sslcommerz: '#E2136E',
   shotstack: '#00B96B',
   meta_ad_library: '#1877F2',
   resend: '#FF5100',
-  replicate: '#0081FB',
+  fashn: '#E91E63',
 };
 
 const SETUP_GUIDES: Record<string, string[]> = {
