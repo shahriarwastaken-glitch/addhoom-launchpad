@@ -457,31 +457,70 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
         <div className="h-20" />
       </div>
 
-      {/* Sticky Generate Button */}
+      {/* Sticky Generate/Continue Button */}
       <div className="sticky bottom-0 bg-gradient-to-t from-card via-card to-transparent px-6 lg:px-7 pb-5 pt-4">
-        <button
-          ref={generateBtnRef as any}
-          onClick={onGenerate}
-          className={`w-full h-[52px] rounded-[14px] font-bold text-[17px] font-heading-bn text-primary-foreground transition-all duration-200 ${
-            generating
-              ? 'bg-primary/70 cursor-not-allowed opacity-80'
-              : 'bg-primary hover:brightness-110 shadow-orange-glow active:scale-[0.98]'
-          }`}
-        >
-          {generating ? (
+        {mode === 'image' && imageStep === 1 ? (
+          <button
+            onClick={() => {
+              const built = buildAdImagePrompt({
+                productName: form.productName || 'the product',
+                style: form.imageStyle,
+                brandColors: [form.brandColorPrimary, form.brandColorSecondary].filter(c => c && c !== '#FFFFFF'),
+                format: form.imageFormat,
+              });
+              setImageDefaultPrompt(built);
+              setImagePrompt(built);
+              setImageStep(2);
+            }}
+            disabled={!form.productName.trim() || !form.productImagePreview}
+            className={`w-full h-[52px] rounded-[14px] font-bold text-[17px] font-heading-bn text-primary-foreground transition-all duration-200 ${
+              (!form.productName.trim() || !form.productImagePreview)
+                ? 'bg-primary/50 cursor-not-allowed opacity-60'
+                : 'bg-primary hover:brightness-110 shadow-orange-glow active:scale-[0.98]'
+            }`}
+          >
             <span className="flex items-center justify-center gap-2">
-              <Rocket size={18} className="animate-bounce" />
-              <span className="animate-pulse">{loadingTexts[loadingTextIdx % loadingTexts.length]}</span>
+              <ArrowRight size={18} /> {t('চালিয়ে যান', 'Continue')}
             </span>
-          ) : (
-            <span className="flex items-center justify-center gap-2">
-              {mode === 'copy'
-                ? <><PenLine size={18} /> {t('বিজ্ঞাপন কপি তৈরি করুন', 'Generate Ad Copy')}</>
-                : <><ImageIcon size={18} /> {t('ইমেজ বিজ্ঞাপন তৈরি করুন', 'Generate Image Ad')}</>}
-            </span>
-          )}
-        </button>
-        <p className="text-center text-[11px] text-muted-foreground mt-2 font-heading-bn">{t('সাধারণত ৮-১৫ সেকেন্ড লাগে', 'Usually takes 8-15 seconds')}</p>
+          </button>
+        ) : mode === 'image' && imageStep === 2 ? (
+          <PromptEditor
+            prompt={imagePrompt}
+            onPromptChange={setImagePrompt}
+            defaultPrompt={imageDefaultPrompt}
+            onBack={() => setImageStep(1)}
+            onGenerate={() => onGenerate(imagePrompt)}
+            generating={generating}
+            generateLabel={t('ইমেজ বিজ্ঞাপন তৈরি করুন', 'Generate Image Ad')}
+            generateIcon={<ImageIcon className="h-4 w-4 mr-2" />}
+            tabType="ad_image"
+            costNote={t('সাধারণত ৮-১৫ সেকেন্ড লাগে', 'Usually takes 8-15 seconds')}
+          />
+        ) : (
+          <button
+            ref={generateBtnRef as any}
+            onClick={() => onGenerate()}
+            className={`w-full h-[52px] rounded-[14px] font-bold text-[17px] font-heading-bn text-primary-foreground transition-all duration-200 ${
+              generating
+                ? 'bg-primary/70 cursor-not-allowed opacity-80'
+                : 'bg-primary hover:brightness-110 shadow-orange-glow active:scale-[0.98]'
+            }`}
+          >
+            {generating ? (
+              <span className="flex items-center justify-center gap-2">
+                <Rocket size={18} className="animate-bounce" />
+                <span className="animate-pulse">{loadingTexts[loadingTextIdx % loadingTexts.length]}</span>
+              </span>
+            ) : (
+              <span className="flex items-center justify-center gap-2">
+                <PenLine size={18} /> {t('বিজ্ঞাপন কপি তৈরি করুন', 'Generate Ad Copy')}
+              </span>
+            )}
+          </button>
+        )}
+        {mode !== 'image' || imageStep !== 2 ? (
+          <p className="text-center text-[11px] text-muted-foreground mt-2 font-heading-bn">{t('সাধারণত ৮-১৫ সেকেন্ড লাগে', 'Usually takes 8-15 seconds')}</p>
+        ) : null}
       </div>
     </div>
   );
