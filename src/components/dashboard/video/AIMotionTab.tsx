@@ -351,7 +351,7 @@ const AIMotionTab = () => {
                     className="block border-2 border-dashed rounded-xl min-h-[120px] flex flex-col items-center justify-center cursor-pointer border-border bg-secondary hover:border-primary/40 transition-all"
                   >
                     <input ref={fileInputRef} type="file" accept="image/*" multiple={inputMode === 'multiple'} className="hidden"
-                      onChange={e => { e.target.files && handleImageUpload(e.target.files); e.target.value = ''; }} />
+                      onChange={e => { e.target.files && handleFiles(Array.from(e.target.files)); e.target.value = ''; }} />
                     <Upload size={28} className="text-muted-foreground mb-1.5" />
                     <p className="text-sm text-muted-foreground">{t('ক্লিক করুন বা টেনে আনুন', 'Click or drag to upload')}</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">JPG, PNG, WEBP · Max 10MB</p>
