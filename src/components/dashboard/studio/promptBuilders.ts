@@ -116,6 +116,35 @@ export function buildProductPhotoPrompt(config: {
   return `Professional product photography of ${name}. ${sceneDesc}. ${angle} ${focus} ${bg} ${lighting} ${time} ${color} Product appears exactly once, full product visible, same colors and proportions as reference image. No text, watermarks, or labels. 8K resolution, perfect exposure, professional color grading.`.replace(/\s{2,}/g, ' ').trim();
 }
 
+// ── Motion Video prompt ──
+
+export function buildMotionPrompt(config: {
+  motionStyle: string;
+  productName: string;
+  productCategory: string;
+  inputMode: 'single' | 'multiple';
+  aspectRatio: string;
+}): string {
+  const stylePrompts: Record<string, string> = {
+    cinematic_reveal: 'Slow cinematic push-in movement. Camera starts wide and gradually moves forward toward the product. Dramatic depth reveal, shallow depth of field, product emerges from soft bokeh background. Luxury brand campaign feel.',
+    float_rotate: 'Product gently floats in space with a smooth 360-degree rotation. Soft studio lighting follows the product as it turns. Clean background, product is hero. Smooth seamless loop motion.',
+    zoom_pan: 'Dynamic camera movement starting wide then zooming into product details. Slow pan across key product features, highlighting texture and craftsmanship. Sharp focus throughout, editorial feel.',
+    lifestyle_motion: 'Camera glides through a lifestyle environment where the product lives. Natural ambient motion, soft wind, light shift, environmental depth. Product integrated naturally in scene. Warm aspirational atmosphere.',
+    energy_burst: 'High energy dynamic motion. Fast camera movement with momentum. Light streaks and particle effects. Bold, kinetic, attention-grabbing. Made for scroll-stopping social ads.',
+    subtle_breathe: 'Almost imperceptible motion. Soft light breathing effect, subtle depth shift, gentle glow pulse. Premium stillness with life. Luxury, calm, sophisticated feel.',
+  };
+
+  const modeNote = config.inputMode === 'multiple'
+    ? 'Smooth cinematic transitions between each image. Each image holds for approximately 1-1.5 seconds. Seamless flow throughout.'
+    : 'Single continuous motion on one image. Full 5 seconds of smooth movement.';
+
+  const name = config.productName || 'the product';
+  const cat = config.productCategory ? ` (${config.productCategory})` : '';
+  const motion = stylePrompts[config.motionStyle] || stylePrompts.cinematic_reveal;
+
+  return `5-second product advertisement video for ${name}${cat}.\n\nMOTION: ${motion}\n\nSTRUCTURE: ${modeNote}\n\nFORMAT: ${config.aspectRatio} aspect ratio.\n\nQUALITY RULES:\n- Product must remain clearly visible throughout the entire video\n- No text or watermarks in the video\n- Smooth motion, no jarring cuts\n- Professional commercial quality\n- Colors true to the product`;
+}
+
 // ── Try-On prompt ──
 
 export function buildTryOnPrompt(config: {
