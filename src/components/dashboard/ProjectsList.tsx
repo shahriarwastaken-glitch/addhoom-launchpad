@@ -125,7 +125,7 @@ const ProjectsList = () => {
 
   const openEditModal = (p: Project) => {
     setEditProject(p);
-    setFormName(p.name); setFormDesc(p.description || ''); setFormEmoji(p.emoji || '📁');
+    setFormName(p.name); setFormDesc(p.description || ''); setFormEmoji(p.emoji || 'folder');
     setFormColor(p.color || '#FF5100');
     setFormStartDate(p.start_date || ''); setFormEndDate(p.end_date || '');
     setShowModal(true);
