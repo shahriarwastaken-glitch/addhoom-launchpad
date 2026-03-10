@@ -128,3 +128,12 @@ verify_jwt = false
 
 [functions.save-style-preferences]
 verify_jwt = false
+
+[functions.remove-background]
+verify_jwt = false
+
+[functions.remix-image-fresh]
+verify_jwt = false
+
+[functions.remix-image-style]
+verify_jwt = false

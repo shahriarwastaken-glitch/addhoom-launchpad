@@ -156,6 +156,7 @@ export type Database = {
         Row: {
           created_at: string
           creative_id: string | null
+          cutout_url: string | null
           dhoom_score: number | null
           format: string
           gemini_prompt: string | null
@@ -163,13 +164,18 @@ export type Database = {
           image_url: string | null
           is_winner: boolean | null
           product_name: string | null
+          remix_config: Json | null
+          remix_type: string | null
+          remixed_from_id: string | null
           sd_prompt: string | null
           style: string
+          text_config: Json | null
           workspace_id: string
         }
         Insert: {
           created_at?: string
           creative_id?: string | null
+          cutout_url?: string | null
           dhoom_score?: number | null
           format?: string
           gemini_prompt?: string | null
@@ -177,13 +183,18 @@ export type Database = {
           image_url?: string | null
           is_winner?: boolean | null
           product_name?: string | null
+          remix_config?: Json | null
+          remix_type?: string | null
+          remixed_from_id?: string | null
           sd_prompt?: string | null
           style?: string
+          text_config?: Json | null
           workspace_id: string
         }
         Update: {
           created_at?: string
           creative_id?: string | null
+          cutout_url?: string | null
           dhoom_score?: number | null
           format?: string
           gemini_prompt?: string | null
@@ -191,8 +202,12 @@ export type Database = {
           image_url?: string | null
           is_winner?: boolean | null
           product_name?: string | null
+          remix_config?: Json | null
+          remix_type?: string | null
+          remixed_from_id?: string | null
           sd_prompt?: string | null
           style?: string
+          text_config?: Json | null
           workspace_id?: string
         }
         Relationships: [
@@ -201,6 +216,13 @@ export type Database = {
             columns: ["creative_id"]
             isOneToOne: false
             referencedRelation: "ad_creatives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_images_remixed_from_id_fkey"
+            columns: ["remixed_from_id"]
+            isOneToOne: false
+            referencedRelation: "ad_images"
             referencedColumns: ["id"]
           },
           {
