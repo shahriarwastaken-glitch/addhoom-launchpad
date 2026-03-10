@@ -1,7 +1,15 @@
-// ─────────────────────────────────────
-// SCENE VARIANT TEMPLATES
+// Client-side prompt builder — mirrors supabase/functions/_shared/imagePrompt.ts
+// This is used to pre-fill prompt textareas before sending to the API
 
-export const SCENE_VARIANTS = {
+import type { SceneKey } from './types';
+
+const SCENE_VARIANTS: Record<SceneKey, {
+  name: string;
+  surface: string;
+  environment: string;
+  composition: string;
+  style: string;
+}> = {
   studio: {
     name: 'Studio',
     surface: 'marble counter with subtle grain texture',
@@ -23,12 +31,7 @@ export const SCENE_VARIANTS = {
     composition: 'dramatic hero shot, product commands attention with gravitas',
     style: 'high-end luxury advertisement, cinematic premium brand aesthetic',
   },
-} as const;
-
-export type SceneKey = keyof typeof SCENE_VARIANTS;
-
-// ─────────────────────────────────────
-// LIGHTING CONSTANTS
+};
 
 const LIGHTING: Record<string, string> = {
   soft: 'soft diffused studio lighting, gentle shadows, even illumination, softbox quality',
@@ -38,9 +41,6 @@ const LIGHTING: Record<string, string> = {
   golden: 'warm golden hour light, rich amber glow, long soft shadows, magic hour photography',
 };
 
-// ─────────────────────────────────────
-// CAMERA CONSTANTS
-
 const CAMERA: Record<string, string> = {
   front: '85mm product photography, straight-on front angle, symmetrical composition',
   three_quarter: '85mm product photography, 3/4 angle perspective, adds depth and dimension',
@@ -48,9 +48,6 @@ const CAMERA: Record<string, string> = {
   closeup: 'macro product shot, extreme close-up, texture and detail emphasized',
   cinematic: '50mm cinematic lens, slight low angle, dramatic perspective',
 };
-
-// ─────────────────────────────────────
-// PRODUCT FIDELITY BLOCK
 
 const PRODUCT_FIDELITY_BLOCK = `
 PRODUCT FIDELITY — ABSOLUTE RULES:
@@ -68,13 +65,6 @@ MUST NOT:
 ✗ Do not add text, watermarks, or labels
 ✗ Do not crop product at frame edge
 ✗ Do not make product float unnaturally`;
-
-// ─────────────────────────────────────
-// CORE PROMPT BUILDER
-// Strict stack order:
-// Subject → Surface → Environment →
-// Composition → Lighting → Camera →
-// Style → Quality
 
 function buildStructuredPrompt(config: {
   productName: string;
@@ -103,10 +93,6 @@ NO TEXT: No words, labels, prices,
 watermarks, or logos anywhere in the image.
 `.replace(/\n{3,}/g, '\n\n').trim();
 }
-
-// ─────────────────────────────────────
-// PROMPT BUILDER
-// Builds only requested scenes
 
 export function buildAdImagePrompts(config: {
   productName: string;

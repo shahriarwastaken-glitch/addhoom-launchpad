@@ -34,6 +34,7 @@ const LIGHTING: Record<LightingMood, string> = {
   dramatic: 'dramatic high-contrast lighting, deep shadows, cinematic chiaroscuro effect',
   natural: 'natural ambient lighting, soft outdoor light, warm sunlight feel',
   bright: 'bright clean lighting, high key, minimal shadows, airy feel',
+  golden: 'warm golden hour light, rich amber glow, long soft shadows',
 };
 const COLOR: Record<ColorMood, string> = {
   warm: 'warm color grading, golden amber tones, rich earthy palette',
@@ -46,6 +47,7 @@ const ANGLE: Record<CameraAngle, string> = {
   three_quarter: '3/4 angle perspective, adds depth and dimension',
   overhead: 'overhead flat lay perspective, bird\'s eye view',
   closeup: 'close-up detail shot, texture emphasized, macro feel',
+  cinematic: '50mm cinematic lens, slight low angle, dramatic perspective',
 };
 const BACKGROUND: Record<BackgroundComplexity, string> = {
   minimal: 'minimal clean background, negative space dominant',

@@ -4,26 +4,21 @@ import { Link } from 'react-router-dom';
 import OnceTooltip from '@/components/ui/OnceTooltip';
 import {
   PenLine, ImageIcon, Facebook, Instagram, ShoppingBag, Search,
-  Target, AlertTriangle, BookOpen, CheckCircle, Zap, Gift,
-  Smile, Briefcase, Flame, Square, Smartphone, Monitor,
-  Sparkles, Palette, Camera, Upload, Rocket, History,
+  Target, Sparkles, Upload, Rocket, History,
   ArrowRight, ChevronDown, HelpCircle, Sprout, Frown,
-  Eye, MessageSquare, Send, Mail, FileText, Phone,
+  Eye, CheckCircle, Mail, FileText, Phone, Home,
+  ArrowLeft,
 } from 'lucide-react';
 import StepIndicator from '@/components/dashboard/studio/StepIndicator';
-import PromptEditor from '@/components/dashboard/studio/PromptEditor';
-import { buildAdImagePrompt } from '@/components/dashboard/studio/promptBuilders';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import {
-  GeneratorMode, GeneratorFormData, PLATFORMS, FRAMEWORKS,
-  OCCASIONS, TONES, IMAGE_FORMATS, IMAGE_STYLES,
-  LIGHTING_OPTIONS, COLOR_MOOD_OPTIONS, CAMERA_ANGLE_OPTIONS,
-  BACKGROUND_OPTIONS, TIME_OF_DAY_OPTIONS, PRODUCT_FOCUS_OPTIONS,
-  SCENE_STYLE_DEFAULTS,
+  GeneratorMode, GeneratorFormData,
   COPY_PLATFORMS, COPY_LANGUAGES, COPY_TONES, AWARENESS_STAGES,
   SOPHISTICATION_LEVELS,
   COPY_LOADING_MESSAGES, COPY_LOADING_MESSAGES_BN,
+  IMAGE_LIGHTING_OPTIONS, IMAGE_CAMERA_OPTIONS, SCENE_OPTIONS,
+  type SceneKey,
 } from './types';
 import { getImageHistory } from './AdGeneratorPage';
 
@@ -40,17 +35,10 @@ const PLATFORM_ICONS: Record<string, React.ReactNode> = {
   whatsapp: <Phone size={14} />,
 };
 
-const FORMAT_ICONS: Record<string, React.ReactNode> = {
-  square: <Square size={14} />,
-  smartphone: <Smartphone size={14} />,
-  monitor: <Monitor size={14} />,
-};
-
-const STYLE_ICONS: Record<string, React.ReactNode> = {
-  sparkles: <Sparkles size={14} />,
-  palette: <Palette size={14} />,
-  camera: <Camera size={14} />,
-  flame: <Flame size={14} />,
+const SCENE_ICONS: Record<string, React.ReactNode> = {
+  target: <Target size={18} />,
+  home: <Home size={18} />,
+  sparkles: <Sparkles size={18} />,
 };
 
 interface InputPanelProps {
@@ -58,7 +46,7 @@ interface InputPanelProps {
   setMode: (m: GeneratorMode) => void;
   form: GeneratorFormData;
   setForm: (fn: (prev: GeneratorFormData) => GeneratorFormData) => void;
-  onGenerate: (prompt?: string) => void;
+  onGenerate: (prompts?: Record<string, string>) => void;
   generating: boolean;
   onToggleImageHistory?: () => void;
   generateBtnRef?: React.RefObject<HTMLButtonElement>;
@@ -116,8 +104,8 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
 
   // Two-step prompt flow for image mode
   const [imageStep, setImageStep] = useState<1 | 2>(1);
-  const [imagePrompt, setImagePrompt] = useState('');
-  const [imageDefaultPrompt, setImageDefaultPrompt] = useState('');
+  const [scenePrompts, setScenePrompts] = useState<Record<string, string>>({});
+  const [defaultScenePrompts, setDefaultScenePrompts] = useState<Record<string, string>>({});
 
   // Copy mode: advanced section toggle
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -136,13 +124,15 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
     setForm(prev => ({ ...prev, [key]: value }));
   };
 
-  const togglePlatform = (p: string) => {
-    setForm(prev => ({
-      ...prev,
-      platforms: prev.platforms.includes(p)
-        ? (prev.platforms.length > 1 ? prev.platforms.filter(x => x !== p) : prev.platforms)
-        : [...prev.platforms, p],
-    }));
+  const toggleScene = (scene: SceneKey) => {
+    setForm(prev => {
+      const current = prev.selectedScenes;
+      if (current.includes(scene)) {
+        if (current.length <= 1) return prev; // at least 1
+        return { ...prev, selectedScenes: current.filter(s => s !== scene) };
+      }
+      return { ...prev, selectedScenes: [...current, scene] };
+    });
   };
 
   const handleFileSelect = (file: File) => {
@@ -163,23 +153,29 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
     }
   };
 
-  // Apply smart defaults when scene style changes (image mode)
-  const handleStyleChange = (style: typeof form.imageStyle) => {
-    const defaults = SCENE_STYLE_DEFAULTS[style];
-    if (defaults) {
-      setForm(prev => ({
-        ...prev,
-        imageStyle: style,
-        lightingMood: defaults.lightingMood,
-        colorMood: defaults.colorMood,
-        cameraAngle: defaults.cameraAngle,
-        backgroundComplexity: defaults.backgroundComplexity,
-        timeOfDay: defaults.timeOfDay,
-        productFocus: defaults.productFocus,
-      }));
-    } else {
-      updateField('imageStyle', style);
-    }
+  const buildPrompts = () => {
+    // Import dynamically to avoid circular deps
+    const { buildAdImagePrompts } = require('./imagePromptClient');
+    return buildAdImagePrompts({
+      productName: form.productName || 'the product',
+      lightingMood: form.lightingMood,
+      cameraAngle: form.cameraAngle,
+      additionalDetails: form.additionalDetails || undefined,
+      selectedScenes: form.selectedScenes,
+    });
+  };
+
+  const handleContinueToPrompt = () => {
+    const prompts = buildPrompts();
+    setDefaultScenePrompts(prompts);
+    setScenePrompts(prompts);
+    setImageStep(2);
+  };
+
+  const handleResetPrompts = () => {
+    const prompts = buildPrompts();
+    setDefaultScenePrompts(prompts);
+    setScenePrompts(prompts);
   };
 
   const AWARENESS_ICONS: Record<string, React.ReactNode> = {
@@ -221,7 +217,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
           {(['copy', 'image'] as const).map(m => (
             <button
               key={m}
-              onClick={() => setMode(m)}
+              onClick={() => { setMode(m); setImageStep(1); }}
               className={`flex-1 py-2.5 rounded-[10px] text-sm font-semibold font-heading-bn transition-all duration-200 flex items-center justify-center gap-1.5 ${
                 mode === m
                   ? 'bg-card text-primary shadow-sm'
@@ -388,28 +384,30 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
                     </FieldGroup>
 
                     {/* Awareness Stage */}
-                    <FieldGroup label={<>{t('আপনার কাস্টমার কতটুকু জানে?', 'How much does your customer know?')}<FieldTooltip text={t('এটি AI কে বলে দেয় কাস্টমারের কাছে কীভাবে যেতে হবে।', 'This tells the AI how to approach your customer.')} /></>}>
-                      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-                        {AWARENESS_STAGES.map(s => (
+                    <FieldGroup label={<>{t('আপনার কাস্টমার কতটুকু জানে?', 'How much does your customer know?')}<FieldTooltip text={t('এটি AI-কে বলে দেয় কীভাবে আপনার কাস্টমারকে approach করতে হবে।', 'This tells the AI how to approach your customer.')} /></>}>
+                      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 snap-x">
+                        {AWARENESS_STAGES.map(a => (
                           <button
-                            key={s.value}
-                            onClick={() => updateField('awarenessStage', s.value)}
-                            className={`shrink-0 flex flex-col items-center gap-1 px-3 py-2.5 rounded-xl border-[1.5px] text-center transition-all duration-150 active:scale-95 min-w-[100px] ${
-                              form.awarenessStage === s.value
-                                ? 'border-primary bg-primary/10 text-primary'
-                                : 'border-input bg-card text-foreground hover:border-primary/40'
+                            key={a.value}
+                            onClick={() => updateField('awarenessStage', a.value)}
+                            className={`snap-start flex-shrink-0 w-[130px] rounded-xl border-[1.5px] p-3 text-left transition-all duration-150 active:scale-95 ${
+                              form.awarenessStage === a.value
+                                ? 'border-primary bg-primary/[0.06]'
+                                : 'border-input bg-card hover:border-primary/30'
                             }`}
                           >
-                            <span className="text-lg">{AWARENESS_ICONS[s.icon]}</span>
-                            <span className="text-[11px] font-semibold font-heading-bn leading-tight">{t(s.labelBn, s.label)}</span>
-                            <span className="text-[10px] text-muted-foreground font-heading-bn leading-tight">{t(s.descBn, s.desc)}</span>
+                            <span className={`mb-1 block ${form.awarenessStage === a.value ? 'text-primary' : 'text-muted-foreground'}`}>
+                              {AWARENESS_ICONS[a.icon]}
+                            </span>
+                            <p className="text-[12px] font-bold font-heading-bn text-foreground leading-tight">{t(a.labelBn, a.label)}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{t(a.descBn, a.desc)}</p>
                           </button>
                         ))}
                       </div>
                     </FieldGroup>
 
-                    {/* Sophistication */}
-                    <FieldGroup label={<>{t('কতগুলো একই রকম বিজ্ঞাপন দেখেছে?', 'How many similar ads seen?')}<FieldTooltip text={t('যদি বাজারে সব প্রতিশ্রুতি দেখা হয়ে গেছে, AI নতুন কোণ খুঁজবে।', 'If your market has seen every promise, the AI will find a fresh angle.')} /></>}>
+                    {/* Market Sophistication */}
+                    <FieldGroup label={<>{t('বাজারে কতটা প্রতিযোগিতা?', 'How competitive is the market?')}<FieldTooltip text={t('আপনার কাস্টমার কতগুলো একই রকম বিজ্ঞাপন দেখেছে? AI একটা ফ্রেশ এঙ্গেল খুঁজবে।', 'How many similar ads has your customer seen? AI will find a fresh angle.')} /></>}>
                       <div className="flex flex-wrap gap-2">
                         {SOPHISTICATION_LEVELS.map(s => (
                           <button
@@ -428,13 +426,13 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
                     </FieldGroup>
 
                     {/* One Idea */}
-                    <FieldGroup label={<>{t('একটি কারণ কেন কিনবে?', "What's the ONE reason to buy?")}<FieldTooltip text={t('সুবিধার তালিকা নয় — শুধু সবচেয়ে শক্তিশালী যুক্তি। AI এটিকে কেন্দ্র করে সব তৈরি করবে।', 'Not a list — just the single strongest argument. AI builds everything around this.')} /></>}>
+                    <FieldGroup label={<>{t('মূল কারণ কী?', "What's the ONE reason to buy?")}<FieldTooltip text={t('বেনিফিটের লিস্ট না — শুধু একটাই সবচেয়ে শক্তিশালী আর্গুমেন্ট।', 'Not a list of benefits — just the single strongest argument.')} /></>}>
                       <textarea
                         value={form.oneIdea}
                         onChange={e => updateField('oneIdea', e.target.value)}
                         rows={2}
                         placeholder={t(
-                          'উদাহরণ: অন্য প্রোটিন পাউডারগুলো চক এর মতো স্বাদ — এটা আসলেই চকলেট মিল্কশেকের মতো...',
+                          'উদাহরণ: অন্য প্রোটিন পাউডারের মতো চকের স্বাদ না, এটা আসলেই চকলেট মিল্কশেকের মতো...',
                           'Example: Unlike other protein powders that taste like chalk, this one actually tastes like a chocolate milkshake...'
                         )}
                         className="w-full rounded-xl border-[1.5px] border-input bg-card px-4 py-3 text-[15px] font-heading-bn text-foreground outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)] resize-none"
@@ -442,37 +440,36 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
                     </FieldGroup>
 
                     {/* Desires */}
-                    <FieldGroup label={<>{t('গোপনে কী চায়?', 'What do they secretly want?')}<FieldTooltip text={t('"আমি এই পণ্য চাই" নয় — আসলে ভেতরে কী চায়? স্ট্যাটাস? সময়? আত্মবিশ্বাস?', 'Not "I want this product" — what do they REALLY want? Status? Time? Confidence?')} /></>}>
+                    <FieldGroup label={<>{t('তারা আসলে কী চায়?', 'What does your customer secretly want?')}<FieldTooltip text={t("শুধু 'এই পণ্য চাই' না — ভিতরে আসলে কী চায়? স্ট্যাটাস? সময়?", "Not just 'I want this product' — what do they REALLY want? Status? Time?")} /></>}>
                       <textarea
                         value={form.desires}
                         onChange={e => updateField('desires', e.target.value)}
                         rows={2}
                         placeholder={t(
-                          'উদাহরণ: তারা চায় সিরিয়াস, প্রফেশনাল ব্যবসায়ী হিসেবে দেখতে — শুধু ফোন থেকে বিক্রি করা কেউ না।',
-                          'Example: They want to feel like a serious, professional business owner — not just someone selling from their phone.'
+                          'উদাহরণ: তারা একজন সিরিয়াস, প্রফেশনাল বিজনেস ওনার মনে হতে চায়...',
+                          'Example: They want to feel like a serious, professional business owner...'
                         )}
                         className="w-full rounded-xl border-[1.5px] border-input bg-card px-4 py-3 text-[15px] font-heading-bn text-foreground outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)] resize-none"
                       />
                     </FieldGroup>
 
-                    {/* Notions / Beliefs */}
-                    <FieldGroup label={<>{t('কী তাদের থামাবে?', 'What will make them hesitate?')}<FieldTooltip text={t('কেনার আগে কাস্টমার কী ভাববে? কোন সন্দেহ বা অজুহাত থামাবে?', 'What will your customer think BEFORE buying? What doubts hold them back?')} /></>}>
+                    {/* Notions/Beliefs */}
+                    <FieldGroup label={<>{t('কী তাদের থামাবে?', 'What will make them hesitate?')}<FieldTooltip text={t('কেনার আগে তারা কী ভাববে? কোন সন্দেহ বা অজুহাত থাকবে?', 'What doubts or excuses will hold them back?')} /></>}>
                       <textarea
                         value={form.notions}
                         onChange={e => updateField('notions', e.target.value)}
                         rows={2}
                         placeholder={t(
-                          'উদাহরণ: "এটা হয়তো দামি।" "আমার জন্য কাজ করবে না।" "আগেও চেষ্টা করেছি।"',
-                          'Example: "This is probably too expensive." "It won\'t work for me." "I\'ve tried things like this."'
+                          "উদাহরণ: 'এটা নিশ্চয়ই বেশি দামি।' 'আমার জন্য কাজ করবে না।'",
+                          "Example: 'This is probably too expensive.' 'It won't work for me.'"
                         )}
                         className="w-full rounded-xl border-[1.5px] border-input bg-card px-4 py-3 text-[15px] font-heading-bn text-foreground outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)] resize-none"
                       />
                     </FieldGroup>
 
                     {/* Identification / Tribe */}
-                    <FieldGroup label={<>{t('কোন গ্রুপের মানুষ?', 'What group do they belong to?')}<FieldTooltip text={t('কোন লেবেল নিয়ে তারা গর্বিত? AI এটি ব্যবহার করে বিজ্ঞাপন তাদের জন্য তৈরি করবে।', 'What label do they wear with pride? AI uses this to make ads feel custom.')} /></>}>
+                    <FieldGroup label={<>{t('তারা কোন গ্রুপের?', 'What group do they belong to?')}<FieldTooltip text={t('তারা কোন লেবেল গর্বের সাথে পরে? AI এটি ব্যবহার করবে।', "What label do they wear with pride? AI will use this.")} /></>}>
                       <input
-                        type="text"
                         value={form.identification}
                         onChange={e => updateField('identification', e.target.value)}
                         placeholder={t(
@@ -483,29 +480,28 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
                       />
                     </FieldGroup>
 
-                    {/* The Offer */}
-                    <FieldGroup label={<>{t('ঠিক কী অফার?', 'What exactly are you offering?')}<FieldTooltip text={t('কী পাচ্ছে, কত দাম, ডিসকাউন্ট আছে কি, গ্যারান্টি আছে কি? যত সম্পূর্ণ, তত শক্তিশালী।', 'What do they get, cost, discount, guarantee? The more complete, the stronger.')} /></>}>
+                    {/* Offer */}
+                    <FieldGroup label={<>{t('অফার কী?', 'What exactly are you offering?')}<FieldTooltip text={t('তারা কী পাবে, দাম কত, ডিসকাউন্ট আছে, গ্যারান্টি?', 'What do they get, cost, discount, guarantee?')} /></>}>
                       <textarea
                         value={form.offer}
                         onChange={e => updateField('offer', e.target.value)}
                         rows={3}
                         placeholder={t(
-                          'উদাহরণ: ফুল স্কিনকেয়ার কিট (ক্লিনজার + সেরাম + ময়েশ্চারাইজার), সাধারণত ৳২,৪০০, এখন ৳১,৬৯৯...',
-                          'Example: The full skincare kit, normally ৳2,400, now ৳1,699 until Sunday. Free delivery. 7-day guarantee.'
+                          'উদাহরণ: ফুল স্কিনকেয়ার কিট, সাধারণত ৳২,৪০০, এখন ৳১,৬৯৯...',
+                          'Example: The full skincare kit, normally ৳2,400, now ৳1,699...'
                         )}
                         className="w-full rounded-xl border-[1.5px] border-input bg-card px-4 py-3 text-[15px] font-heading-bn text-foreground outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)] resize-none"
                       />
                     </FieldGroup>
 
                     {/* One Action */}
-                    <FieldGroup label={<>{t('কী করতে হবে?', 'What should they do?')}<FieldTooltip text={t('একটি মাত্র পরবর্তী পদক্ষেপ। কোনো বিকল্প নয়।', 'One next step only. No alternatives.')} /></>}>
+                    <FieldGroup label={<>{t('তাদের কী করতে হবে?', 'What should they do?')}<FieldTooltip text={t('একটাই পরবর্তী পদক্ষেপ। কোনো বিকল্প না।', 'One action. No alternatives.')} /></>}>
                       <input
-                        type="text"
                         value={form.oneAction}
                         onChange={e => updateField('oneAction', e.target.value)}
                         placeholder={t(
-                          'উদাহরণ: Facebook এ মেসেজ করুন / লিংকে ক্লিক করুন / এখনই কল করুন',
-                          'Example: Message us on Facebook / Click the link / Call now'
+                          'উদাহরণ: Facebook এ মেসেজ করুন / লিংকে ক্লিক করুন',
+                          'Example: Message us on Facebook / Click the link below'
                         )}
                         className="w-full rounded-xl border-[1.5px] border-input bg-card px-4 py-3 text-[15px] font-heading-bn text-foreground outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)]"
                       />
@@ -517,16 +513,14 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
           </>
         )}
 
-        {/* ── IMAGE MODE ── */}
+        {/* ── IMAGE MODE — Step 1: Controls ── */}
         {mode === 'image' && imageStep === 1 && (
           <div className="space-y-5">
             {/* Product Name */}
             <FieldGroup label={t('পণ্যের নাম', 'Product Name')} required>
               <input
-                type="text"
                 value={form.productName}
                 onChange={e => updateField('productName', e.target.value)}
-                maxLength={100}
                 placeholder={t('যেমন: হ্যান্ডব্যাগ, স্মার্টফোন, শাড়ি...', 'e.g. Handbag, Smartphone, Saree...')}
                 className="w-full rounded-xl border-[1.5px] border-input bg-card px-4 py-3 text-[15px] font-heading-bn text-foreground outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)]"
               />
@@ -560,86 +554,105 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && handleFileSelect(e.target.files[0])} />
             </FieldGroup>
 
-            {/* Scene Style */}
-            <FieldGroup label={t('দৃশ্য স্টাইল', 'Scene Style')}>
-              <div className="grid grid-cols-2 gap-2">
-                {IMAGE_STYLES.map(s => (
-                  <button
-                    key={s.value}
-                    onClick={() => handleStyleChange(s.value)}
-                    className={`px-3 py-2 rounded-xl border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 flex items-center justify-center gap-1.5 ${
-                      form.imageStyle === s.value
-                        ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-input bg-card text-foreground'
-                    }`}
-                  >
-                    {STYLE_ICONS[s.icon]} {t(s.label, s.labelEn)}
-                  </button>
-                ))}
-              </div>
+            {/* Lighting */}
+            <VisualPillGroup label={t('আলো', 'Lighting')} options={IMAGE_LIGHTING_OPTIONS} value={form.lightingMood} onChange={v => updateField('lightingMood', v as any)} t={t} />
+
+            {/* Camera Angle */}
+            <VisualPillGroup label={t('ক্যামেরা অ্যাঙ্গেল', 'Camera Angle')} options={IMAGE_CAMERA_OPTIONS} value={form.cameraAngle} onChange={v => updateField('cameraAngle', v as any)} t={t} />
+
+            {/* Additional Details */}
+            <FieldGroup label={t('অতিরিক্ত তথ্য (ঐচ্ছিক)', 'Additional details (optional)')}>
+              <input
+                value={form.additionalDetails}
+                onChange={e => updateField('additionalDetails', e.target.value)}
+                placeholder={t(
+                  'ম্যাটেরিয়াল, রঙ, টেক্সচার, বিশেষ ফিচার, মুড...',
+                  'Material, color, texture, special features, mood...'
+                )}
+                className="w-full rounded-xl border-[1.5px] border-input bg-card px-4 py-3 text-[15px] font-heading-bn text-foreground outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)]"
+              />
             </FieldGroup>
 
-            {/* Image Format */}
-            <FieldGroup label={t('ফর্ম্যাট', 'Format')}>
-              <div className="flex gap-2">
-                {IMAGE_FORMATS.map(f => (
-                  <button
-                    key={f.value}
-                    onClick={() => updateField('imageFormat', f.value)}
-                    className={`flex-1 py-2 rounded-full border-[1.5px] text-[13px] font-medium transition-all duration-150 active:scale-95 flex items-center justify-center gap-1.5 ${
-                      form.imageFormat === f.value
-                        ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-input bg-card text-foreground'
-                    }`}
-                  >
-                    {FORMAT_ICONS[f.icon]} {t(f.label, f.labelEn)}
-                  </button>
-                ))}
+            {/* Scene Selector */}
+            <FieldGroup label={t('সিন বেছে নিন', 'Choose scenes')}>
+              <p className="text-[11px] text-muted-foreground font-heading-bn -mt-1 mb-2">{t('এক বা একাধিক নির্বাচন করুন', 'Select one or more')}</p>
+              <div className="grid grid-cols-3 gap-2">
+                {SCENE_OPTIONS.map(scene => {
+                  const isSelected = form.selectedScenes.includes(scene.value);
+                  return (
+                    <button
+                      key={scene.value}
+                      onClick={() => toggleScene(scene.value)}
+                      className={`rounded-xl border-[1.5px] p-3 text-center transition-all duration-150 active:scale-95 ${
+                        isSelected
+                          ? 'border-primary bg-primary/[0.04]'
+                          : 'border-input bg-card hover:border-primary/30'
+                      }`}
+                    >
+                      <span className={`block mb-1.5 mx-auto ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
+                        {SCENE_ICONS[scene.icon]}
+                      </span>
+                      <p className="text-[13px] font-bold font-heading-bn text-foreground">{t(scene.labelBn, scene.label)}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{t(scene.descBn, scene.desc)}</p>
+                    </button>
+                  );
+                })}
               </div>
-            </FieldGroup>
-
-            {/* Visual Controls */}
-            <VisualPillGroup label={t('আলো', 'Lighting')} options={LIGHTING_OPTIONS} value={form.lightingMood} onChange={v => updateField('lightingMood', v as any)} t={t} />
-            <VisualPillGroup label={t('রঙের ধরন', 'Color Mood')} options={COLOR_MOOD_OPTIONS} value={form.colorMood} onChange={v => updateField('colorMood', v as any)} t={t} />
-            <VisualPillGroup label={t('ক্যামেরা অ্যাঙ্গেল', 'Camera Angle')} options={CAMERA_ANGLE_OPTIONS} value={form.cameraAngle} onChange={v => updateField('cameraAngle', v as any)} t={t} />
-            <VisualPillGroup label={t('ব্যাকগ্রাউন্ড', 'Background')} options={BACKGROUND_OPTIONS} value={form.backgroundComplexity} onChange={v => updateField('backgroundComplexity', v as any)} t={t} />
-            <VisualPillGroup label={t('সময়', 'Time of Day')} options={TIME_OF_DAY_OPTIONS} value={form.timeOfDay} onChange={v => updateField('timeOfDay', v as any)} t={t} />
-            <VisualPillGroup label={t('পণ্যের ফোকাস', 'Product Focus')} options={PRODUCT_FOCUS_OPTIONS} value={form.productFocus} onChange={v => updateField('productFocus', v as any)} t={t} />
-
-            {/* Num Variations */}
-            <FieldGroup label={t('কতগুলো ভার্শন?', 'How many variations?')}>
-              <div className="flex gap-2">
-                {[1, 2, 3].map(n => (
-                  <button
-                    key={n}
-                    onClick={() => updateField('numVariations', n)}
-                    className={`w-9 h-9 rounded-lg text-sm font-bold transition-all duration-150 active:scale-95 ${
-                      form.numVariations === n
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-card border border-input text-foreground'
-                    }`}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
+              {/* Image count indicator */}
+              <p className="text-[12px] text-muted-foreground font-heading-bn mt-2">
+                {form.selectedScenes.length === 1
+                  ? t('১টি ইমেজ তৈরি হবে', '1 image will be generated')
+                  : t(`${toBengali(form.selectedScenes.length)}টি ইমেজ তৈরি হবে`, `${form.selectedScenes.length} images will be generated`)}
+              </p>
             </FieldGroup>
           </div>
         )}
 
-        {/* IMAGE MODE — Step 2: Prompt Editor */}
+        {/* IMAGE MODE — Step 2: Prompt Editor (per scene) */}
         {mode === 'image' && imageStep === 2 && (
-          <PromptEditor
-            prompt={imagePrompt}
-            onPromptChange={setImagePrompt}
-            defaultPrompt={imageDefaultPrompt}
-            onGenerate={() => onGenerate(imagePrompt)}
-            onBack={() => setImageStep(1)}
-            generating={generating}
-            generateLabel={t('ইমেজ তৈরি করুন', 'Generate Image')}
-            generateIcon={<Sparkles size={18} />}
-            tabType="ad_image"
-          />
+          <div className="space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold font-heading-bn text-foreground">{t('আপনার ইমেজ প্রম্পট', 'Your Image Prompt')}</h3>
+                <p className="text-[11px] text-muted-foreground font-heading-bn mt-0.5">
+                  {t('এগুলো AI-তে যাবে। ইচ্ছামতো এডিট করুন।', 'These are exactly what gets sent to the AI. Edit freely for more control.')}
+                </p>
+              </div>
+              <button
+                onClick={handleResetPrompts}
+                className="text-xs text-muted-foreground hover:text-primary font-heading-bn transition-colors"
+              >
+                {t('রিসেট ↺', 'Reset to defaults ↺')}
+              </button>
+            </div>
+
+            {form.selectedScenes.map(sceneKey => {
+              const sceneInfo = SCENE_OPTIONS.find(s => s.value === sceneKey);
+              const sceneBadgeStyles: Record<SceneKey, { bg: string; text: string }> = {
+                studio: { bg: 'hsl(var(--muted))', text: 'hsl(var(--muted-foreground))' },
+                lifestyle: { bg: 'hsl(var(--primary) / 0.1)', text: 'hsl(var(--primary))' },
+                luxury: { bg: 'hsl(var(--foreground))', text: 'hsl(var(--background))' },
+              };
+              const badge = sceneBadgeStyles[sceneKey];
+              return (
+                <div key={sceneKey}>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span
+                      className="px-2.5 py-0.5 rounded-full text-[11px] font-bold font-heading-bn inline-flex items-center gap-1"
+                      style={{ backgroundColor: badge.bg, color: badge.text }}
+                    >
+                      {SCENE_ICONS[sceneInfo?.icon || 'target']} {t(sceneInfo?.labelBn || '', sceneInfo?.label || '')}
+                    </span>
+                  </div>
+                  <textarea
+                    value={scenePrompts[sceneKey] || ''}
+                    onChange={e => setScenePrompts(prev => ({ ...prev, [sceneKey]: e.target.value }))}
+                    className="w-full rounded-xl border-[1.5px] border-input bg-card px-4 py-3 text-[13px] font-mono text-foreground outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)] resize-y min-h-[160px]"
+                  />
+                </div>
+              );
+            })}
+          </div>
         )}
 
         {/* Spacer for sticky button */}
@@ -650,23 +663,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
       <div className="sticky bottom-0 bg-gradient-to-t from-card via-card to-transparent px-6 lg:px-7 pb-5 pt-4">
         {mode === 'image' && imageStep === 1 ? (
           <button
-            onClick={() => {
-              const built = buildAdImagePrompt({
-                productName: form.productName || 'the product',
-                style: form.imageStyle,
-                brandColors: [form.brandColorPrimary, form.brandColorSecondary].filter(c => c && c !== '#FFFFFF'),
-                format: form.imageFormat,
-                lightingMood: form.lightingMood,
-                colorMood: form.colorMood,
-                cameraAngle: form.cameraAngle,
-                backgroundComplexity: form.backgroundComplexity,
-                timeOfDay: form.timeOfDay,
-                productFocus: form.productFocus,
-              });
-              setImageDefaultPrompt(built);
-              setImagePrompt(built);
-              setImageStep(2);
-            }}
+            onClick={handleContinueToPrompt}
             disabled={!form.productName.trim() || !form.productImagePreview}
             className={`w-full h-[52px] rounded-[14px] font-bold text-[17px] font-heading-bn text-primary-foreground transition-all duration-200 ${
               (!form.productName.trim() || !form.productImagePreview)
@@ -679,7 +676,34 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
             </span>
           </button>
         ) : mode === 'image' && imageStep === 2 ? (
-          null /* PromptEditor already renders its own buttons */
+          <div className="space-y-2">
+            <button
+              onClick={() => onGenerate(scenePrompts)}
+              disabled={generating}
+              className={`w-full h-[52px] rounded-[14px] font-bold text-[17px] font-heading-bn text-primary-foreground transition-all duration-200 ${
+                generating
+                  ? 'bg-primary/50 cursor-not-allowed opacity-60'
+                  : 'bg-primary hover:brightness-110 shadow-orange-glow active:scale-[0.98]'
+              }`}
+            >
+              {generating ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Rocket size={18} className="animate-bounce" />
+                  <span className="animate-pulse">{loadingTexts[loadingTextIdx % loadingTexts.length]}</span>
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  <Sparkles size={18} /> {t('ইমেজ তৈরি করুন', 'Generate Images')} →
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setImageStep(1)}
+              className="w-full text-center text-[13px] text-muted-foreground hover:text-primary font-heading-bn transition-colors flex items-center justify-center gap-1"
+            >
+              <ArrowLeft size={13} /> {t('পেছনে যান', 'Back')}
+            </button>
+          </div>
         ) : (
           <button
             ref={generateBtnRef as any}
@@ -703,10 +727,10 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
             )}
           </button>
         )}
-        {mode !== 'image' || imageStep !== 2 ? (
+        {mode !== 'image' || imageStep === 1 ? (
           <p className="text-center text-[11px] text-muted-foreground mt-2 font-heading-bn">
             {mode === 'copy'
-              ? t('ভিডিও ৮-১৫ সেকেন্ডে তৈরি হয়', 'Usually takes 8-15 seconds')
+              ? t('সাধারণত ৮-১৫ সেকেন্ড লাগে', 'Usually takes 8-15 seconds')
               : t('সাধারণত ৮-১৫ সেকেন্ড লাগে', 'Usually takes 8-15 seconds')}
           </p>
         ) : null}
