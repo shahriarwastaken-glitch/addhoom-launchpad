@@ -1,9 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Image, Film, Upload, X, GripVertical, Play, Pause, Download,
-  ArrowRight, ArrowLeft, RefreshCw, Save, Clapperboard,
-  Maximize, Volume2, VolumeX as VolumeOff, Loader2, Sparkles
+  Upload, X, Play, Download, ArrowRight, RefreshCw,
+  Volume2, VolumeX as VolumeOff, Loader2, Sparkles, Film, ImageIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,94 +10,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUpgrade } from '@/contexts/UpgradeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import StepIndicator from '@/components/dashboard/studio/StepIndicator';
-import PromptEditor from '@/components/dashboard/studio/PromptEditor';
-import { buildMotionPrompt } from '@/components/dashboard/studio/promptBuilders';
 
-// ── Types ──
-
-type InputMode = 'single' | 'multiple';
-type MotionStyle = 'cinematic_reveal' | 'float_rotate' | 'zoom_pan' | 'lifestyle_motion' | 'energy_burst' | 'subtle_breathe';
 type AspectRatio = '9:16' | '1:1' | '16:9';
 
-interface MotionStyleOption {
-  value: MotionStyle;
-  icon: React.ReactNode;
-  label: string;
-  labelEn: string;
-  desc: string;
-  descEn: string;
-  best: string;
-  bestEn: string;
-}
-
-const MOTION_STYLES: MotionStyleOption[] = [
-  {
-    value: 'cinematic_reveal',
-    icon: <Clapperboard size={18} />,
-    label: 'সিনেম্যাটিক রিভিল',
-    labelEn: 'Cinematic Reveal',
-    desc: 'ধীরে ড্রামাটিক পুশ-ইন, পণ্য গভীরতা থেকে আবির্ভূত হয়',
-    descEn: 'Slow dramatic push-in, product emerges from depth',
-    best: 'প্রিমিয়াম পণ্য, জুয়েলারি, বিউটি',
-    bestEn: 'Premium products, jewelry, beauty',
-  },
-  {
-    value: 'float_rotate',
-    icon: <RefreshCw size={18} />,
-    label: 'ফ্লোট ও রোটেট',
-    labelEn: 'Float & Rotate',
-    desc: 'পণ্য ৩D স্পেসে মৃদুভাবে ভেসে ঘোরে',
-    descEn: 'Product gently floats and rotates in 3D space',
-    best: 'ইলেকট্রনিক্স, এক্সেসরিজ, বোতল',
-    bestEn: 'Electronics, accessories, bottles',
-  },
-  {
-    value: 'zoom_pan',
-    icon: <Maximize size={18} />,
-    label: 'জুম ও প্যান',
-    labelEn: 'Zoom & Pan',
-    desc: 'ডাইনামিক জুম, পণ্যের বৈশিষ্ট্য জুড়ে প্যান',
-    descEn: 'Dynamic zoom into product details, pans across features',
-    best: 'ফ্যাশন, জুতা, ডিটেইলড পণ্য',
-    bestEn: 'Fashion, shoes, detailed products',
-  },
-  {
-    value: 'lifestyle_motion',
-    icon: <Play size={18} />,
-    label: 'লাইফস্টাইল মোশন',
-    labelEn: 'Lifestyle Motion',
-    desc: 'ক্যামেরা লাইফস্টাইল সিনের মধ্য দিয়ে চলে',
-    descEn: 'Camera moves through a lifestyle scene',
-    best: 'হোম, ফুড, অ্যাপারেল',
-    bestEn: 'Home, food, apparel',
-  },
-  {
-    value: 'energy_burst',
-    icon: <Sparkles size={18} />,
-    label: 'এনার্জি বার্স্ট',
-    labelEn: 'Energy Burst',
-    desc: 'দ্রুত ডাইনামিক মোশন, হাই এনার্জি',
-    descEn: 'Fast dynamic motion, high energy, particles and light',
-    best: 'স্পোর্টস, ইয়ুথ প্রোডাক্ট, সেল',
-    bestEn: 'Sports, youth products, sales',
-  },
-  {
-    value: 'subtle_breathe',
-    icon: <Volume2 size={18} />,
-    label: 'সাটল ব্রিদ',
-    labelEn: 'Subtle Breathe',
-    desc: 'মিনিমাল মোশন, নরম আলোর পরিবর্তন',
-    descEn: 'Minimal motion, soft light shift, almost still but alive',
-    best: 'লাক্সারি, মিনিমালিস্ট, স্কিনকেয়ার',
-    bestEn: 'Luxury, minimalist, skincare',
-  },
-];
-
-const ASPECT_OPTIONS: { value: AspectRatio; label: string; labelEn: string }[] = [
-  { value: '9:16', label: '9:16 রিলস', labelEn: '9:16 Reels' },
-  { value: '1:1', label: '1:1 ফিড', labelEn: '1:1 Feed' },
-  { value: '16:9', label: '16:9 ল্যান্ডস্কেপ', labelEn: '16:9 Landscape' },
+const ASPECT_OPTIONS: { value: AspectRatio; label: string; labelEn: string; icon: React.ReactNode }[] = [
+  { value: '9:16', label: '9:16 রিলস', labelEn: '9:16 Reels', icon: <Film size={14} /> },
+  { value: '1:1', label: '1:1 ফিড', labelEn: '1:1 Feed', icon: <ImageIcon size={14} /> },
+  { value: '16:9', label: '16:9 ল্যান্ডস্কেপ', labelEn: '16:9 Landscape', icon: <Play size={14} /> },
 ];
 
 const PROCESSING_MESSAGES = [
@@ -110,94 +28,100 @@ const PROCESSING_MESSAGES = [
 
 const MAX_SIZE = 10 * 1024 * 1024;
 
+const CATEGORY_PROMPTS: Record<string, (name: string) => string> = {
+  furniture: (name) =>
+    `Slowly zoom in from high angle, cut to close-up shot and present the ${name}, then cut to wide full shot and present the full ${name} from a cinematic angle.`,
+  home: (name) =>
+    `Slowly zoom in from high angle, cut to close-up shot and present the ${name}, then cut to wide full shot and present the full ${name} from a cinematic angle.`,
+  default: (name) =>
+    `A professional product photography of ${name} placed in a premium setting. The product is featured prominently with elegant lighting that highlights its key features. The background is carefully curated to complement the product's aesthetic.`,
+};
+
+function getDefaultPrompt(productName: string, industry?: string): string {
+  const name = productName || 'the product';
+  const cat = (industry || '').toLowerCase();
+  if (cat.includes('furniture') || cat.includes('home')) {
+    return CATEGORY_PROMPTS.furniture(name);
+  }
+  return CATEGORY_PROMPTS.default(name);
+}
+
 const AIMotionTab = () => {
   const { t, lang } = useLanguage();
   const { user, profile, activeWorkspace } = useAuth();
   const { showUpgrade } = useUpgrade();
 
   // Form state
-  const [inputMode, setInputMode] = useState<InputMode>('single');
-  const [images, setImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [motionStyle, setMotionStyle] = useState<MotionStyle>('cinematic_reveal');
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('9:16');
-  const [productName, setProductName] = useState('');
+  const [prompt, setPrompt] = useState('');
+  const [enhancing, setEnhancing] = useState(false);
 
   // Flow state
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [prompt, setPrompt] = useState('');
-  const [defaultPrompt, setDefaultPrompt] = useState('');
   const [generating, setGenerating] = useState(false);
   const [processingMsgIdx, setProcessingMsgIdx] = useState(0);
   const [resultVideoUrl, setResultVideoUrl] = useState('');
   const [resultId, setResultId] = useState('');
   const [videoMuted, setVideoMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const processingTimerRef = useRef<ReturnType<typeof setInterval>>();
 
   const plan = profile?.plan || 'free';
 
+  // Set default prompt when image is uploaded
+  const setDefaultPromptFromWorkspace = useCallback(() => {
+    const industry = activeWorkspace?.industry || '';
+    const name = activeWorkspace?.shop_name || '';
+    setPrompt(getDefaultPrompt(name, industry));
+  }, [activeWorkspace]);
+
   // ── File handling ──
+  const handleFile = useCallback((file: File) => {
+    if (!file.type.startsWith('image/')) { toast.error(t('শুধু ছবি আপলোড করুন', 'Only images allowed')); return; }
+    if (file.size > MAX_SIZE) { toast.error(t('ছবি 10MB এর কম হতে হবে', 'Image must be under 10MB')); return; }
 
-  const handleFiles = useCallback((files: FileList | File[]) => {
-    const maxCount = inputMode === 'single' ? 1 : 4;
-    const arr = Array.from(files).filter(f => {
-      if (!f.type.startsWith('image/')) { toast.error(t('শুধু ছবি আপলোড করুন', 'Only images allowed')); return false; }
-      if (f.size > MAX_SIZE) { toast.error(t('ছবি 10MB এর কম হতে হবে', 'Image must be under 10MB')); return false; }
-      return true;
-    });
-    const total = images.length + arr.length;
-    if (total > maxCount) { toast.error(t(`সর্বোচ্চ ${maxCount}টি ছবি`, `Maximum ${maxCount} images`)); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImage(file);
+      setImagePreview(e.target?.result as string);
+      if (!prompt) setDefaultPromptFromWorkspace();
+    };
+    reader.readAsDataURL(file);
+  }, [t, prompt, setDefaultPromptFromWorkspace]);
 
-    arr.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImages(prev => [...prev, file]);
-        setImagePreviews(prev => [...prev, e.target?.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
-  }, [images.length, inputMode, t]);
-
-  const removeImage = (idx: number) => {
-    setImages(prev => prev.filter((_, i) => i !== idx));
-    setImagePreviews(prev => prev.filter((_, i) => i !== idx));
+  const removeImage = () => {
+    setImage(null);
+    setImagePreview('');
   };
 
-  const handleInputModeChange = (mode: InputMode) => {
-    setInputMode(mode);
-    if (mode === 'single' && images.length > 1) {
-      setImages([images[0]]);
-      setImagePreviews([imagePreviews[0]]);
+  // ── Enhance prompt ──
+  const handleEnhance = async () => {
+    if (!prompt.trim()) return;
+    setEnhancing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('enhance-prompt', {
+        body: { prompt, type: 'motion_video' },
+      });
+      if (error) throw error;
+      if (data?.enhanced_prompt) {
+        setPrompt(data.enhanced_prompt);
+        toast.success(t('প্রম্পট উন্নত হয়েছে', 'Prompt enhanced'));
+      }
+    } catch {
+      toast.error(t('উন্নত করতে ব্যর্থ', 'Failed to enhance'));
+    } finally {
+      setEnhancing(false);
     }
   };
 
-  // ── Continue to prompt step ──
-
-  const handleContinue = () => {
-    if (!productName.trim()) { toast.error(t('পণ্যের নাম দিন', 'Enter product name')); return; }
-    if (images.length === 0) { toast.error(t('ছবি আপলোড করুন', 'Upload an image')); return; }
-
-    const built = buildMotionPrompt({
-      motionStyle,
-      productName,
-      productCategory: '',
-      inputMode,
-      aspectRatio,
-    });
-    setPrompt(built);
-    setDefaultPrompt(built);
-    setStep(2);
-  };
-
   // ── Generate ──
-
   const handleGenerate = async () => {
     if (!activeWorkspace || !user) { toast.error(t('শপ তৈরি করুন', 'Create a shop first')); return; }
+    if (!image) { toast.error(t('ছবি আপলোড করুন', 'Upload an image')); return; }
+    if (!prompt.trim()) { toast.error(t('ভিডিওর বর্ণনা দিন', 'Describe your video')); return; }
 
     setGenerating(true);
-    setStep(3);
     setProcessingMsgIdx(0);
 
     processingTimerRef.current = setInterval(() => {
@@ -205,24 +129,19 @@ const AIMotionTab = () => {
     }, 4000);
 
     try {
-      // Convert images to base64
-      const imageBase64s = await Promise.all(
-        images.map(img => new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.readAsDataURL(img);
-        }))
-      );
+      const imageBase64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(image);
+      });
 
       const { data, error } = await supabase.functions.invoke('generate-ai-video', {
         body: {
           workspace_id: activeWorkspace.id,
-          input_mode: inputMode,
-          images: imageBase64s,
-          motion_style: motionStyle,
-          aspect_ratio: aspectRatio,
+          images: [imageBase64],
           motion_prompt: prompt,
-          product_name: productName,
+          aspect_ratio: aspectRatio,
+          product_name: activeWorkspace.shop_name || '',
         },
       });
 
@@ -236,7 +155,6 @@ const AIMotionTab = () => {
     } catch (err: any) {
       console.error(err);
       toast.error(t('ভিডিও তৈরি ব্যর্থ', 'Video generation failed'));
-      setStep(2);
     } finally {
       setGenerating(false);
       if (processingTimerRef.current) clearInterval(processingTimerRef.current);
@@ -244,13 +162,12 @@ const AIMotionTab = () => {
   };
 
   // ── Reset ──
-
-  const handleTryDifferent = () => {
-    setMotionStyle('cinematic_reveal');
+  const handleReset = () => {
+    setImage(null);
+    setImagePreview('');
     setPrompt('');
     setResultVideoUrl('');
     setResultId('');
-    setStep(1);
   };
 
   const handleGenerateVariation = () => {
@@ -274,155 +191,79 @@ const AIMotionTab = () => {
     }
   };
 
-  const canContinue = images.length > 0 && productName.trim().length > 0;
+  const canGenerate = !!image && prompt.trim().length > 0;
+  const showResult = generating || resultVideoUrl;
 
   // ── Render ──
-
   return (
     <div className="h-full flex flex-col lg:flex-row overflow-hidden">
-      {/* Left Panel */}
-      <div className="w-full lg:w-[40%] border-r border-border overflow-y-auto p-4 sm:p-6">
-        <StepIndicator
-          currentStep={step}
-          labels={[
-            t('অপশন', 'Options'),
-            t('প্রম্পট', 'Prompt'),
-            t('রেজাল্ট', 'Result'),
-          ]}
-        />
-
+      {/* Left Panel — Form */}
+      <div className="w-full lg:w-[45%] border-r border-border overflow-y-auto p-4 sm:p-6">
         <AnimatePresence mode="wait">
-          {step === 1 && (
-            <motion.div key="options" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
-              {/* Input Mode */}
+          {!showResult ? (
+            <motion.div key="form" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-5">
+              {/* Upload Section */}
               <div>
-                <label className="text-sm font-semibold text-foreground mb-3 block">
-                  {t('কী অ্যানিমেট করছেন?', 'What are you animating?')}
+                <label className="text-sm font-semibold text-foreground mb-2 block">
+                  {t('পণ্যের ছবি আপলোড করুন', 'Upload your product image')}
                 </label>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { mode: 'single' as InputMode, icon: <Image size={20} />, label: t('একটি ছবি', 'Single Image'), desc: t('AI একটি পণ্যের ছবিকে মোশনে রূপান্তর করবে', 'AI animates one product image into motion') },
-                    { mode: 'multiple' as InputMode, icon: <Film size={20} />, label: t('একাধিক ছবি', 'Multiple Images'), desc: t('AI ২-৪টি ছবি জুড়ে ফ্লোয়িং ভিডিও তৈরি করবে', 'AI creates a flowing video across 2-4 images') },
-                  ].map(opt => (
-                    <button
-                      key={opt.mode}
-                      onClick={() => handleInputModeChange(opt.mode)}
-                      className={`p-4 rounded-xl border-[1.5px] text-left transition-all ${
-                        inputMode === opt.mode
-                          ? 'border-primary bg-primary/[0.04] shadow-sm'
-                          : 'border-border hover:border-primary/30'
-                      }`}
-                    >
-                      <div className={`mb-2 ${inputMode === opt.mode ? 'text-primary' : 'text-muted-foreground'}`}>{opt.icon}</div>
-                      <p className="text-sm font-semibold text-foreground">{opt.label}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">{opt.desc}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
 
-              {/* Product Name */}
-              <div>
-                <label className="text-sm font-semibold text-foreground mb-1.5 block">
-                  {t('পণ্যের নাম', 'Product Name')} <span className="text-destructive">*</span>
-                </label>
-                <input
-                  value={productName}
-                  onChange={e => setProductName(e.target.value)}
-                  placeholder={t('যেমন: প্রিমিয়াম লেদার ব্যাগ', 'e.g. Premium Leather Bag')}
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-              </div>
-
-              {/* Upload */}
-              <div>
-                <label className="text-sm font-semibold text-foreground mb-1.5 block">
-                  {inputMode === 'single' ? t('পণ্যের ছবি আপলোড', 'Upload Product Image') : t('পণ্যের ছবি আপলোড', 'Upload Product Images')}
-                </label>
-                <p className="text-[11px] text-muted-foreground mb-2">
-                  {inputMode === 'single'
-                    ? t('একটি উচ্চমানের পণ্যের ছবি সবচেয়ে ভালো কাজ করে', 'One high-quality product photo works best')
-                    : t('২ থেকে ৪টি ছবি · ড্র্যাগ করে সাজান', '2 to 4 images · drag to reorder')
-                  }
-                </p>
-
-                {imagePreviews.length === 0 ? (
-                  <label
-                    className="block border-2 border-dashed rounded-xl min-h-[120px] flex flex-col items-center justify-center cursor-pointer border-border bg-secondary hover:border-primary/40 transition-all"
-                  >
-                    <input ref={fileInputRef} type="file" accept="image/*" multiple={inputMode === 'multiple'} className="hidden"
-                      onChange={e => { e.target.files && handleFiles(Array.from(e.target.files)); e.target.value = ''; }} />
-                    <Upload size={28} className="text-muted-foreground mb-1.5" />
+                {!imagePreview ? (
+                  <label className="block border-2 border-dashed rounded-xl min-h-[140px] flex flex-col items-center justify-center cursor-pointer border-border bg-secondary/50 hover:border-primary/40 transition-all">
+                    <input type="file" accept="image/*" className="hidden"
+                      onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ''; }} />
+                    <Upload size={28} className="text-muted-foreground mb-2" />
                     <p className="text-sm text-muted-foreground">{t('ক্লিক করুন বা টেনে আনুন', 'Click or drag to upload')}</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">JPG, PNG, WEBP · Max 10MB</p>
                   </label>
                 ) : (
-                  <div className="border border-border rounded-xl p-3 bg-secondary">
-                    <div className="flex gap-2 flex-wrap">
-                      {imagePreviews.map((preview, idx) => (
-                        <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-border group">
-                          <img src={preview} alt="" className="w-full h-full object-cover" />
-                          <button
-                            onClick={() => removeImage(idx)}
-                            className="absolute top-1 right-1 w-5 h-5 rounded-full bg-background/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X size={10} className="text-destructive" />
-                          </button>
-                          {inputMode === 'multiple' && (
-                            <span className="absolute bottom-0.5 left-0.5 text-[9px] bg-background/70 text-foreground px-1 rounded">{idx + 1}</span>
-                          )}
-                        </div>
-                      ))}
-                      {imagePreviews.length < (inputMode === 'single' ? 1 : 4) && (
-                        <label
-                          className="w-20 h-20 rounded-lg border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer"
-                        >
-                          <input type="file" accept="image/*" multiple={inputMode === 'multiple'} className="hidden"
-                            onChange={e => { e.target.files && handleFiles(Array.from(e.target.files)); e.target.value = ''; }} />
-                          <span className="text-lg">+</span>
-                        </label>
-                      )}
-                    </div>
-                    {inputMode === 'multiple' && imagePreviews.length > 1 && (
-                      <p className="text-[10px] text-muted-foreground mt-2">
-                        <GripVertical size={10} className="inline mr-0.5" />
-                        {t('ছবি এই ক্রমে প্লে হবে', 'Images play in this order')}
-                      </p>
-                    )}
+                  <div className="relative rounded-xl overflow-hidden border border-border bg-secondary">
+                    <img src={imagePreview} alt="" className="w-full max-h-[200px] object-contain" />
+                    <button
+                      onClick={removeImage}
+                      className="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/80 backdrop-blur flex items-center justify-center hover:bg-background transition-colors"
+                    >
+                      <X size={14} className="text-destructive" />
+                    </button>
+                    <button
+                      onClick={() => { removeImage(); }}
+                      className="absolute bottom-2 left-2 text-[11px] text-primary underline underline-offset-2 bg-background/70 px-2 py-0.5 rounded"
+                    >
+                      {t('ছবি পরিবর্তন', 'Change image')}
+                    </button>
                   </div>
                 )}
               </div>
 
-              {/* Motion Style */}
+              {/* Prompt Section */}
               <div>
-                <label className="text-sm font-semibold text-foreground mb-3 block">
-                  {t('মোশন স্টাইল', 'Motion Style')}
-                </label>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {MOTION_STYLES.map(style => (
-                    <button
-                      key={style.value}
-                      onClick={() => setMotionStyle(style.value)}
-                      className={`p-3 rounded-xl border-[1.5px] text-left transition-all ${
-                        motionStyle === style.value
-                          ? 'border-primary bg-primary/[0.04] shadow-sm'
-                          : 'border-border hover:border-primary/30'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={motionStyle === style.value ? 'text-primary' : 'text-muted-foreground'}>{style.icon}</span>
-                        <span className="text-sm font-semibold text-foreground">{lang === 'bn' ? style.label : style.labelEn}</span>
-                      </div>
-                      <p className="text-[11px] text-muted-foreground">{lang === 'bn' ? style.desc : style.descEn}</p>
-                      <p className="text-[10px] text-primary/70 mt-1">{lang === 'bn' ? style.best : style.bestEn}</p>
-                    </button>
-                  ))}
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-semibold text-foreground">
+                    {t('ভিডিওর বর্ণনা দিন', 'Describe your video')}
+                  </label>
+                  <button
+                    onClick={handleEnhance}
+                    disabled={enhancing || !prompt.trim()}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-accent text-accent-foreground hover:bg-accent/80 transition-colors disabled:opacity-50"
+                  >
+                    {enhancing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                    {t('উন্নত করুন', 'Enhance')}
+                  </button>
                 </div>
+                <textarea
+                  value={prompt}
+                  onChange={e => setPrompt(e.target.value)}
+                  placeholder={t(
+                    'একটি প্রিমিয়াম সেটিংয়ে পণ্যটির পেশাদার প্রোডাক্ট ফটোগ্রাফি...',
+                    'A professional product photography of [your product] placed in a premium setting...'
+                  )}
+                  className="w-full min-h-[160px] px-4 py-3 rounded-xl border border-border bg-card text-foreground text-sm resize-y focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-[\'Plus_Jakarta_Sans\',sans-serif]"
+                />
               </div>
 
-              {/* Aspect Ratio */}
+              {/* Settings Row */}
               <div>
-                <label className="text-sm font-semibold text-foreground mb-3 block">
+                <label className="text-sm font-semibold text-foreground mb-2 block">
                   {t('ফরম্যাট', 'Format')}
                 </label>
                 <div className="flex gap-2">
@@ -430,53 +271,35 @@ const AIMotionTab = () => {
                     <button
                       key={opt.value}
                       onClick={() => setAspectRatio(opt.value)}
-                      className={`flex-1 px-3 py-2.5 rounded-xl border-[1.5px] text-sm font-medium transition-all ${
+                      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border-[1.5px] text-xs font-medium transition-all ${
                         aspectRatio === opt.value
                           ? 'border-primary bg-primary/[0.04] text-primary'
                           : 'border-border text-muted-foreground hover:border-primary/30'
                       }`}
                     >
+                      {opt.icon}
                       {lang === 'bn' ? opt.label : opt.labelEn}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Continue Button */}
+              {/* Generate Button */}
               <div className="sticky bottom-0 pt-3 pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 bg-gradient-to-t from-background via-background to-transparent">
                 <Button
-                  onClick={handleContinue}
-                  disabled={!canContinue}
+                  onClick={handleGenerate}
+                  disabled={!canGenerate}
                   className="w-full bg-primary hover:bg-primary/90"
                 >
-                  {t('চালিয়ে যান', 'Continue')} <ArrowRight className="ml-2 h-4 w-4" />
+                  {t('ভিডিও তৈরি করুন', 'Generate Video')} <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
+                <p className="text-[11px] text-muted-foreground text-center mt-1.5">
+                  {t('ভিডিও তৈরি হতে ৩০-৬০ সেকেন্ড সময় লাগে', 'Videos take 30–60 seconds to generate')}
+                </p>
               </div>
             </motion.div>
-          )}
-
-          {step === 2 && (
-            <motion.div key="prompt" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-              <PromptEditor
-                prompt={prompt}
-                onPromptChange={setPrompt}
-                defaultPrompt={defaultPrompt}
-                onBack={() => setStep(1)}
-                onGenerate={handleGenerate}
-                generating={generating}
-                generateLabel={t('ভিডিও তৈরি করুন', 'Generate Video')}
-                generateIcon={<Film className="h-4 w-4 mr-2" />}
-                tabType="ad_image"
-                helperNote={t(
-                  'মোশন বর্ণনা সম্পাদনা করুন — এটিই AI-তে পাঠানো হবে।',
-                  'Edit the motion description — this is exactly what gets sent to the AI.'
-                )}
-              />
-            </motion.div>
-          )}
-
-          {step === 3 && (
-            <motion.div key="result" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
+          ) : (
+            <motion.div key="result" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
               {/* Mobile: inline video + processing */}
               <div className="lg:hidden">
                 {generating ? (
@@ -500,13 +323,10 @@ const AIMotionTab = () => {
                     <video
                       ref={videoRef}
                       src={resultVideoUrl}
-                      autoPlay
-                      loop
-                      muted={videoMuted}
-                      playsInline
+                      autoPlay loop muted={videoMuted} playsInline
                       className="w-full max-h-[40vh] object-contain bg-black"
                     />
-                    <div className="absolute bottom-2 right-2 flex gap-2">
+                    <div className="absolute bottom-2 right-2">
                       <button
                         onClick={() => setVideoMuted(!videoMuted)}
                         className="w-8 h-8 rounded-full bg-background/80 backdrop-blur flex items-center justify-center"
@@ -529,17 +349,17 @@ const AIMotionTab = () => {
                     <Download className="h-4 w-4 mr-2" /> {t('MP4 ডাউনলোড', 'Download MP4')}
                   </Button>
 
-                  <Button onClick={handleTryDifferent} variant="outline" className="w-full">
-                    <RefreshCw className="h-4 w-4 mr-2" /> {t('ভিন্ন মোশন চেষ্টা করুন', 'Try Different Motion')}
+                  <Button onClick={handleReset} variant="outline" className="w-full">
+                    <RefreshCw className="h-4 w-4 mr-2" /> {t('নতুন ভিডিও তৈরি', 'Create New Video')}
                   </Button>
 
                   <Button onClick={handleGenerateVariation} variant="outline" className="w-full">
                     <Sparkles className="h-4 w-4 mr-2" /> {t('ভ্যারিয়েশন তৈরি', 'Generate Variation')}
                   </Button>
                 </>
-              ) : !generating ? (
-                <div className="text-center py-6 text-muted-foreground text-sm">
-                  {t('ভিডিও প্রস্তুত হলে এখানে দেখাবে', 'Video will appear here when ready')}
+              ) : generating ? (
+                <div className="hidden lg:block text-center py-6 text-muted-foreground text-sm">
+                  {t('ভিডিও প্রস্তুত হচ্ছে...', 'Preparing video...')}
                 </div>
               ) : null}
             </motion.div>
@@ -547,21 +367,13 @@ const AIMotionTab = () => {
         </AnimatePresence>
       </div>
 
-      {/* Right Panel - hidden on mobile for all steps */}
+      {/* Right Panel — Preview (desktop only) */}
       <div className="flex-1 hidden lg:flex items-center justify-center p-4 sm:p-6 bg-secondary/30 overflow-hidden">
-        {step === 1 && (
+        {!showResult ? (
           <div className="text-center max-w-sm">
-            {imagePreviews.length > 0 ? (
+            {imagePreview ? (
               <div className="space-y-4">
-                {inputMode === 'single' ? (
-                  <img src={imagePreviews[0]} alt="" className="max-h-[300px] mx-auto rounded-xl border border-border object-contain" />
-                ) : (
-                  <div className="flex gap-2 justify-center flex-wrap">
-                    {imagePreviews.map((p, i) => (
-                      <img key={i} src={p} alt="" className="w-24 h-24 rounded-lg border border-border object-cover" />
-                    ))}
-                  </div>
-                )}
+                <img src={imagePreview} alt="" className="max-h-[300px] mx-auto rounded-xl border border-border object-contain" />
                 <div className="border-2 border-dashed border-border rounded-xl p-6 text-center">
                   <Film size={32} className="text-muted-foreground mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">
@@ -573,28 +385,12 @@ const AIMotionTab = () => {
               <div className="border-2 border-dashed border-border rounded-xl p-10 text-center">
                 <Film size={40} className="text-muted-foreground mx-auto mb-3" />
                 <p className="text-sm text-muted-foreground">
-                  {t('ছবি আপলোড করুন এবং স্টাইল বেছে নিন', 'Upload images and choose a style')}
+                  {t('ছবি আপলোড করুন এবং বর্ণনা দিন', 'Upload an image and describe your video')}
                 </p>
               </div>
             )}
           </div>
-        )}
-
-        {step === 2 && (
-          <div className="text-center max-w-sm">
-            {imagePreviews.length > 0 && inputMode === 'single' && (
-              <img src={imagePreviews[0]} alt="" className="max-h-[250px] mx-auto rounded-xl border border-border object-contain mb-4" />
-            )}
-            <div className="border-2 border-dashed border-border rounded-xl p-6 text-center">
-              <Film size={32} className="text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">
-                {t('প্রম্পট রিভিউ করে "ভিডিও তৈরি করুন" ক্লিক করুন', 'Review prompt and click "Generate Video"')}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {step === 3 && (
+        ) : (
           <div className="w-full max-w-lg">
             {generating ? (
               <div className="text-center space-y-4 py-8">
@@ -617,13 +413,10 @@ const AIMotionTab = () => {
                 <video
                   ref={videoRef}
                   src={resultVideoUrl}
-                  autoPlay
-                  loop
-                  muted={videoMuted}
-                  playsInline
+                  autoPlay loop muted={videoMuted} playsInline
                   className="w-full"
                 />
-                <div className="absolute bottom-3 right-3 flex gap-2">
+                <div className="absolute bottom-3 right-3">
                   <button
                     onClick={() => setVideoMuted(!videoMuted)}
                     className="w-8 h-8 rounded-full bg-background/80 backdrop-blur flex items-center justify-center"

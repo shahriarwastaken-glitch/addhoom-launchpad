@@ -5,12 +5,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
-  Upload, Download, ArrowRight, RotateCcw, Save, Loader2,
-  ArrowUpCircle, Info,
+  Upload, Download, ArrowRight, RotateCcw, Loader2,
+  ArrowUpCircle, Info, Zap, Shield,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import type { UpscaleScale, EnhancementMode, ExportFormat } from './types';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import type { EnhancementMode, ExportFormat } from './types';
+
+type QualityMode = 'standard' | 'ultimate';
+type TargetResolution = '2k' | '4k' | '8k';
 
 function getCdnImageUrl(fullUrl: string, opts: { width?: number; quality?: number } = {}): string {
   if (!fullUrl || !fullUrl.includes('/storage/v1/object/public/')) return fullUrl;
@@ -31,8 +35,9 @@ const UpscalerTab = () => {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [originalSize, setOriginalSize] = useState<{ w: number; h: number } | null>(null);
-  const [scale, setScale] = useState<UpscaleScale>(4);
-  const [mode, setMode] = useState<EnhancementMode>('standard');
+  const [qualityMode, setQualityMode] = useState<QualityMode>('standard');
+  const [targetResolution, setTargetResolution] = useState<TargetResolution>('4k');
+  const [enhancementMode, setEnhancementMode] = useState<EnhancementMode>('standard');
   const [exportFormat, setExportFormat] = useState<ExportFormat>('png');
   const [jpgQuality, setJpgQuality] = useState(90);
 
@@ -42,11 +47,17 @@ const UpscalerTab = () => {
   const [progress, setProgress] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
-  const [upscaledSize, setUpscaledSize] = useState<{ w: number; h: number } | null>(null);
   const pollRef = useRef<NodeJS.Timeout | null>(null);
 
   const [dividerPos, setDividerPos] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-select 4k if switching from ultimate to standard while on 8k
+  useEffect(() => {
+    if (qualityMode === 'standard' && targetResolution === '8k') {
+      setTargetResolution('4k');
+    }
+  }, [qualityMode, targetResolution]);
 
   useEffect(() => {
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
@@ -64,7 +75,6 @@ const UpscalerTab = () => {
             if (pollRef.current) clearInterval(pollRef.current);
             const url = job.output_urls?.[0] || null;
             setResultUrl(url);
-            if (originalSize) setUpscaledSize({ w: originalSize.w * scale, h: originalSize.h * scale });
             setUpscaling(false);
             setJobId(null);
             toast.success(t('আপস্কেল সম্পন্ন', 'Upscale complete'));
@@ -78,7 +88,7 @@ const UpscalerTab = () => {
         })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [jobId, t, originalSize, scale]);
+  }, [jobId, t]);
 
   const handleUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -89,7 +99,6 @@ const UpscalerTab = () => {
     }
     setFile(f);
     setResultUrl(null);
-    setUpscaledSize(null);
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result as string;
@@ -100,6 +109,15 @@ const UpscalerTab = () => {
     };
     reader.readAsDataURL(f);
   }, [t]);
+
+  // Map enhancement mode to creativity param
+  const getCreativity = (): number => {
+    switch (enhancementMode) {
+      case 'sharp_details': return 25;
+      case 'smooth_skin': return -10;
+      default: return 0;
+    }
+  };
 
   const handleUpscale = async () => {
     if (!file || !activeWorkspace) return;
@@ -120,8 +138,9 @@ const UpscalerTab = () => {
           job_type: 'upscale',
           input_config: {
             image_base64: base64,
-            scale,
-            mode,
+            target_resolution: targetResolution,
+            quality_mode: qualityMode,
+            creativity: getCreativity(),
             export_format: exportFormat,
             jpg_quality: jpgQuality,
           },
@@ -149,7 +168,6 @@ const UpscalerTab = () => {
             if (pollRef.current) clearInterval(pollRef.current);
             const url = status.output_urls?.[0] || null;
             setResultUrl(url);
-            if (originalSize) setUpscaledSize({ w: originalSize.w * scale, h: originalSize.h * scale });
             setUpscaling(false);
             setJobId(null);
             toast.success(t('আপস্কেল সম্পন্ন', 'Upscale complete'));
@@ -203,7 +221,7 @@ const UpscalerTab = () => {
       <div className="text-center">
         <h2 className="text-xl font-bold">{t('ইমেজ আপস্কেল করুন', 'Upscale Your Image')}</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          {t('যেকোনো ইমেজ 8× পর্যন্ত রেজোলিউশনে বাড়ান। প্রিন্ট বা এক্সপোর্টের জন্য প্রস্তুত।', 'Enhance any image up to 8× resolution. Sharp details, clean edges, ready for print or export.')}
+          {t('যেকোনো ইমেজ 8K পর্যন্ত রেজোলিউশনে বাড়ান। প্রিন্ট বা এক্সপোর্টের জন্য প্রস্তুত।', 'Enhance any image up to 8K resolution. Sharp details, clean edges, ready for print or export.')}
         </p>
       </div>
 
@@ -267,32 +285,86 @@ const UpscalerTab = () => {
           {/* Info */}
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>{t('আসল', 'Original')}: {originalSize ? `${originalSize.w} × ${originalSize.h}px` : '—'} · {file ? formatFileSize(file.size) : '—'}</span>
-            <span>{t('আপস্কেলড', 'Upscaled')}: {upscaledSize ? `${upscaledSize.w} × ${upscaledSize.h}px` : originalSize ? `${originalSize.w * scale} × ${originalSize.h * scale}px (${t('আনুমানিক', 'est.')})` : '—'}</span>
+            <span>{t('টার্গেট', 'Target')}: {targetResolution.toUpperCase()}</span>
           </div>
         </div>
       )}
 
       {preview && (
         <>
-          {/* Scale */}
-          <div className="space-y-1.5">
-            <span className="text-sm font-semibold">{t('স্কেল', 'Scale')}</span>
-            <div className="flex gap-1.5">
-              {([2, 4, 6, 8] as UpscaleScale[]).map(s => (
-                <button key={s} onClick={() => setScale(s)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                    scale === s ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground'
-                  }`}>{s}×</button>
-              ))}
+          {/* Quality Mode */}
+          <div className="space-y-2">
+            <span className="text-sm font-semibold">{t('কোয়ালিটি মোড', 'Quality Mode')}</span>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setQualityMode('standard')}
+                className={`p-4 rounded-xl border-[1.5px] text-left transition-all ${
+                  qualityMode === 'standard'
+                    ? 'border-primary bg-primary/[0.04] shadow-sm'
+                    : 'border-border hover:border-primary/30'
+                }`}
+              >
+                <div className={`mb-1 ${qualityMode === 'standard' ? 'text-primary' : 'text-muted-foreground'}`}>
+                  <Zap size={18} />
+                </div>
+                <p className="text-sm font-semibold text-foreground">Standard</p>
+                <p className="text-[11px] text-muted-foreground">{t('4K পর্যন্ত · দ্রুত', 'Up to 4K · Fast')}</p>
+              </button>
+              <button
+                onClick={() => setQualityMode('ultimate')}
+                className={`p-4 rounded-xl border-[1.5px] text-left transition-all ${
+                  qualityMode === 'ultimate'
+                    ? 'border-primary bg-primary/[0.04] shadow-sm'
+                    : 'border-border hover:border-primary/30'
+                }`}
+              >
+                <div className={`mb-1 ${qualityMode === 'ultimate' ? 'text-primary' : 'text-muted-foreground'}`}>
+                  <Shield size={18} />
+                </div>
+                <p className="text-sm font-semibold text-foreground">Ultimate</p>
+                <p className="text-[11px] text-muted-foreground">{t('8K পর্যন্ত · সর্বোচ্চ ডিটেইল', 'Up to 8K · Maximum detail')}</p>
+              </button>
             </div>
-            <p className="text-[11px] text-muted-foreground">{t('বেশি স্কেল = বড় ফাইল সাইজ', 'Higher scale = larger file size')}</p>
-            {/* IMPROVEMENT 4: Two-pass notice */}
-            {scale > 4 && (
-              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-1">
-                <Info className="h-3.5 w-3.5 shrink-0" />
-                <span>{t('6× এবং 8× প্রক্রিয়া করতে 4× এর চেয়ে 2× বেশি সময় লাগে', '6× and 8× take 2× longer to process')}</span>
-              </div>
-            )}
+          </div>
+
+          {/* Target Resolution */}
+          <div className="space-y-1.5">
+            <span className="text-sm font-semibold">{t('টার্গেট রেজোলিউশন', 'Target Resolution')}</span>
+            <div className="flex gap-1.5">
+              <TooltipProvider>
+                {(['2k', '4k', '8k'] as TargetResolution[]).map(res => {
+                  const disabled = res === '8k' && qualityMode !== 'ultimate';
+                  const btn = (
+                    <button
+                      key={res}
+                      onClick={() => !disabled && setTargetResolution(res)}
+                      disabled={disabled}
+                      className={`px-4 py-1.5 rounded-full text-xs font-medium border transition-all uppercase ${
+                        targetResolution === res
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : disabled
+                            ? 'border-border text-muted-foreground/40 cursor-not-allowed'
+                            : 'border-border text-muted-foreground hover:border-primary/30'
+                      }`}
+                    >
+                      {res}
+                    </button>
+                  );
+
+                  if (disabled) {
+                    return (
+                      <Tooltip key={res}>
+                        <TooltipTrigger asChild>{btn}</TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">{t('Ultimate মোড সিলেক্ট করুন 8K এর জন্য', 'Select Ultimate mode for 8K')}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  }
+                  return btn;
+                })}
+              </TooltipProvider>
+            </div>
           </div>
 
           {/* Enhancement Mode */}
@@ -304,9 +376,9 @@ const UpscalerTab = () => {
                 ['sharp_details', 'Sharp Details'],
                 ['smooth_skin', 'Smooth Skin'],
               ] as const).map(([val, label]) => (
-                <button key={val} onClick={() => setMode(val)}
+                <button key={val} onClick={() => setEnhancementMode(val)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                    mode === val ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground'
+                    enhancementMode === val ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground'
                   }`}>{label}</button>
               ))}
             </div>
@@ -340,29 +412,28 @@ const UpscalerTab = () => {
               {upscaling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ArrowUpCircle className="h-4 w-4 mr-2" />}
               {t('ইমেজ আপস্কেল করুন', 'Upscale Image')}
             </Button>
-            <p className="text-[11px] text-muted-foreground text-center">
-              ~$0.005 {t('প্রতি আপস্কেল', 'per upscale')} · {scale > 4 ? '2' : '1'} {t('আপস্কেল ক্রেডিট', 'upscale credit{s}')}
-            </p>
+            {qualityMode === 'ultimate' && (
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <Info className="h-3.5 w-3.5 shrink-0" />
+                <span>{t('Ultimate মোড বেশি সময় নেয়', 'Ultimate mode takes longer to process')}</span>
+              </div>
+            )}
           </div>
 
           {/* Result Actions */}
           {resultUrl && (
             <div className="space-y-3 pt-2">
               <Button onClick={() => {
-                // Download at full resolution — no CDN transform
                 const a = document.createElement('a'); a.href = resultUrl; a.download = `upscaled_${Date.now()}.${exportFormat}`; a.click();
               }} className="w-full bg-primary hover:bg-primary/90">
                 <Download className="h-4 w-4 mr-2" />{t('আপস্কেলড ইমেজ ডাউনলোড', 'Download Upscaled Image')}
               </Button>
               <div className="flex gap-2 justify-center flex-wrap">
-                <Button variant="ghost" size="sm" onClick={() => { setFile(null); setPreview(null); setResultUrl(null); setOriginalSize(null); setUpscaledSize(null); }}>
+                <Button variant="ghost" size="sm" onClick={() => { setFile(null); setPreview(null); setResultUrl(null); setOriginalSize(null); }}>
                   <RotateCcw className="h-3.5 w-3.5 mr-1.5" />{t('আরেকটি আপস্কেল', 'Upscale Another')}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => navigate(`/dashboard/generate?tab=image&studio_image_url=${encodeURIComponent(resultUrl)}`)}>
                   <ArrowRight className="h-3.5 w-3.5 mr-1.5" />{t('অ্যাড তৈরি', 'Make an Ad')}
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => toast.success(t('লাইব্রেরিতে সেভ হয়েছে', 'Saved to library'))}>
-                  <Save className="h-3.5 w-3.5 mr-1.5" />{t('সেভ', 'Save to Library')}
                 </Button>
               </div>
             </div>
