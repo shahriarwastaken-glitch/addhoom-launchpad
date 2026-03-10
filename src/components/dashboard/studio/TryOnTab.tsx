@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
   Upload, Check, ArrowRight, Download, RotateCcw, Save,
-  Loader2, User, Shirt, X,
+  Loader2, User, Shirt, X, AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { GarmentCategory, Gender, BodyType, SkinTone, PoseType, PresetModel } from './types';
@@ -49,6 +49,18 @@ const LOADING_MESSAGES = [
   'Almost ready...',
 ];
 
+// IMPROVEMENT 6: CDN image transformation helper
+function getCdnImageUrl(fullUrl: string, opts: { width?: number; quality?: number } = {}): string {
+  if (!fullUrl || !fullUrl.includes('/storage/v1/object/public/')) return fullUrl;
+  const transformed = fullUrl.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
+  const params = new URLSearchParams();
+  if (opts.width) params.set('width', String(opts.width));
+  if (opts.quality) params.set('quality', String(opts.quality));
+  params.set('format', 'webp');
+  params.set('resize', 'contain');
+  return `${transformed}?${params.toString()}`;
+}
+
 const TryOnTab = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -66,10 +78,18 @@ const TryOnTab = () => {
   const [skinFilter, setSkinFilter] = useState<SkinTone>('all');
   const [poseFilter, setPoseFilter] = useState<PoseType>('all');
 
+  // Job queue state
+  const [jobId, setJobId] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [completedVariations, setCompletedVariations] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(0);
   const [results, setResults] = useState<string[]>([]);
   const [activeResult, setActiveResult] = useState(0);
+  const [partialWarning, setPartialWarning] = useState(false);
+  const pollRef = useRef<NodeJS.Timeout | null>(null);
+  const msgRef = useRef<NodeJS.Timeout | null>(null);
 
   const filteredModels = PRESET_MODELS.filter(m => {
     if (genderFilter !== 'all' && m.gender !== genderFilter) return false;
@@ -78,6 +98,53 @@ const TryOnTab = () => {
     if (poseFilter !== 'all' && m.pose !== poseFilter) return false;
     return true;
   });
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+      if (msgRef.current) clearInterval(msgRef.current);
+    };
+  }, []);
+
+  // Subscribe to realtime job updates
+  useEffect(() => {
+    if (!jobId) return;
+
+    const channel = supabase
+      .channel(`job-${jobId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'studio_jobs',
+          filter: `id=eq.${jobId}`,
+        },
+        (payload: any) => {
+          const job = payload.new;
+          if (job.completed_variations != null) {
+            setCompletedVariations(job.completed_variations);
+            setProgress(job.total_variations > 0 ? Math.round((job.completed_variations / job.total_variations) * 100) : 0);
+          }
+          if (job.status === 'completed') {
+            setResults(job.output_urls || []);
+            setActiveResult(0);
+            setGenerating(false);
+            setJobId(null);
+            toast.success(t('ট্রাই-অন তৈরি হয়েছে', 'Try-on generated'));
+          }
+          if (job.status === 'failed') {
+            setGenerating(false);
+            setJobId(null);
+            toast.error(job.error_message || t('ত্রুটি হয়েছে', 'An error occurred'));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [jobId, t]);
 
   const handleGarmentUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -91,6 +158,7 @@ const TryOnTab = () => {
     reader.onload = () => setGarmentPreview(reader.result as string);
     reader.readAsDataURL(file);
     setResults([]);
+    setPartialWarning(false);
   }, [t]);
 
   const handleGenerate = async () => {
@@ -98,8 +166,11 @@ const TryOnTab = () => {
     setGenerating(true);
     setLoadingMsgIdx(0);
     setResults([]);
+    setProgress(0);
+    setCompletedVariations(0);
+    setPartialWarning(false);
 
-    const interval = setInterval(() => {
+    msgRef.current = setInterval(() => {
       setLoadingMsgIdx(prev => (prev + 1) % LOADING_MESSAGES.length);
     }, 4000);
 
@@ -110,25 +181,69 @@ const TryOnTab = () => {
         reader.readAsDataURL(garmentFile);
       });
 
-      const { data, error } = await supabase.functions.invoke('generate-tryon', {
+      // Queue the job
+      const { data, error } = await supabase.functions.invoke('queue-studio-job', {
         body: {
           workspace_id: activeWorkspace.id,
-          garment_image_base64: base64,
-          model_id: selectedModel.id,
-          garment_category: garmentCategory,
-          background,
-          variations,
+          job_type: 'tryon',
+          input_config: {
+            garment_image_base64: base64,
+            model_id: selectedModel.id,
+            garment_category: garmentCategory,
+            background,
+            variations,
+          },
         },
       });
 
       if (error) throw error;
-      setResults(data.images || []);
-      setActiveResult(0);
-      toast.success(t('ট্রাই-অন তৈরি হয়েছে', 'Try-on generated'));
+      setJobId(data.job_id);
+
+      // Fallback polling in case realtime doesn't work
+      const POLL_INTERVAL = 2000;
+      const MAX_POLL_TIME = 120000;
+      const startTime = Date.now();
+
+      pollRef.current = setInterval(async () => {
+        if (Date.now() - startTime > MAX_POLL_TIME) {
+          if (pollRef.current) clearInterval(pollRef.current);
+          if (msgRef.current) clearInterval(msgRef.current);
+          setGenerating(false);
+          toast.error(t('টাইমআউট হয়েছে', 'Request timed out'));
+          return;
+        }
+        try {
+          const { data: status } = await supabase.functions.invoke('get-job-status', {
+            body: { job_id: data.job_id },
+          });
+          if (!status) return;
+          setProgress(status.progress || 0);
+          setCompletedVariations(status.completed_variations || 0);
+          setTimeRemaining(status.time_remaining_ms || 0);
+
+          if (status.status === 'completed') {
+            if (pollRef.current) clearInterval(pollRef.current);
+            if (msgRef.current) clearInterval(msgRef.current);
+            setResults(status.output_urls || []);
+            setActiveResult(0);
+            setGenerating(false);
+            setJobId(null);
+            if (status.output_urls?.length < variations) setPartialWarning(true);
+            toast.success(t('ট্রাই-অন তৈরি হয়েছে', 'Try-on generated'));
+          }
+          if (status.status === 'failed') {
+            if (pollRef.current) clearInterval(pollRef.current);
+            if (msgRef.current) clearInterval(msgRef.current);
+            setGenerating(false);
+            setJobId(null);
+            toast.error(status.error_message || t('ত্রুটি হয়েছে', 'An error occurred'));
+          }
+        } catch { /* keep polling */ }
+      }, POLL_INTERVAL);
+
     } catch (err: any) {
+      if (msgRef.current) clearInterval(msgRef.current);
       toast.error(err.message || t('ত্রুটি হয়েছে', 'An error occurred'));
-    } finally {
-      clearInterval(interval);
       setGenerating(false);
     }
   };
@@ -143,7 +258,7 @@ const TryOnTab = () => {
     const url = results[activeResult];
     if (!url) return;
     const a = document.createElement('a');
-    a.href = url;
+    a.href = url; // Full resolution — no CDN transform
     a.download = `tryon_${Date.now()}.png`;
     a.click();
   };
@@ -313,17 +428,27 @@ const TryOnTab = () => {
       <div className="lg:col-span-3">
         <div className="rounded-2xl border border-border bg-card min-h-[500px] flex items-center justify-center p-6">
           {generating ? (
-            <div className="text-center space-y-4">
+            /* IMPROVEMENT 7: Enhanced job progress card */
+            <div className="w-full max-w-sm mx-auto rounded-2xl border border-border bg-card p-6 space-y-4 text-center">
               <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
-              <p className="text-sm font-medium">{LOADING_MESSAGES[loadingMsgIdx]}</p>
-              <div className="w-48 h-1.5 bg-muted rounded-full mx-auto overflow-hidden">
-                <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: '60%' }} />
+              <p className="text-sm font-medium">{t('ট্রাই-অন তৈরি হচ্ছে...', 'Generating your try-on...')}</p>
+              <p className="text-xs text-muted-foreground">{LOADING_MESSAGES[loadingMsgIdx]}</p>
+              {/* Progress bar */}
+              <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${Math.max(progress, 10)}%` }} />
+              </div>
+              <div className="flex justify-between text-[11px] text-muted-foreground">
+                <span>
+                  {t('ভ্যারিয়েশন', 'Variation')} {completedVariations} {t('এর মধ্যে', 'of')} {variations} {t('সম্পন্ন', 'complete')}
+                </span>
+                <span>~{Math.ceil(timeRemaining / 1000)}s {t('বাকি', 'remaining')}</span>
               </div>
             </div>
           ) : results.length > 0 ? (
             <div className="w-full space-y-4">
+              {/* IMPROVEMENT 6: CDN-optimized preview */}
               <img
-                src={results[activeResult]}
+                src={getCdnImageUrl(results[activeResult], { width: 1200, quality: 90 })}
                 alt="Try-on result"
                 className="w-full max-h-[500px] object-contain rounded-xl"
               />
@@ -332,20 +457,31 @@ const TryOnTab = () => {
                   {results.map((r, i) => (
                     <button key={i} onClick={() => setActiveResult(i)}
                       className={`h-16 w-16 rounded-lg border-2 overflow-hidden ${i === activeResult ? 'border-primary' : 'border-border'}`}>
-                      <img src={r} alt="" className="w-full h-full object-cover" />
+                      {/* CDN thumbnail */}
+                      <img src={getCdnImageUrl(r, { width: 240, quality: 85 })} alt="" className="w-full h-full object-cover" />
                     </button>
                   ))}
+                </div>
+              )}
+              {/* Partial warning */}
+              {partialWarning && (
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-xs text-yellow-700 dark:text-yellow-400">
+                  <AlertTriangle className="h-4 w-4 shrink-0" />
+                  <span>{t(
+                    `${results.length}/${variations} ভ্যারিয়েশন সফলভাবে তৈরি হয়েছে। আরো জন্য আবার চেষ্টা করুন।`,
+                    `${results.length} of ${variations} variations generated successfully. Try again for more.`
+                  )}</span>
                 </div>
               )}
               <Button onClick={handleMakeAd} className="w-full bg-primary hover:bg-primary/90">
                 <ArrowRight className="h-4 w-4 mr-2" />
                 {t('এটি দিয়ে অ্যাড তৈরি করুন', 'Make an Ad with This')}
               </Button>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={() => { setSelectedModel(null); setResults([]); }}>
+              <div className="flex gap-2 flex-wrap">
+                <Button variant="ghost" size="sm" onClick={() => { setSelectedModel(null); setResults([]); setPartialWarning(false); }}>
                   <RotateCcw className="h-3.5 w-3.5 mr-1.5" />{t('ভিন্ন মডেল', 'Try Different Model')}
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => { setGarmentFile(null); setGarmentPreview(null); setResults([]); }}>
+                <Button variant="ghost" size="sm" onClick={() => { setGarmentFile(null); setGarmentPreview(null); setResults([]); setPartialWarning(false); }}>
                   <RotateCcw className="h-3.5 w-3.5 mr-1.5" />{t('ভিন্ন গার্মেন্ট', 'Try Different Garment')}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={handleDownload}>

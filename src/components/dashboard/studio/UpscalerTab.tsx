@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,11 +6,22 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
   Upload, Download, ArrowRight, RotateCcw, Save, Loader2,
-  ArrowUpCircle, Image as ImageIcon,
+  ArrowUpCircle, Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import type { UpscaleScale, EnhancementMode, ExportFormat } from './types';
+
+function getCdnImageUrl(fullUrl: string, opts: { width?: number; quality?: number } = {}): string {
+  if (!fullUrl || !fullUrl.includes('/storage/v1/object/public/')) return fullUrl;
+  const transformed = fullUrl.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
+  const params = new URLSearchParams();
+  if (opts.width) params.set('width', String(opts.width));
+  if (opts.quality) params.set('quality', String(opts.quality));
+  params.set('format', 'webp');
+  params.set('resize', 'contain');
+  return `${transformed}?${params.toString()}`;
+}
 
 const UpscalerTab = () => {
   const { t } = useLanguage();
@@ -25,12 +36,49 @@ const UpscalerTab = () => {
   const [exportFormat, setExportFormat] = useState<ExportFormat>('png');
   const [jpgQuality, setJpgQuality] = useState(90);
 
+  // Job queue state
+  const [jobId, setJobId] = useState<string | null>(null);
   const [upscaling, setUpscaling] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(0);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [upscaledSize, setUpscaledSize] = useState<{ w: number; h: number } | null>(null);
+  const pollRef = useRef<NodeJS.Timeout | null>(null);
 
   const [dividerPos, setDividerPos] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, []);
+
+  // Realtime subscription
+  useEffect(() => {
+    if (!jobId) return;
+    const channel = supabase
+      .channel(`job-${jobId}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'studio_jobs', filter: `id=eq.${jobId}` },
+        (payload: any) => {
+          const job = payload.new;
+          if (job.status === 'completed') {
+            if (pollRef.current) clearInterval(pollRef.current);
+            const url = job.output_urls?.[0] || null;
+            setResultUrl(url);
+            if (originalSize) setUpscaledSize({ w: originalSize.w * scale, h: originalSize.h * scale });
+            setUpscaling(false);
+            setJobId(null);
+            toast.success(t('আপস্কেল সম্পন্ন', 'Upscale complete'));
+          }
+          if (job.status === 'failed') {
+            if (pollRef.current) clearInterval(pollRef.current);
+            setUpscaling(false);
+            setJobId(null);
+            toast.error(job.error_message || t('ত্রুটি হয়েছে', 'An error occurred'));
+          }
+        })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [jobId, t, originalSize, scale]);
 
   const handleUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -57,6 +105,7 @@ const UpscalerTab = () => {
     if (!file || !activeWorkspace) return;
     setUpscaling(true);
     setResultUrl(null);
+    setProgress(0);
 
     try {
       const reader = new FileReader();
@@ -65,27 +114,56 @@ const UpscalerTab = () => {
         reader.readAsDataURL(file);
       });
 
-      const { data, error } = await supabase.functions.invoke('upscale-image', {
+      const { data, error } = await supabase.functions.invoke('queue-studio-job', {
         body: {
           workspace_id: activeWorkspace.id,
-          image_base64: base64,
-          scale,
-          mode,
-          export_format: exportFormat,
-          jpg_quality: jpgQuality,
+          job_type: 'upscale',
+          input_config: {
+            image_base64: base64,
+            scale,
+            mode,
+            export_format: exportFormat,
+            jpg_quality: jpgQuality,
+          },
         },
       });
 
       if (error) throw error;
-      setResultUrl(data.image_url);
-      if (data.upscaled_size) {
-        const [w, h] = data.upscaled_size.split('x').map(Number);
-        setUpscaledSize({ w, h });
-      }
-      toast.success(t('আপস্কেল সম্পন্ন', 'Upscale complete'));
+      setJobId(data.job_id);
+
+      // Fallback polling
+      const startTime = Date.now();
+      pollRef.current = setInterval(async () => {
+        if (Date.now() - startTime > 120000) {
+          if (pollRef.current) clearInterval(pollRef.current);
+          setUpscaling(false);
+          toast.error(t('টাইমআউট হয়েছে', 'Request timed out'));
+          return;
+        }
+        try {
+          const { data: status } = await supabase.functions.invoke('get-job-status', { body: { job_id: data.job_id } });
+          if (!status) return;
+          setProgress(status.progress || 0);
+          setTimeRemaining(status.time_remaining_ms || 0);
+          if (status.status === 'completed') {
+            if (pollRef.current) clearInterval(pollRef.current);
+            const url = status.output_urls?.[0] || null;
+            setResultUrl(url);
+            if (originalSize) setUpscaledSize({ w: originalSize.w * scale, h: originalSize.h * scale });
+            setUpscaling(false);
+            setJobId(null);
+            toast.success(t('আপস্কেল সম্পন্ন', 'Upscale complete'));
+          }
+          if (status.status === 'failed') {
+            if (pollRef.current) clearInterval(pollRef.current);
+            setUpscaling(false);
+            setJobId(null);
+            toast.error(status.error_message || t('ত্রুটি হয়েছে', 'An error occurred'));
+          }
+        } catch { /* keep polling */ }
+      }, 2000);
     } catch (err: any) {
       toast.error(err.message || t('ত্রুটি হয়েছে', 'An error occurred'));
-    } finally {
       setUpscaling(false);
     }
   };
@@ -125,7 +203,7 @@ const UpscalerTab = () => {
       <div className="text-center">
         <h2 className="text-xl font-bold">{t('ইমেজ আপস্কেল করুন', 'Upscale Your Image')}</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          {t('যেকোনো ইমেজ 4× রেজোলিউশনে বাড়ান। প্রিন্ট বা এক্সপোর্টের জন্য প্রস্তুত।', 'Enhance any image up to 4× resolution. Sharp details, clean edges, ready for print or export.')}
+          {t('যেকোনো ইমেজ 8× পর্যন্ত রেজোলিউশনে বাড়ান। প্রিন্ট বা এক্সপোর্টের জন্য প্রস্তুত।', 'Enhance any image up to 8× resolution. Sharp details, clean edges, ready for print or export.')}
         </p>
       </div>
 
@@ -144,15 +222,12 @@ const UpscalerTab = () => {
             ref={containerRef}
             className="relative aspect-video rounded-xl overflow-hidden border border-border select-none"
           >
-            {/* Original (full) */}
             <img src={preview} alt="Original" className="absolute inset-0 w-full h-full object-contain bg-muted" />
-            {/* Upscaled (clipped) */}
             {resultUrl && (
               <div className="absolute inset-0" style={{ clipPath: `inset(0 0 0 ${dividerPos}%)` }}>
-                <img src={resultUrl} alt="Upscaled" className="w-full h-full object-contain bg-muted" />
+                <img src={getCdnImageUrl(resultUrl, { width: 1200, quality: 90 })} alt="Upscaled" className="w-full h-full object-contain bg-muted" />
               </div>
             )}
-            {/* Labels */}
             <div className="absolute top-3 left-3 bg-black/50 text-white text-[10px] px-2 py-1 rounded-full">
               {t('আসল', 'Original')}
             </div>
@@ -161,7 +236,6 @@ const UpscalerTab = () => {
                 {t('আপস্কেলড', 'Upscaled')}
               </div>
             )}
-            {/* Divider */}
             {resultUrl && (
               <div
                 className="absolute top-0 bottom-0 w-1 bg-white/80 cursor-col-resize z-10"
@@ -175,6 +249,17 @@ const UpscalerTab = () => {
                     <div className="w-0.5 h-3 bg-muted-foreground rounded-full" />
                   </div>
                 </div>
+              </div>
+            )}
+            {/* Upscaling overlay */}
+            {upscaling && (
+              <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center gap-3 z-20">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-sm font-medium">{t('ইমেজ আপস্কেল হচ্ছে...', 'Enhancing your image...')}</p>
+                <div className="w-48 h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${Math.max(progress, 10)}%` }} />
+                </div>
+                <p className="text-[11px] text-muted-foreground">~{Math.ceil(timeRemaining / 1000)}s {t('বাকি', 'remaining')}</p>
               </div>
             )}
           </div>
@@ -201,12 +286,19 @@ const UpscalerTab = () => {
               ))}
             </div>
             <p className="text-[11px] text-muted-foreground">{t('বেশি স্কেল = বড় ফাইল সাইজ', 'Higher scale = larger file size')}</p>
+            {/* IMPROVEMENT 4: Two-pass notice */}
+            {scale > 4 && (
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-1">
+                <Info className="h-3.5 w-3.5 shrink-0" />
+                <span>{t('6× এবং 8× প্রক্রিয়া করতে 4× এর চেয়ে 2× বেশি সময় লাগে', '6× and 8× take 2× longer to process')}</span>
+              </div>
+            )}
           </div>
 
           {/* Enhancement Mode */}
           <div className="space-y-1.5">
             <span className="text-sm font-semibold">{t('এনহ্যান্সমেন্ট মোড', 'Enhancement Mode')}</span>
-            <div className="flex gap-1.5">
+            <div className="flex gap-1.5 flex-wrap">
               {([
                 ['standard', 'Standard'],
                 ['sharp_details', 'Sharp Details'],
@@ -248,13 +340,16 @@ const UpscalerTab = () => {
               {upscaling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ArrowUpCircle className="h-4 w-4 mr-2" />}
               {t('ইমেজ আপস্কেল করুন', 'Upscale Image')}
             </Button>
-            <p className="text-[11px] text-muted-foreground text-center">~$0.005 {t('প্রতি আপস্কেল', 'per upscale')} · 1 {t('আপস্কেল ক্রেডিট', 'upscale credit')}</p>
+            <p className="text-[11px] text-muted-foreground text-center">
+              ~$0.005 {t('প্রতি আপস্কেল', 'per upscale')} · {scale > 4 ? '2' : '1'} {t('আপস্কেল ক্রেডিট', 'upscale credit{s}')}
+            </p>
           </div>
 
           {/* Result Actions */}
           {resultUrl && (
             <div className="space-y-3 pt-2">
               <Button onClick={() => {
+                // Download at full resolution — no CDN transform
                 const a = document.createElement('a'); a.href = resultUrl; a.download = `upscaled_${Date.now()}.${exportFormat}`; a.click();
               }} className="w-full bg-primary hover:bg-primary/90">
                 <Download className="h-4 w-4 mr-2" />{t('আপস্কেলড ইমেজ ডাউনলোড', 'Download Upscaled Image')}
