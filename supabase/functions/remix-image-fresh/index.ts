@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { serverError, unauthorizedError } from "../_shared/errors.ts";
+import { piapiGenerateImage, downloadImage } from "../_shared/piapi.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,17 +44,13 @@ serve(async (req) => {
       return new Response(JSON.stringify({ success: false, message: "Missing fields" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Verify workspace
     const { data: workspace } = await supabase.from("workspaces").select("id, owner_id, brand_colors").eq("id", workspace_id).eq("owner_id", user.id).single();
     if (!workspace) return new Response(JSON.stringify({ success: false, message: "Workspace not found" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    // Fetch source image
     const { data: sourceAd } = await supabase.from("ad_images").select("*").eq("id", source_image_id).eq("workspace_id", workspace_id).single();
     if (!sourceAd) return new Response(JSON.stringify({ success: false, message: "Source image not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const cutoutUrl = sourceAd.cutout_url || sourceAd.image_url;
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) return new Response(JSON.stringify({ success: false, message: "AI not configured" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     const brandColors = Array.isArray(workspace.brand_colors) ? workspace.brand_colors.map((c: any) => c.hex || c).filter(Boolean) : [];
     const styleTemplate = STYLE_TEMPLATES[style] || STYLE_TEMPLATES.studio;
@@ -64,8 +61,7 @@ serve(async (req) => {
 
     for (let i = 0; i < count; i++) {
       try {
-        const prompt = `You are given a product image with transparent/white background.
-Generate a complete premium advertising image with this product placed naturally in a new scene.
+        const prompt = `Generate a premium advertising image with this product placed naturally in a new scene.
 
 PRODUCT FIDELITY RULES — CRITICAL:
 - The product must appear EXACTLY ONCE
@@ -86,30 +82,16 @@ BRAND COLORS: ${brandColors.length > 0 ? brandColors.join(", ") : "Use complemen
 
 QUALITY: Editorial luxury brand campaign, 8K, perfect exposure, professional color grading.`;
 
-        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash-image",
-            messages: [{ role: "user", content: [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: cutoutUrl } }] }],
-            modalities: ["image", "text"],
-          }),
+        const resultUrl = await piapiGenerateImage({
+          prompt,
+          sourceImageUrl: cutoutUrl,
+          aspectRatio: "1:1",
+          resolution: "1K",
         });
 
-        if (!response.ok) { console.error(`Fresh scene gen failed:`, await response.text()); continue; }
-
-        const result = await response.json();
-        const genImages = result.choices?.[0]?.message?.images;
-        if (!genImages?.length) continue;
-
-        const base64Data = genImages[0].image_url.url;
-        const base64Clean = base64Data.replace(/^data:image\/\w+;base64,/, "");
-        const binaryString = atob(base64Clean);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let b = 0; b < binaryString.length; b++) bytes[b] = binaryString.charCodeAt(b);
-
+        const imageBytes = await downloadImage(resultUrl);
         const fileName = `${workspace_id}/${Date.now()}-fresh-${i}.png`;
-        const { error: uploadError } = await supabase.storage.from("ad-images").upload(fileName, bytes, { contentType: "image/png", upsert: true });
+        const { error: uploadError } = await supabase.storage.from("ad-images").upload(fileName, imageBytes, { contentType: "image/png", upsert: true });
         if (uploadError) { console.error("Upload error:", uploadError); continue; }
 
         const { data: publicUrl } = supabase.storage.from("ad-images").getPublicUrl(fileName);

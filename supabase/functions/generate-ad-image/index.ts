@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { serverError, unauthorizedError } from "../_shared/errors.ts";
 import { getImageMasterPrompt } from "../_shared/imagePrompt.ts";
+import { piapiGenerateImage, downloadImage } from "../_shared/piapi.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,6 +14,12 @@ const FORMAT_INSTRUCTIONS: Record<string, string> = {
   square: "1:1 square format, optimized for Facebook/Instagram feed",
   story: "9:16 vertical format, optimized for Stories and Reels",
   banner: "16:9 horizontal format, optimized for Facebook cover ads",
+};
+
+const FORMAT_TO_RATIO: Record<string, string> = {
+  square: "1:1",
+  story: "9:16",
+  banner: "16:9",
 };
 
 function computeDhoomScore(
@@ -105,23 +112,22 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      return new Response(
-        JSON.stringify({ success: false, code: 500, message: "Image generation not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
     // Fetch the master prompt from DB (or fallback to default)
     const masterPrompt = await getImageMasterPrompt();
 
-    // ── Force-convert ALL text to English for reliable AI rendering ──
-    // The AI model cannot reliably render Bengali script, so we convert:
-    //   ৳/₹/₨/Rs → "BDT"
-    //   মাত্র (and misspellings) → "Only"
-    //   Bengali numerals → English numerals
-    //   Any remaining Bengali → drop the headline (text-free image)
+    // ── Upload source product image to storage to get a URL for PiAPI ──
+    const base64Match = product_image_base64.match(/^data:image\/(\w+);base64,(.+)$/);
+    const rawBase64 = base64Match ? base64Match[2] : product_image_base64;
+    const ext = base64Match ? (base64Match[1] === 'jpeg' ? 'jpg' : base64Match[1]) : 'png';
+    const srcBytes = Uint8Array.from(atob(rawBase64), c => c.charCodeAt(0));
+    const srcPath = `${workspace_id}/src_${Date.now()}.${ext}`;
+    await supabase.storage.from("ad-images").upload(srcPath, srcBytes, {
+      contentType: `image/${ext === 'jpg' ? 'jpeg' : ext}`, upsert: true,
+    });
+    const { data: srcPublicUrl } = supabase.storage.from("ad-images").getPublicUrl(srcPath);
+    const sourceImageUrl = srcPublicUrl.publicUrl;
+
+    // ── Sanitize headline text ──
     const sanitizedHeadline = (ad_headline || "")
       .replace(/[₹₨৳]/g, "BDT ")
       .replace(/\bRs\.?\s?/gi, "BDT ")
@@ -131,7 +137,6 @@ serve(async (req) => {
       .replace(/\s+/g, " ")
       .trim();
 
-    // If headline still contains Bengali characters after sanitization, drop it
     const hasBangla = /[\u0980-\u09FF]/.test(sanitizedHeadline);
     const finalHeadline = hasBangla ? "" : sanitizedHeadline;
 
@@ -157,7 +162,6 @@ serve(async (req) => {
 5. Font: Bold modern sans-serif, maximum contrast against background.
 `;
 
-    // Framework-specific visual direction
     const frameworkVisuals: Record<string, string> = {
       FOMO: "Create URGENCY visually — use bold countdown-style elements, limited-stock badges, or 'Almost Gone' visual cues. High energy, dynamic angles.",
       PAS: "Show the PROBLEM visually (e.g., frustration, mess) then the SOLUTION (the product as hero). Contrast between chaos and clean.",
@@ -167,7 +171,6 @@ serve(async (req) => {
       offer_first: "Lead with the DEAL visually — price/discount should be the most prominent visual element after the product.",
     };
 
-    // Occasion-specific visual direction
     const occasionVisuals: Record<string, string> = {
       general: "Standard commercial product photography.",
       eid_fitr: "Eid festive theme — gold accents, crescent moon motifs, green tones, celebratory and gift-giving mood.",
@@ -182,7 +185,6 @@ serve(async (req) => {
       product_launch: "Premium launch feel — spotlight lighting, reveal/unveiling composition, tech-forward.",
     };
 
-    // Tone visual mapping
     const toneVisuals: Record<string, string> = {
       friendly: "Warm, approachable, soft lighting, inviting colors.",
       professional: "Clean, premium, structured composition, neutral-cool palette.",
@@ -217,14 +219,12 @@ ${textInstruction}
 ${descInstruction}
 ${hardTextGuardrails}
 
-The attached reference image shows the exact product. Maintain absolute fidelity to it.
+The reference image shows the exact product. Maintain absolute fidelity to it.
 Generate the advertisement image now.`;
 
-    // --- Generate images via Lovable AI Gateway ---
+    // --- Generate images via PiAPI Nano Banana Pro ---
     const count = Math.min(num_variations, 3);
-    const imageDataUri = product_image_base64.startsWith("data:")
-      ? product_image_base64
-      : `data:image/jpeg;base64,${product_image_base64}`;
+    const aspectRatio = FORMAT_TO_RATIO[format] || "1:1";
 
     const images: Array<{
       id: string;
@@ -233,64 +233,26 @@ Generate the advertisement image now.`;
       style: string;
       dhoom_score: number;
       variation_number: number;
+      sd_prompt?: string;
     }> = [];
 
     for (let i = 0; i < count; i++) {
       try {
         const variationHint = count > 1 ? `\n\nThis is variation ${i + 1} of ${count} — create a unique composition different from others.` : "";
 
-        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash-image",
-            messages: [
-              {
-                role: "user",
-                content: [
-                  { type: "text", text: prompt + variationHint },
-                  {
-                    type: "image_url",
-                    image_url: { url: imageDataUri },
-                  },
-                ],
-              },
-            ],
-            modalities: ["image", "text"],
-          }),
+        const resultUrl = await piapiGenerateImage({
+          prompt: prompt + variationHint,
+          sourceImageUrl: sourceImageUrl,
+          aspectRatio,
+          resolution: "1K",
         });
 
-        if (!response.ok) {
-          const errText = await response.text();
-          console.error(`Image gen failed (${response.status}):`, errText);
-          continue;
-        }
-
-        const result = await response.json();
-        const generatedImages = result.choices?.[0]?.message?.images;
-
-        if (!generatedImages || generatedImages.length === 0) {
-          console.error("No images returned for variation", i + 1);
-          continue;
-        }
-
-        const base64Data = generatedImages[0].image_url.url;
-
-        // Upload to Supabase Storage
-        const base64Clean = base64Data.replace(/^data:image\/\w+;base64,/, "");
-        const binaryString = atob(base64Clean);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let b = 0; b < binaryString.length; b++) {
-          bytes[b] = binaryString.charCodeAt(b);
-        }
-
+        // Download from PiAPI and upload to our storage
+        const imageBytes = await downloadImage(resultUrl);
         const fileName = `${workspace_id}/${Date.now()}-${i}.png`;
         const { error: uploadError } = await supabase.storage
           .from("ad-images")
-          .upload(fileName, bytes, { contentType: "image/png", upsert: true });
+          .upload(fileName, imageBytes, { contentType: "image/png", upsert: true });
 
         if (uploadError) {
           console.error("Upload error:", uploadError);
@@ -342,7 +304,7 @@ Generate the advertisement image now.`;
 
     try {
       await supabase.rpc("upsert_api_usage_stats", {
-        p_service_name: "gemini",
+        p_service_name: "piapi",
         p_stat_date: new Date().toISOString().split("T")[0],
         p_calls_made: count,
       });

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { serverError, unauthorizedError } from "../_shared/errors.ts";
+import { piapiGenerateImage, downloadImage } from "../_shared/piapi.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -74,7 +75,6 @@ serve(async (req) => {
       );
     }
 
-    // Verify workspace ownership
     const { data: workspace } = await supabase
       .from("workspaces").select("id, owner_id").eq("id", workspace_id).eq("owner_id", user.id).single();
     if (!workspace) {
@@ -84,7 +84,6 @@ serve(async (req) => {
       );
     }
 
-    // Fetch the original ad image to get its prompt and settings
     const { data: originalAd, error: fetchErr } = await supabase
       .from("ad_images")
       .select("*")
@@ -107,10 +106,7 @@ serve(async (req) => {
       );
     }
 
-    // We also need the original product image. Download from storage URL.
     const originalImageUrl = originalAd.image_url;
-
-    // Pick a random composition hint different from generic
     const hint = COMPOSITION_HINTS[Math.floor(Math.random() * COMPOSITION_HINTS.length)];
 
     const remixPrompt = `${originalPrompt}
@@ -119,70 +115,20 @@ REMIX INSTRUCTION: Create a completely NEW composition variation of this adverti
 ${hint}
 Keep the same product, brand colors, and overall message but make the visual layout distinctly different from the original.`;
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      return new Response(
-        JSON.stringify({ success: false, code: 500, message: "AI key not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Use the original generated image as reference for the remix
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "text", text: remixPrompt },
-              {
-                type: "image_url",
-                image_url: { url: originalImageUrl },
-              },
-            ],
-          },
-        ],
-        modalities: ["image", "text"],
-      }),
+    // Generate via PiAPI Nano Banana Pro
+    const resultUrl = await piapiGenerateImage({
+      prompt: remixPrompt,
+      sourceImageUrl: originalImageUrl,
+      aspectRatio: originalAd.format === "story" ? "9:16" : originalAd.format === "banner" ? "16:9" : "1:1",
+      resolution: "1K",
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error(`Remix image gen failed (${response.status}):`, errText);
-      return new Response(
-        JSON.stringify({ success: false, code: 500, message: "Image generation failed" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const result = await response.json();
-    const generatedImages = result.choices?.[0]?.message?.images;
-
-    if (!generatedImages || generatedImages.length === 0) {
-      return new Response(
-        JSON.stringify({ success: false, code: 500, message: "No image generated" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const base64Data = generatedImages[0].image_url.url;
-    const base64Clean = base64Data.replace(/^data:image\/\w+;base64,/, "");
-    const binaryString = atob(base64Clean);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let b = 0; b < binaryString.length; b++) {
-      bytes[b] = binaryString.charCodeAt(b);
-    }
-
+    // Download and upload to our storage
+    const imageBytes = await downloadImage(resultUrl);
     const fileName = `${workspace_id}/${Date.now()}-remix.png`;
     const { error: uploadError } = await supabase.storage
       .from("ad-images")
-      .upload(fileName, bytes, { contentType: "image/png", upsert: true });
+      .upload(fileName, imageBytes, { contentType: "image/png", upsert: true });
 
     if (uploadError) {
       console.error("Upload error:", uploadError);
@@ -195,9 +141,7 @@ Keep the same product, brand colors, and overall message but make the visual lay
     const { data: publicUrl } = supabase.storage.from("ad-images").getPublicUrl(fileName);
     const imageUrl = publicUrl.publicUrl;
 
-    const dhoomScore = computeDhoomScore(
-      originalAd.style, true, true, true
-    );
+    const dhoomScore = computeDhoomScore(originalAd.style, true, true, true);
 
     const { data: saved, error: saveErr } = await supabase
       .from("ad_images")
@@ -216,7 +160,6 @@ Keep the same product, brand colors, and overall message but make the visual lay
 
     if (saveErr) console.error("Save error:", saveErr);
 
-    // Track usage
     await supabase.from("usage_logs").insert({
       user_id: user.id, workspace_id, feature: "image_remix",
     });
