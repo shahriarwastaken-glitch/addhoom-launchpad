@@ -182,6 +182,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_winner: boolean | null
+          pipeline_version: string | null
           product_name: string | null
           prompt_was_enhanced: boolean | null
           remix_config: Json | null
@@ -205,6 +206,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_winner?: boolean | null
+          pipeline_version?: string | null
           product_name?: string | null
           prompt_was_enhanced?: boolean | null
           remix_config?: Json | null
@@ -228,6 +230,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_winner?: boolean | null
+          pipeline_version?: string | null
           product_name?: string | null
           prompt_was_enhanced?: boolean | null
           remix_config?: Json | null

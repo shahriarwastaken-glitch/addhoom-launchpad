@@ -1,0 +1,1 @@
+ALTER TABLE ad_images ADD COLUMN IF NOT EXISTS pipeline_version text DEFAULT 'v4_structured';
