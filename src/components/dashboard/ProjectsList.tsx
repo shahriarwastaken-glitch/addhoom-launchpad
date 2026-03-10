@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import {
   FolderOpen, Plus, Archive, MoreVertical, Pencil, Trash2,
-  CalendarDays, Trophy, Star, ArrowRight, Check, X, FolderArchive, RotateCcw
+  CalendarDays, Trophy, Star, ArrowRight, Check, X, FolderArchive, RotateCcw,
+  Target, Flame, ShoppingBag, PartyPopper, Sparkles, Briefcase, Megaphone, Rocket, Heart
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,7 +18,12 @@ const COLORS = [
   '#1877F2', '#E4405F', '#1C1B1A', '#00B4D8',
 ];
 
-const QUICK_EMOJIS = ['📁', '🎯', '🔥', '🛍️', '🎊', '✨', '💼', '📣', '🚀', '❤️'];
+const QUICK_ICONS: { key: string; icon: React.ElementType }[] = [
+  { key: 'folder', icon: FolderOpen }, { key: 'target', icon: Target }, { key: 'flame', icon: Flame },
+  { key: 'shopping', icon: ShoppingBag }, { key: 'party', icon: PartyPopper }, { key: 'sparkles', icon: Sparkles },
+  { key: 'briefcase', icon: Briefcase }, { key: 'megaphone', icon: Megaphone }, { key: 'rocket', icon: Rocket },
+  { key: 'heart', icon: Heart },
+];
 
 const QUICK_NAMES_BN = ['ঈদ কালেকশন', 'নতুন স্টক', 'সিজনাল সেল', 'পণ্য লঞ্চ', 'উইকলি অফার'];
 const QUICK_NAMES_EN = ['Eid Collection', 'New Stock', 'Seasonal Sale', 'Product Launch', 'Weekly Offer'];
@@ -27,7 +33,7 @@ interface Project {
   workspace_id: string;
   name: string;
   description: string | null;
-  emoji: string;
+  emoji: string | null;
   color: string;
   start_date: string | null;
   end_date: string | null;
@@ -55,7 +61,7 @@ const ProjectsList = () => {
   // Form state
   const [formName, setFormName] = useState('');
   const [formDesc, setFormDesc] = useState('');
-  const [formEmoji, setFormEmoji] = useState('📁');
+  const [formEmoji, setFormEmoji] = useState('folder');
   const [formColor, setFormColor] = useState('#FF5100');
   const [formStartDate, setFormStartDate] = useState('');
   const [formEndDate, setFormEndDate] = useState('');
@@ -112,14 +118,14 @@ const ProjectsList = () => {
 
   const openCreateModal = () => {
     setEditProject(null);
-    setFormName(''); setFormDesc(''); setFormEmoji('📁'); setFormColor('#FF5100');
+    setFormName(''); setFormDesc(''); setFormEmoji('folder'); setFormColor('#FF5100');
     setFormStartDate(''); setFormEndDate('');
     setShowModal(true);
   };
 
   const openEditModal = (p: Project) => {
     setEditProject(p);
-    setFormName(p.name); setFormDesc(p.description || ''); setFormEmoji(p.emoji || '📁');
+    setFormName(p.name); setFormDesc(p.description || ''); setFormEmoji(p.emoji || 'folder');
     setFormColor(p.color || '#FF5100');
     setFormStartDate(p.start_date || ''); setFormEndDate(p.end_date || '');
     setShowModal(true);
@@ -276,7 +282,7 @@ const ProjectsList = () => {
                 {/* Top row */}
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-2xl shrink-0">{p.emoji || '📁'}</span>
+                    {(() => { const PIco = QUICK_ICONS.find(i => i.key === p.emoji)?.icon || FolderOpen; return <PIco size={22} className="shrink-0" style={{ color: p.color || '#FF5100' }} />; })()}
                     <h3 className="font-heading-bn font-bold text-foreground text-lg truncate">{p.name}</h3>
                   </div>
                   <div className="relative shrink-0">
@@ -422,16 +428,16 @@ const ProjectsList = () => {
                 </button>
               </div>
 
-              {/* Emoji picker */}
+              {/* Icon picker */}
               <div className="mb-4">
                 <label className="text-xs text-muted-foreground mb-2 block">{t('আইকন', 'Icon')}</label>
                 <div className="flex flex-wrap gap-1.5">
-                  {QUICK_EMOJIS.map(e => (
-                    <button key={e} onClick={() => setFormEmoji(e)}
-                      className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center transition-all ${
-                        formEmoji === e ? 'bg-primary/10 border-2 border-primary scale-110' : 'bg-secondary hover:bg-secondary/80'
+                  {QUICK_ICONS.map(({ key, icon: Ico }) => (
+                    <button key={key} onClick={() => setFormEmoji(key)}
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                        formEmoji === key ? 'bg-primary/10 border-2 border-primary scale-110' : 'bg-secondary hover:bg-secondary/80'
                       }`}>
-                      {e}
+                      <Ico size={18} className={formEmoji === key ? 'text-primary' : 'text-muted-foreground'} />
                     </button>
                   ))}
                 </div>

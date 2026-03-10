@@ -545,7 +545,7 @@ const AdGenerator = () => {
 
             {/* RIGHT PANEL — Adapted Ads */}
             <div className="md:col-span-3 space-y-4">
-              <h3 className="text-lg font-heading-bn font-semibold mb-4">{t('🇧🇩 বাংলাদেশের জন্য অ্যাডাপ্টেড', '🇧🇩 Adapted for Bangladesh')}</h3>
+              <h3 className="text-lg font-heading-bn font-semibold mb-4">{t('বাংলাদেশের জন্য অ্যাডাপ্টেড', 'Adapted for Bangladesh')}</h3>
               {adaptedAds.map((ad, i) => renderAdCard(ad, i, true))}
             </div>
           </div>

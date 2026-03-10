@@ -174,7 +174,7 @@ const Analytics = () => {
       {/* Data Note */}
       <div className="border-l-2 border-border pl-3 py-1">
         <p className="text-[11px] text-muted-foreground italic">
-          📊 {t(
+          {t(
             'এই তথ্য AdDhoom-এ তৈরি বিজ্ঞাপনের উপর ভিত্তি করে। আসল Facebook পারফরম্যান্স ডেটা নয়।',
             'This data is based on ads created in AdDhoom. Not actual Facebook performance data.'
           )}

@@ -5,12 +5,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import {
   ArrowLeft, Pencil, Plus, FolderOpen, Star, Trophy, Zap, Flame,
-  TrendingUp, Copy, RefreshCw, Check, X, Search, Filter
+  TrendingUp, Copy, RefreshCw, Check, X, Search, Filter,
+  Target, ShoppingBag, PartyPopper, Sparkles, Briefcase, Megaphone, Rocket, Heart
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const toBn = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
+
+const ICON_MAP: Record<string, React.ElementType> = {
+  folder: FolderOpen, target: Target, flame: Flame, shopping: ShoppingBag,
+  party: PartyPopper, sparkles: Sparkles, briefcase: Briefcase, megaphone: Megaphone,
+  rocket: Rocket, heart: Heart,
+};
 
 interface ProjectData {
   id: string;
@@ -125,7 +132,7 @@ const ProjectDetail = () => {
     for (const adId of ids) {
       await supabase.from('ad_creatives').update({ project_id: id } as any).eq('id', adId);
     }
-    toast.success(t(`${lang === 'bn' ? toBn(ids.length) : ids.length}টি বিজ্ঞাপন যোগ হয়েছে`, `${ids.length} ads added`));
+    toast.success(lang === 'bn' ? `${toBn(ids.length)}টি বিজ্ঞাপন যোগ হয়েছে` : `${ids.length} ads added`);
     setShowAdPicker(false);
     fetchData();
   };
@@ -159,7 +166,7 @@ const ProjectDetail = () => {
       <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-2">
         <div>
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{project.emoji || '📁'}</span>
+            {(() => { const PIco = ICON_MAP[project.emoji || 'folder'] || FolderOpen; return <PIco size={28} className="text-primary" />; })()}
             <h2 className="text-2xl font-heading-bn font-bold text-foreground">{project.name}</h2>
           </div>
           {project.description && (
@@ -171,7 +178,7 @@ const ProjectDetail = () => {
                 <span className="text-xs px-2 py-0.5 rounded-full bg-[#00B96B]/10 text-[#00B96B] font-medium">{t('সম্পন্ন', 'Completed')}</span>
               ) : getDaysRemaining(project.end_date) <= 7 ? (
                 <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
-                  {t(`${toBn(getDaysRemaining(project.end_date))} দিন বাকি`, `${getDaysRemaining(project.end_date)} days left`)}
+                  {lang === 'bn' ? `${toBn(getDaysRemaining(project.end_date))} দিন বাকি` : `${getDaysRemaining(project.end_date)} days left`}
                 </span>
               ) : null}
             </div>
@@ -197,7 +204,7 @@ const ProjectDetail = () => {
         {[
           { label: t('মোট বিজ্ঞাপন', 'Total Ads'), value: dn(totalAds), suffix: t('টি', ''), color: 'text-foreground' },
           { label: t('গড় ধুম স্কোর', 'Avg Dhoom Score'), value: dn(avgScore), suffix: '', color: scoreColor(avgScore) },
-          { label: t('বিজয়ী বিজ্ঞাপন', 'Winner Ads'), value: dn(winners), suffix: '⭐', color: 'text-foreground' },
+          { label: t('বিজয়ী বিজ্ঞাপন', 'Winner Ads'), value: dn(winners), suffix: '', color: 'text-foreground' },
           { label: t('সেরা স্কোর', 'Best Score'), value: dn(bestScore), suffix: '', color: scoreColor(bestScore) },
         ].map(stat => (
           <div key={stat.label} className="bg-card rounded-2xl border border-border p-4">
@@ -386,7 +393,7 @@ const ProjectDetail = () => {
 
               <button onClick={addAdsToProject} disabled={selectedAds.size === 0}
                 className="w-full py-2.5 rounded-full bg-gradient-cta text-primary-foreground text-sm font-semibold disabled:opacity-50 transition-all">
-                {t(`${lang === 'bn' ? toBn(selectedAds.size) : selectedAds.size}টি যোগ করুন`, `Add ${selectedAds.size} ads`)}
+                {lang === 'bn' ? `${toBn(selectedAds.size)}টি যোগ করুন` : `Add ${selectedAds.size} ads`}
               </button>
             </motion.div>
           </motion.div>

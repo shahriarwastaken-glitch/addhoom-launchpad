@@ -1,4 +1,4 @@
-import { Check, ImageIcon, Calendar, ArrowRight } from 'lucide-react';
+import { Check, ImageIcon, Calendar, ArrowRight, PartyPopper } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { GeneratorMode } from './types';
 
@@ -37,7 +37,7 @@ const HandoffBar = ({ mode, hasResults, isScheduled, hasImage, onCreateImage }: 
     >
       {/* Left label */}
       <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-heading-bn hidden sm:block">
-        {allDone ? '🎉' : t('পরবর্তী ধাপ:', 'Next step:')}
+        {allDone ? <PartyPopper size={14} className="text-[hsl(var(--brand-green))]" /> : t('পরবর্তী ধাপ:', 'Next step:')}
       </span>
 
       {/* Center: Step indicators */}

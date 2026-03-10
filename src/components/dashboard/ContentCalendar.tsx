@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, Loader2, X, Check, Sparkles,
   Calendar as CalendarIcon, List, Layers, Zap, Filter,
-  Search, Edit3, Trash2, AlertTriangle, Keyboard, ChevronDown
+  Search, Edit3, Trash2, AlertTriangle, Keyboard, ChevronDown, PartyPopper
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
@@ -177,7 +177,7 @@ const ContentCalendar = () => {
               className="flex items-center gap-1 text-xs bg-destructive/10 text-destructive px-2 py-1 rounded-full"
             >
               <AlertTriangle size={12} />
-              {t(`${toBn(overdueCount)}টি অতিক্রান্ত`, `${overdueCount} overdue`)}
+              {lang === 'bn' ? `${toBn(overdueCount)}টি অতিক্রান্ত` : `${overdueCount} overdue`}
             </button>
           )}
         </div>
@@ -357,7 +357,7 @@ function GenerateModal({ t, lang, activeWorkspace, hasExisting, onClose, onCompl
             {upcomingFests.length > 0 && (
               <p className="text-xs text-primary mb-4 font-bn">
                 {t('আগামী ৯০ দিনে: ', 'In next 90 days: ')}
-                {upcomingFests.map(f => `${lang === 'bn' ? f.name : f.en} (${t(`${toBn(f.daysUntil)} দিন বাকি`, `${f.daysUntil} days`)})`).join(', ')}
+                {upcomingFests.map(f => `${lang === 'bn' ? f.name : f.en} (${lang === 'bn' ? `${toBn(f.daysUntil)} দিন বাকি` : `${f.daysUntil} days`})`).join(', ')}
               </p>
             )}
 
@@ -462,7 +462,7 @@ function GenerateModal({ t, lang, activeWorkspace, hasExisting, onClose, onCompl
               {t('পরিকল্পনা তৈরি হয়েছে!', 'Plan generated!')}
             </h3>
             <p className="text-sm text-muted-foreground mb-1 font-bn">
-              {t(`মোট ${toBn(totalItems)}টি কনটেন্ট আইটেম।`, `Total ${totalItems} content items.`)}
+              {lang === 'bn' ? `মোট ${toBn(totalItems)}টি কনটেন্ট আইটেম।` : `Total ${totalItems} content items.`}
             </p>
             {festivalsCovered.length > 0 && (
               <p className="text-xs text-primary mb-4 font-bn">
@@ -864,11 +864,11 @@ function SwipeView({ entries, setEntries, t, lang, navigate, isMobile }: {
   if (currentIdx >= pendingEntries.length && pendingEntries.length === 0 && entries.length > 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center">
-        <div className="text-4xl mb-4">🎉</div>
+        <PartyPopper size={36} className="text-primary mb-4" />
         <h3 className="text-xl font-bold text-foreground mb-2 font-bn">{t('সব কনটেন্ট রিভিউ হয়ে গেছে!', 'All content reviewed!')}</h3>
         <div className="space-y-1 text-sm text-muted-foreground mb-6">
-          <p>✓ {t(`নিশ্চিত করা হয়েছে: ${toBn(confirmedCount)}টি`, `Confirmed: ${confirmedCount}`)}</p>
-          <p>✕ {t(`বাদ দেওয়া হয়েছে: ${toBn(skippedCount)}টি`, `Skipped: ${skippedCount}`)}</p>
+          <p className="flex items-center gap-1"><Check size={12} /> {lang === 'bn' ? `নিশ্চিত করা হয়েছে: ${toBn(confirmedCount)}টি` : `Confirmed: ${confirmedCount}`}</p>
+          <p className="flex items-center gap-1"><X size={12} /> {lang === 'bn' ? `বাদ দেওয়া হয়েছে: ${toBn(skippedCount)}টি` : `Skipped: ${skippedCount}`}</p>
         </div>
       </div>
     );
@@ -893,7 +893,7 @@ function SwipeView({ entries, setEntries, t, lang, navigate, isMobile }: {
       {/* Progress */}
       <div className="w-full max-w-md mb-4">
         <p className="text-xs text-muted-foreground text-center mb-2 font-bn">
-          {t(`${toBn(totalReviewable)} এর মধ্যে ${toBn(reviewed)}টি রিভিউ করা হয়েছে`, `${reviewed} of ${totalReviewable} reviewed`)}
+          {lang === 'bn' ? `${toBn(totalReviewable)} এর মধ্যে ${toBn(reviewed)}টি রিভিউ করা হয়েছে` : `${reviewed} of ${totalReviewable} reviewed`}
         </p>
         <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
           <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${totalReviewable > 0 ? (reviewed / totalReviewable * 100) : 0}%` }} />
@@ -957,7 +957,7 @@ function SwipeView({ entries, setEntries, t, lang, navigate, isMobile }: {
             {/* Festival indicator */}
             {festival && (
               <div className="bg-[hsl(var(--brand-yellow))]/10 border border-[hsl(var(--brand-yellow))]/30 rounded-xl p-2 mb-3">
-                <p className="text-xs text-[hsl(var(--brand-yellow))] font-medium font-bn">🎊 {festival}</p>
+                <p className="text-xs text-[hsl(var(--brand-yellow))] font-medium font-bn flex items-center gap-1"><PartyPopper size={12} /> {festival}</p>
               </div>
             )}
 
@@ -1079,7 +1079,7 @@ function ListView({ entries, setEntries, t, lang, navigate, isMobile }: {
       selected.has(e.id) ? { ...e, status: action === 'confirm' ? 'confirmed' : 'skipped' } : e
     ));
     setSelected(new Set());
-    toast.success(t(`${toBn(ids.length)}টি আপডেট হয়েছে`, `${ids.length} items updated`));
+    toast.success(lang === 'bn' ? `${toBn(ids.length)}টি আপডেট হয়েছে` : `${ids.length} items updated`);
   };
 
   const handleAction = async (id: string, action: 'confirm' | 'skip' | 'generate') => {
