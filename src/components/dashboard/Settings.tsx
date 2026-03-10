@@ -239,6 +239,19 @@ const Settings = () => {
             </div>
           </div>
 
+          {/* Reset Tooltips */}
+          <div className="px-1 mb-6">
+            <button
+              onClick={() => {
+                resetAllTooltips();
+                toast.success(t('সব টুলটিপ রিসেট হয়েছে', 'All tooltips have been reset'));
+              }}
+              className="text-xs text-muted-foreground hover:text-primary hover:underline transition-colors"
+            >
+              {t('সব টুলটিপ রিসেট করুন', 'Reset all tooltips')}
+            </button>
+          </div>
+
           {/* Subscription */}
           <div className="bg-card rounded-[20px] shadow-warm p-4 sm:p-6 mb-6">
             <h3 className="font-heading-bn font-semibold text-foreground mb-4">{t('সাবস্ক্রিপশন', 'Subscription')}</h3>
