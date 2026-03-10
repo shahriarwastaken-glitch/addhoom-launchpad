@@ -893,7 +893,7 @@ function SwipeView({ entries, setEntries, t, lang, navigate, isMobile }: {
       {/* Progress */}
       <div className="w-full max-w-md mb-4">
         <p className="text-xs text-muted-foreground text-center mb-2 font-bn">
-          {t(`${toBn(totalReviewable)} এর মধ্যে ${toBn(reviewed)}টি রিভিউ করা হয়েছে`, `${reviewed} of ${totalReviewable} reviewed`)}
+          {lang === 'bn' ? `${toBn(totalReviewable)} এর মধ্যে ${toBn(reviewed)}টি রিভিউ করা হয়েছে` : `${reviewed} of ${totalReviewable} reviewed`}
         </p>
         <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
           <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${totalReviewable > 0 ? (reviewed / totalReviewable * 100) : 0}%` }} />
