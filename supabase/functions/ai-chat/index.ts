@@ -200,7 +200,7 @@ serve(async (req) => {
           method: "POST",
           headers: { Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: "google/gemini-3.1-flash-lite-preview",
+            model: "google/gemini-2.5-flash-lite",
             messages: [{
               role: "user",
               content: `Summarize these conversation messages into 3-5 key points about what was discussed and what decisions were made. Focus on: strategies decided, products discussed, advice given that was accepted. Be concise. In the same language as the conversation.\n\n${summary ? "Previous summary:\n" + summary + "\n\n" : ""}New messages to summarize:\n${oldMessages.map((m: any) => `[${m.role}]: ${m.content}`).join("\n")}`,
@@ -247,7 +247,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3.1-flash-lite-preview",
+        model: "google/gemini-2.5-flash-lite",
         messages: [
           { role: "system", content: systemPrompt },
           ...messageHistory,
@@ -333,7 +333,7 @@ serve(async (req) => {
               method: "POST",
               headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
               body: JSON.stringify({
-                model: "google/gemini-3.1-flash-lite-preview",
+                model: "google/gemini-2.5-flash-lite",
                 messages: [
                   { role: "user", content: `Give this conversation a title in 4-6 words. Match the language. Be specific.\nUser: ${message}\nAssistant: ${fullText.substring(0, 200)}\nReturn ONLY the title.` }
                 ],

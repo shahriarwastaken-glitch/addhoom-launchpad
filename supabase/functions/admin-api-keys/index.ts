@@ -12,7 +12,7 @@ const SERVICES = [
   {
     service_name: 'gemini',
     display_name: 'Google Gemini API',
-    description: 'Ad copy, Dhoom Score, prompt enhancement, AI chat, Shop DNA extraction (gemini-3.1-flash-lite-preview)',
+    description: 'Ad copy, Dhoom Score, prompt enhancement, AI chat, Shop DNA extraction (gemini-2.5-flash-lite)',
     docs_url: 'https://aistudio.google.com/apikey',
     icon: '🤖',
     is_critical: true,

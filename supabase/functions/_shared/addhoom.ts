@@ -159,7 +159,7 @@ export async function callGemini(prompt: string, systemPrompt: string = ADDHOOM_
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-3.1-flash-lite-preview",
+      model: "google/gemini-2.5-flash-lite",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: prompt },
@@ -201,7 +201,7 @@ export async function callGeminiMultiturn(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-3.1-flash-lite-preview",
+      model: "google/gemini-2.5-flash-lite",
       messages: [
         { role: "system", content: systemPrompt },
         ...openaiMessages,
