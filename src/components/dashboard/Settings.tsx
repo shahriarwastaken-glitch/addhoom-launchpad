@@ -10,6 +10,7 @@ import {
   Pencil, AlertTriangle, Info, Loader2, Tags, X, Plus, Palette,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { resetAllTooltips } from '@/components/ui/OnceTooltip';
 import VisualIdentitySection from '@/components/dashboard/VisualIdentitySection';
 import ProductsGrid, { ProductEditModal } from '@/components/dashboard/ProductsGrid';
 import DNAScoreIndicator from '@/components/dashboard/DNAScoreIndicator';
