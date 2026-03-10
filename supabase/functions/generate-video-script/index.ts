@@ -37,7 +37,7 @@ Return ONLY the caption text, nothing else.`;
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: "google/gemini-3.1-flash-lite-preview",
           messages: [{ role: "user", content: captionPrompt }],
         }),
       });
