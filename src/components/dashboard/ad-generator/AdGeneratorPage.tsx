@@ -64,6 +64,8 @@ const defaultForm: GeneratorFormData = {
   backgroundComplexity: 'minimal',
   timeOfDay: 'golden',
   productFocus: 'hero',
+  selectedScenes: ['studio'],
+  additionalDetails: '',
   // Copy That! advanced fields
   targetReader: '',
   awarenessStage: 'solution_aware',

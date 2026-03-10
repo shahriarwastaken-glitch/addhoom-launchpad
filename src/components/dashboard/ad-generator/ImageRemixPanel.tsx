@@ -47,6 +47,7 @@ const ANGLE: Record<CameraAngle, string> = {
   three_quarter: '3/4 angle perspective, adds depth and dimension',
   overhead: 'overhead flat lay perspective, bird\'s eye view',
   closeup: 'close-up detail shot, texture emphasized, macro feel',
+  cinematic: '50mm cinematic lens, slight low angle, dramatic perspective',
 };
 const BACKGROUND: Record<BackgroundComplexity, string> = {
   minimal: 'minimal clean background, negative space dominant',
