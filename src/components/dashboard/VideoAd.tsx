@@ -28,6 +28,7 @@ const VideoAd = () => {
   const { t, lang } = useLanguage();
   const { showUpgrade } = useUpgrade();
 
+  const [activeTab, setActiveTab] = useState<VideoTab>('slideshow');
   const [stage, setStage] = useState<VideoStage>(1);
   const [direction, setDirection] = useState(1);
   const [form, setForm] = useState<VideoFormData>(DEFAULT_FORM);
