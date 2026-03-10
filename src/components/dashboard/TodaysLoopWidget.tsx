@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PenLine, ImageIcon, Calendar, Check, ArrowRight } from 'lucide-react';
+import { PenLine, ImageIcon, Calendar, Check, ArrowRight, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';

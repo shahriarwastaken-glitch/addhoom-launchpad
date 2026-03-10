@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Target, Star, RefreshCw, Calendar } from 'lucide-react';
 
 type TooltipKey = 'dhoom_score' | 'winner_star' | 'remix_button' | 'calendar_generate';
 
 const TOOLTIP_STORAGE_KEY = 'addhoom_feature_tooltips';
 
-const TOOLTIPS: Record<TooltipKey, { emoji: string; text: string }> = {
-  dhoom_score: { emoji: '🎯', text: 'Higher score = better ad performance.' },
-  winner_star: { emoji: '⭐', text: 'Mark great ads as winners so the AI learns your taste.' },
-  remix_button: { emoji: '🔄', text: 'Remix a winning ad to generate an even better version.' },
-  calendar_generate: { emoji: '📅', text: 'Generate a 90-day content plan in one click.' },
+const TOOLTIPS: Record<TooltipKey, { Icon: typeof Target; text: string }> = {
+  dhoom_score: { Icon: Target, text: 'Higher score = better ad performance.' },
+  winner_star: { Icon: Star, text: 'Mark great ads as winners so the AI learns your taste.' },
+  remix_button: { Icon: RefreshCw, text: 'Remix a winning ad to generate an even better version.' },
+  calendar_generate: { Icon: Calendar, text: 'Generate a 90-day content plan in one click.' },
 };
 
 export const useFeatureTooltips = () => {

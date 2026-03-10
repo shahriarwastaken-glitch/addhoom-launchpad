@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { X } from 'lucide-react';
+import { X, AlertTriangle, Hand } from 'lucide-react';
 
 const WelcomeBanner = () => {
   const { profile } = useAuth();
@@ -16,13 +16,12 @@ const WelcomeBanner = () => {
 
   if (dismissed || !profile) return null;
 
-  // Show incomplete setup banner
   if (!profile.onboarding_complete) {
     return (
       <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-base font-bold text-foreground">⚠️ Shop setup incomplete</p>
+            <p className="text-base font-bold text-foreground flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-primary" /> Shop setup incomplete</p>
             <p className="text-sm text-muted-foreground">Complete setup so AI can customize for your shop.</p>
           </div>
           <button
@@ -36,7 +35,6 @@ const WelcomeBanner = () => {
     );
   }
 
-  // Show welcome banner (first visit after onboarding)
   const firstName = profile.full_name?.split(' ')[0] || '';
 
   return (
@@ -52,8 +50,8 @@ const WelcomeBanner = () => {
       </button>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-xl font-bold text-white">
-            👋 Welcome{firstName ? `, ${firstName}` : ''}!
+          <h3 className="text-xl font-bold text-white flex items-center gap-2">
+            <Hand className="w-5 h-5" /> Welcome{firstName ? `, ${firstName}` : ''}!
           </h3>
           <p className="text-[15px] text-white/85">
             Your journey with AdDhoom has begun.

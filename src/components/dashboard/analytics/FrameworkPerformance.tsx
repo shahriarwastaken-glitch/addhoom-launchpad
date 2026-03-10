@@ -66,8 +66,8 @@ const FrameworkPerformance = ({ data, industry }: FrameworkPerformanceProps) => 
         {/* Insight Callout */}
         {topFramework && (
           <div className="border-l-4 border-primary bg-primary/5 p-4 rounded-lg">
-            <p className="text-sm font-body-bn">
-              🔥 {t(
+            <p className="text-sm font-body-bn flex items-start gap-1.5">
+              <TrendingUp className="w-4 h-4 text-primary shrink-0 mt-0.5" /> {t(
                 `${topFramework.framework} কৌশল আপনার ${industry || 'ব্যবসার'} জন্য সবচেয়ে কার্যকর। পরবর্তী বিজ্ঞাপনে ${topFramework.framework} ব্যবহার করুন।`,
                 `${topFramework.framework} strategy is most effective for your ${industry || 'business'}. Use ${topFramework.framework} in your next ads.`
               )}
