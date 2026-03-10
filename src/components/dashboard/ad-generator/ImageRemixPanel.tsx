@@ -232,11 +232,10 @@ const ImageRemixPanel = ({ image, workspaceId, onClose, onRemixComplete }: Image
     }
   };
 
-  const PillSelect = <T extends string>({ options, value, onChange, labelKey = 'labelEn' }: {
-    options: { label: string; labelEn: string; value: T; emoji?: string }[];
-    value: T;
-    onChange: (v: T) => void;
-    labelKey?: 'label' | 'labelEn';
+  const PillSelect = ({ options, value, onChange }: {
+    options: { label: string; labelEn: string; value: string; emoji?: string }[];
+    value: string;
+    onChange: (v: any) => void;
   }) => (
     <div className="flex flex-wrap gap-1.5">
       {options.map(opt => (

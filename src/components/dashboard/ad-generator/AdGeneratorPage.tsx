@@ -9,7 +9,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { FolderOpen, ArrowLeft } from 'lucide-react';
 import InputPanel from './InputPanel';
 import ResultsPanel from './ResultsPanel';
-import RemixModal from './RemixModal';
+import CopyRemixPanel from './CopyRemixPanel';
+import ImageRemixPanel from './ImageRemixPanel';
 import HandoffBar from './HandoffBar';
 import ScheduleModal from './ScheduleModal';
 import type { GeneratorMode, GeneratorFormData, AdResult } from './types';
@@ -65,7 +66,6 @@ const defaultForm: GeneratorFormData = {
   productFocus: 'hero',
 };
 
-// Selected copy context for handoff
 export interface SelectedCopyContext {
   headline: string;
   body: string;
@@ -89,7 +89,6 @@ const AdGeneratorPage = () => {
   const [generating, setGenerating] = useState(false);
   const [results, setResults] = useState<AdResult[]>([]);
   const [remixAd, setRemixAd] = useState<AdResult | null>(null);
-  const [remixing, setRemixing] = useState(false);
   const [mobileTab, setMobileTab] = useState<'input' | 'results'>('input');
   const [projectInfo, setProjectInfo] = useState<{ name: string; emoji: string; color: string } | null>(null);
   const [imageHistoryOpen, setImageHistoryOpen] = useState(false);
@@ -105,24 +104,20 @@ const AdGeneratorPage = () => {
     productName?: string;
   } | null>(null);
 
-  // Project prompt state (Connection 5)
+  // Project prompt state
   const [showProjectPrompt, setShowProjectPrompt] = useState(true);
   const [projectPromptDismissed, setProjectPromptDismissed] = useState(false);
 
-  // Generate button ref for pulse
   const generateBtnRef = useRef<HTMLButtonElement>(null);
 
   const toggleImageHistory = useCallback(() => {
     setImageHistoryOpen(prev => {
       const next = !prev;
-      if (next && isMobile) {
-        setMobileTab('results');
-      }
+      if (next && isMobile) setMobileTab('results');
       return next;
     });
   }, [isMobile]);
 
-  // CONNECTION 3: Read URL params from calendar
   useEffect(() => {
     const product = searchParams.get('product');
     const platform = searchParams.get('platform');
@@ -139,8 +134,6 @@ const AdGeneratorPage = () => {
         framework: framework || prev.framework,
         tone: tone || prev.tone,
       }));
-
-      // Pulse the generate button after delay
       setTimeout(() => {
         generateBtnRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         generateBtnRef.current?.classList.add('animate-pulse');
@@ -149,7 +142,6 @@ const AdGeneratorPage = () => {
     }
   }, [calendarItemId, searchParams]);
 
-  // Fetch project info if project_id is present
   useEffect(() => {
     if (!projectId) { setProjectInfo(null); return; }
     supabase.from('projects').select('name, emoji, color').eq('id', projectId).single()
@@ -198,7 +190,6 @@ const AdGeneratorPage = () => {
           setResults(data.ads);
           toast.success(t(`${data.count}টি বিজ্ঞাপন তৈরি হয়েছে`, `${data.count} ads generated`));
 
-          // CONNECTION 3: Auto-save back to calendar
           if (calendarItemId && data.ads[0]?.id) {
             await supabase.from('content_calendar')
               .update({ status: 'generated', generated_creative_id: data.ads[0].id })
@@ -208,7 +199,6 @@ const AdGeneratorPage = () => {
           toast.error(data?.message || t('সমস্যা হয়েছে', 'Something went wrong'));
         }
       } else {
-        // Convert product image to base64 if present
         let product_image_base64: string | undefined;
         let product_image_mime_type = "image/jpeg";
         if (form.productImagePreview) {
@@ -280,38 +270,24 @@ const AdGeneratorPage = () => {
     }
   }, [activeWorkspace, form, mode, isMobile, t, calendarItemId, projectId, lang]);
 
-  // CONNECTION 1: Best-scored copy → Image handoff
   const handleHandoffToImage = useCallback(() => {
     if (results.length === 0) return;
-    // Pick best-scored
     const best = [...results].sort((a, b) => b.dhoom_score - a.dhoom_score)[0];
     const ctx: SelectedCopyContext = {
-      headline: best.headline,
-      body: best.body,
-      cta: best.cta,
-      framework: best.framework,
-      platform: best.platform,
-      dhoom_score: best.dhoom_score,
+      headline: best.headline, body: best.body, cta: best.cta,
+      framework: best.framework, platform: best.platform, dhoom_score: best.dhoom_score,
     };
     setSelectedCopy(ctx);
     setMode('image');
-    setForm(prev => ({
-      ...prev,
-      productDesc: `${best.headline}\n${best.body}`,
-      platforms: [best.platform],
-    }));
+    setForm(prev => ({ ...prev, productDesc: `${best.headline}\n${best.body}`, platforms: [best.platform] }));
     setResults([]);
     if (isMobile) setMobileTab('input');
   }, [results, isMobile]);
 
   const handleSwitchToImage = (ad: AdResult) => {
     const ctx: SelectedCopyContext = {
-      headline: ad.headline,
-      body: ad.body,
-      cta: ad.cta,
-      framework: ad.framework,
-      platform: ad.platform,
-      dhoom_score: ad.dhoom_score,
+      headline: ad.headline, body: ad.body, cta: ad.cta,
+      framework: ad.framework, platform: ad.platform, dhoom_score: ad.dhoom_score,
     };
     setSelectedCopy(ctx);
     setMode('image');
@@ -324,7 +300,6 @@ const AdGeneratorPage = () => {
     setForm(prev => ({ ...prev, productDesc: '' }));
   };
 
-  // CONNECTION 2 & 4: Schedule handler
   const handleSchedule = (ad: AdResult) => {
     setScheduleModal({
       creativeId: ad.image_url ? undefined : ad.id,
@@ -334,57 +309,35 @@ const AdGeneratorPage = () => {
     });
   };
 
-  const handleRemix = async (options: { learnFromWinners: boolean; framework?: string; tone?: string }) => {
-    if (!remixAd?.id || !activeWorkspace) return;
-    setRemixing(true);
-    try {
-      if (remixAd.image_url) {
-        const { data } = await supabase.functions.invoke('remix-image-ad', {
-          body: {
-            workspace_id: activeWorkspace.id,
-            ad_image_id: remixAd.id,
-          },
-        });
-        if (data?.success && data.images) {
-          const newAds: AdResult[] = data.images.map((img: any) => ({
-            id: img.id,
-            headline: t(`রিমিক্স ভার্শন`, `Remix Version`),
-            body: img.sd_prompt || '',
-            cta: '',
-            dhoom_score: img.dhoom_score || 70,
-            copy_score: 0,
-            platform: remixAd.platform,
-            framework: remixAd.framework,
-            is_winner: false,
-            image_url: img.image_url || '',
-          }));
-          setResults(prev => [...newAds, ...prev]);
-          toast.success(t('ইমেজ রিমিক্স তৈরি হয়েছে!', 'Image remix created!'));
-        } else {
-          toast.error(data?.message || t('রিমিক্স ব্যর্থ হয়েছে', 'Remix failed'));
-        }
-      } else {
-        const { data } = await supabase.functions.invoke('remix-ad', {
-          body: { workspace_id: activeWorkspace.id, ad_id: remixAd.id, num_variations: 2 },
-        });
-        if (data?.success && data.ads) {
-          setResults(prev => [...data.ads, ...prev]);
-          toast.success(t('রিমিক্স তৈরি হয়েছে!', 'Remix created!'));
-        }
-      }
-    } catch {
-      toast.error(t('রিমিক্স ব্যর্থ হয়েছে', 'Remix failed'));
-    } finally {
-      setRemixing(false);
-      setRemixAd(null);
-    }
+  // New remix handler — opens the appropriate panel
+  const handleRemixClick = (ad: AdResult) => {
+    setRemixAd(ad);
   };
 
-  // CONNECTION 5: Assign all results to a project
+  const handleCopyRemixComplete = (ads: AdResult[]) => {
+    setResults(prev => [...ads, ...prev]);
+    setRemixAd(null);
+  };
+
+  const handleImageRemixComplete = (images: any[]) => {
+    const newAds: AdResult[] = images.map((img: any, i: number) => ({
+      id: img.id,
+      headline: t(`রিমিক্স ভার্শন ${i + 1}`, `Remix Version ${i + 1}`),
+      body: '',
+      cta: '',
+      dhoom_score: img.dhoom_score || 70,
+      copy_score: 0,
+      platform: remixAd?.platform || 'facebook',
+      framework: remixAd?.framework || 'FOMO',
+      is_winner: false,
+      image_url: img.image_url || '',
+    }));
+    setResults(prev => [...newAds, ...prev]);
+  };
+
   const handleAssignAllToProject = async (projectIdToAssign: string, projectName: string) => {
     const copyIds = results.filter(r => r.id && !r.image_url).map(r => r.id!);
     if (copyIds.length === 0) return;
-
     const promises = copyIds.map(id =>
       supabase.from('ad_creatives').update({ project_id: projectIdToAssign }).eq('id', id)
     );
@@ -396,6 +349,31 @@ const AdGeneratorPage = () => {
     setShowProjectPrompt(false);
   };
 
+  // Determine which remix panel to show
+  const remixPanel = remixAd ? (
+    remixAd.image_url ? (
+      <ImageRemixPanel
+        image={{
+          id: remixAd.id || '',
+          image_url: remixAd.image_url,
+          product_name: form.productName || remixAd.headline,
+          style: form.imageStyle,
+          text_config: {},
+        }}
+        workspaceId={activeWorkspace?.id || ''}
+        onClose={() => setRemixAd(null)}
+        onRemixComplete={handleImageRemixComplete}
+      />
+    ) : (
+      <CopyRemixPanel
+        ad={remixAd}
+        workspaceId={activeWorkspace?.id || ''}
+        onClose={() => setRemixAd(null)}
+        onRemixComplete={handleCopyRemixComplete}
+      />
+    )
+  ) : null;
+
   const resultsPanel = (
     <ResultsPanel
       mode={mode}
@@ -404,7 +382,7 @@ const AdGeneratorPage = () => {
       generating={generating}
       onRegenerate={handleGenerate}
       onSwitchToImage={handleSwitchToImage}
-      onRemix={ad => setRemixAd(ad)}
+      onRemix={handleRemixClick}
       onLoadHistory={setResults}
       projectId={projectId}
       imageHistoryOpen={imageHistoryOpen}
@@ -421,13 +399,10 @@ const AdGeneratorPage = () => {
     return (
       <div className="h-[calc(100vh-3.5rem)] flex overflow-hidden -m-3 sm:-m-6 md:-m-8">
         <div className="w-[38%] min-w-[340px] border-r border-border flex flex-col">
-          {/* Calendar context breadcrumb (Connection 3) */}
           {calendarItemId && (
             <div className="px-6 pt-3 pb-0">
-              <button
-                onClick={() => navigate('/dashboard/calendar')}
-                className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors font-heading-bn"
-              >
+              <button onClick={() => navigate('/dashboard/calendar')}
+                className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors font-heading-bn">
                 <ArrowLeft size={12} /> {t('ক্যালেন্ডারে ফিরুন', 'Back to Calendar')}
               </button>
             </div>
@@ -444,7 +419,6 @@ const AdGeneratorPage = () => {
               </div>
             </div>
           )}
-          {/* Copy context chip (Connection 1) */}
           {selectedCopy && mode === 'image' && (
             <div className="px-6 pt-3 pb-0">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/[0.06] border border-primary/15">
@@ -472,25 +446,14 @@ const AdGeneratorPage = () => {
           </div>
           {results.length > 0 && !generating && (
             <HandoffBar
-              mode={mode}
-              hasResults={results.length > 0}
-              isScheduled={isScheduled}
-              hasImage={hasImageResult}
+              mode={mode} hasResults={results.length > 0}
+              isScheduled={isScheduled} hasImage={hasImageResult}
               onCreateImage={handleHandoffToImage}
             />
           )}
         </div>
 
-        <AnimatePresence>
-          {remixAd && (
-            <RemixModal
-              ad={remixAd}
-              onClose={() => setRemixAd(null)}
-              onRemix={handleRemix}
-              remixing={remixing}
-            />
-          )}
-        </AnimatePresence>
+        <AnimatePresence>{remixPanel}</AnimatePresence>
 
         <AnimatePresence>
           {scheduleModal && (
@@ -510,29 +473,21 @@ const AdGeneratorPage = () => {
     <div className="h-[calc(100vh-3.5rem-4rem)] flex flex-col overflow-hidden -m-3 sm:-m-6 md:-m-8">
       <div className="flex bg-card border-b border-border shrink-0">
         {calendarItemId && (
-          <button
-            onClick={() => navigate('/dashboard/calendar')}
-            className="flex items-center gap-1 px-3 text-xs text-primary font-heading-bn"
-          >
+          <button onClick={() => navigate('/dashboard/calendar')}
+            className="flex items-center gap-1 px-3 text-xs text-primary font-heading-bn">
             <ArrowLeft size={12} />
           </button>
         )}
         {(['input', 'results'] as const).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setMobileTab(tab)}
+          <button key={tab} onClick={() => setMobileTab(tab)}
             className={`flex-1 py-3 text-sm font-semibold font-heading-bn transition-colors ${
-              mobileTab === tab
-                ? 'text-primary border-b-2 border-primary'
-                : 'text-muted-foreground'
-            }`}
-          >
+              mobileTab === tab ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+            }`}>
             {tab === 'input' ? t('ইনপুট', 'Input') : t('ফলাফল', 'Results')}
           </button>
         ))}
       </div>
 
-      {/* Copy context chip (mobile) */}
       {selectedCopy && mode === 'image' && mobileTab === 'input' && (
         <div className="px-4 pt-2">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/[0.06] border border-primary/15">
@@ -555,31 +510,18 @@ const AdGeneratorPage = () => {
               onToggleImageHistory={toggleImageHistory}
               generateBtnRef={generateBtnRef}
             />
-          ) : (
-            resultsPanel
-          )}
+          ) : resultsPanel}
         </div>
         {mobileTab === 'results' && results.length > 0 && !generating && (
           <HandoffBar
-            mode={mode}
-            hasResults={results.length > 0}
-            isScheduled={isScheduled}
-            hasImage={hasImageResult}
+            mode={mode} hasResults={results.length > 0}
+            isScheduled={isScheduled} hasImage={hasImageResult}
             onCreateImage={handleHandoffToImage}
           />
         )}
       </div>
 
-      <AnimatePresence>
-        {remixAd && (
-          <RemixModal
-            ad={remixAd}
-            onClose={() => setRemixAd(null)}
-            onRemix={handleRemix}
-            remixing={remixing}
-          />
-        )}
-      </AnimatePresence>
+      <AnimatePresence>{remixPanel}</AnimatePresence>
 
       <AnimatePresence>
         {scheduleModal && (
