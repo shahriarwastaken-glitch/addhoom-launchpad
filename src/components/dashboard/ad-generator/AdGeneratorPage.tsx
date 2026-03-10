@@ -163,8 +163,11 @@ const AdGeneratorPage = () => {
       toast.error(t('প্রথমে একটি শপ তৈরি করুন', 'Create a shop first'));
       return;
     }
-    if (!form.productName.trim()) {
-      toast.error(t('পণ্যের নাম দিন', 'Enter product name'));
+    const productText = mode === 'copy' ? form.productDesc : form.productName;
+    if (!productText.trim()) {
+      toast.error(mode === 'copy'
+        ? t('আপনি কী বিক্রি করছেন তা লিখুন', 'Describe what you are selling')
+        : t('পণ্যের নাম দিন', 'Enter product name'));
       return;
     }
     if (form.platforms.length === 0) {
