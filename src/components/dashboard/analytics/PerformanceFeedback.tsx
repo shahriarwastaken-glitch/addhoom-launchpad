@@ -117,7 +117,7 @@ const PerformanceFeedback = ({ unratedAds, onRate }: PerformanceFeedbackProps) =
 
           {displayedAds.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-4 font-body-bn">
-              {t('সব বিজ্ঞাপন রেট করা হয়েছে! 🎉', 'All ads have been rated! 🎉')}
+              {t('সব বিজ্ঞাপন রেট করা হয়েছে!', 'All ads have been rated!')}
             </p>
           )}
 

@@ -227,7 +227,7 @@ const VideoResultView = ({ result, plan, usageUsed, usageLimit, onReset, onRegen
             className="mb-6 bg-brand-green text-white rounded-2xl px-5 py-3 flex items-center justify-between"
           >
             <span className="text-[15px] font-bold font-heading-bn">
-              🎉 {t('ভিডিও তৈরি হয়েছে! ডাউনলোড করে এখনই পোস্ট করুন।', 'Video created! Download and post now.')}
+              {t('ভিডিও তৈরি হয়েছে! ডাউনলোড করে এখনই পোস্ট করুন।', 'Video created! Download and post now.')}
             </span>
             <button onClick={() => setShowBanner(false)} className="text-white/80 hover:text-white">✕</button>
           </motion.div>

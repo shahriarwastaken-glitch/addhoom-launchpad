@@ -393,7 +393,7 @@ const ProjectDetail = () => {
 
               <button onClick={addAdsToProject} disabled={selectedAds.size === 0}
                 className="w-full py-2.5 rounded-full bg-gradient-cta text-primary-foreground text-sm font-semibold disabled:opacity-50 transition-all">
-                {t(`${lang === 'bn' ? toBn(selectedAds.size) : selectedAds.size}টি যোগ করুন`, `Add ${selectedAds.size} ads`)}
+                {lang === 'bn' ? `${toBn(selectedAds.size)}টি যোগ করুন` : `Add ${selectedAds.size} ads`}
               </button>
             </motion.div>
           </motion.div>

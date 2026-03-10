@@ -101,8 +101,9 @@ const UpcomingContentWidget = () => {
             borderColor: `${festival.color}30`,
           }}
         >
-          <p className="text-sm font-bold font-bn" style={{ color: festival.color }}>
-            {festival.emoji} {lang === 'bn' ? festival.name : festival.en} — {t(`${toBn(festival.daysUntil)} দিন বাকি`, `${festival.daysUntil} days away`)}
+          <p className="text-sm font-bold font-bn flex items-center gap-1.5" style={{ color: festival.color }}>
+            {(() => { const FIcon = festival.icon; return <FIcon size={16} />; })()}
+            {lang === 'bn' ? festival.name : festival.en} — {t(`${toBn(festival.daysUntil)} দিন বাকি`, `${festival.daysUntil} days away`)}
           </p>
           <p className="text-xs text-muted-foreground mt-1 font-bn">
             {t('বিজ্ঞাপন প্রস্তুত আছে?', 'Are your ads ready?')}

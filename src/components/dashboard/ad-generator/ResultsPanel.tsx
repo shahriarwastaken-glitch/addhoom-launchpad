@@ -90,7 +90,7 @@ const ResultsPanel = ({ mode, results, setResults, generating, onRegenerate, onS
         return updated.sort((a, b) => (b.is_winner ? 1 : 0) - (a.is_winner ? 1 : 0));
       });
       toast.success(newVal
-        ? t('🏆 বিজয়ী চিহ্নিত! রিমিক্সে এই প্যাটার্ন ব্যবহার হবে।', '🏆 Marked as winner! Remix will use this pattern.')
+        ? t('বিজয়ী চিহ্নিত! রিমিক্সে এই প্যাটার্ন ব্যবহার হবে।', 'Marked as winner! Remix will use this pattern.')
         : t('বিজয়ী সরানো হয়েছে', 'Removed winner'));
     }
   };

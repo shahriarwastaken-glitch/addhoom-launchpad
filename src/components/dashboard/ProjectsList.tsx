@@ -428,16 +428,16 @@ const ProjectsList = () => {
                 </button>
               </div>
 
-              {/* Emoji picker */}
+              {/* Icon picker */}
               <div className="mb-4">
                 <label className="text-xs text-muted-foreground mb-2 block">{t('আইকন', 'Icon')}</label>
                 <div className="flex flex-wrap gap-1.5">
-                  {QUICK_EMOJIS.map(e => (
-                    <button key={e} onClick={() => setFormEmoji(e)}
-                      className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center transition-all ${
-                        formEmoji === e ? 'bg-primary/10 border-2 border-primary scale-110' : 'bg-secondary hover:bg-secondary/80'
+                  {QUICK_ICONS.map(({ key, icon: Ico }) => (
+                    <button key={key} onClick={() => setFormEmoji(key)}
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                        formEmoji === key ? 'bg-primary/10 border-2 border-primary scale-110' : 'bg-secondary hover:bg-secondary/80'
                       }`}>
-                      {e}
+                      <Ico size={18} className={formEmoji === key ? 'text-primary' : 'text-muted-foreground'} />
                     </button>
                   ))}
                 </div>

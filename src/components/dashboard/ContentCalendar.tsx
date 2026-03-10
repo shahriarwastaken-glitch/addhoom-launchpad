@@ -1079,7 +1079,7 @@ function ListView({ entries, setEntries, t, lang, navigate, isMobile }: {
       selected.has(e.id) ? { ...e, status: action === 'confirm' ? 'confirmed' : 'skipped' } : e
     ));
     setSelected(new Set());
-    toast.success(t(`${toBn(ids.length)}টি আপডেট হয়েছে`, `${ids.length} items updated`));
+    toast.success(lang === 'bn' ? `${toBn(ids.length)}টি আপডেট হয়েছে` : `${ids.length} items updated`);
   };
 
   const handleAction = async (id: string, action: 'confirm' | 'skip' | 'generate') => {
