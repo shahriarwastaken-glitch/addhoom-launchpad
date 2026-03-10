@@ -18,7 +18,12 @@ const COLORS = [
   '#1877F2', '#E4405F', '#1C1B1A', '#00B4D8',
 ];
 
-const QUICK_EMOJIS = ['📁', '🎯', '🔥', '🛍️', '🎊', '✨', '💼', '📣', '🚀', '❤️'];
+const QUICK_ICONS: { key: string; icon: React.ElementType }[] = [
+  { key: 'folder', icon: FolderOpen }, { key: 'target', icon: Target }, { key: 'flame', icon: Flame },
+  { key: 'shopping', icon: ShoppingBag }, { key: 'party', icon: PartyPopper }, { key: 'sparkles', icon: Sparkles },
+  { key: 'briefcase', icon: Briefcase }, { key: 'megaphone', icon: Megaphone }, { key: 'rocket', icon: Rocket },
+  { key: 'heart', icon: Heart },
+];
 
 const QUICK_NAMES_BN = ['ঈদ কালেকশন', 'নতুন স্টক', 'সিজনাল সেল', 'পণ্য লঞ্চ', 'উইকলি অফার'];
 const QUICK_NAMES_EN = ['Eid Collection', 'New Stock', 'Seasonal Sale', 'Product Launch', 'Weekly Offer'];
