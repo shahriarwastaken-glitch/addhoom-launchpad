@@ -154,7 +154,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files[0];
-    if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
+    if (file && file.type.startsWith('image/')) {
       handleFileSelect(file);
     }
   };
