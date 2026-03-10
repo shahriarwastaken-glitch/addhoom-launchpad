@@ -1,12 +1,14 @@
 import { ReactNode, useState, useEffect } from 'react';
 import DashboardNavbar from './DashboardNavbar';
+import DashboardSidebar from './DashboardSidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/contexts/AuthContext';
-import { Bell, Moon, Sun, Target, Video, MessageSquare, LogOut, ChevronDown, Store, X, Settings, Wand2 } from 'lucide-react';
+import { Bell, Moon, Sun, Target, Video, MessageSquare, LogOut, ChevronDown, Store, X, Settings, Wand2, Sparkles } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 
 const mobileItems = [
   { icon: Target, bn: 'হোম', en: 'Home', url: '/dashboard' },
@@ -66,12 +68,16 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
     : user?.email?.[0]?.toUpperCase() || 'A';
 
   return (
-    <>
+    <SidebarProvider>
       <div className="min-h-screen flex w-full">
+        <div className="hidden md:block">
+          <DashboardSidebar />
+        </div>
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top Header */}
           <header className="h-14 flex items-center justify-between border-b border-border bg-card px-2 sm:px-4 flex-shrink-0">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <SidebarTrigger className="hidden md:flex mr-1" />
               {/* Workspace selector */}
               <div className="relative min-w-0">
                 <button
@@ -211,7 +217,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           </NavLink>
         ))}
       </nav>
-    </>
+    </SidebarProvider>
   );
 };
 
