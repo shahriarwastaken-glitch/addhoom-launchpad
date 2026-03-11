@@ -68,6 +68,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <PageMetaManager />
               <ScrollToTop />
               <UpgradeProvider>
                 <UpgradeBridge>
