@@ -1,0 +1,1 @@
+ALTER TABLE profiles ALTER COLUMN plan_key SET DEFAULT 'free';
