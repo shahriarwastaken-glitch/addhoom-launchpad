@@ -1819,17 +1819,23 @@ export type Database = {
           brand_fonts: Json | null
           brand_logo_url: string | null
           brand_tone: string | null
+          color: string | null
           competitor_urls: string[] | null
           created_at: string
           default_language: string | null
+          default_tone: string | null
+          deleted_at: string | null
           dna_last_updated: string | null
           dna_score: number | null
           dna_source: string | null
           extraction_quality: string | null
+          icon_name: string | null
           id: string
           industry: string | null
+          is_default: boolean | null
           key_products: string | null
           language: string
+          member_count: number | null
           niche_tags: string[] | null
           owner_id: string
           platform: string | null
@@ -1841,23 +1847,30 @@ export type Database = {
           style_preferences: Json | null
           target_audience: string | null
           unique_selling: string | null
+          updated_at: string | null
         }
         Insert: {
           brand_colors?: Json | null
           brand_fonts?: Json | null
           brand_logo_url?: string | null
           brand_tone?: string | null
+          color?: string | null
           competitor_urls?: string[] | null
           created_at?: string
           default_language?: string | null
+          default_tone?: string | null
+          deleted_at?: string | null
           dna_last_updated?: string | null
           dna_score?: number | null
           dna_source?: string | null
           extraction_quality?: string | null
+          icon_name?: string | null
           id?: string
           industry?: string | null
+          is_default?: boolean | null
           key_products?: string | null
           language?: string
+          member_count?: number | null
           niche_tags?: string[] | null
           owner_id: string
           platform?: string | null
@@ -1869,23 +1882,30 @@ export type Database = {
           style_preferences?: Json | null
           target_audience?: string | null
           unique_selling?: string | null
+          updated_at?: string | null
         }
         Update: {
           brand_colors?: Json | null
           brand_fonts?: Json | null
           brand_logo_url?: string | null
           brand_tone?: string | null
+          color?: string | null
           competitor_urls?: string[] | null
           created_at?: string
           default_language?: string | null
+          default_tone?: string | null
+          deleted_at?: string | null
           dna_last_updated?: string | null
           dna_score?: number | null
           dna_source?: string | null
           extraction_quality?: string | null
+          icon_name?: string | null
           id?: string
           industry?: string | null
+          is_default?: boolean | null
           key_products?: string | null
           language?: string
+          member_count?: number | null
           niche_tags?: string[] | null
           owner_id?: string
           platform?: string | null
@@ -1897,6 +1917,7 @@ export type Database = {
           style_preferences?: Json | null
           target_audience?: string | null
           unique_selling?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {

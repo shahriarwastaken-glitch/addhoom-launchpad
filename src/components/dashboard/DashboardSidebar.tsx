@@ -9,7 +9,7 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
 } from '@/components/ui/sidebar';
-import { Target, Video, Calendar, MessageSquare, Search, Stethoscope, FolderOpen, Settings, Shield, Zap, Wand2, BarChart3, Sparkles, Coins } from 'lucide-react';
+import { Target, Video, Calendar, MessageSquare, Search, Stethoscope, FolderOpen, Settings, Shield, Zap, Wand2, BarChart3, Sparkles, Coins, Layers } from 'lucide-react';
 
 const items = [
   { icon: Target, bn: 'হোম', en: 'Home', url: '/dashboard' },
@@ -24,6 +24,7 @@ const items = [
   { icon: Coins, bn: 'ক্রেডিট', en: 'Credits', url: '/dashboard/credits' },
   { icon: Zap, bn: 'ধুম স্কোর', en: 'Dhoom Score', url: '/dashboard/dhoom-score' },
   { icon: BarChart3, bn: 'বিশ্লেষণ', en: 'Analytics', url: '/dashboard/analytics' },
+  { icon: Layers, bn: 'ওয়ার্কস্পেস', en: 'Workspaces', url: '/dashboard/workspaces' },
   { icon: Settings, bn: 'সেটিংস', en: 'Settings', url: '/dashboard/settings' },
 ];
 
