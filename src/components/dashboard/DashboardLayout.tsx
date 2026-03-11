@@ -26,7 +26,7 @@ const mobileItems = [
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const { t } = useLanguage();
   const { dark, toggleTheme } = useTheme();
-  const { user, profile, activeWorkspace, workspaces, setActiveWorkspaceId, signOut } = useAuth();
+  const { user, profile, activeWorkspace, workspaces, setActiveWorkspaceId, signOut, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [showCreateWs, setShowCreateWs] = useState(false);
