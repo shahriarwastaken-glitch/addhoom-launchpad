@@ -83,8 +83,8 @@ export default function CreditsPage() {
   const usedPercent = monthlyCredits > 0 ? Math.min(100, (usedCredits / monthlyCredits) * 100) : 0;
   const isLow = balance < monthlyCredits * 0.3;
 
-  const resetDays = resetAt
-    ? formatDistanceToNow(new Date(new Date(resetAt).getTime() + 30 * 24 * 60 * 60 * 1000), { addSuffix: false })
+  const resetDateFormatted = resetAt
+    ? format(new Date(resetAt), 'MMM d, yyyy')
     : null;
 
   return (
