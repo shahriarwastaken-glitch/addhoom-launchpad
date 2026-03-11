@@ -1,7 +1,11 @@
-User-agent: Googlebot
+User-agent: *
 Allow: /
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /onboarding
+Disallow: /reset-password
 
-User-agent: Bingbot
+User-agent: Googlebot
 Allow: /
 
 User-agent: Twitterbot
@@ -10,5 +14,4 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
+Sitemap: https://addhoom.lovable.app/sitemap.xml
