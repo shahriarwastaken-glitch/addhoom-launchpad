@@ -1,8 +1,11 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Coins, MessageSquare } from 'lucide-react';
+import { Zap, Coins, MessageSquare, CreditCard, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useState, useMemo } from 'react';
+import { toast } from '@/hooks/use-toast';
 
 type UpgradeType = 'video' | 'general' | 'credits';
 
@@ -34,12 +37,49 @@ const ACTION_LABELS: Record<string, { bn: string; en: string }> = {
   'remix-image-fresh': { bn: 'ইমেজ রিমিক্স করতে', en: 'remix this image' },
 };
 
+const PLAN_CARDS = [
+  { key: 'starter', name: 'Starter', priceBDT: '৳799', priceUSD: '$19', credits: '5K' },
+  { key: 'pro', name: 'Pro', priceBDT: '৳1,999', priceUSD: '$49', credits: '15K' },
+  { key: 'agency', name: 'Agency', priceBDT: '৳4,999', priceUSD: '$99', credits: '35K' },
+];
+
 const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeModalProps) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
   const isAgency = profile?.plan_key === 'agency';
   const actionLabel = creditInfo?.action ? ACTION_LABELS[creditInfo.action] : null;
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+
+  const isBD = useMemo(() => {
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Dhaka'; } catch { return false; }
+  }, []);
+  const currency = isBD ? 'BDT' : 'USD';
+
+  const initiateCheckout = async (planKey: string) => {
+    setCheckoutLoading(planKey);
+    try {
+      const isUpgrade = profile?.plan_key && profile.plan_key !== 'free' && profile.plan_key !== planKey;
+      const { data, error } = await supabase.functions.invoke('initiate-payment', {
+        body: { plan_key: planKey, currency, is_upgrade: isUpgrade },
+      });
+
+      if (error) throw error;
+
+      if (data.dev_mode) {
+        toast({ title: '✅ ' + t('প্ল্যান সক্রিয়!', 'Plan Activated!'), description: data.message_en });
+        await refreshProfile();
+        onClose();
+      } else if (data.gateway_url) {
+        window.location.href = data.gateway_url;
+        return;
+      }
+    } catch (e) {
+      console.error('Checkout error:', e);
+      toast({ title: t('ত্রুটি', 'Error'), description: t('পেমেন্ট শুরু করতে ব্যর্থ।', 'Failed to initiate payment.'), variant: 'destructive' });
+    }
+    setCheckoutLoading(null);
+  };
 
   return (
     <AnimatePresence>
@@ -91,7 +131,6 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
                 )}
               </div>
 
-              {/* Credit info */}
               {type === 'credits' && creditInfo && (
                 <div className="bg-muted/50 rounded-xl p-4 space-y-2 text-center">
                   <p className="text-sm text-muted-foreground">
@@ -122,45 +161,43 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
                 </div>
               ) : (
                 <>
-                  {/* Plan comparison */}
+                  {/* Plan comparison with checkout */}
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="rounded-2xl border border-border p-3 space-y-1 bg-secondary/50">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Starter</p>
-                      <p className="text-sm font-bold text-foreground">5K</p>
-                      <p className="text-[10px] text-muted-foreground">{t('ক্রেডিট', 'credits')}</p>
-                    </div>
-                    <div className={`rounded-2xl border-2 p-3 space-y-1 relative ${
-                      profile?.plan_key === 'starter' ? 'border-primary bg-primary/5' : 'border-border bg-secondary/50'
-                    }`}>
-                      {profile?.plan_key === 'starter' && (
-                        <span className="absolute -top-2 right-2 bg-primary text-primary-foreground text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase">
-                          {t('সুপারিশ', 'Best')}
-                        </span>
-                      )}
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-primary">Pro</p>
-                      <p className="text-sm font-bold text-foreground">15K</p>
-                      <p className="text-[10px] text-muted-foreground">{t('ক্রেডিট', 'credits')}</p>
-                    </div>
-                    <div className={`rounded-2xl border-2 p-3 space-y-1 relative ${
-                      profile?.plan_key === 'pro' ? 'border-primary bg-primary/5' : 'border-border bg-secondary/50'
-                    }`}>
-                      {profile?.plan_key === 'pro' && (
-                        <span className="absolute -top-2 right-2 bg-primary text-primary-foreground text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase">
-                          {t('সুপারিশ', 'Best')}
-                        </span>
-                      )}
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-amber-500">Agency</p>
-                      <p className="text-sm font-bold text-foreground">35K</p>
-                      <p className="text-[10px] text-muted-foreground">{t('ক্রেডিট', 'credits')}</p>
-                    </div>
-                  </div>
+                    {PLAN_CARDS.map(plan => {
+                      const isCurrent = profile?.plan_key === plan.key;
+                      const isRecommended = (profile?.plan_key === 'starter' || profile?.plan_key === 'free') && plan.key === 'pro'
+                        || profile?.plan_key === 'pro' && plan.key === 'agency';
+                      const price = currency === 'BDT' ? plan.priceBDT : plan.priceUSD;
 
-                  <button
-                    onClick={() => { onClose(); navigate('/pricing'); }}
-                    className="w-full bg-gradient-cta text-primary-foreground rounded-full py-3 text-sm font-bold shadow-orange-glow hover:opacity-90 transition-opacity"
-                  >
-                    {t('আপগ্রেড করুন →', 'Upgrade Now →')}
-                  </button>
+                      return (
+                        <div key={plan.key} className={`rounded-2xl border-2 p-3 space-y-1 relative ${
+                          isRecommended ? 'border-primary bg-primary/5' : 'border-border bg-secondary/50'
+                        }`}>
+                          {isRecommended && (
+                            <span className="absolute -top-2 right-2 bg-primary text-primary-foreground text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase">
+                              {t('সুপারিশ', 'Best')}
+                            </span>
+                          )}
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{plan.name}</p>
+                          <p className="text-sm font-bold text-foreground">{price}</p>
+                          <p className="text-[10px] text-muted-foreground">{plan.credits} {t('ক্রেডিট', 'credits')}</p>
+                          {!isCurrent && (
+                            <button
+                              onClick={() => initiateCheckout(plan.key)}
+                              disabled={!!checkoutLoading}
+                              className="!mt-2 w-full bg-primary text-primary-foreground rounded-lg py-1 text-[10px] font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
+                            >
+                              {checkoutLoading === plan.key ? <Loader2 size={10} className="animate-spin" /> : <CreditCard size={10} />}
+                              {t('নিন', 'Get')}
+                            </button>
+                          )}
+                          {isCurrent && (
+                            <p className="!mt-2 text-[10px] text-center text-primary font-medium">{t('বর্তমান', 'Current')}</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </>
               )}
 
