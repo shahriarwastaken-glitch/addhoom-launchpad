@@ -169,9 +169,8 @@ const DhoomScoreChecker = () => {
           <button
             onClick={handleEvaluate}
             disabled={loading || (!headline && !body)}
-            className="w-full bg-gradient-cta text-primary-foreground font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex flex-col items-center justify-center gap-1"
+            className="w-full bg-gradient-cta text-primary-foreground font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            <span className="flex items-center gap-2">
             {loading ? (
               <>
                 <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
@@ -183,6 +182,9 @@ const DhoomScoreChecker = () => {
               <>{t('স্কোর দেখুন', 'Check Score')} <Sparkles size={14} /></>
             )}
           </button>
+          <p className="text-center mt-1" style={{ color: '#00B96B' }}>
+            <span className="text-[11px] font-body">· {t('ফ্রি', 'Free')}</span>
+          </p>
         </div>
 
         {/* Results Panel */}
