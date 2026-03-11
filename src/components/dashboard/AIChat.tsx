@@ -404,7 +404,7 @@ const AIChat = () => {
       <div className="hidden lg:flex flex-col w-[280px] bg-card border-r border-border flex-shrink-0">
         {/* Sidebar Header */}
         <div className="p-5 pb-4">
-          <h2 className="text-lg font-bold font-heading-bn text-foreground">ধুম AI</h2>
+          <h2 className="text-lg font-bold font-heading-bn text-foreground">DhoomAi</h2>
           <p className="text-xs text-muted-foreground font-body-bn">
             {t('আপনার বিজ্ঞাপন বিশেষজ্ঞ', 'Your ad expert')}
           </p>
