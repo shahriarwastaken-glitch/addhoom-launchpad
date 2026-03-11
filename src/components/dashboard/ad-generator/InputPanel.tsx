@@ -2,6 +2,7 @@ import { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import OnceTooltip from '@/components/ui/OnceTooltip';
+import CreditCostLabel from '@/components/ui/CreditCostLabel';
 import {
   PenLine, ImageIcon, Facebook, Instagram, ShoppingBag, Search,
   Target, Sparkles, Upload, Rocket, History,
