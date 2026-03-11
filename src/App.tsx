@@ -66,38 +66,40 @@ const PageMetaManager = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <AuthProvider>
-        <SessionManager>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <PageMetaManager />
-              <ScrollToTop />
-              <UpgradeProvider>
-                <UpgradeBridge>
-                  <ImpersonationBanner />
-                  <ErrorBoundary>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/auth" element={<Auth />} />
-                      <Route path="/reset-password" element={<ResetPassword />} />
-                      <Route path="/onboarding" element={<Onboarding />} />
-                      <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                      <Route path="/admin/*" element={<AdminDashboardNew />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </ErrorBoundary>
-                </UpgradeBridge>
-              </UpgradeProvider>
-            </BrowserRouter>
-          </TooltipProvider>
-        </SessionManager>
-      </AuthProvider>
-    </LanguageProvider>
-  </QueryClientProvider>
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <LanguageProvider>
+        <AuthProvider>
+          <SessionManager>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <PageMetaManager />
+                <ScrollToTop />
+                <UpgradeProvider>
+                  <UpgradeBridge>
+                    <ImpersonationBanner />
+                    <ErrorBoundary>
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/auth" element={<Auth />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
+                        <Route path="/onboarding" element={<Onboarding />} />
+                        <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                        <Route path="/admin/*" element={<AdminDashboardNew />} />
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </ErrorBoundary>
+                  </UpgradeBridge>
+                </UpgradeProvider>
+              </BrowserRouter>
+            </TooltipProvider>
+          </SessionManager>
+        </AuthProvider>
+      </LanguageProvider>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;
