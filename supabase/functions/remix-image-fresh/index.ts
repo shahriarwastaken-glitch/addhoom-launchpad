@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { serverError, unauthorizedError } from "../_shared/errors.ts";
 import { piapiGenerateImage, downloadImage } from "../_shared/piapi.ts";
+import { deductCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -42,6 +43,15 @@ serve(async (req) => {
 
     if (!workspace_id || !source_image_id) {
       return new Response(JSON.stringify({ success: false, message: "Missing fields" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // Credit check — charge per variation
+    const creditResult = await deductCredits({
+      supabase, userId: user!.id, workspaceId: workspace_id,
+      actionKey: 'image_generation', quantity: variations,
+    });
+    if (!creditResult.success) {
+      return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 125 * variations);
     }
 
     const { data: workspace } = await supabase.from("workspaces").select("id, owner_id, brand_colors").eq("id", workspace_id).eq("owner_id", user.id).single();

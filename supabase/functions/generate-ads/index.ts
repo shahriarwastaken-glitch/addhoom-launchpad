@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { callGemini, getSystemPrompt } from "../_shared/gemini.ts";
 import { serverError, aiError, unauthorizedError } from "../_shared/errors.ts";
+import { deductCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 import { AD_COPY_SYSTEM_PROMPT, buildCopyBrief, calculateBriefCompleteness } from "../_shared/adCopyPrompt.ts";
 
 const corsHeaders = {
@@ -74,6 +75,15 @@ serve(async (req) => {
     const finalLanguage = language || 'en';
     const finalTone = tone || 'friendly';
     const finalVariations = variations || num_variations || 3;
+
+    // Credit check
+    const creditResult = await deductCredits({
+      supabase, userId: user.id, workspaceId: workspace_id,
+      actionKey: 'ad_copy', quantity: 1,
+    });
+    if (!creditResult.success) {
+      return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 10);
+    }
 
     // Enforce plan limits on variations
     const { data: profile } = await supabase

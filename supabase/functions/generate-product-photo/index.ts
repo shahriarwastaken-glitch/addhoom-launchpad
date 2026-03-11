@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { piapiGenerateImage, downloadImage } from "../_shared/piapi.ts";
+import { deductCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -55,6 +56,15 @@ serve(async (req) => {
 
     if (!workspace_id || !product_image_base64 || !scene) {
       throw new Error('Missing required fields');
+    }
+
+    // Credit check
+    const creditResult = await deductCredits({
+      supabase, userId: user.id, workspaceId: workspace_id,
+      actionKey: 'image_generation', quantity: 1,
+    });
+    if (!creditResult.success) {
+      return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 125);
     }
 
     // Upload source image to storage to get URL for PiAPI

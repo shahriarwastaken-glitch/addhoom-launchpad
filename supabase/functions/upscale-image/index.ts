@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { wavespeedCreate, wavespeedPoll, downloadFile } from "../_shared/wavespeed.ts";
+import { deductCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -40,6 +41,15 @@ serve(async (req) => {
 
     if (!workspace_id) throw new Error('Missing workspace_id');
     if (!image_base64 && !image_url) throw new Error('Missing image');
+
+    // Credit check
+    const creditResult = await deductCredits({
+      supabase, userId: user.id, workspaceId: workspace_id,
+      actionKey: 'upscale', quantity: 1,
+    });
+    if (!creditResult.success) {
+      return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 100);
+    }
 
     // Get source image URL
     let sourceImageUrl = image_url || '';

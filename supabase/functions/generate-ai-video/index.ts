@@ -1,6 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { wavespeedCreate, wavespeedPoll, downloadFile } from '../_shared/wavespeed.ts';
+import { deductCredits, insufficientCreditsResponse } from '../_shared/credits.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,6 +35,15 @@ serve(async (req) => {
 
     if (!workspace_id || !motion_prompt) {
       throw new Error('Missing required fields');
+    }
+
+    // Credit check
+    const creditResult = await deductCredits({
+      supabase, userId: user.id, workspaceId: workspace_id,
+      actionKey: 'video_generation', quantity: 1,
+    });
+    if (!creditResult.success) {
+      return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 330);
     }
 
     // Determine source image URL

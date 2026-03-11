@@ -957,6 +957,108 @@ export type Database = {
           },
         ]
       }
+      credit_costs: {
+        Row: {
+          action_key: string
+          action_label: string
+          category: string
+          credits: number
+          id: string
+          is_active: boolean | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          action_key: string
+          action_label: string
+          category: string
+          credits: number
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          action_key?: string
+          action_label?: string
+          category?: string
+          credits?: number
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_costs_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_transactions: {
+        Row: {
+          action_key: string | null
+          balance_after: number
+          created_at: string | null
+          created_by: string | null
+          credits_delta: number
+          description: string | null
+          id: string
+          transaction_type: string
+          user_id: string
+          workspace_id: string | null
+        }
+        Insert: {
+          action_key?: string | null
+          balance_after: number
+          created_at?: string | null
+          created_by?: string | null
+          credits_delta: number
+          description?: string | null
+          id?: string
+          transaction_type: string
+          user_id: string
+          workspace_id?: string | null
+        }
+        Update: {
+          action_key?: string | null
+          balance_after?: number
+          created_at?: string | null
+          created_by?: string | null
+          credits_delta?: number
+          description?: string | null
+          id?: string
+          transaction_type?: string
+          user_id?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transactions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_templates: {
         Row: {
           html_content: string
@@ -1177,6 +1279,7 @@ export type Database = {
           id: string
           is_popular: boolean | null
           limits: Json | null
+          monthly_credits: number
           name: string
           plan_key: string
           price_annual_bdt: number | null
@@ -1197,6 +1300,7 @@ export type Database = {
           id?: string
           is_popular?: boolean | null
           limits?: Json | null
+          monthly_credits?: number
           name: string
           plan_key: string
           price_annual_bdt?: number | null
@@ -1217,6 +1321,7 @@ export type Database = {
           id?: string
           is_popular?: boolean | null
           limits?: Json | null
+          monthly_credits?: number
           name?: string
           plan_key?: string
           price_annual_bdt?: number | null
@@ -1293,6 +1398,8 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          credit_balance: number
+          credits_reset_at: string | null
           email: string | null
           full_name: string | null
           id: string
@@ -1307,6 +1414,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          credit_balance?: number
+          credits_reset_at?: string | null
           email?: string | null
           full_name?: string | null
           id: string
@@ -1321,6 +1430,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          credit_balance?: number
+          credits_reset_at?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
@@ -1790,6 +1901,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_adjust_credits: {
+        Args: {
+          p_admin_id: string
+          p_credits_delta: number
+          p_description: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      deduct_credits_atomic: {
+        Args: {
+          p_action_key: string
+          p_action_label: string
+          p_credits: number
+          p_user_id: string
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1799,6 +1929,7 @@ export type Database = {
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      reset_monthly_credits: { Args: never; Returns: undefined }
       upsert_api_usage_stats: {
         Args: {
           p_calls_failed?: number

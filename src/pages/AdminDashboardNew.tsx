@@ -18,6 +18,7 @@ import AdminAnnouncements from '@/components/admin/AdminAnnouncements';
 import AdminCoupons from '@/components/admin/AdminCoupons';
 import AdminEmails from '@/components/admin/AdminEmails';
 import AdminAuditLog from '@/components/admin/AdminAuditLog';
+import AdminCredits from '@/components/admin/AdminCredits';
 
 export default function AdminDashboardNew() {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -42,6 +43,7 @@ export default function AdminDashboardNew() {
           <Route path="coupons" element={<AdminCoupons />} />
           <Route path="emails" element={<AdminEmails />} />
           <Route path="audit-log" element={<AdminAuditLog />} />
+          <Route path="credits" element={<AdminCredits />} />
           {isSuperAdmin && (
             <Route path="admins" element={<AdminManageAdmins />} />
           )}

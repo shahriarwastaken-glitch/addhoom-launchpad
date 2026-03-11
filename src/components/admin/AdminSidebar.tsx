@@ -25,7 +25,8 @@ import {
   Mail,
   Wrench,
   FileText,
-  LogOut
+  LogOut,
+  Coins
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -52,6 +53,7 @@ const controlNavItems = [
 
 const systemNavItems = [
   { icon: Key, label: 'API কী', path: '/admin/api-keys' },
+  { icon: Coins, label: 'ক্রেডিট', path: '/admin/credits' },
   { icon: Mail, label: 'ইমেইল টেমপ্লেট', path: '/admin/emails' },
   { icon: Wrench, label: 'সিস্টেম সেটিংস', path: '/admin/settings' },
   { icon: FileText, label: 'অডিট লগ', path: '/admin/audit-log' },

@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { serverError, unauthorizedError } from "../_shared/errors.ts";
 import { wavespeedCreate, wavespeedPoll, downloadFile } from "../_shared/wavespeed.ts";
+import { deductCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -69,6 +70,15 @@ serve(async (req) => {
         JSON.stringify({ success: false, code: 400, message: "At least one scene required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Credit check — charge per scene
+    const creditResult = await deductCredits({
+      supabase, userId: user.id, workspaceId: workspace_id,
+      actionKey: 'image_generation', quantity: selected_scenes.length,
+    });
+    if (!creditResult.success) {
+      return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 125 * selected_scenes.length);
     }
 
     const { data: workspace } = await supabase
