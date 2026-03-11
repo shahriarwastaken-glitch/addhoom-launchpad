@@ -76,6 +76,15 @@ serve(async (req) => {
     const finalTone = tone || 'friendly';
     const finalVariations = variations || num_variations || 3;
 
+    // Credit check
+    const creditResult = await deductCredits({
+      supabase, userId: user.id, workspaceId: workspace_id,
+      actionKey: 'ad_copy', quantity: 1,
+    });
+    if (!creditResult.success) {
+      return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 10);
+    }
+
     // Enforce plan limits on variations
     const { data: profile } = await supabase
       .from("profiles").select("plan").eq("id", user.id).single();

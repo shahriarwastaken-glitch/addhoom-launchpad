@@ -27,8 +27,19 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) throw new Error('Unauthorized');
 
-    const { prompt, tab_type } = await req.json();
+    const { prompt, tab_type, workspace_id } = await req.json();
     if (!prompt) throw new Error('Missing prompt');
+
+    // Credit check
+    if (workspace_id) {
+      const creditResult = await deductCredits({
+        supabase, userId: user.id, workspaceId: workspace_id,
+        actionKey: 'prompt_enhance', quantity: 1,
+      });
+      if (!creditResult.success) {
+        return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 10);
+      }
+    }
 
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) throw new Error('GEMINI_API_KEY not configured');

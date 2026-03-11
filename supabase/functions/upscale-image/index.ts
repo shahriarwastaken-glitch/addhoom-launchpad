@@ -42,6 +42,15 @@ serve(async (req) => {
     if (!workspace_id) throw new Error('Missing workspace_id');
     if (!image_base64 && !image_url) throw new Error('Missing image');
 
+    // Credit check
+    const creditResult = await deductCredits({
+      supabase, userId: user.id, workspaceId: workspace_id,
+      actionKey: 'upscale', quantity: 1,
+    });
+    if (!creditResult.success) {
+      return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 100);
+    }
+
     // Get source image URL
     let sourceImageUrl = image_url || '';
 

@@ -58,6 +58,15 @@ serve(async (req) => {
       throw new Error('Missing required fields');
     }
 
+    // Credit check
+    const creditResult = await deductCredits({
+      supabase, userId: user.id, workspaceId: workspace_id,
+      actionKey: 'image_generation', quantity: 1,
+    });
+    if (!creditResult.success) {
+      return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 125);
+    }
+
     // Upload source image to storage to get URL for PiAPI
     const srcBytes = Uint8Array.from(atob(product_image_base64), c => c.charCodeAt(0));
     const srcPath = `product-photo/${workspace_id}/src_${Date.now()}.png`;

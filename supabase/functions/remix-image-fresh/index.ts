@@ -45,6 +45,15 @@ serve(async (req) => {
       return new Response(JSON.stringify({ success: false, message: "Missing fields" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // Credit check — charge per variation
+    const creditResult = await deductCredits({
+      supabase, userId: user!.id, workspaceId: workspace_id,
+      actionKey: 'image_generation', quantity: variations,
+    });
+    if (!creditResult.success) {
+      return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 125 * variations);
+    }
+
     const { data: workspace } = await supabase.from("workspaces").select("id, owner_id, brand_colors").eq("id", workspace_id).eq("owner_id", user.id).single();
     if (!workspace) return new Response(JSON.stringify({ success: false, message: "Workspace not found" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 

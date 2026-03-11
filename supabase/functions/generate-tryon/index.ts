@@ -89,6 +89,15 @@ serve(async (req) => {
       throw new Error('Missing required fields');
     }
 
+    // Credit check
+    const creditResult = await deductCredits({
+      supabase, userId: user.id, workspaceId: workspace_id,
+      actionKey: 'tryon', quantity: 1,
+    });
+    if (!creditResult.success) {
+      return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 125);
+    }
+
     const FASHN_API_KEY = Deno.env.get('FASHN_API_KEY');
     if (!FASHN_API_KEY) throw new Error('FASHN_API_KEY not configured');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
