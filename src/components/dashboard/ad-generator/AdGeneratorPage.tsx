@@ -279,7 +279,11 @@ const AdGeneratorPage = () => {
       }
     } catch (e: any) {
       console.error(e);
-      toast.error(t('AI সমস্যা। আবার চেষ্টা করুন।', 'AI error. Please try again.'));
+      // Check for 402 insufficient credits
+      const { handleCreditError } = await import('@/utils/creditErrorHandler');
+      if (!handleCreditError(e)) {
+        toast.error(t('AI সমস্যা। আবার চেষ্টা করুন।', 'AI error. Please try again.'));
+      }
     } finally {
       setGenerating(false);
     }
