@@ -31,10 +31,7 @@ const FirstTimeHelperBar = () => {
   if (!visible) return null;
 
   return (
-    <div
-      className="w-full px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-2 sm:gap-3"
-      style={{ backgroundColor: '#FFF3E8', borderBottom: '1px solid rgba(255,81,0,0.15)' }}
-    >
+    <div className="w-full px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-2 sm:gap-3 bg-primary/10 border-b border-primary/15">
       <span className="text-sm text-foreground font-medium">👋 Ready to create your first ad?</span>
       <div className="flex items-center gap-2">
         <button
