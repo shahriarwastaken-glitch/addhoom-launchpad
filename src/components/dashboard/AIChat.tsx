@@ -682,9 +682,7 @@ const AIChat = () => {
                 return (
                   <div key={i} className={`flex mb-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     {msg.role === 'model' && (
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-[hsl(var(--brand-yellow))] flex items-center justify-center text-primary-foreground text-[10px] font-bold mr-2 flex-shrink-0 mt-1 font-heading-bn">
-                        ধু
-                      </div>
+                      <img src="/mascot/mascot-ai.png" alt="Dhoom AI" className="w-7 h-7 rounded-full object-cover mr-2 flex-shrink-0 mt-1" />
                     )}
                     <div className={`max-w-[80%] sm:max-w-[70%] ${msg.role === 'user' ? 'max-w-[70%]' : ''}`}>
                       <div className={`rounded-[20px] px-[18px] py-3 text-[15px] leading-[1.65] font-body-bn ${
