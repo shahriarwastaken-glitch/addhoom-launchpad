@@ -26,7 +26,8 @@ const BillingTab = () => {
   const planCredits = useMemo(() => {
     if (planKey === 'agency') return 35000;
     if (planKey === 'pro') return 15000;
-    return 5000;
+    if (planKey === 'starter') return 5000;
+    return 0;
   }, [planKey]);
   const creditBalance = profile?.credit_balance ?? 0;
   const creditPct = planCredits > 0 ? Math.round(((planCredits - creditBalance) / planCredits) * 100) : 0;
