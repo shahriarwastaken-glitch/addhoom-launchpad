@@ -1321,6 +1321,72 @@ export type Database = {
           },
         ]
       }
+      pending_transactions: {
+        Row: {
+          amount: number
+          bank_tran_id: string | null
+          created_at: string | null
+          currency: string
+          expires_at: string | null
+          id: string
+          is_upgrade: boolean | null
+          plan_id: string | null
+          plan_key: string
+          previous_plan_key: string | null
+          status: string | null
+          tran_id: string
+          user_id: string
+          val_id: string | null
+        }
+        Insert: {
+          amount: number
+          bank_tran_id?: string | null
+          created_at?: string | null
+          currency?: string
+          expires_at?: string | null
+          id?: string
+          is_upgrade?: boolean | null
+          plan_id?: string | null
+          plan_key: string
+          previous_plan_key?: string | null
+          status?: string | null
+          tran_id: string
+          user_id: string
+          val_id?: string | null
+        }
+        Update: {
+          amount?: number
+          bank_tran_id?: string | null
+          created_at?: string | null
+          currency?: string
+          expires_at?: string | null
+          id?: string
+          is_upgrade?: boolean | null
+          plan_id?: string | null
+          plan_key?: string
+          previous_plan_key?: string | null
+          status?: string | null
+          tran_id?: string
+          user_id?: string
+          val_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pending_transactions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pending_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plans: {
         Row: {
           color: string | null
@@ -1337,7 +1403,9 @@ export type Database = {
           name: string
           plan_key: string
           price_annual_bdt: number | null
+          price_annual_usd: number | null
           price_monthly_bdt: number
+          price_usd: number | null
           sslcommerz_plan_code: string | null
           status: string | null
           trial_days: number | null
@@ -1358,7 +1426,9 @@ export type Database = {
           name: string
           plan_key: string
           price_annual_bdt?: number | null
+          price_annual_usd?: number | null
           price_monthly_bdt?: number
+          price_usd?: number | null
           sslcommerz_plan_code?: string | null
           status?: string | null
           trial_days?: number | null
@@ -1379,7 +1449,9 @@ export type Database = {
           name?: string
           plan_key?: string
           price_annual_bdt?: number | null
+          price_annual_usd?: number | null
           price_monthly_bdt?: number
+          price_usd?: number | null
           sslcommerz_plan_code?: string | null
           status?: string | null
           trial_days?: number | null
@@ -1669,6 +1741,7 @@ export type Database = {
       subscriptions: {
         Row: {
           amount: number | null
+          bank_tran_id: string | null
           cancel_at_period_end: boolean | null
           cancelled_at: string | null
           created_at: string | null
@@ -1681,9 +1754,11 @@ export type Database = {
           status: string
           updated_at: string | null
           user_id: string
+          val_id: string | null
         }
         Insert: {
           amount?: number | null
+          bank_tran_id?: string | null
           cancel_at_period_end?: boolean | null
           cancelled_at?: string | null
           created_at?: string | null
@@ -1696,9 +1771,11 @@ export type Database = {
           status?: string
           updated_at?: string | null
           user_id: string
+          val_id?: string | null
         }
         Update: {
           amount?: number | null
+          bank_tran_id?: string | null
           cancel_at_period_end?: boolean | null
           cancelled_at?: string | null
           created_at?: string | null
@@ -1711,6 +1788,7 @@ export type Database = {
           status?: string
           updated_at?: string | null
           user_id?: string
+          val_id?: string | null
         }
         Relationships: [
           {
