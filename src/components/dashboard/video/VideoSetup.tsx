@@ -4,6 +4,7 @@ import { Upload, X, GripVertical, Play, Square, Rocket, ChevronDown, ChevronUp, 
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import CreditCostLabel from '@/components/ui/CreditCostLabel';
 import { toast } from 'sonner';
 import type {
   VideoFormData, VideoFormat, VideoStyle, MusicTrack,
@@ -645,6 +646,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
               {generating ? t('তৈরি হচ্ছে...', 'Generating...') : t('ভিডিও তৈরি করুন', 'Create Video')}
             </button>
           </div>
+          <p className="text-center mt-1"><CreditCostLabel credits={330} /></p>
         </div>
       </div>
     </div>

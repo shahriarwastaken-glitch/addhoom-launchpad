@@ -461,7 +461,7 @@ const ProductPhotoTab = () => {
             generateLabel={t('প্রোডাক্ট ফটো তৈরি করুন', 'Generate Product Photo')}
             generateIcon={<Camera className="h-4 w-4 mr-2" />}
             tabType="product_photo"
-            costNote={`· 125 ${t('ক্রেডিট', 'credits')}`}
+            creditCost={125}
           />
         )}
 
