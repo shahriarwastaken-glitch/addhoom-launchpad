@@ -13,10 +13,10 @@ const LandingFooter = () => {
 
   return (
     <footer style={{ background: '#161514', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-      <div className="max-w-[1200px] mx-auto px-6 py-20">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-12 sm:py-20">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
           {/* Brand */}
-          <div>
+          <div className="col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2.5">
               <img src={mascot} alt="AdDhoom Studio" className="h-9 w-auto object-contain" />
               <span className="font-heading-en text-lg font-semibold text-white">AdDhoom Studio</span>
@@ -63,7 +63,7 @@ const LandingFooter = () => {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-16 pt-6 flex flex-wrap items-center justify-between gap-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="mt-10 sm:mt-16 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           <span className="font-body-en text-[13px]" style={{ color: 'rgba(255,255,255,0.3)' }}>© 2025 AdDhoom Studio. All rights reserved.</span>
           <div className="flex gap-1">
             {['EN', 'বাংলা'].map(l => (
