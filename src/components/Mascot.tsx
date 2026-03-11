@@ -25,10 +25,11 @@ interface MascotProps {
   variant: MascotVariant;
   size?: number;
   animate?: boolean;
+  priority?: boolean;
   className?: string;
 }
 
-export function Mascot({ variant, size = 80, animate = false, className }: MascotProps) {
+export function Mascot({ variant, size = 80, animate = false, priority = false, className }: MascotProps) {
   return (
     <img
       src={MASCOT_PATHS[variant]}
