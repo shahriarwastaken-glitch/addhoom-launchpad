@@ -182,20 +182,23 @@ const ContentCalendar = () => {
           )}
         </div>
         <FeatureTooltip tooltipKey="calendar_generate" position="bottom">
-          <button
-            onClick={() => setShowGenModal(true)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
-              hasExisting
-                ? 'border border-border text-foreground hover:bg-secondary'
-                : 'bg-gradient-cta text-primary-foreground shadow-orange-glow hover:scale-[1.02]'
-            }`}
-          >
-            <Sparkles size={16} />
-            {hasExisting
-              ? t('পুনরায় তৈরি করুন', 'Regenerate')
-              : t('৯০ দিনের পরিকল্পনা তৈরি করুন', 'Generate 90-Day Plan')
-            }
-          </button>
+          <div className="flex flex-col items-end gap-0.5">
+            <button
+              onClick={() => setShowGenModal(true)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                hasExisting
+                  ? 'border border-border text-foreground hover:bg-secondary'
+                  : 'bg-gradient-cta text-primary-foreground shadow-orange-glow hover:scale-[1.02]'
+              }`}
+            >
+              <Sparkles size={16} />
+              {hasExisting
+                ? t('পুনরায় তৈরি করুন', 'Regenerate')
+                : t('৯০ দিনের পরিকল্পনা তৈরি করুন', 'Generate 90-Day Plan')
+              }
+            </button>
+            <span className="text-[11px] font-body" style={{ color: '#9E9E9E' }}>· 500 {t('ক্রেডিট', 'credits')}</span>
+          </div>
         </FeatureTooltip>
       </div>
 

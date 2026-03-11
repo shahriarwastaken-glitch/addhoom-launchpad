@@ -248,6 +248,7 @@ const AIMotionTab = () => {
                   >
                     {enhancing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
                     {t('উন্নত করুন', 'Enhance')}
+                    <span className="text-[9px] opacity-70">· 10</span>
                   </button>
                 </div>
                 <textarea
