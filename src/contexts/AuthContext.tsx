@@ -34,7 +34,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [workspaces, setWorkspaces] = useState<any[]>([]);
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null);
+  const [activeWorkspaceId, setActiveWorkspaceIdState] = useState<string | null>(
+    () => localStorage.getItem('active_workspace_id')
+  );
+
+  const setActiveWorkspaceId = (id: string) => {
+    setActiveWorkspaceIdState(id);
+    localStorage.setItem('active_workspace_id', id);
+  };
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase

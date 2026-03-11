@@ -266,6 +266,8 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           </NavLink>
         ))}
       </nav>
+
+      <CreateWorkspaceModal open={showCreateWs} onClose={() => setShowCreateWs(false)} />
     </SidebarProvider>
   );
 };
