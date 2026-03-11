@@ -4,6 +4,7 @@ import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import mascot from '@/assets/mascot.png';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
