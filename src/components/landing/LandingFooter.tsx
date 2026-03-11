@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { MessageCircle, Mail } from 'lucide-react';
+import mascot from '@/assets/mascot.png';
 
 const LandingFooter = () => {
   const productLinks = ['Image Generator', 'Ad Copy', 'Video Ads', 'Virtual Try-On', 'Studio', 'Dhoom Score'];
@@ -16,7 +17,10 @@ const LandingFooter = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div>
-            <span className="font-heading-en text-lg font-[800] text-white">AdDhoom Studio</span>
+            <div className="flex items-center gap-2.5">
+              <img src={mascot} alt="AdDhoom Studio" className="h-8 w-auto" />
+              <span className="font-heading-en text-lg font-semibold text-white">AdDhoom Studio</span>
+            </div>
             <p className="mt-3 font-body-en text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>From product to published — in minutes.</p>
           </div>
 
