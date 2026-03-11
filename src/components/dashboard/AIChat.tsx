@@ -545,13 +545,11 @@ const AIChat = () => {
             </button>
             {/* Avatar */}
             <div className="relative flex-shrink-0">
-              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-[hsl(var(--brand-yellow))] flex items-center justify-center text-primary-foreground font-bold text-sm font-heading-bn">
-                ধু
-              </div>
+              <img src="/mascot/mascot-ai.png" alt="DhoomAi" className="w-11 h-11 rounded-full object-contain" />
               <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[hsl(var(--brand-green))] border-2 border-card animate-pulse" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-[15px] font-bold text-foreground font-heading-bn">ধুম AI</h3>
+              <h3 className="text-[15px] font-bold text-foreground font-heading-bn">DhoomAi</h3>
               <p className="text-xs text-muted-foreground font-body-bn truncate">
                 {t('আপনার বিজ্ঞাপন বিশেষজ্ঞ • সবসময় অনলাইন', 'Your ad expert • Always online')}
               </p>
