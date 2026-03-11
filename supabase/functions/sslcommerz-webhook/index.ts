@@ -52,16 +52,34 @@ serve(async (req) => {
           transaction_id: valId || "dev-mode",
         }).eq("id", tranId);
 
-        // Update user profile
+        // Update user profile with credits
         const expiresAt = payment.billing_cycle === "annual"
           ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
           : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
+        // Get plan monthly credits
+        const { data: planData } = await supabase
+          .from("plans").select("monthly_credits").eq("plan_key", payment.plan_purchased).single();
+        const monthlyCredits = planData?.monthly_credits || 5000;
+        const nowIso = new Date().toISOString();
+
         await supabase.from("profiles").update({
           plan: payment.plan_purchased,
+          plan_key: payment.plan_purchased,
           subscription_status: "active",
           subscription_expires_at: expiresAt.toISOString(),
+          credit_balance: monthlyCredits,
+          credits_reset_at: nowIso,
         }).eq("id", payment.user_id);
+
+        // Record credit grant transaction
+        await supabase.from("credit_transactions").insert({
+          user_id: payment.user_id,
+          credits_delta: monthlyCredits,
+          balance_after: monthlyCredits,
+          description: `Plan activated: ${payment.plan_purchased}`,
+          transaction_type: "monthly_reset",
+        });
 
         // Send confirmation email
         const { data: profile } = await supabase

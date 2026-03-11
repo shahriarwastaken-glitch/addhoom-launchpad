@@ -63,11 +63,30 @@ serve(async (req) => {
       // SSLCommerz not configured — simulate success for dev
       // Activate the plan directly using service role
       const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      const nowIso = new Date().toISOString();
+
+      // Get plan monthly credits
+      const { data: planData } = await supabase
+        .from("plans").select("monthly_credits").eq("plan_key", plan).single();
+      const monthlyCredits = planData?.monthly_credits || 5000;
+
       await supabase.from("profiles").update({
         plan,
+        plan_key: plan,
         subscription_status: "active",
         subscription_expires_at: expiresAt,
+        credit_balance: monthlyCredits,
+        credits_reset_at: nowIso,
       }).eq("id", user.id);
+
+      // Record credit grant transaction
+      await supabase.from("credit_transactions").insert({
+        user_id: user.id,
+        credits_delta: monthlyCredits,
+        balance_after: monthlyCredits,
+        description: `Plan activated: ${plan}`,
+        transaction_type: "monthly_reset",
+      });
 
       await supabase.from("payments").update({
         status: "completed",
