@@ -123,6 +123,75 @@ const ProfileTab = () => {
 
   return (
     <div className="space-y-6">
+      {/* Credit Tracker */}
+      <section className={`rounded-2xl border p-5 sm:p-6 ${
+        creditEmpty ? 'border-destructive/30 bg-destructive/5' : creditLow ? 'border-[hsl(var(--brand-yellow))]/30 bg-[hsl(var(--brand-yellow))]/5' : 'border-border bg-card'
+      }`}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+            <Zap size={16} className={creditEmpty ? 'text-destructive' : 'text-primary'} />
+            {t('ক্রেডিট ব্যালেন্স', 'Credit Balance')}
+          </h3>
+          <span className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+            planKey === 'free' ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-primary'
+          }`}>
+            {profile?.plan || 'Free'}
+          </span>
+        </div>
+
+        <div className="flex items-end gap-1 mb-3">
+          <span className={`text-3xl font-bold ${creditEmpty ? 'text-destructive' : 'text-foreground'}`}>
+            {creditBalance.toLocaleString()}
+          </span>
+          {planCredits > 0 && (
+            <span className="text-sm text-muted-foreground mb-1">/ {planCredits.toLocaleString()} {t('ক্রেডিট', 'credits')}</span>
+          )}
+          {planKey === 'free' && (
+            <span className="text-sm text-muted-foreground mb-1">{t('ক্রেডিট', 'credits')}</span>
+          )}
+        </div>
+
+        {planCredits > 0 && (
+          <div className="space-y-1.5 mb-4">
+            <Progress value={creditPct} className="h-2" />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{creditPct}% {t('ব্যবহৃত', 'used')}</span>
+              {resetDate && <span>{t(`রিসেট হবে ${format(resetDate, 'MMM d, yyyy')}`, `Resets on ${format(resetDate, 'MMM d, yyyy')}`)}</span>}
+            </div>
+          </div>
+        )}
+
+        {creditEmpty && (
+          <p className="text-sm text-destructive mb-3">
+            {t('আপনার ক্রেডিট শেষ। কোনো অ্যাকশন করতে প্ল্যান কিনুন।', 'You have no credits. Subscribe to a plan to start creating.')}
+          </p>
+        )}
+
+        <div className="flex flex-wrap gap-2">
+          {planKey === 'free' || creditEmpty ? (
+            <button
+              onClick={() => showUpgrade('credits', { balance: creditBalance })}
+              className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2"
+            >
+              {t('প্ল্যান কিনুন', 'Get a Plan')} <ArrowRight size={14} />
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate('/dashboard/settings#billing')}
+              className="bg-secondary text-foreground rounded-xl px-4 py-2 text-sm font-medium hover:bg-secondary/80 transition-colors"
+            >
+              {t('বিলিং দেখুন', 'View Billing')}
+            </button>
+          )}
+          <button
+            onClick={() => navigate('/dashboard/credits')}
+            className="text-sm text-primary hover:underline px-2 py-2"
+          >
+            {t('ব্যবহার দেখুন →', 'View Usage →')}
+          </button>
+        </div>
+      </section>
+
       {/* Personal Information */}
       <section className="bg-card rounded-2xl border border-border p-5 sm:p-6">
         <h3 className="text-base font-semibold text-foreground mb-5">{t('ব্যক্তিগত তথ্য', 'Personal Information')}</h3>
