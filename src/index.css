@@ -86,6 +86,10 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: 'Plus Jakarta Sans', 'Noto Sans Bengali', sans-serif;
@@ -93,6 +97,16 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Syne', 'Hind Siliguri', sans-serif;
+  }
+
+  /* Accessible focus styles */
+  :focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  *:focus:not(:focus-visible) {
+    outline: none;
   }
 }
 
@@ -223,4 +237,32 @@
 .safe-bottom {
   padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
   height: calc(4rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skeleton-shimmer {
+  background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--border)) 50%, hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-mascot-float,
+  .animate-mascot-celebrate,
+  .animate-breathe,
+  .animate-pulse-glow,
+  .skeleton-shimmer {
+    animation: none !important;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
