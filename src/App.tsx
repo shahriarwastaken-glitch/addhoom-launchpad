@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { UpgradeProvider, useUpgrade as useUpgradeCtx } from "@/contexts/UpgradeContext";
@@ -65,38 +66,40 @@ const PageMetaManager = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <AuthProvider>
-        <SessionManager>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <PageMetaManager />
-              <ScrollToTop />
-              <UpgradeProvider>
-                <UpgradeBridge>
-                  <ImpersonationBanner />
-                  <ErrorBoundary>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/auth" element={<Auth />} />
-                      <Route path="/reset-password" element={<ResetPassword />} />
-                      <Route path="/onboarding" element={<Onboarding />} />
-                      <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                      <Route path="/admin/*" element={<AdminDashboardNew />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </ErrorBoundary>
-                </UpgradeBridge>
-              </UpgradeProvider>
-            </BrowserRouter>
-          </TooltipProvider>
-        </SessionManager>
-      </AuthProvider>
-    </LanguageProvider>
-  </QueryClientProvider>
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <LanguageProvider>
+        <AuthProvider>
+          <SessionManager>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <PageMetaManager />
+                <ScrollToTop />
+                <UpgradeProvider>
+                  <UpgradeBridge>
+                    <ImpersonationBanner />
+                    <ErrorBoundary>
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/auth" element={<Auth />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
+                        <Route path="/onboarding" element={<Onboarding />} />
+                        <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                        <Route path="/admin/*" element={<AdminDashboardNew />} />
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </ErrorBoundary>
+                  </UpgradeBridge>
+                </UpgradeProvider>
+              </BrowserRouter>
+            </TooltipProvider>
+          </SessionManager>
+        </AuthProvider>
+      </LanguageProvider>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;
