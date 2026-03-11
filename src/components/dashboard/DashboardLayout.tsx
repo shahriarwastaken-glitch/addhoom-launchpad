@@ -73,8 +73,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const { refreshProfile: _rp } = useAuth();
-  const refreshProfile = useAuth().refreshProfile;
 
   // Load notifications
   useEffect(() => {
