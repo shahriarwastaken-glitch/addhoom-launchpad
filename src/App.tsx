@@ -9,6 +9,7 @@ import { UpgradeProvider, useUpgrade as useUpgradeCtx } from "@/contexts/Upgrade
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { setUpgradeHandler } from "@/lib/api";
+import usePageMeta from "@/hooks/usePageMeta";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
@@ -58,6 +59,11 @@ const UpgradeBridge = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const PageMetaManager = () => {
+  usePageMeta();
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
@@ -67,6 +73,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <PageMetaManager />
               <ScrollToTop />
               <UpgradeProvider>
                 <UpgradeBridge>
