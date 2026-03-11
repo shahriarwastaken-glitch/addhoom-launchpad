@@ -132,6 +132,56 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
               <DashboardNavbar />
             </div>
             <div className="flex items-center gap-1.5 sm:gap-3">
+              {/* Credit Balance Widget */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowCredits(!showCredits)}
+                  className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-bold transition-colors ${
+                    creditEmpty
+                      ? 'bg-destructive/10 text-destructive'
+                      : creditWarning
+                        ? 'bg-[hsl(var(--brand-yellow))]/10 text-[hsl(var(--brand-yellow))]'
+                        : 'bg-primary/10 text-primary'
+                  }`}
+                >
+                  {creditEmpty ? <X size={12} /> : creditWarning ? <AlertTriangle size={12} /> : <Zap size={12} />}
+                  {creditEmpty
+                    ? t('ক্রেডিট নেই', 'No credits')
+                    : `${creditBalance.toLocaleString()}`
+                  }
+                </button>
+                {showCredits && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowCredits(false)} />
+                    <div className="absolute top-full right-0 mt-1 z-50 bg-card border border-border rounded-xl shadow-warm-lg p-4 min-w-[240px] space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Zap size={14} className="text-primary" />
+                        <span className="text-sm font-bold text-foreground">{creditBalance.toLocaleString()} {t('ক্রেডিট বাকি', 'credits remaining')}</span>
+                      </div>
+                      <div className="space-y-1">
+                        <Progress value={creditPct} className="h-1.5" />
+                        <p className="text-[11px] text-muted-foreground">{creditPct}% {t('ব্যবহৃত', 'used')}</p>
+                      </div>
+                      {daysUntilReset !== null && (
+                        <p className="text-[11px] text-muted-foreground">
+                          {t(`${daysUntilReset} দিনে রিসেট হবে`, `Resets in ${daysUntilReset} days`)}
+                        </p>
+                      )}
+                      <div className="flex flex-col gap-1.5 pt-1 border-t border-border">
+                        <button onClick={() => { setShowCredits(false); navigate('/dashboard/credits'); }}
+                          className="text-xs text-primary hover:underline text-left">
+                          {t('ব্যবহার দেখুন →', 'View Usage →')}
+                        </button>
+                        <button onClick={() => { setShowCredits(false); navigate('/pricing'); }}
+                          className="text-xs text-primary hover:underline text-left">
+                          {t('প্ল্যান আপগ্রেড করুন →', 'Upgrade Plan →')}
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
               {profile?.plan && (
                 <span className="hidden sm:inline-block text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                   {profile.plan}
