@@ -5,14 +5,15 @@ import DashboardSidebar from './DashboardSidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/contexts/AuthContext';
-import { Bell, Moon, Sun, Target, Video, LogOut, X, Settings, Wand2, Sparkles, Zap, AlertTriangle } from 'lucide-react';
+import { Bell, Moon, Sun, Target, Video, LogOut, X, Settings, Wand2, Sparkles, Zap, AlertTriangle, CheckCircle2, RotateCcw } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Progress } from '@/components/ui/progress';
 import WorkspaceSelector from './workspace/WorkspaceSelector';
 import CreateWorkspaceModal from './workspace/CreateWorkspaceModal';
+import { toast } from '@/hooks/use-toast';
 
 const mobileItems = [
   { icon: Target, bn: 'হোম', en: 'Home', url: '/dashboard' },
