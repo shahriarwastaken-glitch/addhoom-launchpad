@@ -36,7 +36,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen scroll-smooth">
+    <div className="min-h-screen scroll-smooth overflow-x-hidden">
       <div className="grain-overlay" />
       <LandingNavbar />
       <LandingHero />
