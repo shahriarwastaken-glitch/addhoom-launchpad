@@ -4,6 +4,7 @@ import {
   corsHeaders, callGemini, checkPlanLimit, logUsage,
   errorResponse, jsonResponse, ADDHOOM_SYSTEM_PROMPT,
 } from "../_shared/addhoom.ts";
+import { deductCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 
 const BD_FESTIVALS = [
   { name: 'পহেলা বৈশাখ', en_name: 'Pohela Boishakh', type: 'fixed', month: 4, day: 14, prep_days: 14, color: '#E53E3E', emoji: '🎊', occasion: 'boishakh', content_themes: ['নতুন বছর শুরু করুন নতুনভাবে', 'বৈশাখী কালেকশন', 'পরিবারের জন্য উপহার'] },
