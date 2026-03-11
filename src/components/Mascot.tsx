@@ -42,6 +42,7 @@ export function Mascot({ variant, size = 80, animate = false, priority = false, 
         variant === 'celebrating' && 'animate-mascot-celebrate',
         className
       )}
+      loading={priority ? 'eager' : 'lazy'}
       style={{ width: size, height: size }}
     />
   );
