@@ -4,6 +4,7 @@ import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import mascot from '@/assets/mascot.png';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
@@ -50,11 +51,9 @@ const DashboardSidebar = () => {
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
-        <div className="p-4">
-          <Link to="/" className="text-lg font-bold font-heading-en">
-            <span className="text-foreground">Ad</span>
-            <span className="text-primary">Dhoom</span>
-            {!collapsed && <Zap size={16} className="text-brand-yellow" />}
+        <div className="p-4 flex items-center gap-2.5">
+          <Link to="/">
+            <img src={mascot} alt="AdDhoom" className="h-8 w-auto object-contain" />
           </Link>
         </div>
         <SidebarGroup>

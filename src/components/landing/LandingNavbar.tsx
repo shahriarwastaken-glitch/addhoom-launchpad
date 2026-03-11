@@ -25,7 +25,7 @@ const LandingNavbar = () => {
       <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 bg-background ${scrolled ? 'border-b border-border shadow-[0_1px_8px_rgba(0,0,0,0.04)]' : ''}`}>
         <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <img src={mascot} alt="AdDhoom Studio" className="h-9 w-auto" />
+            <img src={mascot} alt="AdDhoom Studio" className="h-10 w-auto object-contain" />
             <span className="font-heading-en text-lg font-semibold text-foreground tracking-tight">AdDhoom Studio</span>
           </Link>
 
