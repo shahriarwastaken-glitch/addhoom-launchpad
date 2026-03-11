@@ -15,6 +15,25 @@ const ProfileTab = () => {
   const { t, lang, toggle } = useLanguage();
   const { user, profile, refreshProfile } = useAuth();
   const { dark, toggleTheme } = useTheme();
+  const { showUpgrade } = useUpgrade();
+  const navigate = useNavigate();
+
+  // Credit tracker
+  const planKey = profile?.plan_key || 'free';
+  const planCredits = useMemo(() => {
+    if (planKey === 'agency') return 35000;
+    if (planKey === 'pro') return 15000;
+    if (planKey === 'starter') return 5000;
+    return 0;
+  }, [planKey]);
+  const creditBalance = profile?.credit_balance ?? 0;
+  const creditPct = planCredits > 0 ? Math.round(((planCredits - creditBalance) / planCredits) * 100) : 0;
+  const resetDate = useMemo(() => {
+    if (!profile?.credits_reset_at) return null;
+    return new Date(profile.credits_reset_at);
+  }, [profile?.credits_reset_at]);
+  const creditLow = planCredits > 0 && creditBalance / planCredits < 0.2;
+  const creditEmpty = creditBalance <= 0;
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
