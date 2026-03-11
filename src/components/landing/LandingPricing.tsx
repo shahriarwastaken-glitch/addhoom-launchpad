@@ -119,10 +119,6 @@ const LandingPricing = () => {
           </div>
         </div>
 
-        {/* Guarantee */}
-        <p className="mt-10 text-center font-body-en text-[13px] text-muted-foreground">
-          7-day money back guarantee · Cancel anytime · No contracts · No hidden fees
-        </p>
 
         {/* Credit costs collapsible */}
         <Collapsible open={creditsOpen} onOpenChange={setCreditsOpen} className="mt-8 max-w-[600px] mx-auto">
