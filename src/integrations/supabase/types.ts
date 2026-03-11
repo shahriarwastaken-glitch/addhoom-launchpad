@@ -1405,12 +1405,14 @@ export type Database = {
           id: string
           language_pref: string
           onboarding_complete: boolean
+          onboarding_step: number | null
           phone: string | null
           plan: string
           plan_key: string | null
           ssl_customer_id: string | null
           subscription_expires_at: string | null
           subscription_status: string
+          tour_completed: boolean | null
         }
         Insert: {
           created_at?: string
@@ -1421,12 +1423,14 @@ export type Database = {
           id: string
           language_pref?: string
           onboarding_complete?: boolean
+          onboarding_step?: number | null
           phone?: string | null
           plan?: string
           plan_key?: string | null
           ssl_customer_id?: string | null
           subscription_expires_at?: string | null
           subscription_status?: string
+          tour_completed?: boolean | null
         }
         Update: {
           created_at?: string
@@ -1437,12 +1441,14 @@ export type Database = {
           id?: string
           language_pref?: string
           onboarding_complete?: boolean
+          onboarding_step?: number | null
           phone?: string | null
           plan?: string
           plan_key?: string | null
           ssl_customer_id?: string | null
           subscription_expires_at?: string | null
           subscription_status?: string
+          tour_completed?: boolean | null
         }
         Relationships: []
       }
@@ -1815,6 +1821,7 @@ export type Database = {
           brand_tone: string | null
           competitor_urls: string[] | null
           created_at: string
+          default_language: string | null
           dna_last_updated: string | null
           dna_score: number | null
           dna_source: string | null
@@ -1827,6 +1834,7 @@ export type Database = {
           owner_id: string
           platform: string | null
           price_range: string | null
+          primary_platform: string | null
           scrape_data: Json | null
           shop_name: string
           shop_url: string | null
@@ -1841,6 +1849,7 @@ export type Database = {
           brand_tone?: string | null
           competitor_urls?: string[] | null
           created_at?: string
+          default_language?: string | null
           dna_last_updated?: string | null
           dna_score?: number | null
           dna_source?: string | null
@@ -1853,6 +1862,7 @@ export type Database = {
           owner_id: string
           platform?: string | null
           price_range?: string | null
+          primary_platform?: string | null
           scrape_data?: Json | null
           shop_name: string
           shop_url?: string | null
@@ -1867,6 +1877,7 @@ export type Database = {
           brand_tone?: string | null
           competitor_urls?: string[] | null
           created_at?: string
+          default_language?: string | null
           dna_last_updated?: string | null
           dna_score?: number | null
           dna_source?: string | null
@@ -1879,6 +1890,7 @@ export type Database = {
           owner_id?: string
           platform?: string | null
           price_range?: string | null
+          primary_platform?: string | null
           scrape_data?: Json | null
           shop_name?: string
           shop_url?: string | null
