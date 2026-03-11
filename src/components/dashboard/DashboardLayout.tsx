@@ -28,8 +28,28 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const [showWorkspaces, setShowWorkspaces] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showCredits, setShowCredits] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
+
+  const creditBalance = profile?.credit_balance ?? 0;
+  // Compute plan credits from plan_key
+  const planCredits = useMemo(() => {
+    const key = profile?.plan_key || 'pro';
+    if (key === 'agency') return 35000;
+    if (key === 'pro') return 15000;
+    return 5000;
+  }, [profile?.plan_key]);
+  const creditPct = planCredits > 0 ? Math.round(((planCredits - creditBalance) / planCredits) * 100) : 0;
+  const daysUntilReset = useMemo(() => {
+    if (!profile?.credits_reset_at) return null;
+    const resetDate = new Date(profile.credits_reset_at);
+    resetDate.setDate(resetDate.getDate() + 30);
+    const diff = Math.ceil((resetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    return Math.max(0, diff);
+  }, [profile?.credits_reset_at]);
+  const creditWarning = planCredits > 0 && creditBalance / planCredits < 0.2;
+  const creditEmpty = creditBalance <= 0;
 
 
   // Load notifications
