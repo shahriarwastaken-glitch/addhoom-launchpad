@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { MessageCircle, Mail } from 'lucide-react';
+import mascot from '@/assets/mascot.png';
 
 const LandingFooter = () => {
   const productLinks = ['Image Generator', 'Ad Copy', 'Video Ads', 'Virtual Try-On', 'Studio', 'Dhoom Score'];
