@@ -698,6 +698,9 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
                 </span>
               )}
             </button>
+            <p className="text-center">
+              <CreditCostLabel credits={125 * form.selectedScenes.length} />
+            </p>
             <button
               onClick={() => setImageStep(1)}
               className="w-full text-center text-[13px] text-muted-foreground hover:text-primary font-heading-bn transition-colors flex items-center justify-center gap-1"
