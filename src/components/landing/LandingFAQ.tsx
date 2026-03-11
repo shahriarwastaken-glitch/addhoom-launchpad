@@ -9,7 +9,7 @@ const faqs = [
   { q: 'What happens when I run out of credits?', a: 'Upgrade your plan or wait for your monthly reset on the 1st.' },
   { q: 'What languages are supported?', a: 'English, বাংলা (Bangla), and Banglish. Set your preference in workspace settings.' },
   { q: 'Can I use AdDhoom for multiple shops?', a: 'Yes. Pro includes 5 workspaces, Agency includes 20. Each has its own settings and Shop DNA.' },
-  { q: 'Is there a contract?', a: 'No. Monthly subscription, cancel anytime. 7-day money back guarantee on first payment.' },
+  { q: 'Is there a contract?', a: 'No. Monthly subscription, cancel anytime.' },
   { q: 'What image formats can I upload?', a: 'JPG, PNG, and WEBP. Maximum 10MB per image.' },
 ];
 
