@@ -17,6 +17,8 @@ import AdminDashboardNew from "./pages/AdminDashboardNew";
 import NotFound from "./pages/NotFound";
 import Onboarding from "./pages/Onboarding";
 import ImpersonationBanner from "./components/admin/ImpersonationBanner";
+import ScrollToTop from "./components/ScrollToTop";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
