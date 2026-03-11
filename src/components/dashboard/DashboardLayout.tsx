@@ -5,14 +5,15 @@ import DashboardSidebar from './DashboardSidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/contexts/AuthContext';
-import { Bell, Moon, Sun, Target, Video, LogOut, X, Settings, Wand2, Sparkles, Zap, AlertTriangle } from 'lucide-react';
+import { Bell, Moon, Sun, Target, Video, LogOut, X, Settings, Wand2, Sparkles, Zap, AlertTriangle, CheckCircle2, RotateCcw } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Progress } from '@/components/ui/progress';
 import WorkspaceSelector from './workspace/WorkspaceSelector';
 import CreateWorkspaceModal from './workspace/CreateWorkspaceModal';
+import { toast } from '@/hooks/use-toast';
 
 const mobileItems = [
   { icon: Target, bn: 'হোম', en: 'Home', url: '/dashboard' },
@@ -25,7 +26,7 @@ const mobileItems = [
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const { t } = useLanguage();
   const { dark, toggleTheme } = useTheme();
-  const { user, profile, activeWorkspace, workspaces, setActiveWorkspaceId, signOut } = useAuth();
+  const { user, profile, activeWorkspace, workspaces, setActiveWorkspaceId, signOut, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [showCreateWs, setShowCreateWs] = useState(false);
@@ -53,6 +54,24 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   }, [profile?.credits_reset_at]);
   const creditWarning = planCredits > 0 && creditBalance / planCredits < 0.2;
   const creditEmpty = creditBalance <= 0;
+
+
+  // Payment result handler
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get('payment');
+    if (payment === 'success') {
+      toast({ title: '🎉 ' + t('পেমেন্ট সফল!', 'Payment Successful!'), description: t('আপনার ক্রেডিট প্রস্তুত।', 'Your credits are ready.') });
+      refreshProfile();
+    } else if (payment === 'already_processed') {
+      toast({ title: t('ইতিমধ্যে প্রসেস হয়েছে', 'Already Processed'), description: t('এই পেমেন্ট আগেই প্রসেস হয়েছে।', 'This payment was already processed.') });
+    }
+    if (payment) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('payment');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
 
 
   // Load notifications

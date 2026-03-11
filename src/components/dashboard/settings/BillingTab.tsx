@@ -3,20 +3,24 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUpgrade } from '@/contexts/UpgradeContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Zap, ArrowRight, Download, Loader2 } from 'lucide-react';
+import { Zap, ArrowRight, Loader2, CreditCard, AlertTriangle, CheckCircle2, RotateCcw } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
+import { toast } from '@/hooks/use-toast';
 
 const BillingTab = () => {
   const { t } = useLanguage();
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const { showUpgrade } = useUpgrade();
 
   const [billingHistory, setBillingHistory] = useState<any[]>([]);
   const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [reactivateLoading, setReactivateLoading] = useState(false);
 
   const planKey = profile?.plan_key || 'free';
   const planCredits = useMemo(() => {
@@ -33,6 +37,12 @@ const BillingTab = () => {
     return Math.max(0, Math.ceil((resetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
   }, [profile?.credits_reset_at]);
 
+  // Detect timezone for currency
+  const isBD = useMemo(() => {
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Dhaka'; } catch { return false; }
+  }, []);
+  const currency = isBD ? 'BDT' : 'USD';
+
   useEffect(() => {
     if (!user) return;
     const load = async () => {
@@ -48,27 +58,122 @@ const BillingTab = () => {
     load();
   }, [user]);
 
+  // Check URL params for payment result
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get('payment');
+    if (payment === 'failed') {
+      toast({ title: t('পেমেন্ট ব্যর্থ', 'Payment Failed'), description: t('আবার চেষ্টা করুন।', 'Please try again.'), variant: 'destructive' });
+    } else if (payment === 'cancelled') {
+      toast({ title: t('পেমেন্ট বাতিল', 'Payment Cancelled'), description: t('পেমেন্ট বাতিল করা হয়েছে।', 'Payment was cancelled.') });
+    }
+    if (payment) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('payment');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
+
+  const initiateCheckout = async (targetPlanKey: string) => {
+    setCheckoutLoading(targetPlanKey);
+    try {
+      const isUpgrade = planKey !== 'free' && planKey !== targetPlanKey;
+      const { data, error } = await supabase.functions.invoke('initiate-payment', {
+        body: { plan_key: targetPlanKey, currency, is_upgrade: isUpgrade },
+      });
+
+      if (error) throw error;
+
+      if (data.dev_mode) {
+        toast({ title: '✅ ' + t('প্ল্যান সক্রিয়!', 'Plan Activated!'), description: data.message_en });
+        await refreshProfile();
+        // Reload billing data
+        const [{ data: sub }, { data: history }] = await Promise.all([
+          supabase.from('subscriptions').select('*').eq('user_id', user!.id).eq('status', 'active').maybeSingle(),
+          supabase.from('billing_history').select('*').eq('user_id', user!.id).order('created_at', { ascending: false }).limit(10),
+        ]);
+        setSubscription(sub);
+        setBillingHistory(history || []);
+      } else if (data.gateway_url) {
+        window.location.href = data.gateway_url;
+        return; // Don't reset loading — we're navigating away
+      }
+    } catch (e) {
+      console.error('Checkout error:', e);
+      toast({ title: t('ত্রুটি', 'Error'), description: t('পেমেন্ট শুরু করতে ব্যর্থ।', 'Failed to initiate payment.'), variant: 'destructive' });
+    }
+    setCheckoutLoading(null);
+  };
+
+  const handleCancelSubscription = async () => {
+    setCancelLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('cancel-subscription', {
+        body: { reason: cancelReason },
+      });
+      if (error) throw error;
+      toast({ title: t('সাবস্ক্রিপশন বাতিল হয়েছে', 'Subscription Cancelled'), description: t(`অ্যাক্সেস চলবে ${data.access_until ? format(new Date(data.access_until), 'MMM d, yyyy') : ''} পর্যন্ত`, `Access continues until ${data.access_until ? format(new Date(data.access_until), 'MMM d, yyyy') : ''}`) });
+      setShowCancelModal(false);
+      // Reload subscription
+      const { data: sub } = await supabase.from('subscriptions').select('*').eq('user_id', user!.id).eq('status', 'active').maybeSingle();
+      setSubscription(sub);
+    } catch (e) {
+      console.error('Cancel error:', e);
+      toast({ title: t('ত্রুটি', 'Error'), description: t('বাতিল করতে ব্যর্থ।', 'Failed to cancel.'), variant: 'destructive' });
+    }
+    setCancelLoading(false);
+  };
+
+  const handleReactivate = async () => {
+    setReactivateLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke('reactivate-subscription', { body: {} });
+      if (error) throw error;
+      toast({ title: '✅ ' + t('পুনরায় সক্রিয়!', 'Reactivated!'), description: t('আপনার সাবস্ক্রিপশন আবার সক্রিয়।', 'Your subscription is active again.') });
+      const { data: sub } = await supabase.from('subscriptions').select('*').eq('user_id', user!.id).eq('status', 'active').maybeSingle();
+      setSubscription(sub);
+    } catch (e) {
+      toast({ title: t('ত্রুটি', 'Error'), description: t('পুনরায় সক্রিয় করতে ব্যর্থ।', 'Failed to reactivate.'), variant: 'destructive' });
+    }
+    setReactivateLoading(false);
+  };
+
   const PLAN_CARDS = [
-    { key: 'starter', name: 'Starter', price: '৳799', credits: '5,000' },
-    { key: 'pro', name: 'Pro', price: '৳1,999', credits: '15,000' },
-    { key: 'agency', name: 'Agency', price: '৳4,999', credits: '35,000' },
+    { key: 'starter', name: 'Starter', priceBDT: '৳799', priceUSD: '$19', credits: '5,000' },
+    { key: 'pro', name: 'Pro', priceBDT: '৳1,999', priceUSD: '$49', credits: '15,000' },
+    { key: 'agency', name: 'Agency', priceBDT: '৳4,999', priceUSD: '$99', credits: '35,000' },
   ];
 
   return (
     <div className="space-y-6">
+      {/* Past-due renewal banner */}
+      {profile?.subscription_status === 'past_due' && (
+        <div className="bg-[hsl(var(--brand-yellow))]/10 border border-[hsl(var(--brand-yellow))]/20 rounded-2xl p-4 flex items-center gap-3">
+          <AlertTriangle size={20} className="text-[hsl(var(--brand-yellow))] flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-foreground">{t('সাবস্ক্রিপশনের মেয়াদ শেষ', 'Subscription Expired')}</p>
+            <p className="text-xs text-muted-foreground">{t('ক্রেডিট ব্যবহার করতে এখনই রিনিউ করুন।', 'Renew now to keep using your credits.')}</p>
+          </div>
+          <button onClick={() => initiateCheckout(planKey)} className="bg-primary text-primary-foreground rounded-xl px-4 py-2 text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-1.5">
+            {checkoutLoading === planKey ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />}
+            {t('রিনিউ করুন', 'Renew Now')}
+          </button>
+        </div>
+      )}
+
       {/* Current Plan */}
       <section className="bg-card rounded-2xl border border-border p-5 sm:p-6">
         <h3 className="text-base font-semibold text-foreground mb-4">{t('বর্তমান প্ল্যান', 'Current Plan')}</h3>
-
         <div className="flex items-center gap-3 mb-4">
           <span className="text-sm font-bold uppercase tracking-wider text-primary bg-primary/10 px-3 py-1 rounded-full">
             {profile?.plan || 'Free'}
           </span>
           {profile?.subscription_status === 'active' && (
-            <span className="text-xs text-green-600 bg-green-500/10 px-2 py-0.5 rounded-full">{t('সক্রিয়', 'Active')}</span>
+            <span className="text-xs text-green-600 bg-green-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <CheckCircle2 size={10} /> {t('সক্রিয়', 'Active')}
+            </span>
           )}
         </div>
-
         <div className="space-y-3 mb-4">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground flex items-center gap-1.5"><Zap size={14} /> {t('ক্রেডিট', 'Credits')}</span>
@@ -80,33 +185,39 @@ const BillingTab = () => {
             {daysUntilReset !== null && <span>{t(`${daysUntilReset} দিনে রিসেট`, `Resets in ${daysUntilReset} days`)}</span>}
           </div>
         </div>
-
         {planKey !== 'agency' && (
           <button onClick={() => showUpgrade()} className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2">
             {t('আপগ্রেড করুন', 'Upgrade')} <ArrowRight size={14} />
           </button>
         )}
-        {planKey === 'agency' && (
-          <p className="text-sm text-muted-foreground">{t('আপনি আমাদের সেরা প্ল্যানে আছেন', "You're on our best plan")}</p>
-        )}
       </section>
 
-      {/* Plan Comparison */}
+      {/* Plan Comparison with Checkout */}
       <section className="bg-card rounded-2xl border border-border p-5 sm:p-6">
         <h3 className="text-base font-semibold text-foreground mb-4">{t('প্ল্যান তুলনা', 'Plan Comparison')}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {PLAN_CARDS.map(plan => {
             const isCurrent = planKey === plan.key;
+            const price = currency === 'BDT' ? plan.priceBDT : plan.priceUSD;
             return (
               <div key={plan.key} className={`rounded-xl p-4 border transition-colors ${isCurrent ? 'border-primary bg-primary/[0.03]' : 'border-border'}`}>
                 <h4 className="text-sm font-bold text-foreground">{plan.name}</h4>
-                <p className="text-lg font-bold text-foreground mt-1">{plan.price}<span className="text-xs text-muted-foreground font-normal">/mo</span></p>
+                <p className="text-lg font-bold text-foreground mt-1">{price}<span className="text-xs text-muted-foreground font-normal">/mo</span></p>
                 <p className="text-xs text-muted-foreground mt-1">{plan.credits} {t('ক্রেডিট/মাস', 'credits/mo')}</p>
                 {isCurrent ? (
                   <span className="mt-3 block text-xs text-primary font-medium">{t('বর্তমান প্ল্যান', 'Current plan')}</span>
                 ) : (
-                  <button onClick={() => showUpgrade()} className="mt-3 w-full bg-primary text-primary-foreground rounded-lg py-1.5 text-xs font-semibold hover:bg-primary/90 transition-colors">
-                    {t('আপগ্রেড', 'Upgrade')}
+                  <button
+                    onClick={() => initiateCheckout(plan.key)}
+                    disabled={!!checkoutLoading}
+                    className="mt-3 w-full bg-primary text-primary-foreground rounded-lg py-1.5 text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  >
+                    {checkoutLoading === plan.key ? (
+                      <Loader2 size={12} className="animate-spin" />
+                    ) : (
+                      <CreditCard size={12} />
+                    )}
+                    {t('সাবস্ক্রাইব', 'Subscribe')}
                   </button>
                 )}
               </div>
@@ -164,7 +275,12 @@ const BillingTab = () => {
                 {t('সাবস্ক্রিপশন বাতিল করা হয়েছে। অ্যাক্সেস চলবে ', 'Subscription cancelled. Access continues until ')}
                 {subscription?.current_period_end ? format(new Date(subscription.current_period_end), 'MMM d, yyyy') : ''}
               </p>
-              <button className="bg-green-600 text-white rounded-xl px-5 py-2.5 text-sm font-semibold hover:bg-green-700 transition-colors">
+              <button
+                onClick={handleReactivate}
+                disabled={reactivateLoading}
+                className="bg-green-600 text-white rounded-xl px-5 py-2.5 text-sm font-semibold hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                {reactivateLoading ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />}
                 {t('পুনরায় সক্রিয় করুন', 'Reactivate Subscription')}
               </button>
             </div>
@@ -211,7 +327,12 @@ const BillingTab = () => {
               <button onClick={() => setShowCancelModal(false)} className="w-full bg-primary text-primary-foreground rounded-xl py-3 text-sm font-semibold">
                 {t('সাবস্ক্রিপশন রাখুন', 'Keep My Subscription')}
               </button>
-              <button onClick={() => setShowCancelModal(false)} className="w-full text-destructive hover:underline text-sm py-2">
+              <button
+                onClick={handleCancelSubscription}
+                disabled={cancelLoading}
+                className="w-full text-destructive hover:underline text-sm py-2 flex items-center justify-center gap-1.5 disabled:opacity-50"
+              >
+                {cancelLoading && <Loader2 size={12} className="animate-spin" />}
                 {t('তবুও বাতিল করুন', 'Cancel Anyway')}
               </button>
             </div>
