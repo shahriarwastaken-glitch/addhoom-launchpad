@@ -2,6 +2,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Coins, MessageSquare, CreditCard, Loader2 } from 'lucide-react';
+import { Mascot } from '@/components/Mascot';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useState, useMemo } from 'react';
@@ -110,7 +111,7 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
 
             <div className="p-6 space-y-5">
               <div className="text-center space-y-2">
-                <span className="text-4xl">{type === 'credits' ? '💳' : '⚡'}</span>
+                <Mascot variant={type === 'credits' ? 'sheepish' : 'worried'} size={80} className="mx-auto" />
                 <h3 className="text-lg font-bold text-foreground">
                   {type === 'credits'
                     ? t('ক্রেডিট শেষ হয়ে গেছে', "You're out of credits")

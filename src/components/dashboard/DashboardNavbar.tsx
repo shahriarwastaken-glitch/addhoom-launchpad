@@ -11,7 +11,7 @@ const navItems = [
   { icon: Video, bn: 'ভিডিও অ্যাড', en: 'Video Ads', url: '/dashboard/video' },
   { icon: FolderOpen, bn: 'প্রজেক্ট', en: 'Projects', url: '/dashboard/projects' },
   { icon: Calendar, bn: 'ক্যালেন্ডার', en: 'Calendar', url: '/dashboard/calendar' },
-  { icon: MessageSquare, bn: 'AI চ্যাট', en: 'AI Chat', url: '/dashboard/chat' },
+  { icon: MessageSquare, bn: 'DhoomAi', en: 'DhoomAi', url: '/dashboard/chat' },
   { icon: Search, bn: 'প্রতিযোগী', en: 'Competitors', url: '/dashboard/competitors' },
   { icon: Stethoscope, bn: 'অ্যাকাউন্ট ডাক্তার', en: 'Doctor', url: '/dashboard/doctor' },
   { icon: PartyPopper, bn: 'উৎসব', en: 'Festival', url: '/dashboard/festival' },

@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { Stethoscope, CheckCircle, AlertTriangle, AlertOctagon, RefreshCw, Loader2, ArrowRight } from 'lucide-react';
+import { Mascot } from '@/components/Mascot';
 
 const toBengali = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
 
@@ -79,8 +80,8 @@ const AccountDoctor = () => {
 
       {!report ? (
         <div className="bg-card rounded-[20px] shadow-warm p-8 text-center">
-          <Stethoscope size={48} className="text-primary mx-auto mb-4" />
-          <h3 className="text-lg font-heading-bn font-semibold mb-2">{t('আপনার অ্যাকাউন্ট চেক করুন', 'Check Your Account')}</h3>
+          <Mascot variant="detective" size={80} animate={loading} className="mx-auto mb-4" />
+          <h3 className="text-lg font-heading-bn font-semibold mb-2">{loading ? t('বিশ্লেষণ চলছে...', 'Analyzing your shop...') : t('আপনার অ্যাকাউন্ট চেক করুন', 'Check Your Account')}</h3>
           <p className="text-sm text-muted-foreground font-body-bn mb-6">
             {t('AI আপনার ক্যাম্পেইন বিশ্লেষণ করে হেলথ স্কোর ও সাজেশন দেবে।', 'AI will analyze your campaigns and provide a health score & suggestions.')}
           </p>
