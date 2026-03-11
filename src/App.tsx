@@ -9,6 +9,7 @@ import { UpgradeProvider, useUpgrade as useUpgradeCtx } from "@/contexts/Upgrade
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { setUpgradeHandler } from "@/lib/api";
+import usePageMeta from "@/hooks/usePageMeta";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
