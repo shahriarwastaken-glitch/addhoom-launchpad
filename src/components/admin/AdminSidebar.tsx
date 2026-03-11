@@ -76,7 +76,7 @@ export default function AdminSidebar({ isSuperAdmin }: AdminSidebarProps) {
       <div className="p-4 border-b border-border/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src={mascot} alt="AdDhoom Studio" className="h-8 w-auto" />
+            <img src={mascot} alt="AdDhoom Studio" className="h-9 w-auto object-contain" />
             <div>
               <span className="text-lg font-bold bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent">
                 AdDhoom
