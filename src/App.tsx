@@ -17,7 +17,6 @@ import AdminDashboardNew from "./pages/AdminDashboardNew";
 import NotFound from "./pages/NotFound";
 import Onboarding from "./pages/Onboarding";
 import ImpersonationBanner from "./components/admin/ImpersonationBanner";
-import ImpersonationBanner from "./components/admin/ImpersonationBanner";
 
 const queryClient = new QueryClient();
 
