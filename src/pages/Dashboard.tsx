@@ -1,7 +1,10 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import DashboardHome from '@/components/dashboard/DashboardHome';
+import PageTransition from '@/components/PageTransition';
+import { PageSkeleton } from '@/components/ui/ShimmerSkeleton';
 
 // Lazy-loaded heavy components
 const AdGeneratorPage = lazy(() => import('@/components/dashboard/ad-generator/AdGeneratorPage'));
@@ -22,44 +25,37 @@ const StudioPage = lazy(() => import('@/components/dashboard/studio/StudioPage')
 const CreditsPage = lazy(() => import('@/components/dashboard/CreditsPage'));
 const WorkspaceManagement = lazy(() => import('@/components/dashboard/workspace/WorkspaceManagement'));
 
-const PageSkeleton = () => (
-  <div className="p-6 space-y-4 animate-pulse">
-    <div className="h-8 w-48 bg-muted rounded-lg" />
-    <div className="h-4 w-72 bg-muted rounded" />
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-      {[1, 2, 3].map(i => (
-        <div key={i} className="h-32 bg-muted rounded-2xl" />
-      ))}
-    </div>
-    <div className="h-64 bg-muted rounded-2xl mt-4" />
-  </div>
-);
-
 const Dashboard = () => {
+  const location = useLocation();
+
   return (
     <DashboardLayout>
-      <Suspense fallback={<PageSkeleton />}>
-        <Routes>
-          <Route index element={<DashboardHome />} />
-          <Route path="generate" element={<AdGeneratorPage />} />
-          <Route path="studio" element={<StudioPage />} />
-          <Route path="ad-history" element={<AdHistory />} />
-          <Route path="video" element={<VideoAd />} />
-          <Route path="video/history" element={<VideoHistory />} />
-          <Route path="calendar" element={<ContentCalendar />} />
-          <Route path="chat" element={<AIChat />} />
-          <Route path="competitors" element={<CompetitorIntel />} />
-          <Route path="doctor" element={<AccountDoctor />} />
-          <Route path="festival" element={<FestivalTemplates />} />
-          <Route path="projects" element={<ProjectsList />} />
-          <Route path="projects/:id" element={<ProjectDetail />} />
-          <Route path="dhoom-score" element={<DhoomScoreChecker />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="credits" element={<CreditsPage />} />
-          <Route path="workspaces" element={<WorkspaceManagement />} />
-          <Route path="settings" element={<Settings />} />
-        </Routes>
-      </Suspense>
+      <AnimatePresence mode="wait">
+        <PageTransition key={location.pathname}>
+          <Suspense fallback={<PageSkeleton />}>
+            <Routes location={location}>
+              <Route index element={<DashboardHome />} />
+              <Route path="generate" element={<AdGeneratorPage />} />
+              <Route path="studio" element={<StudioPage />} />
+              <Route path="ad-history" element={<AdHistory />} />
+              <Route path="video" element={<VideoAd />} />
+              <Route path="video/history" element={<VideoHistory />} />
+              <Route path="calendar" element={<ContentCalendar />} />
+              <Route path="chat" element={<AIChat />} />
+              <Route path="competitors" element={<CompetitorIntel />} />
+              <Route path="doctor" element={<AccountDoctor />} />
+              <Route path="festival" element={<FestivalTemplates />} />
+              <Route path="projects" element={<ProjectsList />} />
+              <Route path="projects/:id" element={<ProjectDetail />} />
+              <Route path="dhoom-score" element={<DhoomScoreChecker />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="credits" element={<CreditsPage />} />
+              <Route path="workspaces" element={<WorkspaceManagement />} />
+              <Route path="settings" element={<Settings />} />
+            </Routes>
+          </Suspense>
+        </PageTransition>
+      </AnimatePresence>
     </DashboardLayout>
   );
 };

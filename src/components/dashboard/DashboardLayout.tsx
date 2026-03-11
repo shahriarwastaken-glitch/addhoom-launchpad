@@ -13,6 +13,7 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Progress } from '@/components/ui/progress';
 import WorkspaceSelector from './workspace/WorkspaceSelector';
 import CreateWorkspaceModal from './workspace/CreateWorkspaceModal';
+import ScrollToTopButton from '@/components/ScrollToTopButton';
 import { toast } from '@/hooks/use-toast';
 
 const mobileItems = [
@@ -289,6 +290,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
       </nav>
 
       <CreateWorkspaceModal open={showCreateWs} onClose={() => setShowCreateWs(false)} />
+      <ScrollToTopButton />
     </SidebarProvider>
   );
 };
