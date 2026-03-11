@@ -70,9 +70,25 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
 
             <div className="p-6 space-y-5">
               <div className="text-center space-y-2">
-                <span className="text-4xl">{c.icon}</span>
-                <h3 className="text-lg font-bold text-foreground">{t(c.title_bn, c.title_en)}</h3>
-                <p className="text-sm text-muted-foreground">{t(c.desc_bn, c.desc_en)}</p>
+                <span className="text-4xl">{type === 'credits' ? '💳' : '⚡'}</span>
+                <h3 className="text-lg font-bold text-foreground">
+                  {type === 'credits'
+                    ? t('ক্রেডিট শেষ হয়ে গেছে', "You're out of credits")
+                    : t('ফিচার লিমিট শেষ হয়েছে', 'Feature Limit Reached')
+                  }
+                </h3>
+                {type === 'credits' && actionLabel ? (
+                  <p className="text-sm text-muted-foreground">
+                    {t(
+                      `${actionLabel.bn} ${creditInfo?.required?.toLocaleString() || ''} ক্রেডিট প্রয়োজন`,
+                      `You need ${creditInfo?.required?.toLocaleString() || ''} credits to ${actionLabel.en}`
+                    )}
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    {t('আরও ব্যবহারের জন্য আপগ্রেড করুন।', 'Upgrade your plan to keep creating.')}
+                  </p>
+                )}
               </div>
 
               {/* Credit info */}
