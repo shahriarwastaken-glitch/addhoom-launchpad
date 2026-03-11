@@ -61,7 +61,7 @@ const WelcomeBanner = () => {
           {[
             { label: 'Create Ad', path: '/dashboard/generate' },
             { label: 'View Calendar', path: '/dashboard/calendar' },
-            { label: 'Learn about Dhoom Score', path: '/dashboard/doctor' },
+            { label: 'Learn about Dhoom Score', path: '/dashboard/dhoom-score' },
           ].map(a => (
             <button
               key={a.path}
