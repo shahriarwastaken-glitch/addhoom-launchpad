@@ -340,12 +340,12 @@ const Onboarding = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6"
       style={{ backgroundColor: 'rgba(28,27,26,0.6)', backdropFilter: 'blur(8px)' }}
     >
       <motion.div
         layout
-        className={`bg-card rounded-3xl shadow-warm-lg w-full ${cardMaxWidth} max-h-[90vh] overflow-y-auto p-8 sm:p-10 relative`}
+        className={`bg-card rounded-2xl sm:rounded-3xl shadow-warm-lg w-full ${cardMaxWidth} max-h-[92vh] overflow-y-auto p-5 sm:p-8 md:p-10 relative`}
         transition={{ duration: 0.3 }}
       >
         {/* Progress bar */}

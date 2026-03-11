@@ -27,7 +27,7 @@ type Props = {
 };
 
 const EntryPointCards = ({ selected, onSelect }: Props) => (
-  <div className="grid grid-cols-2 gap-3">
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
     {ENTRY_POINTS.map(ep => {
       const Icon = ep.icon;
       const isSelected = selected === ep.id;
