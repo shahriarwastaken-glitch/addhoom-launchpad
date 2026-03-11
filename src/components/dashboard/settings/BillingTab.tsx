@@ -30,11 +30,9 @@ const BillingTab = () => {
   }, [planKey]);
   const creditBalance = profile?.credit_balance ?? 0;
   const creditPct = planCredits > 0 ? Math.round(((planCredits - creditBalance) / planCredits) * 100) : 0;
-  const daysUntilReset = useMemo(() => {
+  const resetDate = useMemo(() => {
     if (!profile?.credits_reset_at) return null;
-    const resetDate = new Date(profile.credits_reset_at);
-    resetDate.setDate(resetDate.getDate() + 30);
-    return Math.max(0, Math.ceil((resetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+    return new Date(profile.credits_reset_at);
   }, [profile?.credits_reset_at]);
 
   // Detect timezone for currency
