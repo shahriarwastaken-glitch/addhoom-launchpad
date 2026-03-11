@@ -110,7 +110,7 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
 
             <div className="p-6 space-y-5">
               <div className="text-center space-y-2">
-                <span className="text-4xl">{type === 'credits' ? '💳' : '⚡'}</span>
+                <Mascot variant={type === 'credits' ? 'sheepish' : 'worried'} size={80} className="mx-auto" />
                 <h3 className="text-lg font-bold text-foreground">
                   {type === 'credits'
                     ? t('ক্রেডিট শেষ হয়ে গেছে', "You're out of credits")
