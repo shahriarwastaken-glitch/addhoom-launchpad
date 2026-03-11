@@ -50,9 +50,15 @@ async function callFunction<T = any>(
   if (data?.error) {
     const code = data.code || 500;
 
-    if (code === 402) {
-      const isVideo = name === 'generate-video' || name === 'video';
-      _upgradeHandler?.(isVideo ? 'video' : 'general');
+    if (code === 402 || data.error === 'insufficient_credits') {
+      window.dispatchEvent(new CustomEvent('credits:insufficient', {
+        detail: {
+          action: name,
+          required: data.required,
+          balance: data.balance,
+        }
+      }));
+      return { data: null, error: { error: true, code: 402, message_bn: 'ক্রেডিট শেষ।', message_en: 'Insufficient credits.' } };
     }
 
     return { data: null, error: data as ApiError };
