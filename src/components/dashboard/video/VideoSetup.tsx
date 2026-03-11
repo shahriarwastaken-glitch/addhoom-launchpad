@@ -646,6 +646,7 @@ const VideoSetup = ({ form, setForm, onPreviewScript, onGenerate, generating, us
               {generating ? t('তৈরি হচ্ছে...', 'Generating...') : t('ভিডিও তৈরি করুন', 'Create Video')}
             </button>
           </div>
+          <p className="text-center mt-1"><CreditCostLabel credits={330} /></p>
         </div>
       </div>
     </div>

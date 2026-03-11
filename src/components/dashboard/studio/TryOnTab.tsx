@@ -581,8 +581,8 @@ const TryOnTab = () => {
               generating={generating}
               generateLabel={t('ট্রাই-অন তৈরি করুন', 'Generate Try-On')}
               generateIcon={<Shirt className="h-4 w-4 mr-2" />}
-              tabType="tryon"
-              costNote={`· 125 ${t('ক্রেডিট', 'credits')}`}
+            tabType="tryon"
+              creditCost={125}
               helperNote={t('এটি আপনার মডেলের বর্ণনা, দৃশ্যের নয়। চেহারায় মনোযোগ দিন — লিঙ্গ, গড়ন, ত্বকের রং, পোজ।', 'This describes your model, not the scene. Focus on appearance — gender, build, skin tone, pose.')}
             />
           </>

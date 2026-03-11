@@ -138,9 +138,11 @@ const PromptEditor = ({
           {generating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : generateIcon}
           {generateLabel}
         </Button>
-        {costNote && (
+        {creditCost !== undefined ? (
+          <p className="text-center"><CreditCostLabel credits={creditCost} /></p>
+        ) : costNote ? (
           <p className="text-[11px] text-center" style={{ color: '#9E9E9E' }}>{costNote}</p>
-        )}
+        ) : null}
       </div>
 
       {/* Back link */}
