@@ -13,7 +13,7 @@ const DashboardHome = () => {
     { icon: Sparkles, label: t('বিজ্ঞাপন তৈরি', 'Create Ad'), path: '/dashboard/generate', color: 'bg-primary/10 text-primary' },
     { icon: Video, label: t('ভিডিও তৈরি', 'Create Video'), path: '/dashboard/video', color: 'bg-brand-purple/10 text-brand-purple' },
     { icon: Calendar, label: t('ক্যালেন্ডার', 'Calendar'), path: '/dashboard/calendar', color: 'bg-brand-green/10 text-brand-green' },
-    { icon: Brain, label: t('AI চ্যাট', 'AI Chat'), path: '/dashboard/chat', color: 'bg-brand-yellow/10 text-brand-yellow' },
+    { icon: Brain, label: 'DhoomAi', path: '/dashboard/chat', color: 'bg-brand-yellow/10 text-brand-yellow' },
     { icon: BarChart3, label: t('অ্যানালিটিক্স', 'Analytics'), path: '/dashboard/analytics', color: 'bg-accent/10 text-accent' },
     { icon: Zap, label: t('ধুম স্কোর', 'Dhoom Score'), path: '/dashboard/dhoom-score', color: 'bg-brand-yellow/10 text-brand-yellow' },
     { icon: FolderOpen, label: t('প্রজেক্ট', 'Projects'), path: '/dashboard/projects', color: 'bg-destructive/10 text-destructive' },
