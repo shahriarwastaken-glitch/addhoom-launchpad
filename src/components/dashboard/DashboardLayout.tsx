@@ -28,7 +28,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const { user, profile, activeWorkspace, workspaces, setActiveWorkspaceId, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [showWorkspaces, setShowWorkspaces] = useState(false);
+  const [showCreateWs, setShowCreateWs] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCredits, setShowCredits] = useState(false);
