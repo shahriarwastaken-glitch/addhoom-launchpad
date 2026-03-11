@@ -54,6 +54,7 @@ const ProductsGrid = ({ products, onToggleActive, onEdit, onDelete, onAdd }: Pro
                   <img
                     src={product.primary_image_url}
                     alt={product.name}
+                    loading="lazy"
                     className="w-full h-full object-cover"
                   />
                 ) : (
