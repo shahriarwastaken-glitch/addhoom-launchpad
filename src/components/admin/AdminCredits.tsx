@@ -154,7 +154,8 @@ export default function AdminCredits() {
       toast.error(error.message);
       return;
     }
-    toast.success(`Credits adjusted: ${data.balance_before} → ${data.balance_after}`);
+    const result = data as any;
+    toast.success(`Credits adjusted: ${result.balance_before} → ${result.balance_after}`);
     setAdjustUser(null);
     setAdjustAmount(0);
     setAdjustReason('');
