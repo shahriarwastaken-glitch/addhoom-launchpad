@@ -4,32 +4,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Check, ChevronRight, Crown, Globe, Lock,
-  Pencil, Search, ShoppingBag, Sparkles, Store, Target,
-  MessageSquare, Package, Star, DollarSign, Factory, Zap,
-  Palette, Type, Image as ImageIcon, Tags, X, Plus, ArrowLeft, Info, AlertTriangle,
+  Check, Globe, Search, ShoppingBag, Sparkles, Store, X,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import VisualIdentitySection from '@/components/dashboard/VisualIdentitySection';
-import ProductsGrid, { ProductEditModal } from '@/components/dashboard/ProductsGrid';
-import DNAScoreIndicator from '@/components/dashboard/DNAScoreIndicator';
-import StyleCalibration from '@/components/dashboard/StyleCalibration';
 import EntryPointCards, { type EntryPointType } from '@/components/onboarding/EntryPointCards';
 import ManualEntryForm from '@/components/onboarding/ManualEntryForm';
 import TemplateSelector from '@/components/onboarding/TemplateSelector';
 import PhotoUploader from '@/components/onboarding/PhotoUploader';
-import type { WorkspaceProduct } from '@/hooks/useWorkspaceProducts';
 
-type ShopDNA = {
-  shop_name: string;
-  industry: string;
-  brand_tone: string;
-  target_audience: string;
-  key_products: string;
-  unique_selling: string;
-  price_range: string;
-  niche_tags: string[];
-};
+const TOTAL_STEPS = 5;
 
 const STEP_SLIDE = {
   initial: (dir: number) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
@@ -38,27 +21,85 @@ const STEP_SLIDE = {
 };
 const STEP_TRANSITION = { duration: 0.35, ease: [0.4, 0, 0.2, 1] as const };
 
-const TOTAL_STEPS = 4;
-
-const plans = [
-  {
-    id: 'pro', name: 'Pro', price: '৳2,999', period: '/mo',
-    features: ['50 AI ads/day', 'All platforms', 'Competitor analysis', 'AI chat assistant', 'Account Doctor'],
-    gradient: 'from-primary to-accent', icon: Zap,
-  },
-  {
-    id: 'agency', name: 'Agency', price: '৳7,999', period: '/mo',
-    features: ['All Pro features', 'Unlimited AI ads', 'Video ad generator', 'Content calendar', 'Festival templates', 'Priority support'],
-    gradient: 'from-[hsl(var(--brand-purple))] to-primary', icon: Crown,
-  },
-];
-
 const ANALYZING_STEPS = [
   { icon: Search, text: 'Analyzing source...' },
-  { icon: Palette, text: 'Extracting brand colors & fonts...' },
-  { icon: Package, text: 'Building product catalog...' },
-  { icon: Sparkles, text: 'Understanding brand identity...' },
+  { icon: Sparkles, text: 'Extracting brand identity...' },
+  { icon: ShoppingBag, text: 'Building product catalog...' },
   { icon: Check, text: 'Ready!' },
+];
+
+const INDUSTRIES = [
+  { emoji: '👗', label: 'Fashion' },
+  { emoji: '👟', label: 'Footwear' },
+  { emoji: '💄', label: 'Beauty' },
+  { emoji: '📱', label: 'Electronics' },
+  { emoji: '🍔', label: 'Food & Beverage' },
+  { emoji: '🏠', label: 'Home & Furniture' },
+  { emoji: '💍', label: 'Jewellery' },
+  { emoji: '🎒', label: 'Bags' },
+  { emoji: '🧸', label: 'Kids & Toys' },
+  { emoji: '⚽', label: 'Sports' },
+  { emoji: '💊', label: 'Health' },
+  { emoji: '📦', label: 'Other' },
+];
+
+const PLATFORMS = [
+  { emoji: '📘', label: 'Facebook' },
+  { emoji: '📸', label: 'Instagram' },
+  { emoji: '🛒', label: 'Daraz' },
+  { emoji: '🌐', label: 'Own Website' },
+  { emoji: '📦', label: 'Multiple' },
+];
+
+const LANGUAGES = [
+  { emoji: '🇬🇧', label: 'English', value: 'en' },
+  { emoji: '🇧🇩', label: 'বাংলা', value: 'bn' },
+  { emoji: '🔀', label: 'Banglish', value: 'banglish' },
+];
+
+const CREDIT_COSTS = [
+  { emoji: '📸', label: 'Image Generation', credits: 125 },
+  { emoji: '🎬', label: 'Video Generation', credits: 330 },
+  { emoji: '✍️', label: 'Ad Copy', credits: 10 },
+  { emoji: '✨', label: 'Prompt Enhance', credits: 10 },
+  { emoji: '⬆️', label: 'Upscale', credits: 100 },
+  { emoji: '👗', label: 'Virtual Try-On', credits: 125 },
+  { emoji: '📅', label: 'Content Calendar', credits: 500 },
+  { emoji: '🔍', label: 'Account Doctor', credits: 50 },
+  { emoji: '✅', label: 'Dhoom Score', credits: 0 },
+];
+
+const PLAN_CARDS = [
+  {
+    id: 'starter',
+    name: 'Starter',
+    priceUsd: 19,
+    priceBdt: 799,
+    credits: 5000,
+    estimates: '~40 images · ~15 videos · ~500 ad copies',
+    features: ['All core features', '1 workspace', 'Email support', 'Dhoom Score free'],
+    popular: false,
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    priceUsd: 49,
+    priceBdt: 1999,
+    credits: 15000,
+    estimates: '~120 images · ~45 videos · ~1,500 ad copies',
+    features: ['Everything in Starter', 'Virtual Try-On', '5 workspaces', 'Content Calendar', 'Priority support'],
+    popular: true,
+  },
+  {
+    id: 'agency',
+    name: 'Agency',
+    priceUsd: 99,
+    priceBdt: 4999,
+    credits: 35000,
+    estimates: '~280 images · ~106 videos · ~3,500 ad copies',
+    features: ['Everything in Pro', '20 workspaces', 'White label', 'Dedicated support'],
+    popular: false,
+  },
 ];
 
 const Onboarding = () => {
@@ -67,27 +108,23 @@ const Onboarding = () => {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
 
-  // Step 1
+  // Screen 2
   const [entryPoint, setEntryPoint] = useState<EntryPointType | null>(null);
   const [shopUrl, setShopUrl] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzeStep, setAnalyzeStep] = useState(0);
-  const [extractionQuality, setExtractionQuality] = useState<string>('full');
 
-  // Step 2
-  const [dna, setDna] = useState<ShopDNA | null>(null);
-  const [brandColors, setBrandColors] = useState<Array<{ hex: string; role: string; source: string }>>([]);
-  const [brandFonts, setBrandFonts] = useState<{ heading?: string; body?: string; source: string }>({ source: 'extracted' });
-  const [brandLogoUrl, setBrandLogoUrl] = useState<string | null>(null);
-  const [products, setProducts] = useState<WorkspaceProduct[]>([]);
-  const [dnaScore, setDnaScore] = useState(0);
-  const [editingField, setEditingField] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'brand' | 'products'>('brand');
-  const [editingProduct, setEditingProduct] = useState<Partial<WorkspaceProduct> | null>(null);
-  const [showProductModal, setShowProductModal] = useState(false);
-  const [newTag, setNewTag] = useState('');
+  // Screen 3
+  const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
+  const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
 
-  // Step 4 — plan
+  // Screen 5
+  const [currency, setCurrency] = useState<'intl' | 'bdt'>(() => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Dhaka' ? 'bdt' : 'intl';
+    } catch { return 'intl'; }
+  });
   const [planLoading, setPlanLoading] = useState<string | null>(null);
 
   useEffect(() => {
@@ -95,44 +132,55 @@ const Onboarding = () => {
   }, [loading, user]);
 
   useEffect(() => {
-    if (!loading && profile?.onboarding_complete && activeWorkspace?.shop_url) {
+    if (!loading && profile?.onboarding_complete) {
       navigate('/dashboard', { replace: true });
     }
-  }, [loading, profile, activeWorkspace]);
+  }, [loading, profile]);
 
-  const goTo = (s: number) => {
+  // Resume from saved step
+  useEffect(() => {
+    if (profile) {
+      const saved = (profile as any).onboarding_step;
+      if (saved && saved > 1 && saved <= TOTAL_STEPS) setStep(saved);
+    }
+  }, [profile]);
+
+  // Pre-fill from existing data
+  useEffect(() => {
+    if (activeWorkspace?.industry) setSelectedIndustry(activeWorkspace.industry);
+    if ((activeWorkspace as any)?.primary_platform) setSelectedPlatform((activeWorkspace as any).primary_platform);
+    if (profile?.language_pref) setSelectedLanguage(profile.language_pref);
+  }, [activeWorkspace, profile]);
+
+  const goTo = async (s: number) => {
     setDirection(s > step ? 1 : -1);
     setStep(s);
+    if (user) {
+      await supabase.from('profiles').update({ onboarding_step: s } as any).eq('id', user.id);
+    }
   };
 
-  // Invoke the edge function for URL-based entry points
+  // --- Screen 2: Shop DNA handlers ---
   const handleUrlAnalyze = async (platform: string) => {
     if (!shopUrl.trim() || !activeWorkspace) return;
     setAnalyzing(true);
     setAnalyzeStep(0);
-
     const interval = setInterval(() => {
-      setAnalyzeStep(prev => {
-        if (prev >= ANALYZING_STEPS.length - 1) { clearInterval(interval); return prev; }
-        return prev + 1;
-      });
+      setAnalyzeStep(prev => prev >= ANALYZING_STEPS.length - 1 ? prev : prev + 1);
     }, 2000);
-
     try {
       const { data, error } = await supabase.functions.invoke('setup-shop-dna', {
         body: { workspace_id: activeWorkspace.id, url: shopUrl.trim(), platform },
       });
       clearInterval(interval);
       setAnalyzeStep(ANALYZING_STEPS.length - 1);
-
       if (error || !data?.success) {
         toast.error('Could not extract info. Please try another method.');
         setAnalyzing(false);
         return;
       }
-
-      applyResults(data);
-      setTimeout(() => { setAnalyzing(false); goTo(2); }, 800);
+      await refreshProfile();
+      setTimeout(() => { setAnalyzing(false); goTo(3); }, 800);
     } catch {
       clearInterval(interval);
       toast.error('Something went wrong.');
@@ -140,99 +188,58 @@ const Onboarding = () => {
     }
   };
 
-  // Manual form submit
   const handleManualSubmit = async (formData: any) => {
     if (!activeWorkspace) return;
     setAnalyzing(true);
-
     try {
-      const { data, error } = await supabase.functions.invoke('setup-shop-dna', {
+      await supabase.functions.invoke('setup-shop-dna', {
         body: { workspace_id: activeWorkspace.id, platform: 'manual', payload: { form_data: formData } },
       });
-      if (error || !data?.success) {
-        // Fallback: use form data directly
-        setDna({
-          shop_name: formData.shop_name,
-          industry: formData.industry,
-          brand_tone: formData.brand_tone,
-          target_audience: formData.target_audience,
-          key_products: formData.key_products,
-          unique_selling: '',
-          price_range: formData.price_range,
-          niche_tags: [],
-        });
-        setExtractionQuality('manual');
-        setAnalyzing(false);
-        goTo(2);
-        return;
-      }
-      applyResults(data);
+      await refreshProfile();
       setAnalyzing(false);
-      goTo(2);
+      goTo(3);
     } catch {
       toast.error('Something went wrong.');
       setAnalyzing(false);
     }
   };
 
-  // Template submit
   const handleTemplateSelect = async (industry: string, templateData: any) => {
     if (!activeWorkspace) return;
     setAnalyzing(true);
-
     try {
-      const { data, error } = await supabase.functions.invoke('setup-shop-dna', {
+      await supabase.functions.invoke('setup-shop-dna', {
         body: { workspace_id: activeWorkspace.id, platform: 'template', payload: { industry, template_data: templateData } },
       });
-      if (error || !data?.success) {
-        // Fallback
-        setDna({
-          shop_name: 'My Shop',
-          industry,
-          ...templateData,
-          niche_tags: templateData.niche_tags || [],
-        });
-        setExtractionQuality('template');
-        setAnalyzing(false);
-        goTo(2);
-        return;
-      }
-      applyResults(data);
+      await refreshProfile();
       setAnalyzing(false);
-      goTo(2);
+      goTo(3);
     } catch {
-      setAnalyzing(false);
       toast.error('Something went wrong.');
+      setAnalyzing(false);
     }
   };
 
-  // Photo upload submit
   const handlePhotosSubmit = async (base64Images: string[]) => {
     if (!activeWorkspace) return;
     setAnalyzing(true);
     setAnalyzeStep(0);
-
     const interval = setInterval(() => {
-      setAnalyzeStep(prev => {
-        if (prev >= ANALYZING_STEPS.length - 1) { clearInterval(interval); return prev; }
-        return prev + 1;
-      });
+      setAnalyzeStep(prev => prev >= ANALYZING_STEPS.length - 1 ? prev : prev + 1);
     }, 2500);
-
     try {
       const { data, error } = await supabase.functions.invoke('setup-shop-dna', {
         body: { workspace_id: activeWorkspace.id, platform: 'photos', payload: { images: base64Images } },
       });
       clearInterval(interval);
       setAnalyzeStep(ANALYZING_STEPS.length - 1);
-
       if (error || !data?.success) {
-        toast.error('Could not analyze photos. Please try manually.');
+        toast.error('Could not analyze photos.');
         setAnalyzing(false);
         return;
       }
-      applyResults(data);
-      setTimeout(() => { setAnalyzing(false); goTo(2); }, 800);
+      await refreshProfile();
+      setTimeout(() => { setAnalyzing(false); goTo(3); }, 800);
     } catch {
       clearInterval(interval);
       toast.error('Something went wrong.');
@@ -240,56 +247,22 @@ const Onboarding = () => {
     }
   };
 
-  const applyResults = (data: any) => {
-    setDna({ ...data.dna, niche_tags: data.dna?.niche_tags || [] });
-    setBrandColors(data.brand_colors || []);
-    setBrandFonts(data.brand_fonts || { source: 'extracted' });
-    setBrandLogoUrl(data.brand_logo_url || null);
-    setProducts(data.products || []);
-    setDnaScore(data.dna_score || 0);
-    setExtractionQuality(data.extraction_quality || 'full');
-  };
-
-  // Step 2 → save DNA
-  const handleSaveDna = async () => {
-    if (!dna || !activeWorkspace) return;
+  // --- Screen 3: Save preferences ---
+  const handleSavePreferences = async () => {
+    if (!activeWorkspace || !user) { goTo(4); return; }
     try {
       await supabase.from('workspaces').update({
-        shop_name: dna.shop_name || 'My Shop',
-        industry: dna.industry,
-        brand_tone: dna.brand_tone,
-        target_audience: dna.target_audience,
-        key_products: dna.key_products,
-        unique_selling: dna.unique_selling,
-        price_range: dna.price_range,
-        shop_url: shopUrl || null,
-        brand_colors: brandColors,
-        brand_fonts: brandFonts,
-        brand_logo_url: brandLogoUrl,
-        niche_tags: dna.niche_tags?.slice(0, 5) || [],
+        industry: selectedIndustry,
+        primary_platform: selectedPlatform,
+        default_language: selectedLanguage,
       } as any).eq('id', activeWorkspace.id);
-
-      await supabase.from('profiles').update({ onboarding_complete: true } as any).eq('id', user!.id);
+      await supabase.from('profiles').update({ language_pref: selectedLanguage } as any).eq('id', user.id);
       await refreshProfile();
-      goTo(3);
-    } catch {
-      toast.error('Failed to save. Please try again.');
-    }
-  };
-
-  // Step 3 → save style preferences
-  const handleStyleComplete = async (preferences: any) => {
-    if (!activeWorkspace) { goTo(4); return; }
-    try {
-      await supabase.functions.invoke('save-style-preferences', {
-        body: { workspace_id: activeWorkspace.id, ...preferences },
-      });
-      await refreshProfile();
-    } catch { /* continue anyway */ }
+    } catch { /* continue */ }
     goTo(4);
   };
 
-  // Step 4 → select plan
+  // --- Screen 5: Plan selection ---
   const handleSelectPlan = async (planId: string) => {
     setPlanLoading(planId);
     try {
@@ -297,199 +270,136 @@ const Onboarding = () => {
         body: { plan: planId, billing_cycle: 'monthly' },
       });
       if (error) throw error;
-      if (data?.gateway_url) window.location.href = data.gateway_url;
-      else if (data?.dev_mode) {
-        toast.success('Plan activated!');
+      if (data?.gateway_url) {
+        window.location.href = data.gateway_url;
+      } else if (data?.dev_mode) {
+        const planCredits = PLAN_CARDS.find(p => p.id === planId)?.credits || 5000;
+        toast.success(`🎉 Welcome! Your ${planCredits.toLocaleString()} credits are ready.`);
+        await supabase.from('profiles').update({ onboarding_complete: true, onboarding_step: 5 } as any).eq('id', user!.id);
         await refreshProfile();
         navigate('/dashboard', { replace: true });
       }
     } catch (e: any) {
-      toast.error(e.message || 'Payment failed');
+      toast.error(e.message || 'Payment failed. Please try again.');
     } finally {
       setPlanLoading(null);
     }
   };
 
-  const [showSkipConfirm, setShowSkipConfirm] = useState(false);
-  const handleSkip = async () => {
-    try {
-      await supabase.from('profiles').update({ onboarding_complete: false } as any).eq('id', user!.id);
-      navigate('/dashboard', { replace: true });
-    } catch { navigate('/dashboard', { replace: true }); }
+  const handleSubscribeLater = async () => {
+    if (!user) return;
+    await supabase.from('profiles').update({ onboarding_complete: true, onboarding_step: 5 } as any).eq('id', user.id);
+    await refreshProfile();
+    navigate('/dashboard', { replace: true });
   };
 
-  const updateDna = (field: keyof ShopDNA, value: any) => {
-    if (dna) setDna({ ...dna, [field]: value });
-  };
+  const handleSkip = () => goTo(step + 1);
 
-  const addNicheTag = () => {
-    if (!newTag.trim() || !dna || (dna.niche_tags?.length || 0) >= 5) return;
-    updateDna('niche_tags', [...(dna.niche_tags || []), newTag.trim()]);
-    setNewTag('');
-  };
-
-  const removeNicheTag = (index: number) => {
-    if (!dna) return;
-    updateDna('niche_tags', (dna.niche_tags || []).filter((_, i) => i !== index));
-  };
-
-  const handleProductSave = async (data: Partial<WorkspaceProduct>) => {
-    if (!activeWorkspace) return;
-    if (editingProduct?.id) {
-      await supabase.functions.invoke('workspace-products', {
-        body: { action: 'update', product_id: editingProduct.id, product: data },
-      });
-    } else {
-      await supabase.functions.invoke('workspace-products', {
-        body: { action: 'add', workspace_id: activeWorkspace.id, product: data },
-      });
-    }
-    const { data: refreshed } = await supabase.functions.invoke('workspace-products', {
-      body: { action: 'list', workspace_id: activeWorkspace.id, active_only: false },
-    });
-    if (refreshed?.success) setProducts(refreshed.products);
-    setShowProductModal(false);
-    setEditingProduct(null);
-  };
-
-  const handleProductToggle = async (id: string, active: boolean) => {
-    await supabase.functions.invoke('workspace-products', {
-      body: { action: 'update', product_id: id, product: { is_active: active } },
-    });
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, is_active: active } : p));
-  };
-
-  const handleProductDelete = async (id: string) => {
-    if (!activeWorkspace) return;
-    await supabase.functions.invoke('workspace-products', {
-      body: { action: 'delete', product_id: id, workspace_id: activeWorkspace.id },
-    });
-    setProducts(prev => prev.filter(p => p.id !== id));
-  };
-
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-background"><div className="animate-pulse text-primary text-xl font-bold">AdDhoom</div></div>;
-  }
-
-  const dnaFields: { key: keyof ShopDNA; icon: React.ReactNode; label: string }[] = [
-    { key: 'shop_name', icon: <Store size={14} className="text-primary" />, label: 'Shop Name' },
-    { key: 'industry', icon: <Factory size={14} className="text-primary" />, label: 'Industry' },
-    { key: 'target_audience', icon: <Target size={14} className="text-primary" />, label: 'Target Audience' },
-    { key: 'brand_tone', icon: <MessageSquare size={14} className="text-primary" />, label: 'Brand Voice' },
-    { key: 'key_products', icon: <Package size={14} className="text-primary" />, label: 'Key Products' },
-    { key: 'unique_selling', icon: <Star size={14} className="text-primary" />, label: 'Unique Selling Point' },
-    { key: 'price_range', icon: <DollarSign size={14} className="text-primary" />, label: 'Price Range' },
-  ];
-
-  // Count missing fields for quality banner
-  const missingFieldCount = dna ? dnaFields.filter(f => !dna[f.key]).length : 0;
-
-  // URL input for website/facebook/daraz
   const renderUrlInput = () => {
     const placeholders: Record<string, string> = {
       website: 'https://yourshop.com',
       facebook: 'facebook.com/yourpagename',
       daraz: 'daraz.com.bd/shop/yourshop',
     };
-    const labels: Record<string, string> = {
-      website: 'Your website URL',
-      facebook: 'Your Facebook Page URL',
-      daraz: 'Your Daraz Store URL',
-    };
     return (
       <div className="mt-5 space-y-4">
-        <div>
-          <label className="text-sm font-semibold text-foreground mb-1.5 block">{labels[entryPoint!]}</label>
-          <div className="relative">
-            <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-            <input type="url" value={shopUrl} onChange={e => setShopUrl(e.target.value)}
-              placeholder={placeholders[entryPoint!]}
-              className="w-full bg-card border-2 border-border rounded-2xl pl-11 pr-5 py-4 text-base focus:outline-none focus:border-primary transition-colors placeholder:text-muted-foreground" />
-          </div>
+        <div className="relative">
+          <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+          <input
+            type="url"
+            value={shopUrl}
+            onChange={e => setShopUrl(e.target.value)}
+            placeholder={placeholders[entryPoint!]}
+            className="w-full bg-secondary border-2 border-border rounded-2xl pl-11 pr-5 py-4 text-base focus:outline-none focus:border-primary transition-colors placeholder:text-muted-foreground"
+          />
         </div>
-        {entryPoint === 'facebook' && (
-          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-            <Info size={12} /> Facebook limits what we can read. We'll extract what's publicly visible and you can fill in the rest.
-          </p>
-        )}
-        <button onClick={() => handleUrlAnalyze(entryPoint!)} disabled={!shopUrl.trim()}
-          className="w-full bg-gradient-cta text-primary-foreground rounded-2xl py-4 text-base font-bold shadow-orange-glow hover:scale-[1.01] transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+        <button
+          onClick={() => handleUrlAnalyze(entryPoint!)}
+          disabled={!shopUrl.trim()}
+          className="w-full bg-primary text-primary-foreground rounded-2xl py-4 text-base font-bold hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+        >
           Continue →
         </button>
       </div>
     );
   };
 
-  return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      <div className="grain-overlay" />
-
-      {/* Top Bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="max-w-[700px] mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-              <span className="font-bn text-[15px] font-bold text-primary-foreground leading-none">আ</span>
-            </div>
-            <span className="font-en text-lg font-[800] text-foreground tracking-[-0.02em]">AdDhoom</span>
-          </div>
-          <div className="flex items-center gap-0">
-            {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((s, i) => (
-              <div key={s} className="flex items-center">
-                <div className={`rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
-                  s < step ? 'w-5 h-5 bg-[hsl(var(--brand-green))] text-white' :
-                  s === step ? 'w-6 h-6 bg-primary text-primary-foreground' :
-                  'w-4 h-4 border-2 border-muted-foreground/30'
-                }`}>
-                  {s < step ? <Check size={12} /> : s === step ? s : null}
-                </div>
-                {i < TOTAL_STEPS - 1 && (
-                  <div className={`w-8 h-0.5 mx-0.5 ${s < step ? 'bg-[hsl(var(--brand-green))]' : 'border-t-2 border-dashed border-muted-foreground/20'}`} />
-                )}
-              </div>
-            ))}
-          </div>
-          {step < TOTAL_STEPS && (
-            <button onClick={() => setShowSkipConfirm(true)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Skip</button>
-          )}
-          {step >= TOTAL_STEPS && <div className="w-8" />}
-        </div>
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-pulse text-primary text-xl font-bold">AdDhoom</div>
       </div>
+    );
+  }
 
-      {/* Skip Confirmation */}
-      <AnimatePresence>
-        {showSkipConfirm && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-            className="fixed top-14 left-0 right-0 z-40 bg-card border-b border-border px-6 py-3">
-            <div className="max-w-[600px] mx-auto text-center">
-              <p className="text-sm text-foreground mb-2">You can always complete setup later. Go to dashboard now?</p>
-              <div className="flex gap-3 justify-center">
-                <button onClick={handleSkip} className="text-sm font-semibold text-primary hover:underline">Yes, go to dashboard</button>
-                <button onClick={() => setShowSkipConfirm(false)} className="text-sm text-muted-foreground hover:text-foreground">No, continue setup</button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+  const cardMaxWidth = step === 5 ? 'max-w-[900px]' : 'max-w-[520px]';
 
-      {/* Main Content */}
-      <div className="pt-20 pb-12 px-6 max-w-[680px] mx-auto min-h-screen flex flex-col justify-center">
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
+      style={{ backgroundColor: 'rgba(28,27,26,0.6)', backdropFilter: 'blur(8px)' }}
+    >
+      <motion.div
+        layout
+        className={`bg-card rounded-3xl shadow-warm-lg w-full ${cardMaxWidth} max-h-[90vh] overflow-y-auto p-8 sm:p-10 relative`}
+        transition={{ duration: 0.3 }}
+      >
+        {/* Progress bar */}
+        <div className="mb-6">
+          <div className="flex items-center justify-end mb-2">
+            <span className="text-xs text-muted-foreground">Step {step} of {TOTAL_STEPS}</span>
+          </div>
+          <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#E8E3DC' }}>
+            <motion.div
+              className="h-full rounded-full bg-primary"
+              initial={false}
+              animate={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+            />
+          </div>
+        </div>
+
         <AnimatePresence mode="wait" custom={direction}>
-          {/* STEP 1 — Entry Point Selection */}
-          {step === 1 && !analyzing && (
-            <motion.div key="step1" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_TRANSITION}>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Step 1 of {TOTAL_STEPS}</p>
-              <h1 className="text-3xl font-bold text-foreground mb-2">How do you want to set up your shop?</h1>
-              <p className="text-muted-foreground mb-8 leading-relaxed">
-                Choose how you want to get started. You can always edit everything later.
+          {/* SCREEN 1 — Welcome */}
+          {step === 1 && (
+            <motion.div key="s1" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_TRANSITION} className="text-center space-y-6">
+              <div className="flex justify-center">
+                <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center">
+                  <span className="font-bn text-2xl font-bold text-primary-foreground leading-none">আ</span>
+                </div>
+              </div>
+              <h1 className="text-[28px] sm:text-[32px] font-bold text-foreground leading-tight" style={{ fontFamily: 'Syne, sans-serif' }}>
+                Welcome to AdDhoom Studio
+              </h1>
+              <p className="text-base text-muted-foreground leading-relaxed">
+                Let's set up your workspace<br />in under a minute.
               </p>
+              <button
+                onClick={() => goTo(2)}
+                className="w-full bg-primary text-primary-foreground rounded-2xl py-4 text-base font-bold hover:opacity-90 transition-all"
+              >
+                Let's Go →
+              </button>
+            </motion.div>
+          )}
+
+          {/* SCREEN 2 — Shop DNA */}
+          {step === 2 && !analyzing && (
+            <motion.div key="s2" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_TRANSITION} className="space-y-5">
+              <div>
+                <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>
+                  Tell us about your shop
+                </h1>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Helps AdDhoom write better ads for your specific products.
+                </p>
+              </div>
 
               <EntryPointCards selected={entryPoint} onSelect={setEntryPoint} />
 
-              {/* Per-entry-point flow below cards */}
               <AnimatePresence mode="wait">
                 {entryPoint && ['website', 'facebook', 'daraz'].includes(entryPoint) && (
-                  <motion.div key="url-input" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+                  <motion.div key="url" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
                     {renderUrlInput()}
                   </motion.div>
                 )}
@@ -509,235 +419,258 @@ const Onboarding = () => {
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              <button onClick={handleSkip} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors pt-2">
+                Skip for now →
+              </button>
             </motion.div>
           )}
 
-          {/* ANALYZING STATE */}
-          {step === 1 && analyzing && (
-            <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center space-y-8">
-              <div className="relative inline-block">
-                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
-                  <Store className="text-primary" size={36} />
-                </div>
+          {/* Analyzing state */}
+          {step === 2 && analyzing && (
+            <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center space-y-6 py-8">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto animate-pulse">
+                <Store className="text-primary" size={32} />
               </div>
-              <div className="space-y-3 max-w-sm mx-auto">
+              <div className="space-y-3 max-w-xs mx-auto">
                 {ANALYZING_STEPS.map((s, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: i <= analyzeStep ? 1 : 0.3, x: 0 }} transition={{ delay: i * 0.1, duration: 0.3 }}
-                    className="flex items-center gap-3">
+                  <div key={i} className={`flex items-center gap-3 text-sm ${i <= analyzeStep ? 'text-foreground' : 'text-muted-foreground/40'}`}>
                     {i < analyzeStep ? (
-                      <Check size={16} className="text-[hsl(var(--brand-green))] flex-shrink-0" />
-                    ) : i === analyzeStep ? (
-                      <s.icon size={16} className="text-primary animate-pulse flex-shrink-0" />
+                      <Check size={14} className="text-[hsl(var(--brand-green))]" />
                     ) : (
-                      <s.icon size={16} className="text-muted-foreground/40 flex-shrink-0" />
+                      <s.icon size={14} className={i === analyzeStep ? 'text-primary animate-pulse' : ''} />
                     )}
-                    <span className={`text-sm ${i <= analyzeStep ? 'text-foreground' : 'text-muted-foreground/40'}`}>{s.text}</span>
-                  </motion.div>
+                    <span>{s.text}</span>
+                  </div>
                 ))}
               </div>
             </motion.div>
           )}
 
-          {/* STEP 2 — Brand Review */}
-          {step === 2 && dna && (
-            <motion.div key="step2" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_TRANSITION}>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Step 2 of {TOTAL_STEPS}</p>
-              <h1 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2">
-                AI understood your brand <Sparkles size={20} className="text-primary" />
+          {/* SCREEN 3 — Quick Preferences */}
+          {step === 3 && (
+            <motion.div key="s3" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_TRANSITION} className="space-y-6">
+              <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>
+                A few quick questions
               </h1>
-              <p className="text-muted-foreground mb-5 text-sm">Review and edit if needed, then continue.</p>
 
-              {/* Extraction Quality Banner */}
-              {extractionQuality === 'partial' && (
-                <div className="mb-4 p-3 rounded-xl border border-[hsl(40,100%,50%)]/30 bg-[hsl(40,100%,50%)]/[0.08] flex items-start gap-2">
-                  <AlertTriangle size={16} className="text-[hsl(40,100%,40%)] flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-foreground">
-                    Some fields couldn't be extracted automatically. Please review and fill in any missing fields below.
-                  </p>
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-2.5 uppercase tracking-wider">What do you sell?</p>
+                <div className="flex flex-wrap gap-2">
+                  {INDUSTRIES.map(ind => (
+                    <button
+                      key={ind.label}
+                      onClick={() => setSelectedIndustry(ind.label)}
+                      className={`px-3.5 py-2 rounded-full text-sm font-medium border transition-all ${
+                        selectedIndustry === ind.label
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-secondary text-foreground border-border hover:border-primary/50'
+                      }`}
+                    >
+                      {ind.emoji} {ind.label}
+                    </button>
+                  ))}
                 </div>
-              )}
-              {(extractionQuality === 'manual' || extractionQuality === 'template') && (
-                <div className="mb-4 p-3 rounded-xl border border-[hsl(var(--brand-purple))]/20 bg-[hsl(var(--brand-purple))]/[0.06] flex items-start gap-2">
-                  <Info size={16} className="text-[hsl(var(--brand-purple))] flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-foreground">
-                    You can always update this information later in Settings → Shop DNA.
-                  </p>
-                </div>
-              )}
+              </div>
 
-              {/* Tabs */}
-              <div className="bg-secondary rounded-xl p-1 flex mb-6">
-                {(['brand', 'products'] as const).map(tab => (
-                  <button key={tab} onClick={() => setActiveTab(tab)}
-                    className={`flex-1 py-2.5 rounded-[10px] text-sm font-semibold transition-all flex items-center justify-center gap-1.5 ${
-                      activeTab === tab ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
-                    }`}>
-                    {tab === 'brand' ? (
-                      <>
-                        <Palette size={14} /> Brand Info
-                        {missingFieldCount > 0 && <span className="text-[10px] bg-primary/15 text-primary rounded-full px-1.5 py-0.5 font-bold">{missingFieldCount} missing</span>}
-                      </>
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-2.5 uppercase tracking-wider">Where do you sell?</p>
+                <div className="flex flex-wrap gap-2">
+                  {PLATFORMS.map(p => (
+                    <button
+                      key={p.label}
+                      onClick={() => setSelectedPlatform(p.label)}
+                      className={`px-3.5 py-2 rounded-full text-sm font-medium border transition-all ${
+                        selectedPlatform === p.label
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-secondary text-foreground border-border hover:border-primary/50'
+                      }`}
+                    >
+                      {p.emoji} {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-2.5 uppercase tracking-wider">Ad language?</p>
+                <div className="flex flex-wrap gap-2">
+                  {LANGUAGES.map(l => (
+                    <button
+                      key={l.value}
+                      onClick={() => setSelectedLanguage(l.value)}
+                      className={`px-3.5 py-2 rounded-full text-sm font-medium border transition-all ${
+                        selectedLanguage === l.value
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-secondary text-foreground border-border hover:border-primary/50'
+                      }`}
+                    >
+                      {l.emoji} {l.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                onClick={handleSavePreferences}
+                className="w-full bg-primary text-primary-foreground rounded-2xl py-4 text-base font-bold hover:opacity-90 transition-all"
+              >
+                Next →
+              </button>
+              <button onClick={handleSkip} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Skip →
+              </button>
+            </motion.div>
+          )}
+
+          {/* SCREEN 4 — Credits Explainer */}
+          {step === 4 && (
+            <motion.div key="s4" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_TRANSITION} className="space-y-6">
+              <div>
+                <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>
+                  How credits work
+                </h1>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Every action uses credits. Subscribe to get your monthly allowance.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {CREDIT_COSTS.map(item => (
+                  <div key={item.label} className="flex items-center justify-between bg-secondary rounded-xl px-3.5 py-3">
+                    <span className="text-sm text-foreground flex items-center gap-2">
+                      <span>{item.emoji}</span> {item.label}
+                    </span>
+                    {item.credits === 0 ? (
+                      <span className="text-sm font-bold" style={{ color: '#00B96B' }}>Free</span>
                     ) : (
-                      <><Package size={14} /> Products ({products.length})</>
+                      <span className="text-sm font-bold text-foreground">{item.credits}</span>
                     )}
-                  </button>
+                  </div>
                 ))}
               </div>
 
-              {activeTab === 'brand' ? (
-                <div className="space-y-6">
-                  <VisualIdentitySection
-                    brandColors={brandColors}
-                    brandFonts={brandFonts}
-                    brandLogoUrl={brandLogoUrl}
-                    onUpdateColors={setBrandColors}
-                    onUpdateFonts={setBrandFonts}
-                  />
-                  <div className="h-px bg-border" />
-                  <div className="space-y-3">
-                    {dnaFields.map((field, i) => {
-                      const isEmpty = !dna[field.key];
-                      return (
-                        <motion.div key={field.key} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05, duration: 0.3 }}
-                          className={`bg-card rounded-[14px] p-4 border-l-4 ${isEmpty ? 'border-l-primary' : 'border-l-primary'}`}>
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
-                              {field.icon} {field.label} {isEmpty && <span className="text-primary">*</span>}
-                            </span>
-                            <button onClick={() => setEditingField(editingField === field.key ? null : field.key)}
-                              className="text-muted-foreground hover:text-primary transition-colors"><Pencil size={14} /></button>
-                          </div>
-                          {editingField === field.key ? (
-                            <input autoFocus value={(dna[field.key] as string) || ''} onChange={e => updateDna(field.key, e.target.value)}
-                              onBlur={() => setEditingField(null)} onKeyDown={e => e.key === 'Enter' && setEditingField(null)}
-                              placeholder="Not found — add manually"
-                              className={`w-full bg-transparent border-b text-base font-semibold focus:outline-none text-foreground ${isEmpty ? 'border-primary' : 'border-primary'}`} />
-                          ) : (
-                            <p className={`text-base font-semibold ${dna[field.key] ? 'text-foreground' : 'text-muted-foreground italic'}`}>
-                              {(dna[field.key] as string) || 'Not found — click pencil to add'}
-                            </p>
-                          )}
-                        </motion.div>
-                      );
-                    })}
-                  </div>
+              <p className="text-xs text-muted-foreground text-center">
+                Credits reset every 30 days from your subscription date.
+              </p>
 
-                  {/* Niche Tags */}
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                      <Tags size={12} /> Niche Tags
-                    </label>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {(dna.niche_tags || []).map((tag, i) => (
-                        <span key={i} className="text-xs bg-primary/10 text-primary rounded-full px-3 py-1.5 font-medium flex items-center gap-1">
-                          {tag}
-                          <button onClick={() => removeNicheTag(i)} className="hover:text-destructive"><X size={12} /></button>
-                        </span>
-                      ))}
-                      {(dna.niche_tags?.length || 0) < 5 && (
-                        <div className="flex items-center gap-1">
-                          <input value={newTag} onChange={e => setNewTag(e.target.value)} onKeyDown={e => e.key === 'Enter' && addNicheTag()}
-                            placeholder="Add tag" className="text-xs bg-card border border-border rounded-full px-3 py-1.5 w-24 focus:outline-none focus:border-primary text-foreground" />
-                          <button onClick={addNicheTag} className="text-xs text-primary"><Plus size={14} /></button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <ProductsGrid
-                  products={products}
-                  onToggleActive={handleProductToggle}
-                  onEdit={p => { setEditingProduct(p); setShowProductModal(true); }}
-                  onDelete={handleProductDelete}
-                  onAdd={() => { setEditingProduct({}); setShowProductModal(true); }}
-                />
-              )}
+              <button
+                onClick={() => goTo(5)}
+                className="w-full bg-primary text-primary-foreground rounded-2xl py-4 text-base font-bold hover:opacity-90 transition-all"
+              >
+                Next →
+              </button>
+              <button onClick={handleSkip} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Skip →
+              </button>
+            </motion.div>
+          )}
 
-              {/* Missing fields nudge */}
-              {missingFieldCount > 0 && (
-                <p className="text-xs text-muted-foreground text-center mt-3">
-                  {missingFieldCount} field{missingFieldCount > 1 ? 's' : ''} empty — AI works better with more information
+          {/* SCREEN 5 — Choose a Plan */}
+          {step === 5 && (
+            <motion.div key="s5" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_TRANSITION} className="space-y-6">
+              <div className="text-center">
+                <h1 className="text-[24px] sm:text-[28px] font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>
+                  Choose your plan
+                </h1>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Get your monthly credits and<br />start creating immediately.
                 </p>
-              )}
+              </div>
 
-              {/* Bottom: DNA Score + Next */}
-              <div className="mt-6 flex items-center justify-between">
-                <DNAScoreIndicator score={dnaScore} size="sm" />
-                <button onClick={handleSaveDna}
-                  className="bg-gradient-cta text-primary-foreground rounded-2xl px-8 py-3 text-base font-bold shadow-orange-glow hover:scale-[1.01] transition-all flex items-center gap-2">
-                  Next: Style Preferences <ChevronRight size={18} />
+              {/* Currency toggle */}
+              <div className="flex justify-center">
+                <div className="bg-secondary rounded-full p-1 flex">
+                  <button
+                    onClick={() => setCurrency('intl')}
+                    className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                      currency === 'intl' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'
+                    }`}
+                  >
+                    🌍 International
+                  </button>
+                  <button
+                    onClick={() => setCurrency('bdt')}
+                    className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                      currency === 'bdt' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'
+                    }`}
+                  >
+                    🇧🇩 Bangladesh
+                  </button>
+                </div>
+              </div>
+
+              {/* Plan cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {PLAN_CARDS.map(plan => (
+                  <div
+                    key={plan.id}
+                    className={`relative bg-card rounded-2xl border-2 p-5 flex flex-col transition-all ${
+                      plan.popular
+                        ? 'border-primary shadow-lg sm:scale-[1.03]'
+                        : 'border-border'
+                    }`}
+                  >
+                    {plan.popular && (
+                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">
+                        Most Popular
+                      </span>
+                    )}
+                    <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
+                    <div className="mt-2">
+                      <span className="text-2xl font-bold text-foreground">
+                        {currency === 'intl' ? `$${plan.priceUsd}` : `৳${plan.priceBdt.toLocaleString()}`}
+                      </span>
+                      <span className="text-sm text-muted-foreground">/month</span>
+                    </div>
+                    <p className="text-sm text-primary font-semibold mt-1">
+                      {plan.credits.toLocaleString()} credits/month
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">{plan.estimates}</p>
+
+                    <div className="mt-4 space-y-2 flex-1">
+                      {plan.features.map((f, i) => (
+                        <div key={i} className="flex items-center gap-2 text-sm text-foreground">
+                          <Check size={14} className="text-[hsl(var(--brand-green))] flex-shrink-0" />
+                          {f}
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => handleSelectPlan(plan.id)}
+                      disabled={planLoading === plan.id}
+                      className={`w-full mt-4 rounded-xl py-3 font-semibold text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2 ${
+                        plan.popular
+                          ? 'bg-primary text-primary-foreground hover:opacity-90'
+                          : 'bg-secondary text-foreground border border-border hover:bg-secondary/80'
+                      }`}
+                    >
+                      {planLoading === plan.id ? (
+                        <Sparkles size={14} className="animate-spin" />
+                      ) : (
+                        `Start with ${plan.name} →`
+                      )}
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="text-center space-y-2 pt-2">
+                <p className="text-xs text-muted-foreground">
+                  7-day money back guarantee. Cancel anytime.
+                </p>
+                <button
+                  onClick={handleSubscribeLater}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  I'll subscribe later →
                 </button>
               </div>
             </motion.div>
           )}
-
-          {/* STEP 3 — Style Calibration */}
-          {step === 3 && (
-            <motion.div key="step3" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_TRANSITION}>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Step 3 of {TOTAL_STEPS}</p>
-              <StyleCalibration onComplete={handleStyleComplete} onSkip={() => goTo(4)} />
-            </motion.div>
-          )}
-
-          {/* STEP 4 — Choose Plan */}
-          {step === 4 && (
-            <motion.div key="step4" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_TRANSITION}>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Step {TOTAL_STEPS} of {TOTAL_STEPS}</p>
-              <h1 className="text-3xl font-bold text-foreground mb-2 flex items-center gap-2">
-                Choose your plan <Crown size={24} className="text-primary" />
-              </h1>
-              <p className="text-muted-foreground mb-8">Your brand DNA is saved. Pick a plan to start creating AI ads.</p>
-
-              <div className="space-y-4">
-                {plans.map(plan => (
-                  <div key={plan.id} className="bg-card rounded-2xl border border-border overflow-hidden shadow-warm">
-                    <div className={`bg-gradient-to-r ${plan.gradient} p-5 text-white`}>
-                      <div className="flex items-center gap-2"><plan.icon size={20} /><h3 className="text-lg font-bold">{plan.name}</h3></div>
-                      <div className="flex items-baseline gap-1 mt-1.5">
-                        <span className="text-2xl font-mono font-bold">{plan.price}</span>
-                        <span className="text-sm opacity-80">{plan.period}</span>
-                      </div>
-                    </div>
-                    <div className="p-5 space-y-2.5">
-                      {plan.features.map((f, i) => (
-                        <div key={i} className="flex items-center gap-2 text-sm">
-                          <Check size={14} className="text-[hsl(var(--brand-green))] flex-shrink-0" /><span className="text-foreground">{f}</span>
-                        </div>
-                      ))}
-                      <button onClick={() => handleSelectPlan(plan.id)} disabled={planLoading === plan.id}
-                        className="w-full mt-3 bg-gradient-cta text-primary-foreground rounded-xl py-3 font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform disabled:opacity-50 flex items-center justify-center gap-2">
-                        {planLoading === plan.id ? <Sparkles size={16} className="animate-spin" /> : <><Zap size={16} /> Get {plan.name}</>}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {dna && (
-                <div className="mt-6 rounded-xl border border-[hsl(var(--brand-green))]/15 bg-[hsl(var(--brand-green))]/5 p-4">
-                  <p className="text-sm text-foreground flex items-center gap-1.5">
-                    <Check size={14} className="text-[hsl(var(--brand-green))]" />
-                    Shop DNA saved: {dna.shop_name} · {dna.industry}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    AI will use your brand data to create personalized ads as soon as you subscribe.
-                  </p>
-                </div>
-              )}
-            </motion.div>
-          )}
         </AnimatePresence>
-      </div>
-
-      {/* Product Edit Modal */}
-      {showProductModal && (
-        <ProductEditModal
-          product={editingProduct}
-          onSave={handleProductSave}
-          onClose={() => { setShowProductModal(false); setEditingProduct(null); }}
-        />
-      )}
+      </motion.div>
     </div>
   );
 };

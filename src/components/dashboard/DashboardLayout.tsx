@@ -1,4 +1,5 @@
 import { ReactNode, useState, useEffect, useMemo } from 'react';
+import FirstTimeHelperBar from './FirstTimeHelperBar';
 import DashboardNavbar from './DashboardNavbar';
 import DashboardSidebar from './DashboardSidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -267,6 +268,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             </div>
           </header>
 
+          <FirstTimeHelperBar />
           <main className={`flex-1 bg-background overflow-auto ${
             location.pathname === '/dashboard/chat' || location.pathname === '/dashboard/calendar'
               ? 'p-0 pb-14 md:pb-0' 

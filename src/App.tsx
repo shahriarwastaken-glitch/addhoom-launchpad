@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { UpgradeProvider, useUpgrade as useUpgradeCtx } from "@/contexts/UpgradeContext";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { setUpgradeHandler } from "@/lib/api";
 import Index from "./pages/Index";
@@ -15,36 +15,19 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import AdminDashboardNew from "./pages/AdminDashboardNew";
 import NotFound from "./pages/NotFound";
-import PlanGate from "./pages/PlanGate";
 import Onboarding from "./pages/Onboarding";
-import ShopDNASetup from "./components/dashboard/ShopDNASetup";
 import ImpersonationBanner from "./components/admin/ImpersonationBanner";
 
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children, skipPlanCheck }: { children: React.ReactNode; skipPlanCheck?: boolean }) => {
   const { user, loading, profile, activeWorkspace, refreshProfile } = useAuth();
-  const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    if (profile) {
-      setOnboardingDone(profile.onboarding_complete === true);
-    }
-  }, [profile]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><div className="animate-pulse text-primary text-xl font-bold">AdDhoom</div></div>;
   if (!user) return <Navigate to="/auth" replace />;
   
-  // Check if user has a paid plan (skip for admin routes)
-  if (!skipPlanCheck) {
-    const plan = profile?.plan || 'free';
-    if (plan === 'free') {
-      return <PlanGate />;
-    }
-  }
-
-  // Show onboarding if not complete — redirect to /onboarding
-  if (onboardingDone === false && !skipPlanCheck && activeWorkspace && !activeWorkspace.shop_url) {
+  // Show onboarding if not complete
+  if (!skipPlanCheck && profile && !profile.onboarding_complete) {
     return <Navigate to="/onboarding" replace />;
   }
   
