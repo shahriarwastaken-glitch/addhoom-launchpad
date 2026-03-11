@@ -56,6 +56,26 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const creditEmpty = creditBalance <= 0;
 
 
+  // Payment result handler
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get('payment');
+    if (payment === 'success') {
+      toast({ title: '🎉 ' + t('পেমেন্ট সফল!', 'Payment Successful!'), description: t('আপনার ক্রেডিট প্রস্তুত।', 'Your credits are ready.') });
+      refreshProfile();
+    } else if (payment === 'already_processed') {
+      toast({ title: t('ইতিমধ্যে প্রসেস হয়েছে', 'Already Processed'), description: t('এই পেমেন্ট আগেই প্রসেস হয়েছে।', 'This payment was already processed.') });
+    }
+    if (payment) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('payment');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
+
+  const { refreshProfile: _rp } = useAuth();
+  const refreshProfile = useAuth().refreshProfile;
+
   // Load notifications
   useEffect(() => {
     if (!user) return;
