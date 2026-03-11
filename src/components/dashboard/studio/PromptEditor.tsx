@@ -32,6 +32,7 @@ const PromptEditor = ({
   generateIcon,
   tabType,
   costNote,
+  creditCost,
   helperNote,
 }: PromptEditorProps) => {
   const { t } = useLanguage();
