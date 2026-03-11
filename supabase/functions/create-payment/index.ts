@@ -3,8 +3,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, errorResponse, jsonResponse } from "../_shared/addhoom.ts";
 
 const PLAN_PRICES: Record<string, Record<string, number>> = {
-  pro: { monthly: 2999, annual: Math.round(2999 * 12 * 0.8) },
-  agency: { monthly: 7999, annual: Math.round(7999 * 12 * 0.8) },
+  starter: { monthly: 799, annual: Math.round(799 * 12 * 0.8) },
+  pro: { monthly: 1999, annual: Math.round(1999 * 12 * 0.8) },
+  agency: { monthly: 4999, annual: Math.round(4999 * 12 * 0.8) },
 };
 
 serve(async (req) => {
