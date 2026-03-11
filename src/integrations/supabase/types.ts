@@ -715,6 +715,60 @@ export type Database = {
           },
         ]
       }
+      billing_history: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency: string
+          id: string
+          invoice_url: string | null
+          plan_name: string
+          sslcommerz_transaction_id: string | null
+          status: string
+          subscription_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          currency: string
+          id?: string
+          invoice_url?: string | null
+          plan_name: string
+          sslcommerz_transaction_id?: string | null
+          status: string
+          subscription_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string
+          id?: string
+          invoice_url?: string | null
+          plan_name?: string
+          sslcommerz_transaction_id?: string | null
+          status?: string
+          subscription_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_history_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competitor_analyses: {
         Row: {
           ads_found: Json | null
@@ -1397,13 +1451,16 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string
           credit_balance: number
           credits_reset_at: string | null
+          default_ad_language: string | null
           email: string | null
           full_name: string | null
           id: string
           language_pref: string
+          notification_preferences: Json | null
           onboarding_complete: boolean
           onboarding_step: number | null
           phone: string | null
@@ -1415,13 +1472,16 @@ export type Database = {
           tour_completed: boolean | null
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
           credit_balance?: number
           credits_reset_at?: string | null
+          default_ad_language?: string | null
           email?: string | null
           full_name?: string | null
           id: string
           language_pref?: string
+          notification_preferences?: Json | null
           onboarding_complete?: boolean
           onboarding_step?: number | null
           phone?: string | null
@@ -1433,13 +1493,16 @@ export type Database = {
           tour_completed?: boolean | null
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
           credit_balance?: number
           credits_reset_at?: string | null
+          default_ad_language?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
           language_pref?: string
+          notification_preferences?: Json | null
           onboarding_complete?: boolean
           onboarding_step?: number | null
           phone?: string | null
@@ -1602,6 +1665,69 @@ export type Database = {
           thumbnail_url?: string | null
         }
         Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          amount: number | null
+          cancel_at_period_end: boolean | null
+          cancelled_at: string | null
+          created_at: string | null
+          currency: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan_id: string
+          sslcommerz_transaction_id: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          cancel_at_period_end?: boolean | null
+          cancelled_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id: string
+          sslcommerz_transaction_id?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          cancel_at_period_end?: boolean | null
+          cancelled_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id?: string
+          sslcommerz_transaction_id?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       usage_logs: {
         Row: {
