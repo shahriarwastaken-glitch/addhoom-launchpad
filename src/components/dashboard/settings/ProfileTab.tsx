@@ -1,11 +1,15 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
+import { useUpgrade } from '@/contexts/UpgradeContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 import {
-  Globe, Type, Sun, Moon, Save, Camera, Loader2, Check, X, AlertTriangle,
+  Globe, Type, Sun, Moon, Save, Camera, Loader2, Check, X, AlertTriangle, Zap, ArrowRight,
 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { format } from 'date-fns';
 
 const ProfileTab = () => {
   const { t, lang, toggle } = useLanguage();
