@@ -37,6 +37,15 @@ serve(async (req) => {
       throw new Error('Missing required fields');
     }
 
+    // Credit check
+    const creditResult = await deductCredits({
+      supabase, userId: user.id, workspaceId: workspace_id,
+      actionKey: 'video_generation', quantity: 1,
+    });
+    if (!creditResult.success) {
+      return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 330);
+    }
+
     // Determine source image URL
     let sourceImageUrl = image_url || '';
 

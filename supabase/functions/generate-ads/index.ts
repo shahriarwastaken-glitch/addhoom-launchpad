@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { callGemini, getSystemPrompt } from "../_shared/gemini.ts";
 import { serverError, aiError, unauthorizedError } from "../_shared/errors.ts";
+import { deductCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 import { AD_COPY_SYSTEM_PROMPT, buildCopyBrief, calculateBriefCompleteness } from "../_shared/adCopyPrompt.ts";
 
 const corsHeaders = {

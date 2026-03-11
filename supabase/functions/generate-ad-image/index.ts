@@ -72,6 +72,15 @@ serve(async (req) => {
       );
     }
 
+    // Credit check — charge per scene
+    const creditResult = await deductCredits({
+      supabase, userId: user.id, workspaceId: workspace_id,
+      actionKey: 'image_generation', quantity: selected_scenes.length,
+    });
+    if (!creditResult.success) {
+      return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 125 * selected_scenes.length);
+    }
+
     const { data: workspace } = await supabase
       .from("workspaces").select("id").eq("id", workspace_id).eq("owner_id", user.id).single();
     if (!workspace) {
