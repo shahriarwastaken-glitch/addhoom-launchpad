@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
+import mascot from '@/assets/mascot.png';
 import { 
   LayoutDashboard, 
   Users, 
@@ -75,9 +76,7 @@ export default function AdminSidebar({ isSuperAdmin }: AdminSidebarProps) {
       <div className="p-4 border-b border-border/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
+            <img src={mascot} alt="AdDhoom Studio" className="h-8 w-auto" />
             <div>
               <span className="text-lg font-bold bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent">
                 AdDhoom
@@ -290,9 +289,7 @@ export default function AdminSidebar({ isSuperAdmin }: AdminSidebarProps) {
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border h-14 flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center">
-            <span className="text-white font-bold text-xs">A</span>
-          </div>
+          <img src={mascot} alt="AdDhoom Studio" className="h-7 w-auto" />
           <span className="text-lg font-bold bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent">
             AdDhoom
           </span>
