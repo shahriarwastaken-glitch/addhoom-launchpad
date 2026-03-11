@@ -57,20 +57,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .from('workspaces')
       .select('*')
       .eq('owner_id', userId)
+      .is('deleted_at', null)
       .order('created_at', { ascending: true });
 
     const ws = data || [];
     setWorkspaces(ws);
 
-    if (ws.length > 0 && !activeWorkspaceId) {
-      setActiveWorkspaceId(ws[0].id);
+    if (ws.length > 0) {
+      const savedId = localStorage.getItem('active_workspace_id');
+      const savedExists = savedId && ws.find((w: any) => w.id === savedId);
+      const defaultWs = ws.find((w: any) => w.is_default);
+
+      if (!savedExists) {
+        const pick = defaultWs || ws[0];
+        setActiveWorkspaceId(pick.id);
+      }
     }
 
     // Auto-create default workspace if none
     if (ws.length === 0) {
       const { data: newWs } = await supabase
         .from('workspaces')
-        .insert({ owner_id: userId, shop_name: 'My Shop', language: 'bn' })
+        .insert({ owner_id: userId, shop_name: 'My Shop', language: 'bn', is_default: true })
         .select()
         .single();
       if (newWs) {
