@@ -24,27 +24,12 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children, skipPlanCheck }: { children: React.ReactNode; skipPlanCheck?: boolean }) => {
   const { user, loading, profile, activeWorkspace, refreshProfile } = useAuth();
-  const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    if (profile) {
-      setOnboardingDone(profile.onboarding_complete === true);
-    }
-  }, [profile]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><div className="animate-pulse text-primary text-xl font-bold">AdDhoom</div></div>;
   if (!user) return <Navigate to="/auth" replace />;
   
-  // Check if user has a paid plan (skip for admin routes)
-  if (!skipPlanCheck) {
-    const plan = profile?.plan || 'free';
-    if (plan === 'free') {
-      return <PlanGate />;
-    }
-  }
-
-  // Show onboarding if not complete — redirect to /onboarding
-  if (onboardingDone === false && !skipPlanCheck && activeWorkspace && !activeWorkspace.shop_url) {
+  // Show onboarding if not complete
+  if (!skipPlanCheck && profile && !profile.onboarding_complete) {
     return <Navigate to="/onboarding" replace />;
   }
   
