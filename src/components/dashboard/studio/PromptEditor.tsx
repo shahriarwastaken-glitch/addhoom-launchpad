@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import CreditCostLabel from '@/components/ui/CreditCostLabel';
 
 interface PromptEditorProps {
   prompt: string;
@@ -16,6 +17,7 @@ interface PromptEditorProps {
   generateIcon: React.ReactNode;
   tabType: 'ad_image' | 'product_photo' | 'tryon';
   costNote?: string;
+  creditCost?: number;
   helperNote?: string;
 }
 
