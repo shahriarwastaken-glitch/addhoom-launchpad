@@ -100,7 +100,7 @@ export default function CreditsPage() {
               {t('Pro প্ল্যানে আপগ্রেড করুন — ১৫,০০০ ক্রেডিট/মাস', 'Upgrade to Pro for 15,000 credits/month')}
             </p>
           </div>
-          <Button size="sm" onClick={() => navigate('/pricing')} className="bg-gradient-cta text-primary-foreground">
+          <Button size="sm" onClick={() => navigate('/dashboard/settings#billing')} className="bg-gradient-cta text-primary-foreground">
             {t('আপগ্রেড →', 'Upgrade →')}
           </Button>
         </div>

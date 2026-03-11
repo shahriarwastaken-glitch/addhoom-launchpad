@@ -170,7 +170,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
                           className="text-xs text-primary hover:underline text-left">
                           {t('ব্যবহার দেখুন →', 'View Usage →')}
                         </button>
-                        <button onClick={() => { setShowCredits(false); navigate('/pricing'); }}
+                        <button onClick={() => { setShowCredits(false); navigate('/dashboard/settings#billing'); }}
                           className="text-xs text-primary hover:underline text-left">
                           {t('প্ল্যান আপগ্রেড করুন →', 'Upgrade Plan →')}
                         </button>
