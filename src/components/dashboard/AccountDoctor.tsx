@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { Stethoscope, CheckCircle, AlertTriangle, AlertOctagon, RefreshCw, Loader2, ArrowRight } from 'lucide-react';
+import { Mascot } from '@/components/Mascot';
 
 const toBengali = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
 
