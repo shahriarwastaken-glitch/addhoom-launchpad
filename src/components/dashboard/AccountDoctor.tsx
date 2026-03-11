@@ -92,6 +92,9 @@ const AccountDoctor = () => {
               <><Stethoscope size={16} /> {t('ডায়াগনস্টিক চালান', 'Run Diagnostics')}</>
             )}
           </button>
+          <p className="text-center mt-2" style={{ color: '#9E9E9E' }}>
+            <span className="text-[11px] font-body">· 50 {t('ক্রেডিট', 'credits')}</span>
+          </p>
         </div>
       ) : (
         <>

@@ -4,6 +4,7 @@ import {
   corsHeaders, callGemini, checkPlanLimit, logUsage,
   errorResponse, jsonResponse, ADDHOOM_SYSTEM_PROMPT,
 } from "../_shared/addhoom.ts";
+import { deductCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 
 const BD_FESTIVALS = [
   { name: 'পহেলা বৈশাখ', en_name: 'Pohela Boishakh', type: 'fixed', month: 4, day: 14, prep_days: 14, color: '#E53E3E', emoji: '🎊', occasion: 'boishakh', content_themes: ['নতুন বছর শুরু করুন নতুনভাবে', 'বৈশাখী কালেকশন', 'পরিবারের জন্য উপহার'] },
@@ -64,6 +65,15 @@ serve(async (req) => {
     if (!limitCheck.allowed) return errorResponse(402, limitCheck.message_bn!, limitCheck.message_en!);
 
     const { workspace_id, start_date, posts_per_week, platforms, content_mix, regenerate, language } = await req.json();
+
+    // Credit check
+    const creditResult = await deductCredits({
+      supabase, userId: user.id, workspaceId: workspace_id,
+      actionKey: 'content_calendar', quantity: 1,
+    });
+    if (!creditResult.success) {
+      return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 500);
+    }
     if (!workspace_id) return errorResponse(400, "ওয়ার্কস্পেস আইডি দিন।", "Workspace ID required.");
 
     const { data: workspace } = await supabase

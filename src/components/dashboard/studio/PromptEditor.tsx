@@ -91,6 +91,7 @@ const PromptEditor = ({
             <Sparkles className="h-3.5 w-3.5" />
           )}
           {enhancing ? t('উন্নত হচ্ছে...', 'Enhancing...') : t('উন্নত করুন', 'Enhance')}
+          <span className="text-[9px] opacity-70">· 10</span>
         </button>
       </div>
 
@@ -135,7 +136,7 @@ const PromptEditor = ({
           {generateLabel}
         </Button>
         {costNote && (
-          <p className="text-[11px] text-muted-foreground text-center">{costNote}</p>
+          <p className="text-[11px] text-center" style={{ color: '#9E9E9E' }}>{costNote}</p>
         )}
       </div>
 

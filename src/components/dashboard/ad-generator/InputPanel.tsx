@@ -2,6 +2,7 @@ import { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import OnceTooltip from '@/components/ui/OnceTooltip';
+import CreditCostLabel from '@/components/ui/CreditCostLabel';
 import {
   PenLine, ImageIcon, Facebook, Instagram, ShoppingBag, Search,
   Target, Sparkles, Upload, Rocket, History,
@@ -697,6 +698,9 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
                 </span>
               )}
             </button>
+            <p className="text-center">
+              <CreditCostLabel credits={125 * form.selectedScenes.length} />
+            </p>
             <button
               onClick={() => setImageStep(1)}
               className="w-full text-center text-[13px] text-muted-foreground hover:text-primary font-heading-bn transition-colors flex items-center justify-center gap-1"
@@ -730,7 +734,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
         {mode !== 'image' || imageStep === 1 ? (
           <p className="text-center text-[11px] text-muted-foreground mt-2 font-heading-bn">
             {mode === 'copy'
-              ? t('সাধারণত ৮-১৫ সেকেন্ড লাগে', 'Usually takes 8-15 seconds')
+              ? <CreditCostLabel credits={10} />
               : t('সাধারণত ৮-১৫ সেকেন্ড লাগে', 'Usually takes 8-15 seconds')}
           </p>
         ) : null}

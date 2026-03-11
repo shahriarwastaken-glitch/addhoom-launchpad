@@ -248,6 +248,7 @@ const AIMotionTab = () => {
                   >
                     {enhancing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
                     {t('উন্নত করুন', 'Enhance')}
+                    <span className="text-[9px] opacity-70">· 10</span>
                   </button>
                 </div>
                 <textarea
@@ -293,8 +294,8 @@ const AIMotionTab = () => {
                 >
                   {t('ভিডিও তৈরি করুন', 'Generate Video')} <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <p className="text-[11px] text-muted-foreground text-center mt-1.5">
-                  {t('ভিডিও তৈরি হতে ৩০-৬০ সেকেন্ড সময় লাগে', 'Videos take 30–60 seconds to generate')}
+                <p className="text-[11px] text-center mt-1.5" style={{ color: '#9E9E9E' }}>
+                  · 330 {t('ক্রেডিট', 'credits')} · {t('৩০-৬০ সেকেন্ড সময় লাগে', '30–60 seconds')}
                 </p>
               </div>
             </motion.div>

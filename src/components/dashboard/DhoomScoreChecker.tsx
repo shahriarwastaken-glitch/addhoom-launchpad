@@ -182,6 +182,9 @@ const DhoomScoreChecker = () => {
               <>{t('স্কোর দেখুন', 'Check Score')} <Sparkles size={14} /></>
             )}
           </button>
+          <p className="text-center mt-1" style={{ color: '#00B96B' }}>
+            <span className="text-[11px] font-body">· {t('ফ্রি', 'Free')}</span>
+          </p>
         </div>
 
         {/* Results Panel */}

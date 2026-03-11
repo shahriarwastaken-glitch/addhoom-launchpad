@@ -4,6 +4,7 @@ import {
   corsHeaders, callGemini, checkPlanLimit, logUsage,
   errorResponse, jsonResponse,
 } from "../_shared/addhoom.ts";
+import { deductCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -31,6 +32,15 @@ serve(async (req) => {
     if (!limitCheck.allowed) return errorResponse(402, limitCheck.message_bn!, limitCheck.message_en!);
 
     const { workspace_id } = await req.json();
+
+    // Credit check
+    const creditResult = await deductCredits({
+      supabase, userId: user.id, workspaceId: workspace_id,
+      actionKey: 'account_doctor', quantity: 1,
+    });
+    if (!creditResult.success) {
+      return insufficientCreditsResponse(corsHeaders, creditResult.balanceAfter, 50);
+    }
     if (!workspace_id) return errorResponse(400, "ওয়ার্কস্পেস দিন।", "Workspace ID required.");
 
     // Gather account data

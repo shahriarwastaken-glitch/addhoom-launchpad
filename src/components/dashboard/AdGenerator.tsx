@@ -733,17 +733,20 @@ const AdGenerator = () => {
                   <ArrowLeft size={16} /> {t('আগের', 'Back')}
                 </button>
                 <button onClick={handleGenerate} disabled={generating}
-                  className="flex-[2] bg-gradient-cta text-primary-foreground rounded-full py-4 text-lg font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform disabled:opacity-70 font-body-bn flex items-center justify-center gap-2">
+                  className="flex-[2] bg-gradient-cta text-primary-foreground rounded-full py-4 text-lg font-semibold shadow-orange-glow hover:scale-[1.02] transition-transform disabled:opacity-70 font-body-bn flex flex-col items-center justify-center gap-1">
                   {generating ? (
-                    <>
+                    <span className="flex items-center gap-2">
                       <Rocket size={20} className="animate-bounce" />
                       {t('AI আপনার বিজ্ঞাপন লিখছে...', 'AI is writing your ads...')}
-                    </>
+                    </span>
                   ) : (
-                    <><Zap size={20} /> {t('বিজ্ঞাপন তৈরি করুন', 'Generate Ads')}</>
+                    <span className="flex items-center gap-2"><Zap size={20} /> {t('বিজ্ঞাপন তৈরি করুন', 'Generate Ads')}</span>
                   )}
                 </button>
               </div>
+              <p className="text-center" style={{ color: '#9E9E9E' }}>
+                <span className="text-[11px] font-body">· 10 {t('ক্রেডিট', 'credits')}</span>
+              </p>
 
               {generating && <RocketLoader />}
             </div>
