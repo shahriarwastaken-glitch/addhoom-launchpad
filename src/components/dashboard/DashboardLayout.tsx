@@ -290,6 +290,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
       </nav>
 
       <CreateWorkspaceModal open={showCreateWs} onClose={() => setShowCreateWs(false)} />
+      <ScrollToTopButton />
     </SidebarProvider>
   );
 };
