@@ -734,7 +734,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
         {mode !== 'image' || imageStep === 1 ? (
           <p className="text-center text-[11px] text-muted-foreground mt-2 font-heading-bn">
             {mode === 'copy'
-              ? t('সাধারণত ৮-১৫ সেকেন্ড লাগে', 'Usually takes 8-15 seconds')
+              ? <CreditCostLabel credits={10} />
               : t('সাধারণত ৮-১৫ সেকেন্ড লাগে', 'Usually takes 8-15 seconds')}
           </p>
         ) : null}

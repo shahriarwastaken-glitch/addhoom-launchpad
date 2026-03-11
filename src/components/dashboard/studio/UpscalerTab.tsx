@@ -412,6 +412,9 @@ const UpscalerTab = () => {
               {upscaling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ArrowUpCircle className="h-4 w-4 mr-2" />}
               {t('ইমেজ আপস্কেল করুন', 'Upscale Image')}
             </Button>
+            <p className="text-[11px] text-center" style={{ color: '#9E9E9E' }}>
+              · 100 {t('ক্রেডিট', 'credits')}
+            </p>
             {qualityMode === 'ultimate' && (
               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 <Info className="h-3.5 w-3.5 shrink-0" />

@@ -169,8 +169,9 @@ const DhoomScoreChecker = () => {
           <button
             onClick={handleEvaluate}
             disabled={loading || (!headline && !body)}
-            className="w-full bg-gradient-cta text-primary-foreground font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-gradient-cta text-primary-foreground font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex flex-col items-center justify-center gap-1"
           >
+            <span className="flex items-center gap-2">
             {loading ? (
               <>
                 <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>

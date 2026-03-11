@@ -135,7 +135,7 @@ const PromptEditor = ({
           {generateLabel}
         </Button>
         {costNote && (
-          <p className="text-[11px] text-muted-foreground text-center">{costNote}</p>
+          <p className="text-[11px] text-center" style={{ color: '#9E9E9E' }}>{costNote}</p>
         )}
       </div>
 
