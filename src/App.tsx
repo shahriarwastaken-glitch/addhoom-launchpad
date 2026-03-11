@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { UpgradeProvider, useUpgrade as useUpgradeCtx } from "@/contexts/UpgradeContext";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { setUpgradeHandler } from "@/lib/api";
 import Index from "./pages/Index";
