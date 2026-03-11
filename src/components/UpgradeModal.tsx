@@ -13,28 +13,25 @@ interface UpgradeModalProps {
   creditInfo?: { balance?: number; required?: number; action?: string };
 }
 
-const content: Record<UpgradeType, { icon: string; title_bn: string; title_en: string; desc_bn: string; desc_en: string }> = {
-  video: {
-    icon: '🎬',
-    title_bn: 'ভিডিও লিমিট শেষ হয়েছে',
-    title_en: 'Video Limit Reached',
-    desc_bn: 'Pro প্ল্যানে মাসে ২টি ভিডিও বিজ্ঞাপন তৈরি করা যায়। Unlimited ভিডিওর জন্য Agency প্ল্যানে যান।',
-    desc_en: 'Pro plan allows 2 video ads per month. Upgrade to Agency for unlimited videos.',
-  },
-  general: {
-    icon: 'zap',
-    title_bn: 'ফিচার লিমিট শেষ হয়েছে',
-    title_en: 'Feature Limit Reached',
-    desc_bn: 'এই ফিচারের লিমিট শেষ হয়ে গেছে। আরও ব্যবহারের জন্য আপগ্রেড করুন।',
-    desc_en: 'You have reached the limit for this feature. Upgrade for more usage.',
-  },
-  credits: {
-    icon: '💳',
-    title_bn: 'ক্রেডিট শেষ হয়ে গেছে',
-    title_en: "You're out of credits",
-    desc_bn: 'আপনার ক্রেডিট শেষ। আরও তৈরি করতে আপগ্রেড করুন।',
-    desc_en: 'Upgrade your plan to keep creating.',
-  },
+const ACTION_LABELS: Record<string, { bn: string; en: string }> = {
+  'image_generation': { bn: 'ছবি তৈরি করতে', en: 'generate an image' },
+  'video_generation': { bn: 'ভিডিও তৈরি করতে', en: 'generate a video' },
+  'ad_copy': { bn: 'বিজ্ঞাপন কপি তৈরি করতে', en: 'generate ad copy' },
+  'prompt_enhance': { bn: 'প্রম্পট উন্নত করতে', en: 'enhance this prompt' },
+  'upscale': { bn: 'ইমেজ আপস্কেল করতে', en: 'upscale this image' },
+  'tryon': { bn: 'ট্রাই-অন তৈরি করতে', en: 'generate a try-on' },
+  'content_calendar': { bn: 'কনটেন্ট ক্যালেন্ডার তৈরি করতে', en: 'generate your content calendar' },
+  'account_doctor': { bn: 'অ্যাকাউন্ট ডাক্তার চালাতে', en: 'run Account Doctor' },
+  'generate-ad-image': { bn: 'ছবি তৈরি করতে', en: 'generate an image' },
+  'generate-ai-video': { bn: 'ভিডিও তৈরি করতে', en: 'generate a video' },
+  'generate-ads': { bn: 'বিজ্ঞাপন কপি তৈরি করতে', en: 'generate ad copy' },
+  'enhance-prompt': { bn: 'প্রম্পট উন্নত করতে', en: 'enhance this prompt' },
+  'upscale-image': { bn: 'ইমেজ আপস্কেল করতে', en: 'upscale this image' },
+  'generate-tryon': { bn: 'ট্রাই-অন তৈরি করতে', en: 'generate a try-on' },
+  'generate-content-calendar': { bn: 'কনটেন্ট ক্যালেন্ডার তৈরি করতে', en: 'generate your content calendar' },
+  'account-doctor': { bn: 'অ্যাকাউন্ট ডাক্তার চালাতে', en: 'run Account Doctor' },
+  'generate-product-photo': { bn: 'প্রোডাক্ট ফটো তৈরি করতে', en: 'generate a product photo' },
+  'remix-image-fresh': { bn: 'ইমেজ রিমিক্স করতে', en: 'remix this image' },
 };
 
 const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeModalProps) => {
