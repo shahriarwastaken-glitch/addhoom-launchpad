@@ -3,13 +3,13 @@ import { ChevronDown } from 'lucide-react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 const faqs = [
-  { q: 'What are credits?', a: 'Credits power every generation in AdDhoom Studio. Each action costs a set number — generating an image costs 125 credits, a video costs 330 credits. Your credits reset every month.' },
-  { q: 'Do unused credits roll over?', a: 'No — credits reset on the 1st of every month. This keeps pricing simple and fair.' },
+  { q: 'What are credits?', a: 'Credits power every generation in AdDhoom Studio. Each action costs a set number — generating an image costs 125 credits, a video costs 330 credits. Your credits reset every 30 days from your plan purchase date.' },
+  { q: 'Do unused credits roll over?', a: 'No — credits reset on a 30-day rolling cycle from your plan purchase date. Unused credits do not carry over.' },
   { q: 'Can I explore before subscribing?', a: 'Yes — sign up and explore the entire dashboard for free. You only need to subscribe when you\'re ready to start generating.' },
   { q: 'What happens when I run out of credits?', a: 'Upgrade your plan or wait for your monthly reset on the 1st.' },
   { q: 'What languages are supported?', a: 'English, বাংলা (Bangla), and Banglish. Set your preference in workspace settings.' },
   { q: 'Can I use AdDhoom for multiple shops?', a: 'Yes. Pro includes 5 workspaces, Agency includes 20. Each has its own settings and Shop DNA.' },
-  { q: 'Is there a contract?', a: 'No. Monthly subscription, cancel anytime. 7-day money back guarantee on first payment.' },
+  { q: 'Is there a contract?', a: 'No. Monthly subscription, cancel anytime.' },
   { q: 'What image formats can I upload?', a: 'JPG, PNG, and WEBP. Maximum 10MB per image.' },
 ];
 
