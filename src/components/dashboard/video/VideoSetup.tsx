@@ -4,6 +4,7 @@ import { Upload, X, GripVertical, Play, Square, Rocket, ChevronDown, ChevronUp, 
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import CreditCostLabel from '@/components/ui/CreditCostLabel';
 import { toast } from 'sonner';
 import type {
   VideoFormData, VideoFormat, VideoStyle, MusicTrack,
