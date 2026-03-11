@@ -39,10 +39,11 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const creditBalance = profile?.credit_balance ?? 0;
   // Compute plan credits from plan_key
   const planCredits = useMemo(() => {
-    const key = profile?.plan_key || 'pro';
+    const key = profile?.plan_key || 'free';
     if (key === 'agency') return 35000;
     if (key === 'pro') return 15000;
-    return 5000;
+    if (key === 'starter') return 5000;
+    return 0;
   }, [profile?.plan_key]);
   const creditPct = planCredits > 0 ? Math.round(((planCredits - creditBalance) / planCredits) * 100) : 0;
   const daysUntilReset = useMemo(() => {
