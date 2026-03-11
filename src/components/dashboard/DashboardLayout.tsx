@@ -102,33 +102,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           <header className="h-14 flex items-center justify-between border-b border-border bg-card px-2 sm:px-4 flex-shrink-0">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <SidebarTrigger className="hidden md:flex mr-1" />
-              {/* Workspace selector */}
-              <div className="relative min-w-0">
-                <button
-                  onClick={() => setShowWorkspaces(!showWorkspaces)}
-                  className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-secondary hover:bg-secondary/80 text-sm font-medium transition-colors min-w-0"
-                >
-                  <Store size={14} className="text-primary flex-shrink-0" />
-                  <span className="max-w-[80px] sm:max-w-[120px] truncate text-xs sm:text-sm">{activeWorkspace?.shop_name || t('শপ', 'Shop')}</span>
-                  <ChevronDown size={12} className="text-muted-foreground flex-shrink-0" />
-                </button>
-                {showWorkspaces && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowWorkspaces(false)} />
-                    <div className="absolute top-full left-0 mt-1 z-50 bg-card border border-border rounded-xl shadow-warm-lg py-1 min-w-[200px]">
-                      {workspaces.map(ws => (
-                        <button
-                          key={ws.id}
-                          onClick={() => { setActiveWorkspaceId(ws.id); setShowWorkspaces(false); }}
-                          className={`w-full text-left px-4 py-2 text-sm hover:bg-secondary transition-colors ${ws.id === activeWorkspace?.id ? 'text-primary font-medium' : 'text-foreground'}`}
-                        >
-                          {ws.shop_name}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
+              <WorkspaceSelector onCreateClick={() => setShowCreateWs(true)} />
             </div>
 
             <div className="flex-1 flex justify-center min-w-0">
