@@ -15,9 +15,8 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import AdminDashboardNew from "./pages/AdminDashboardNew";
 import NotFound from "./pages/NotFound";
-import PlanGate from "./pages/PlanGate";
 import Onboarding from "./pages/Onboarding";
-import ShopDNASetup from "./components/dashboard/ShopDNASetup";
+import ImpersonationBanner from "./components/admin/ImpersonationBanner";
 import ImpersonationBanner from "./components/admin/ImpersonationBanner";
 
 const queryClient = new QueryClient();
