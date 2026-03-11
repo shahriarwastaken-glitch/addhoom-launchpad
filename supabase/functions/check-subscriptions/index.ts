@@ -65,9 +65,6 @@ serve(async (req) => {
       }
     }
 
-    // 3. Reset credits for users whose 30-day cycle has elapsed
-    await supabase.rpc('reset_monthly_credits');
-
     return jsonResponse({
       expired_count: (expired || []).length,
       expiring_count: (expiring || []).length,

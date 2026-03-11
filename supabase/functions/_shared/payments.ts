@@ -112,7 +112,7 @@ export async function processSuccessfulPayment(
       subscription_status: "active",
       subscription_expires_at: periodEnd.toISOString(),
       credit_balance: monthlyCredits,
-      credits_reset_at: now.toISOString(),
+      credits_reset_at: periodEnd.toISOString(),
     })
     .eq("id", pending.user_id);
 

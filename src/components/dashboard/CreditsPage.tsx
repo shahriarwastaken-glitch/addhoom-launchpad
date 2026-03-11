@@ -119,10 +119,10 @@ export default function CreditsPage() {
                 <p className="text-xs text-muted-foreground">{t('ক্রেডিট বাকি', 'credits remaining')}</p>
               </div>
             </div>
-            {resetDays && (
+            {resetDateFormatted && (
               <div className="text-right">
-                <p className="text-xs text-muted-foreground">{t('রিসেট হবে', 'Resets in')}</p>
-                <p className="text-sm font-medium text-foreground">{resetDays}</p>
+                <p className="text-xs text-muted-foreground">{t('রিসেট হবে', 'Resets on')}</p>
+                <p className="text-sm font-medium text-foreground">{resetDateFormatted}</p>
               </div>
             )}
           </div>

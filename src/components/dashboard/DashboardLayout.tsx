@@ -48,7 +48,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const daysUntilReset = useMemo(() => {
     if (!profile?.credits_reset_at) return null;
     const resetDate = new Date(profile.credits_reset_at);
-    resetDate.setDate(resetDate.getDate() + 30);
     const diff = Math.ceil((resetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
     return Math.max(0, diff);
   }, [profile?.credits_reset_at]);

@@ -180,7 +180,7 @@ const BillingTab = () => {
           <Progress value={creditPct} className="h-2" />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>{creditPct}% {t('ব্যবহৃত', 'used')}</span>
-            {daysUntilReset !== null && <span>{t(`${daysUntilReset} দিনে রিসেট`, `Resets in ${daysUntilReset} days`)}</span>}
+            {resetDate && <span>{t(`রিসেট হবে ${format(resetDate, 'MMM d, yyyy')}`, `Resets on ${format(resetDate, 'MMM d, yyyy')}`)}</span>}
           </div>
         </div>
         {planKey !== 'agency' && (
