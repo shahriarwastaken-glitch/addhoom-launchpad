@@ -16,6 +16,7 @@ import Settings from '@/components/dashboard/Settings';
 import DhoomScoreChecker from '@/components/dashboard/DhoomScoreChecker';
 import Analytics from '@/components/dashboard/Analytics';
 import StudioPage from '@/components/dashboard/studio/StudioPage';
+import CreditsPage from '@/components/dashboard/CreditsPage';
 
 const Dashboard = () => {
   return (
@@ -36,6 +37,7 @@ const Dashboard = () => {
         <Route path="projects/:id" element={<ProjectDetail />} />
         <Route path="dhoom-score" element={<DhoomScoreChecker />} />
         <Route path="analytics" element={<Analytics />} />
+        <Route path="credits" element={<CreditsPage />} />
         <Route path="settings" element={<Settings />} />
       </Routes>
     </DashboardLayout>
