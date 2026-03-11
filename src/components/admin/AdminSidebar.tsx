@@ -289,7 +289,7 @@ export default function AdminSidebar({ isSuperAdmin }: AdminSidebarProps) {
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border h-14 flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <img src={mascot} alt="AdDhoom Studio" className="h-7 w-auto" />
+          <img src={mascot} alt="AdDhoom Studio" className="h-8 w-auto object-contain" />
           <span className="text-lg font-bold bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent">
             AdDhoom
           </span>
