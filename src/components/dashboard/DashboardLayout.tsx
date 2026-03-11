@@ -1,4 +1,5 @@
 import { ReactNode, useState, useEffect, useMemo } from 'react';
+import FirstTimeHelperBar from './FirstTimeHelperBar';
 import DashboardNavbar from './DashboardNavbar';
 import DashboardSidebar from './DashboardSidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
