@@ -59,6 +59,11 @@ const UpgradeBridge = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const PageMetaManager = () => {
+  usePageMeta();
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
