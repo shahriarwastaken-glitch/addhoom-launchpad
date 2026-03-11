@@ -137,11 +137,15 @@ const Onboarding = () => {
     }
   }, [loading, profile]);
 
-  // Resume from saved step
+  // Resume from saved step — only on initial mount
+  const hasResumed = useState(false);
   useEffect(() => {
-    if (profile) {
+    if (profile && !hasResumed[0]) {
       const saved = (profile as any).onboarding_step;
-      if (saved && saved > 1 && saved <= TOTAL_STEPS) setStep(saved);
+      if (saved && saved > 1 && saved <= TOTAL_STEPS) {
+        setStep(saved);
+      }
+      hasResumed[1](true);
     }
   }, [profile]);
 
