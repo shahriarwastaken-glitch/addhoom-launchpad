@@ -38,8 +38,8 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { profile } = useAuth();
-  const c = content[type];
   const isAgency = profile?.plan_key === 'agency';
+  const actionLabel = creditInfo?.action ? ACTION_LABELS[creditInfo.action] : null;
 
   return (
     <AnimatePresence>
