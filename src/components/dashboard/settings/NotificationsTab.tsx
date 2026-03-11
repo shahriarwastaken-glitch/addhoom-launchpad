@@ -14,7 +14,7 @@ interface NotifPref {
 }
 
 const NOTIF_OPTIONS: { key: keyof NotifPref; labelBn: string; labelEn: string; descBn: string; descEn: string }[] = [
-  { key: 'credit_reset', labelBn: 'মাসিক ক্রেডিট রিসেট রিমাইন্ডার', labelEn: 'Monthly credit reset reminder', descBn: 'ক্রেডিট রিসেট হলে জানানো হবে', descEn: 'Get notified when your credits reset' },
+  { key: 'credit_reset', labelBn: 'ক্রেডিট রিসেট রিমাইন্ডার', labelEn: 'Credit reset reminder', descBn: 'প্রতিটি পেমেন্টের ৩০ দিন পর ক্রেডিট রিসেট হলে জানানো হবে', descEn: 'Credits reset 30 days after each payment' },
   { key: 'low_credits', labelBn: 'লো ক্রেডিট সতর্কতা', labelEn: 'Low credit warning', descBn: '২০% এর নিচে গেলে জানানো হবে', descEn: 'Get notified when below 20% credits' },
   { key: 'generation_complete', labelBn: 'জেনারেশন সম্পন্ন', labelEn: 'Generation completed', descBn: 'দীর্ঘ কাজ শেষ হলে ইমেইল', descEn: 'Email when long jobs finish' },
   { key: 'weekly_summary', labelBn: 'সাপ্তাহিক ব্যবহার সারসংক্ষেপ', labelEn: 'Weekly usage summary', descBn: 'আপনার কার্যকলাপের সাপ্তাহিক রিপোর্ট', descEn: 'Weekly report of your activity' },

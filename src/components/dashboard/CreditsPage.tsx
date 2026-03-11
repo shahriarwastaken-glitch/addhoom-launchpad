@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Coins, ArrowUpRight, TrendingDown, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
 type Transaction = {
@@ -83,8 +83,8 @@ export default function CreditsPage() {
   const usedPercent = monthlyCredits > 0 ? Math.min(100, (usedCredits / monthlyCredits) * 100) : 0;
   const isLow = balance < monthlyCredits * 0.3;
 
-  const resetDays = resetAt
-    ? formatDistanceToNow(new Date(new Date(resetAt).getTime() + 30 * 24 * 60 * 60 * 1000), { addSuffix: false })
+  const resetDateFormatted = resetAt
+    ? format(new Date(resetAt), 'MMM d, yyyy')
     : null;
 
   return (
@@ -119,10 +119,10 @@ export default function CreditsPage() {
                 <p className="text-xs text-muted-foreground">{t('ক্রেডিট বাকি', 'credits remaining')}</p>
               </div>
             </div>
-            {resetDays && (
+            {resetDateFormatted && (
               <div className="text-right">
-                <p className="text-xs text-muted-foreground">{t('রিসেট হবে', 'Resets in')}</p>
-                <p className="text-sm font-medium text-foreground">{resetDays}</p>
+                <p className="text-xs text-muted-foreground">{t('রিসেট হবে', 'Resets on')}</p>
+                <p className="text-sm font-medium text-foreground">{resetDateFormatted}</p>
               </div>
             )}
           </div>
