@@ -710,9 +710,7 @@ const AIChat = () => {
               })}
               {streaming && messages[messages.length - 1]?.role !== 'model' && (
                 <div className="flex mb-4 justify-start">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-[hsl(var(--brand-yellow))] flex items-center justify-center text-primary-foreground text-[10px] font-bold mr-2 font-heading-bn">
-                    ধু
-                  </div>
+                  <img src="/mascot/mascot-ai.png" alt="Dhoom AI" className="w-7 h-7 rounded-full object-cover mr-2" />
                   <div className="bg-card rounded-[20px] rounded-bl-[4px] border border-border">
                     <ThinkingLoader />
                   </div>

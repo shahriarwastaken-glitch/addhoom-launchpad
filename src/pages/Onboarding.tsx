@@ -396,7 +396,7 @@ const Onboarding = () => {
               <EntryPointCards selected={entryPoint} onSelect={setEntryPoint} />
 
               <AnimatePresence mode="wait">
-                {entryPoint && ['website', 'facebook', 'daraz'].includes(entryPoint) && (
+                {entryPoint === 'website' && (
                   <motion.div key="url" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
                     {renderUrlInput()}
                   </motion.div>

@@ -145,7 +145,11 @@ const AIMotionTab = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        const { handleCreditError } = await import('@/utils/creditErrorHandler');
+        if (handleCreditError(error, data)) { setGenerating(false); if (processingTimerRef.current) clearInterval(processingTimerRef.current); return; }
+        throw error;
+      }
       if (data?.video_url) {
         setResultVideoUrl(data.video_url);
         setResultId(data.id || '');

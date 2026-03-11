@@ -242,7 +242,11 @@ const ProductPhotoTab = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        const { handleCreditError } = await import('@/utils/creditErrorHandler');
+        if (handleCreditError(error, data)) { setGenerating(false); if (msgRef.current) clearInterval(msgRef.current); return; }
+        throw error;
+      }
       setJobId(data.job_id);
 
       // Fallback polling

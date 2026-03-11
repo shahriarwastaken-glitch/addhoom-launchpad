@@ -147,7 +147,11 @@ const UpscalerTab = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        const { handleCreditError } = await import('@/utils/creditErrorHandler');
+        if (handleCreditError(error, data)) { setUpscaling(false); return; }
+        throw error;
+      }
       setJobId(data.job_id);
 
       // Fallback polling

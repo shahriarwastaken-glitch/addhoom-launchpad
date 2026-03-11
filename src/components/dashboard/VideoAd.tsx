@@ -101,7 +101,11 @@ const VideoAd = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        const { handleCreditError } = await import('@/utils/creditErrorHandler');
+        if (handleCreditError(error, data)) { setGenerating(false); return; }
+        throw error;
+      }
       if (data?.success && data.script) {
         setScript(data.script);
         setShowScriptModal(true);

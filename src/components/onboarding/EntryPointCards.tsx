@@ -1,4 +1,4 @@
-import { Globe, Facebook, ShoppingBag, Camera, PenLine, LayoutTemplate } from 'lucide-react';
+import { Globe, Camera, PenLine, LayoutTemplate } from 'lucide-react';
 
 export type EntryPointType = 'website' | 'photos' | 'manual' | 'template';
 
