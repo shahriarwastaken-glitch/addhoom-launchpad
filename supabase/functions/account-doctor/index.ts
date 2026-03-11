@@ -4,6 +4,7 @@ import {
   corsHeaders, callGemini, checkPlanLimit, logUsage,
   errorResponse, jsonResponse,
 } from "../_shared/addhoom.ts";
+import { deductCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
