@@ -1,19 +1,11 @@
-import { Globe, Facebook, ShoppingBag, Camera, PenLine, LayoutTemplate } from 'lucide-react';
+import { Globe, Camera, PenLine, LayoutTemplate } from 'lucide-react';
 
-export type EntryPointType = 'website' | 'facebook' | 'daraz' | 'photos' | 'manual' | 'template';
+export type EntryPointType = 'website' | 'photos' | 'manual' | 'template';
 
 const ENTRY_POINTS: { id: EntryPointType; icon: React.ElementType; title: string; description: string }[] = [
   {
     id: 'website', icon: Globe, title: 'Website URL',
     description: "We'll scan your site and extract everything automatically",
-  },
-  {
-    id: 'facebook', icon: Facebook, title: 'Facebook Page',
-    description: "Paste your Facebook page link. We'll grab what's publicly visible.",
-  },
-  {
-    id: 'daraz', icon: ShoppingBag, title: 'Daraz Store',
-    description: "Paste your Daraz shop URL. We'll pull your products automatically.",
   },
   {
     id: 'photos', icon: Camera, title: 'Upload Product Photos',

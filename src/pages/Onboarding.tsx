@@ -364,9 +364,7 @@ const Onboarding = () => {
           {step === 1 && (
             <motion.div key="s1" custom={direction} variants={STEP_SLIDE} initial="initial" animate="animate" exit="exit" transition={STEP_TRANSITION} className="text-center space-y-6">
               <div className="flex justify-center">
-                <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center">
-                  <span className="font-bn text-2xl font-bold text-primary-foreground leading-none">আ</span>
-                </div>
+                <img src="/mascot/mascot-ai.png" alt="AdDhoom" className="w-16 h-16 object-contain" />
               </div>
               <h1 className="text-[28px] sm:text-[32px] font-bold text-foreground leading-tight" style={{ fontFamily: 'Syne, sans-serif' }}>
                 Welcome to AdDhoom Studio
@@ -398,7 +396,7 @@ const Onboarding = () => {
               <EntryPointCards selected={entryPoint} onSelect={setEntryPoint} />
 
               <AnimatePresence mode="wait">
-                {entryPoint && ['website', 'facebook', 'daraz'].includes(entryPoint) && (
+                {entryPoint === 'website' && (
                   <motion.div key="url" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
                     {renderUrlInput()}
                   </motion.div>
