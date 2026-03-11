@@ -77,9 +77,11 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!user) return;
     const loadNotifications = async () => {
+      const userCreatedAt = profile?.created_at || new Date().toISOString();
       const { data: notifs } = await supabase
         .from('notifications')
         .select('*')
+        .gte('created_at', userCreatedAt)
         .order('created_at', { ascending: false })
         .limit(20);
       setNotifications(notifs || []);
