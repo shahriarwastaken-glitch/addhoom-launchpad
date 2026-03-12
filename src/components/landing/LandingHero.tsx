@@ -124,7 +124,7 @@ const LandingHero = () => {
 
           <h1>
             <span className={`block font-heading-en font-[800] text-foreground leading-[1.08] ${anim(100)}`} style={{ fontSize: 'clamp(32px, 5.5vw, 72px)', transitionDelay: '100ms' }}>From product</span>
-            <span className={`block font-heading-en font-[800] text-foreground leading-[1.08] ${anim(200)}`} style={{ fontSize: 'clamp(32px, 5.5vw, 72px)', transitionDelay: '200ms' }}>to <span className="relative inline-block">published<WavyUnderline /></span> —</span>
+            <span className={`block font-heading-en font-[800] text-foreground leading-[1.08] ${anim(200)}`} style={{ fontSize: 'clamp(32px, 5.5vw, 72px)', transitionDelay: '200ms' }}>to <span className="relative inline-block">published<WavyUnderline /></span></span>
             <span className={`block font-heading-en font-[800] text-foreground leading-[1.08] ${anim(300)}`} style={{ fontSize: 'clamp(32px, 5.5vw, 72px)', transitionDelay: '300ms' }}>in minutes.</span>
           </h1>
 
