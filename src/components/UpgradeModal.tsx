@@ -58,6 +58,20 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
   }, []);
   const currency = isBD ? 'BDT' : 'USD';
 
+  // Compute reset date for paid subscribers
+  const isPaidSubscriber = profile?.plan_key && profile.plan_key !== 'free' && profile.subscription_status === 'active';
+  const resetDateStr = useMemo(() => {
+    if (!isPaidSubscriber || !profile?.credits_reset_at) return null;
+    const resetDate = addDays(new Date(profile.credits_reset_at), 30);
+    return format(resetDate, 'MMM d, yyyy');
+  }, [isPaidSubscriber, profile?.credits_reset_at]);
+
+  const dismissLabel = useMemo(() => {
+    if (type !== 'credits') return t('পরে করব', 'Maybe later');
+    if (isPaidSubscriber && resetDateStr) return t(`রিসেট হবে ${resetDateStr}`, `Resets on ${resetDateStr}`);
+    return t('পরে করব', 'Maybe later');
+  }, [type, isPaidSubscriber, resetDateStr, t]);
+
   const initiateCheckout = async (planKey: string) => {
     setCheckoutLoading(planKey);
     try {
