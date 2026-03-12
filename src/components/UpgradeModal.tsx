@@ -148,9 +148,15 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
 
               {isAgency ? (
                 <div className="text-center space-y-3">
-                  <p className="text-sm text-muted-foreground">
-                    {t('আপনার ক্রেডিট শীঘ্রই রিসেট হবে', 'Your credits will reset soon')}
-                  </p>
+                  {resetDateStr ? (
+                    <p className="text-sm text-muted-foreground">
+                      {t(`ক্রেডিট রিসেট হবে ${resetDateStr}`, `Credits reset on ${resetDateStr}`)}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {t('সাবস্ক্রিপশন সক্রিয় করুন', 'Subscribe to get credits')}
+                    </p>
+                  )}
                   <a
                     href="https://wa.me/8801234567890"
                     target="_blank"
@@ -207,10 +213,8 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
                 onClick={onClose}
                 className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                {type === 'credits' 
-                  ? t('রিসেটের জন্য অপেক্ষা করব', "I'll wait for reset")
-                  : t('পরে করব', 'Maybe later')
-                }
+                {dismissLabel}
+              </button>
               </button>
             </div>
           </motion.div>
