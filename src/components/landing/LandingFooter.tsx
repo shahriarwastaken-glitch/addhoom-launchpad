@@ -21,7 +21,7 @@ const LandingFooter = () => {
               <img src={mascot} alt="AdDhoom Studio" className="h-9 w-auto object-contain" />
               <span className="font-heading-en text-lg font-semibold text-white">AdDhoom Studio</span>
             </div>
-            <p className="mt-3 font-body-en text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>From product to published — in minutes.</p>
+            <p className="mt-3 font-body-en text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>From product to published in minutes.</p>
           </div>
 
           {/* Product */}
