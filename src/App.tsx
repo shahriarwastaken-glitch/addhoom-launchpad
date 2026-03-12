@@ -20,6 +20,7 @@ import Onboarding from "./pages/Onboarding";
 import ImpersonationBanner from "./components/admin/ImpersonationBanner";
 import ScrollToTop from "./components/ScrollToTop";
 import ErrorBoundary from "./components/ErrorBoundary";
+import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,7 @@ const App = () => (
                       <Route path="/" element={<Index />} />
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/reset-password" element={<ResetPassword />} />
+                      <Route path="/auth/callback" element={<AuthCallback />} />
                       <Route path="/onboarding" element={<Onboarding />} />
                       <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                       <Route path="/admin/*" element={<AdminDashboardNew />} />
