@@ -20,6 +20,7 @@ import Onboarding from "./pages/Onboarding";
 import ImpersonationBanner from "./components/admin/ImpersonationBanner";
 import ScrollToTop from "./components/ScrollToTop";
 import ErrorBoundary from "./components/ErrorBoundary";
+import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
