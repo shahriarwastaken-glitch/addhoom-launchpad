@@ -261,9 +261,10 @@ const Onboarding = () => {
         default_language: selectedLanguage,
       } as any).eq('id', activeWorkspace.id);
       await supabase.from('profiles').update({ language_pref: selectedLanguage } as any).eq('id', user.id);
-      await refreshProfile();
     } catch { /* continue */ }
+    // Navigate first, then refresh profile in background to avoid race conditions
     goTo(4);
+    refreshProfile();
   };
 
   // --- Screen 5: Plan selection ---
