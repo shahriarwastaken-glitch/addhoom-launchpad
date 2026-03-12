@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useState, useMemo } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { format, addDays } from 'date-fns';
 
 type UpgradeType = 'video' | 'general' | 'credits';
 
