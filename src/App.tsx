@@ -85,6 +85,7 @@ const App = () => (
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/reset-password" element={<ResetPassword />} />
                       <Route path="/auth/callback" element={<AuthCallback />} />
+                      <Route path="/onboarding" element={<Onboarding />} />
                       <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                       <Route path="/admin/*" element={<AdminDashboardNew />} />
                       <Route path="*" element={<NotFound />} />
