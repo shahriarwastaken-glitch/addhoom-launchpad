@@ -229,7 +229,6 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
               >
                 {dismissLabel}
               </button>
-              </button>
             </div>
           </motion.div>
         </motion.div>
