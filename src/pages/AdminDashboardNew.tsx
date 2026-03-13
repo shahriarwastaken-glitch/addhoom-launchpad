@@ -19,6 +19,7 @@ import AdminCoupons from '@/components/admin/AdminCoupons';
 import AdminEmails from '@/components/admin/AdminEmails';
 import AdminAuditLog from '@/components/admin/AdminAuditLog';
 import AdminCredits from '@/components/admin/AdminCredits';
+import AdminCreditPacks from '@/components/admin/AdminCreditPacks';
 
 export default function AdminDashboardNew() {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
