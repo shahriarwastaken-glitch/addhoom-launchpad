@@ -1052,6 +1052,96 @@ export type Database = {
           },
         ]
       }
+      credit_pack_purchases: {
+        Row: {
+          amount: number
+          bank_tran_id: string | null
+          created_at: string | null
+          credits: number
+          currency: string
+          id: string
+          pack_id: string
+          status: string | null
+          tran_id: string
+          user_id: string
+          val_id: string | null
+        }
+        Insert: {
+          amount: number
+          bank_tran_id?: string | null
+          created_at?: string | null
+          credits: number
+          currency: string
+          id?: string
+          pack_id: string
+          status?: string | null
+          tran_id: string
+          user_id: string
+          val_id?: string | null
+        }
+        Update: {
+          amount?: number
+          bank_tran_id?: string | null
+          created_at?: string | null
+          credits?: number
+          currency?: string
+          id?: string
+          pack_id?: string
+          status?: string | null
+          tran_id?: string
+          user_id?: string
+          val_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_pack_purchases_pack_id_fkey"
+            columns: ["pack_id"]
+            isOneToOne: false
+            referencedRelation: "credit_packs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_pack_purchases_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_packs: {
+        Row: {
+          created_at: string | null
+          credits: number
+          id: string
+          is_active: boolean | null
+          name: string
+          price_bdt: number
+          price_usd: number
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          credits: number
+          id?: string
+          is_active?: boolean | null
+          name: string
+          price_bdt: number
+          price_usd: number
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          credits?: number
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          price_bdt?: number
+          price_usd?: number
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       credit_transactions: {
         Row: {
           action_key: string | null
@@ -2138,6 +2228,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_pack_credits: {
+        Args: { p_credits: number; p_description: string; p_user_id: string }
+        Returns: undefined
+      }
       admin_adjust_credits: {
         Args: {
           p_admin_id: string
