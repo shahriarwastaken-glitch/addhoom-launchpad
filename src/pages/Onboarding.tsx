@@ -241,6 +241,7 @@ const Onboarding = () => {
     if (!activeWorkspace) return;
     setAnalyzing(true);
     setAnalyzeStep(0);
+    trackEvent('onboarding_shop_dna_method', { method: 'photos' });
     const interval = setInterval(() => {
       setAnalyzeStep(prev => prev >= ANALYZING_STEPS.length - 1 ? prev : prev + 1);
     }, 2500);
