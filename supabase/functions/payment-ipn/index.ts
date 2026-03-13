@@ -15,14 +15,39 @@ serve(async (req) => {
     const status = formData.get("status") as string;
     const storeId = formData.get("store_id") as string;
 
-    // Verify store ID
     const ssl = getSSLCommerzConfig();
-    if (ssl.configured && storeId !== ssl.storeId) {
+
+    // Reject if SSLCommerz is not configured — never process unverified IPNs
+    if (!ssl.configured) {
+      console.error("IPN rejected: SSLCommerz not configured");
+      return new Response("Payment gateway not configured", { status: 503 });
+    }
+
+    // Verify store ID
+    if (storeId !== ssl.storeId) {
+      console.error("IPN rejected: store_id mismatch");
       return new Response("Unauthorized", { status: 401 });
     }
 
     if (status !== "VALID" && status !== "VALIDATED") {
       return new Response("OK", { status: 200 });
+    }
+
+    // Verify val_id with SSLCommerz validation API (mirrors payment-callback)
+    if (!valId) {
+      console.error("IPN rejected: missing val_id");
+      return new Response("Missing val_id", { status: 400 });
+    }
+
+    const verifyRes = await fetch(
+      `${ssl.baseUrl}/validator/api/validationserverAPI.php` +
+      `?val_id=${valId}&store_id=${ssl.storeId}&store_passwd=${ssl.storePass}&v=1&format=json`
+    );
+    const verified = await verifyRes.json();
+
+    if (verified.status !== "VALID" && verified.status !== "VALIDATED") {
+      console.error("IPN rejected: val_id verification failed", verified.status);
+      return new Response("Validation failed", { status: 401 });
     }
 
     // Check if already processed
