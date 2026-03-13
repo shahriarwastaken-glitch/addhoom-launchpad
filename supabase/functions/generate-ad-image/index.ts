@@ -203,7 +203,7 @@ serve(async (req) => {
 
     try {
       await supabase.rpc("upsert_api_usage_stats", {
-        p_service_name: "wavespeed",
+        p_service_name: "vidgo",
         p_stat_date: new Date().toISOString().split("T")[0],
         p_calls_made: selected_scenes.length,
       });
