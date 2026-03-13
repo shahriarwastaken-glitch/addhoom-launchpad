@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { Mascot } from '@/components/Mascot';
 import { z } from 'zod';
+import { trackEvent } from '@/lib/posthog';
 
 const loginSchema = z.object({
   email: z.string().trim().email('Invalid email').max(255),
@@ -61,9 +62,10 @@ const Auth = forwardRef<HTMLDivElement>((_, ref) => {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (error) throw error;
 
+        trackEvent('user_logged_in', { method: 'email' });
+
         // If "Remember Me" is unchecked, session will be cleared on tab close
         if (!rememberMe) {
-          // Store flag to clear session on window close
           sessionStorage.setItem('addhoom_session_temp', 'true');
         } else {
           sessionStorage.removeItem('addhoom_session_temp');
@@ -80,6 +82,9 @@ const Auth = forwardRef<HTMLDivElement>((_, ref) => {
           },
         });
         if (error) throw error;
+
+        trackEvent('user_signed_up', { method: 'email' });
+
         toast({
           title: t('অ্যাকাউন্ট তৈরি হয়েছে!', 'Account created!'),
           description: t('ইমেইল ভেরিফাই করুন।', 'Please verify your email.'),

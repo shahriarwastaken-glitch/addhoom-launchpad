@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
+import { identifyUser, resetUser } from '@/lib/posthog';
 
 type AuthContextType = {
   user: User | null;
@@ -50,6 +51,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .eq('id', userId)
       .single();
     setProfile(data);
+    if (data) {
+      identifyUser(userId, {
+        email: data.email || undefined,
+        plan: data.plan_key || data.plan || undefined,
+        subscribed: data.subscription_status === 'active',
+        created_at: data.created_at,
+      });
+    }
   };
 
   const fetchWorkspaces = async (userId: string) => {
@@ -102,14 +111,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          setTimeout(() => {
-            fetchProfile(session.user.id);
+          setTimeout(async () => {
+            await fetchProfile(session.user.id);
             fetchWorkspaces(session.user.id);
           }, 0);
         } else {
           setProfile(null);
           setWorkspaces([]);
           setActiveWorkspaceId(null);
+          resetUser();
         }
         setLoading(false);
       }
@@ -139,7 +149,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         profile,
         activeWorkspace,
         workspaces,
-        signOut: async () => { await supabase.auth.signOut(); },
+        signOut: async () => { resetUser(); await supabase.auth.signOut(); },
         refreshProfile,
         setActiveWorkspaceId,
       }}

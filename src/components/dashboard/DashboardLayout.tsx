@@ -15,6 +15,7 @@ import WorkspaceSelector from './workspace/WorkspaceSelector';
 import CreateWorkspaceModal from './workspace/CreateWorkspaceModal';
 import ScrollToTopButton from '@/components/ScrollToTopButton';
 import { toast } from '@/hooks/use-toast';
+import { trackEvent } from '@/lib/posthog';
 
 const mobileItems = [
   { icon: Target, bn: 'হোম', en: 'Home', url: '/dashboard' },
@@ -55,6 +56,34 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   }, [profile?.credits_reset_at]);
   const creditWarning = planCredits > 0 && creditBalance / planCredits < 0.2;
   const creditEmpty = creditBalance <= 0;
+
+  // Track navigation (feature_visited)
+  const ROUTE_TO_FEATURE: Record<string, string> = {
+    '/dashboard/generate': 'image_generator',
+    '/dashboard/studio': 'studio',
+    '/dashboard/video': 'video',
+    '/dashboard/calendar': 'content_calendar',
+    '/dashboard/doctor': 'account_doctor',
+    '/dashboard/settings': 'settings',
+    '/dashboard/credits': 'billing',
+    '/dashboard/analytics': 'analytics',
+  };
+  useEffect(() => {
+    const feature = ROUTE_TO_FEATURE[location.pathname];
+    if (feature) {
+      trackEvent('feature_visited', { feature });
+    }
+  }, [location.pathname]);
+
+  // Track credits low warning
+  useEffect(() => {
+    if (creditWarning && planCredits > 0) {
+      trackEvent('credits_low_warning_shown', {
+        credits_remaining: creditBalance,
+        percentage_remaining: Math.round((creditBalance / planCredits) * 100),
+      });
+    }
+  }, [creditWarning]);
 
 
   // Payment result handler

@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { FolderOpen, ArrowLeft } from 'lucide-react';
+import { trackEvent } from '@/lib/posthog';
 import InputPanel from './InputPanel';
 import ResultsPanel from './ResultsPanel';
 import CopyRemixPanel from './CopyRemixPanel';
@@ -181,8 +182,18 @@ const AdGeneratorPage = () => {
     setResults([]);
     if (isMobile) setMobileTab('results');
 
+    const genStartTime = Date.now();
+
     try {
       if (mode === 'copy') {
+        trackEvent('ad_copy_generation_started', {
+          platform: form.platforms[0] || 'facebook',
+          language: form.language || lang,
+          tone: form.tone,
+          variations: form.numVariations,
+          used_advanced_options: !!(form.targetReader || form.oneIdea || form.desires),
+        });
+
         const { data, error } = await supabase.functions.invoke('generate-ads', {
           body: {
             workspace_id: activeWorkspace.id,
@@ -212,6 +223,11 @@ const AdGeneratorPage = () => {
 
         if (data?.success && data.ads) {
           setResults(data.ads);
+          trackEvent('ad_copy_generation_completed', {
+            variations_returned: data.count,
+            platform: form.platforms[0] || 'facebook',
+            language: form.language || lang,
+          });
           toast.success(t(`${data.count}টি বিজ্ঞাপন তৈরি হয়েছে`, `${data.count} ads generated`));
 
           if (calendarItemId && data.ads[0]?.id) {
@@ -224,6 +240,12 @@ const AdGeneratorPage = () => {
         }
       } else {
         // Image mode — scene-based generation
+        trackEvent('image_generation_started', {
+          scene_type: form.selectedScenes?.[0] || 'studio',
+          prompt_enhanced: false,
+          workspace_industry: activeWorkspace.industry || 'unknown',
+        });
+
         let product_image_base64: string | undefined;
         let product_image_mime_type = "image/jpeg";
         if (form.productImagePreview) {
@@ -280,8 +302,13 @@ const AdGeneratorPage = () => {
           setResults(imageAds);
           setHasImageResult(true);
           saveImageHistory(form.productName, imageAds);
+          trackEvent('image_generation_completed', {
+            scene_type: form.selectedScenes?.[0] || 'studio',
+            duration_seconds: Math.round((Date.now() - genStartTime) / 1000),
+          });
           toast.success(t(`${data.images.length}টি ইমেজ তৈরি হয়েছে`, `${data.images.length} images generated`));
         } else {
+          trackEvent('image_generation_failed', { scene_type: form.selectedScenes?.[0] || 'studio', error: data?.message || 'unknown' });
           toast.error(data?.message || t('ইমেজ তৈরিতে সমস্যা হয়েছে', 'Image generation failed'));
         }
       }

@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useState, useMemo, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { format, addDays } from 'date-fns';
+import { trackEvent } from '@/lib/posthog';
 
 type UpgradeType = 'video' | 'general' | 'credits';
 
@@ -89,6 +90,11 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
 
   const initiateCheckout = async (planKey: string) => {
     setCheckoutLoading(planKey);
+    trackEvent('subscription_checkout_started', {
+      plan: planKey,
+      currency,
+      amount: PLAN_CARDS.find(p => p.key === planKey)?.[currency === 'BDT' ? 'priceBDT' : 'priceUSD'] || '',
+    });
     try {
       const isUpgrade = profile?.plan_key && profile.plan_key !== 'free' && profile.plan_key !== planKey;
       const { data, error } = await supabase.functions.invoke('initiate-payment', {
@@ -97,6 +103,8 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
       if (error) throw error;
       if (data.dev_mode) {
         toast({ title: '✅ ' + t('প্ল্যান সক্রিয়!', 'Plan Activated!'), description: data.message_en });
+        trackEvent('subscription_payment_success', { plan: planKey, currency, amount: 0, is_upgrade: !!isUpgrade });
+        trackEvent('paywall_converted', { type: showSubscriptionModal ? 'unsubscribed' : 'out_of_credits', action: isUpgrade ? 'upgraded' : 'subscribed' });
         await refreshProfile();
         onClose();
       } else if (data.gateway_url) {
@@ -105,6 +113,7 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
       }
     } catch (e) {
       console.error('Checkout error:', e);
+      trackEvent('subscription_payment_failed', { plan: planKey, currency });
       toast({ title: t('ত্রুটি', 'Error'), description: t('পেমেন্ট শুরু করতে ব্যর্থ।', 'Failed to initiate payment.'), variant: 'destructive' });
     }
     setCheckoutLoading(null);
@@ -112,6 +121,13 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
 
   const initiatePackPurchase = async (packId: string) => {
     setCheckoutLoading(packId);
+    const pack = packs.find(p => p.id === packId);
+    trackEvent('credit_pack_checkout_started', {
+      pack: pack?.name?.toLowerCase() || 'unknown',
+      currency,
+      amount: pack ? (currency === 'BDT' ? pack.price_bdt : pack.price_usd) : 0,
+      credits: pack?.credits || 0,
+    });
     try {
       const { data, error } = await supabase.functions.invoke('initiate-credit-pack-payment', {
         body: { pack_id: packId, currency },
@@ -136,6 +152,15 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
   // ── GATE LOGIC ──
   const showSubscriptionModal = !isPaidSubscriber;
   const showCreditsModal = isPaidSubscriber && type === 'credits';
+  // Track paywall_shown when modal opens
+  useEffect(() => {
+    if (!open) return;
+    trackEvent('paywall_shown', {
+      type: !isPaidSubscriber ? 'unsubscribed' : 'out_of_credits',
+      feature: creditInfo?.action || 'unknown',
+      credits_required: creditInfo?.required || 0,
+    });
+  }, [open]);
 
   const CurrencyToggle = () => (
     <div className="flex justify-center">
@@ -217,7 +242,7 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
                 </div>
 
                 <div className="p-6 pt-3">
-                  <button onClick={onClose} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <button onClick={() => { trackEvent('paywall_dismissed', { type: 'unsubscribed', action: 'later' }); onClose(); }} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                     {t('পরে করব', 'Maybe later')}
                   </button>
                 </div>

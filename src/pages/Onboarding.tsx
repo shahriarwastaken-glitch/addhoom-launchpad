@@ -7,6 +7,7 @@ import {
   Check, Globe, Search, ShoppingBag, Sparkles, Store, X,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { trackEvent } from '@/lib/posthog';
 import EntryPointCards, { type EntryPointType } from '@/components/onboarding/EntryPointCards';
 import ManualEntryForm from '@/components/onboarding/ManualEntryForm';
 import TemplateSelector from '@/components/onboarding/TemplateSelector';
@@ -161,9 +162,13 @@ const Onboarding = () => {
 
   const goTo = async (s: number) => {
     setDirection(s > step ? 1 : -1);
-    // Save the COMPLETED step (the one we're leaving), not the target
     const completedStep = step;
     setStep(s);
+
+    // Track step completion
+    const stepNames = ['', 'welcome', 'shop_dna', 'preferences', 'credits_explainer', 'choose_plan'];
+    trackEvent('onboarding_step_completed', { step: completedStep, step_name: stepNames[completedStep] });
+
     if (user) {
       await supabase.from('profiles').update({ onboarding_step: completedStep } as any).eq('id', user.id);
     }
@@ -174,6 +179,7 @@ const Onboarding = () => {
     if (!shopUrl.trim() || !activeWorkspace) return;
     setAnalyzing(true);
     setAnalyzeStep(0);
+    trackEvent('onboarding_shop_dna_method', { method: platform === 'facebook' ? 'facebook' : platform === 'daraz' ? 'daraz' : 'website' });
     const interval = setInterval(() => {
       setAnalyzeStep(prev => prev >= ANALYZING_STEPS.length - 1 ? prev : prev + 1);
     }, 2000);
@@ -200,6 +206,7 @@ const Onboarding = () => {
   const handleManualSubmit = async (formData: any) => {
     if (!activeWorkspace) return;
     setAnalyzing(true);
+    trackEvent('onboarding_shop_dna_method', { method: 'manual' });
     try {
       await supabase.functions.invoke('setup-shop-dna', {
         body: { workspace_id: activeWorkspace.id, platform: 'manual', payload: { form_data: formData } },
@@ -216,6 +223,7 @@ const Onboarding = () => {
   const handleTemplateSelect = async (industry: string, templateData: any) => {
     if (!activeWorkspace) return;
     setAnalyzing(true);
+    trackEvent('onboarding_shop_dna_method', { method: 'template' });
     try {
       await supabase.functions.invoke('setup-shop-dna', {
         body: { workspace_id: activeWorkspace.id, platform: 'template', payload: { industry, template_data: templateData } },
@@ -233,6 +241,7 @@ const Onboarding = () => {
     if (!activeWorkspace) return;
     setAnalyzing(true);
     setAnalyzeStep(0);
+    trackEvent('onboarding_shop_dna_method', { method: 'photos' });
     const interval = setInterval(() => {
       setAnalyzeStep(prev => prev >= ANALYZING_STEPS.length - 1 ? prev : prev + 1);
     }, 2500);
@@ -275,6 +284,11 @@ const Onboarding = () => {
   // --- Screen 5: Plan selection ---
   const handleSelectPlan = async (planId: string) => {
     setPlanLoading(planId);
+    trackEvent('subscription_checkout_started', {
+      plan: planId,
+      currency: currency === 'bdt' ? 'BDT' : 'USD',
+      amount: PLAN_CARDS.find(p => p.id === planId)?.[currency === 'bdt' ? 'priceBdt' : 'priceUsd'] || 0,
+    });
     try {
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: { plan: planId, billing_cycle: 'monthly' },
@@ -285,11 +299,19 @@ const Onboarding = () => {
       } else if (data?.dev_mode) {
         const planCredits = PLAN_CARDS.find(p => p.id === planId)?.credits || 5000;
         toast.success(`🎉 Welcome! Your ${planCredits.toLocaleString()} credits are ready.`);
+        trackEvent('subscription_payment_success', { plan: planId, currency: currency === 'bdt' ? 'BDT' : 'USD', amount: 0, is_upgrade: false });
+        trackEvent('onboarding_completed', {
+          industry: selectedIndustry || 'unknown',
+          platform: selectedPlatform || 'unknown',
+          language: selectedLanguage,
+          subscribed_during_onboarding: true,
+        });
         await supabase.from('profiles').update({ onboarding_complete: true, onboarding_step: 5 } as any).eq('id', user!.id);
         await refreshProfile();
         navigate('/dashboard', { replace: true });
       }
     } catch (e: any) {
+      trackEvent('subscription_payment_failed', { plan: planId, currency: currency === 'bdt' ? 'BDT' : 'USD' });
       toast.error(e.message || 'Payment failed. Please try again.');
     } finally {
       setPlanLoading(null);
@@ -298,12 +320,21 @@ const Onboarding = () => {
 
   const handleSubscribeLater = async () => {
     if (!user) return;
+    trackEvent('onboarding_completed', {
+      industry: selectedIndustry || 'unknown',
+      platform: selectedPlatform || 'unknown',
+      language: selectedLanguage,
+      subscribed_during_onboarding: false,
+    });
     await supabase.from('profiles').update({ onboarding_complete: true, onboarding_step: 5 } as any).eq('id', user.id);
     await refreshProfile();
     navigate('/dashboard', { replace: true });
   };
 
-  const handleSkip = () => goTo(step + 1);
+  const handleSkip = () => {
+    if (step === 2) trackEvent('onboarding_shop_dna_method', { method: 'skipped' });
+    goTo(step + 1);
+  };
 
   const renderUrlInput = () => {
     const placeholders: Record<string, string> = {

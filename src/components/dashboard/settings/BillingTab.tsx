@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { Mascot } from '@/components/Mascot';
+import { trackEvent } from '@/lib/posthog';
 
 type CreditPack = {
   id: string;
@@ -163,6 +164,7 @@ const BillingTab = () => {
         body: { reason: cancelReason },
       });
       if (error) throw error;
+      trackEvent('subscription_cancelled', { plan: planKey, reason: cancelReason });
       toast({ title: t('সাবস্ক্রিপশন বাতিল হয়েছে', 'Subscription Cancelled'), description: t(`অ্যাক্সেস চলবে ${data.access_until ? format(new Date(data.access_until), 'MMM d, yyyy') : ''} পর্যন্ত`, `Access continues until ${data.access_until ? format(new Date(data.access_until), 'MMM d, yyyy') : ''}`) });
       setShowCancelModal(false);
       const { data: sub } = await supabase.from('subscriptions').select('*').eq('user_id', user!.id).eq('status', 'active').maybeSingle();
@@ -179,6 +181,7 @@ const BillingTab = () => {
     try {
       const { error } = await supabase.functions.invoke('reactivate-subscription', { body: {} });
       if (error) throw error;
+      trackEvent('subscription_reactivated', { plan: planKey });
       toast({ title: '✅ ' + t('পুনরায় সক্রিয়!', 'Reactivated!'), description: t('আপনার সাবস্ক্রিপশন আবার সক্রিয়।', 'Your subscription is active again.') });
       const { data: sub } = await supabase.from('subscriptions').select('*').eq('user_id', user!.id).eq('status', 'active').maybeSingle();
       setSubscription(sub);

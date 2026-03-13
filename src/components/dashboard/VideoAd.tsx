@@ -6,6 +6,7 @@ import { useUpgrade } from '@/contexts/UpgradeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Film, Sparkles } from 'lucide-react';
+import { trackEvent } from '@/lib/posthog';
 import StageIndicator from './video/StageIndicator';
 import VideoSetup from './video/VideoSetup';
 import VideoProcessing from './video/VideoProcessing';
@@ -132,6 +133,12 @@ const VideoAd = () => {
     goToStage(2);
     setElapsedSeconds(0);
 
+    trackEvent('video_generation_started', {
+      type: 'slideshow',
+      aspect_ratio: form.format === 'reels' ? '9:16' : form.format === 'story' ? '9:16' : '16:9',
+      prompt_enhanced: false,
+    });
+
     // Start elapsed timer
     elapsedRef.current = setInterval(() => setElapsedSeconds(s => s + 1), 1000);
 
@@ -210,6 +217,11 @@ const VideoAd = () => {
         createdAt: new Date().toISOString(),
       });
     }
+
+    trackEvent('video_generation_completed', {
+      type: 'slideshow',
+      duration_seconds: elapsedSeconds,
+    });
 
     goToStage(3);
   }, [script, form, plan, usageUsed, usageLimit, user, activeWorkspace, showUpgrade]);

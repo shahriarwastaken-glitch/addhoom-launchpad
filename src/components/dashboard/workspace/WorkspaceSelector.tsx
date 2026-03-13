@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import WorkspaceAvatar from './WorkspaceAvatar';
 import { WORKSPACE_LIMITS } from './constants';
+import { trackEvent } from '@/lib/posthog';
 
 interface WorkspaceSelectorProps {
   onCreateClick: () => void;
@@ -28,6 +29,7 @@ const WorkspaceSelector = ({ onCreateClick }: WorkspaceSelectorProps) => {
     }
     setActiveWorkspaceId(ws.id);
     setOpen(false);
+    trackEvent('workspace_switched');
     toast.success(t(`"${ws.shop_name}"-এ স্যুইচ করা হয়েছে`, `Switched to "${ws.shop_name}"`));
   };
 
