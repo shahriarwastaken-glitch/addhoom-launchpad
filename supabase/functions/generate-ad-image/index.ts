@@ -140,7 +140,7 @@ serve(async (req) => {
 
       if (results[i].status === 'fulfilled') {
         try {
-          const imageUrl = (results[i] as PromiseFulfilledResult<any>).value?.outputs?.[0];
+          const imageUrl = (results[i] as PromiseFulfilledResult<any>).value;
           if (!imageUrl) continue;
 
           const imageBytes = await downloadFile(imageUrl);
