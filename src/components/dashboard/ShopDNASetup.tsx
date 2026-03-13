@@ -83,10 +83,7 @@ const ShopDNASetup = ({ onComplete }: { onComplete: () => void }) => {
 
       if (error) throw error;
 
-      await supabase
-        .from('profiles')
-        .update({ onboarding_complete: true } as any)
-        .eq('id', activeWorkspace.owner_id);
+      // Note: Do NOT set onboarding_complete here — this is a dashboard re-setup, not onboarding completion
 
       await refreshProfile();
 
