@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useState, useMemo, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { format, addDays } from 'date-fns';
+import { trackEvent } from '@/lib/posthog';
 
 type UpgradeType = 'video' | 'general' | 'credits';
 
