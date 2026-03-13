@@ -17,10 +17,8 @@ const HeroPreviewCard = () => {
     { icon: Shirt, label: 'Try-On' },
   ];
 
-  const Placeholder = ({ label }: { label: string }) => (
-    <div className="w-full h-full rounded-lg flex items-center justify-center" style={{ background: '#F0EDE8', border: '1.5px dashed #D4CFC8' }}>
-      <span className="font-mono text-[11px] text-muted-foreground">{label}</span>
-    </div>
+  const LandingImg = ({ src, alt }: { src: string; alt: string }) => (
+    <img src={src} alt={alt} className="w-full h-full object-cover rounded-lg" loading="lazy" />
   );
 
   return (
@@ -45,12 +43,12 @@ const HeroPreviewCard = () => {
         <div className={`absolute inset-0 transition-opacity duration-300 ${activeTab === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
           <div className="flex h-full">
             <div className="flex-1 relative p-2 sm:p-3">
-              <Placeholder label="Raw product photo" />
+              <LandingImg src="/landing/hero-before.webp" alt="Raw product photo" />
               <span className="absolute bottom-3 sm:bottom-5 left-3 sm:left-5 bg-foreground/70 text-primary-foreground text-[10px] font-mono px-2 py-0.5 rounded">Before</span>
             </div>
             <div className="w-[2px] bg-card" />
             <div className="flex-1 relative p-2 sm:p-3">
-              <Placeholder label="AI-generated scene" />
+              <LandingImg src="/landing/hero-after.webp" alt="AI-generated product scene" />
               <span className="absolute bottom-3 sm:bottom-5 right-3 sm:right-5 bg-primary text-primary-foreground text-[10px] font-mono px-2 py-0.5 rounded">After</span>
             </div>
           </div>
@@ -92,12 +90,12 @@ const HeroPreviewCard = () => {
         <div className={`absolute inset-0 transition-opacity duration-300 ${activeTab === 3 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
           <div className="flex h-full">
             <div className="flex-1 relative p-2 sm:p-3">
-              <Placeholder label="Flat lay garment" />
+              <LandingImg src="/landing/hero-tryon-garment.webp" alt="Flat lay garment" />
               <span className="absolute bottom-3 sm:bottom-5 left-3 sm:left-5 bg-foreground/70 text-primary-foreground text-[10px] font-mono px-2 py-0.5 rounded">Product</span>
             </div>
             <div className="w-[2px] bg-card" />
             <div className="flex-1 relative p-2 sm:p-3">
-              <Placeholder label="Model wearing it" />
+              <LandingImg src="/landing/hero-tryon-model.webp" alt="Model wearing garment" />
               <span className="absolute bottom-3 sm:bottom-5 right-3 sm:right-5 bg-primary text-primary-foreground text-[10px] font-mono px-2 py-0.5 rounded">Try-On</span>
             </div>
           </div>

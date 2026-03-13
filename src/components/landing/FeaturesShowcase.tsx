@@ -2,10 +2,8 @@ import { useState } from 'react';
 import { Camera, PenTool, Video, Shirt, Check, ArrowRight, Target, Home, Sparkles } from 'lucide-react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
-const Placeholder = ({ label }: { label: string }) => (
-  <div className="w-full h-full min-h-[120px] rounded-xl flex items-center justify-center" style={{ background: '#F0EDE8', border: '1.5px dashed #D4CFC8' }}>
-    <span className="font-mono text-[11px] text-muted-foreground">{label}</span>
-  </div>
+const LandingImg = ({ src, alt }: { src: string; alt: string }) => (
+  <img src={src} alt={alt} className="w-full h-full min-h-[120px] object-cover rounded-xl" loading="lazy" />
 );
 
 const FeatureCheck = ({ text }: { text: string }) => (
@@ -24,9 +22,9 @@ const tabs = [
     cta: 'Generate your first image',
     right: (
       <div className="grid grid-cols-2 gap-3 max-w-[460px] w-full">
-        <div className="col-span-1 row-span-1"><Placeholder label="Studio scene" /><span className="flex items-center gap-1 mt-1.5 text-[11px] font-mono text-muted-foreground"><Target size={12} /> Studio</span></div>
-        <div className="col-span-1 row-span-1 mt-8"><Placeholder label="Lifestyle scene" /><span className="flex items-center gap-1 mt-1.5 text-[11px] font-mono text-muted-foreground"><Home size={12} /> Lifestyle</span></div>
-        <div className="col-span-2 mt-2"><div className="max-w-[200px] mx-auto"><Placeholder label="Luxury scene" /><span className="flex items-center gap-1 mt-1.5 text-[11px] font-mono text-muted-foreground"><Sparkles size={12} /> Luxury</span></div></div>
+        <div className="col-span-1 row-span-1"><LandingImg src="/landing/feature-studio.webp" alt="Studio scene" /><span className="flex items-center gap-1 mt-1.5 text-[11px] font-mono text-muted-foreground"><Target size={12} /> Studio</span></div>
+        <div className="col-span-1 row-span-1 mt-8"><LandingImg src="/landing/feature-lifestyle.webp" alt="Lifestyle scene" /><span className="flex items-center gap-1 mt-1.5 text-[11px] font-mono text-muted-foreground"><Home size={12} /> Lifestyle</span></div>
+        <div className="col-span-2 mt-2"><div className="max-w-[200px] mx-auto"><LandingImg src="/landing/feature-luxury.webp" alt="Luxury scene" /><span className="flex items-center gap-1 mt-1.5 text-[11px] font-mono text-muted-foreground"><Sparkles size={12} /> Luxury</span></div></div>
       </div>
     ),
   },
@@ -76,9 +74,9 @@ const tabs = [
     cta: 'Try on your product',
     right: (
       <div className="flex rounded-2xl overflow-hidden max-w-[400px] w-full border border-border">
-        <div className="flex-1 relative"><Placeholder label="Flat lay garment" /><span className="absolute bottom-3 left-3 bg-foreground/70 text-primary-foreground text-[10px] font-mono px-2 py-0.5 rounded">Product</span></div>
+        <div className="flex-1 relative"><LandingImg src="/landing/feature-tryon-garment.webp" alt="Flat lay garment" /><span className="absolute bottom-3 left-3 bg-foreground/70 text-primary-foreground text-[10px] font-mono px-2 py-0.5 rounded">Product</span></div>
         <div className="w-[2px] bg-card" />
-        <div className="flex-1 relative"><Placeholder label="Model wearing it" /><span className="absolute bottom-3 right-3 bg-primary text-primary-foreground text-[10px] font-mono px-2 py-0.5 rounded">Try-On</span></div>
+        <div className="flex-1 relative"><LandingImg src="/landing/feature-tryon-model.webp" alt="Model wearing garment" /><span className="absolute bottom-3 right-3 bg-primary text-primary-foreground text-[10px] font-mono px-2 py-0.5 rounded">Try-On</span></div>
       </div>
     ),
   },
