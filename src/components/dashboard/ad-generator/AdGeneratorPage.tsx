@@ -186,6 +186,14 @@ const AdGeneratorPage = () => {
 
     try {
       if (mode === 'copy') {
+        trackEvent('ad_copy_generation_started', {
+          platform: form.platforms[0] || 'facebook',
+          language: form.language || lang,
+          tone: form.tone,
+          variations: form.numVariations,
+          used_advanced_options: !!(form.targetReader || form.oneIdea || form.desires),
+        });
+
         const { data, error } = await supabase.functions.invoke('generate-ads', {
           body: {
             workspace_id: activeWorkspace.id,
@@ -215,6 +223,11 @@ const AdGeneratorPage = () => {
 
         if (data?.success && data.ads) {
           setResults(data.ads);
+          trackEvent('ad_copy_generation_completed', {
+            variations_returned: data.count,
+            platform: form.platforms[0] || 'facebook',
+            language: form.language || lang,
+          });
           toast.success(t(`${data.count}টি বিজ্ঞাপন তৈরি হয়েছে`, `${data.count} ads generated`));
 
           if (calendarItemId && data.ads[0]?.id) {
