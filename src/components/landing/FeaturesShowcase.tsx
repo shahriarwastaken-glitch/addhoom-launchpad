@@ -22,9 +22,9 @@ const tabs = [
     cta: 'Generate your first image',
     right: (
       <div className="grid grid-cols-2 gap-3 max-w-[460px] w-full">
-        <div className="col-span-1 row-span-1"><Placeholder label="Studio scene" /><span className="flex items-center gap-1 mt-1.5 text-[11px] font-mono text-muted-foreground"><Target size={12} /> Studio</span></div>
-        <div className="col-span-1 row-span-1 mt-8"><Placeholder label="Lifestyle scene" /><span className="flex items-center gap-1 mt-1.5 text-[11px] font-mono text-muted-foreground"><Home size={12} /> Lifestyle</span></div>
-        <div className="col-span-2 mt-2"><div className="max-w-[200px] mx-auto"><Placeholder label="Luxury scene" /><span className="flex items-center gap-1 mt-1.5 text-[11px] font-mono text-muted-foreground"><Sparkles size={12} /> Luxury</span></div></div>
+        <div className="col-span-1 row-span-1"><LandingImg src="/landing/feature-studio.webp" alt="Studio scene" /><span className="flex items-center gap-1 mt-1.5 text-[11px] font-mono text-muted-foreground"><Target size={12} /> Studio</span></div>
+        <div className="col-span-1 row-span-1 mt-8"><LandingImg src="/landing/feature-lifestyle.webp" alt="Lifestyle scene" /><span className="flex items-center gap-1 mt-1.5 text-[11px] font-mono text-muted-foreground"><Home size={12} /> Lifestyle</span></div>
+        <div className="col-span-2 mt-2"><div className="max-w-[200px] mx-auto"><LandingImg src="/landing/feature-luxury.webp" alt="Luxury scene" /><span className="flex items-center gap-1 mt-1.5 text-[11px] font-mono text-muted-foreground"><Sparkles size={12} /> Luxury</span></div></div>
       </div>
     ),
   },
