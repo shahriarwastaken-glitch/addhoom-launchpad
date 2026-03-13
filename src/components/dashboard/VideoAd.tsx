@@ -133,6 +133,12 @@ const VideoAd = () => {
     goToStage(2);
     setElapsedSeconds(0);
 
+    trackEvent('video_generation_started', {
+      type: 'slideshow',
+      aspect_ratio: form.format === 'reels' ? '9:16' : form.format === 'square' ? '1:1' : '16:9',
+      prompt_enhanced: false,
+    });
+
     // Start elapsed timer
     elapsedRef.current = setInterval(() => setElapsedSeconds(s => s + 1), 1000);
 
