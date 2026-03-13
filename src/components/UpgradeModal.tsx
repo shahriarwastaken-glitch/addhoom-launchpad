@@ -1,7 +1,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Coins, MessageSquare, CreditCard, Loader2, ArrowRight, Package } from 'lucide-react';
+import { Zap, Coins, MessageSquare, CreditCard, Loader2, ArrowRight, Package, ArrowUp, Globe, MapPin, Flame, Sparkles } from 'lucide-react';
 import { Mascot } from '@/components/Mascot';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -54,7 +54,7 @@ type CreditPack = {
   sort_order: number;
 };
 
-const PACK_ICONS: Record<string, string> = { Small: '⚡', Medium: '🔥', Large: '💥' };
+const PACK_ICONS: Record<string, typeof Zap> = { Small: Zap, Medium: Flame, Large: Sparkles };
 
 const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeModalProps) => {
   const { t } = useLanguage();
@@ -134,10 +134,23 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
   };
 
   // ── GATE LOGIC ──
-  // Not subscribed → show subscription modal
-  // Subscribed with 0 credits → show tabbed buy/upgrade modal
   const showSubscriptionModal = !isPaidSubscriber;
   const showCreditsModal = isPaidSubscriber && type === 'credits';
+
+  const CurrencyToggle = () => (
+    <div className="flex justify-center">
+      <div className="inline-flex bg-muted rounded-full p-1">
+        <button
+          onClick={() => setCurrencyMode('intl')}
+          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5 ${currencyMode === 'intl' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+        ><Globe size={12} /> International</button>
+        <button
+          onClick={() => setCurrencyMode('bd')}
+          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5 ${currencyMode === 'bd' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+        ><MapPin size={12} /> Bangladesh</button>
+      </div>
+    </div>
+  );
 
   return (
     <AnimatePresence>
@@ -157,7 +170,7 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-[480px] bg-card rounded-3xl shadow-warm-lg overflow-hidden border border-border"
+            className="relative w-full max-w-[480px] bg-card rounded-3xl shadow-warm-lg overflow-hidden border border-border max-h-[90vh] overflow-y-auto"
           >
             {showSubscriptionModal ? (
               /* ─── SUBSCRIPTION MODAL (unsubscribed users) ─── */
@@ -172,19 +185,7 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
                   </p>
                 </div>
 
-                {/* Currency toggle */}
-                <div className="flex justify-center mb-4">
-                  <div className="inline-flex bg-muted rounded-full p-1">
-                    <button
-                      onClick={() => setCurrencyMode('intl')}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${currencyMode === 'intl' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
-                    >🌍 International</button>
-                    <button
-                      onClick={() => setCurrencyMode('bd')}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${currencyMode === 'bd' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
-                    >🇧🇩 Bangladesh</button>
-                  </div>
-                </div>
+                <div className="mb-4"><CurrencyToggle /></div>
 
                 <div className="px-6 pb-2 space-y-2.5">
                   {PLAN_CARDS.map(plan => {
@@ -225,7 +226,7 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
               /* ─── OUT OF CREDITS MODAL (subscribed users) ─── */
               <div>
                 {/* Header strip */}
-                <div className="bg-gradient-brand px-6 py-5 text-center" style={{ background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--brand-yellow)))' }}>
+                <div className="px-6 py-5 text-center" style={{ background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--brand-yellow)))' }}>
                   <Mascot variant="sheepish" size={56} className="mx-auto mb-2" />
                   <h2 className="text-lg font-bold text-primary-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>
                     {t('ক্রেডিট শেষ হয়ে গেছে', "You're out of credits")}
@@ -248,7 +249,7 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
                       onClick={() => setActiveTab('upgrade')}
                       className={`flex-1 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all ${activeTab === 'upgrade' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
                     >
-                      <ArrowRight size={14} /> {t('আপগ্রেড', 'Upgrade Plan')}
+                      <ArrowUp size={14} /> {t('আপগ্রেড', 'Upgrade Plan')}
                     </button>
                   </div>
                 </div>
@@ -257,19 +258,7 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
                   {activeTab === 'buy' ? (
                     /* ── BUY CREDITS TAB ── */
                     <div className="space-y-4">
-                      {/* Currency toggle */}
-                      <div className="flex justify-center">
-                        <div className="inline-flex bg-muted rounded-full p-1">
-                          <button
-                            onClick={() => setCurrencyMode('intl')}
-                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${currencyMode === 'intl' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
-                          >🌍 International</button>
-                          <button
-                            onClick={() => setCurrencyMode('bd')}
-                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${currencyMode === 'bd' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
-                          >🇧🇩 Bangladesh</button>
-                        </div>
-                      </div>
+                      <CurrencyToggle />
 
                       {/* Pack cards */}
                       <div className="space-y-2.5">
@@ -278,12 +267,13 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
                           const price = currency === 'BDT' ? `৳${pack.price_bdt.toLocaleString()}` : `$${pack.price_usd}`;
                           const imgCount = Math.floor(pack.credits / 125);
                           const vidCount = Math.floor(pack.credits / 330);
+                          const PackIcon = PACK_ICONS[pack.name] || Zap;
                           return (
                             <div key={pack.id} className={`rounded-2xl border-2 p-4 flex items-center justify-between transition-colors ${isPopular ? 'border-primary bg-primary/5' : 'border-border'}`}>
                               <div>
                                 <div className="flex items-center gap-2">
-                                  <p className="text-[15px] font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>
-                                    {PACK_ICONS[pack.name] || '⚡'} {pack.name}
+                                  <p className="text-[15px] font-bold text-foreground flex items-center gap-1.5" style={{ fontFamily: 'Syne, sans-serif' }}>
+                                    <PackIcon size={14} className="text-primary" /> {pack.name}
                                   </p>
                                   {isPopular && <span className="bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">{t('জনপ্রিয়', 'Most Popular')}</span>}
                                 </div>
@@ -323,19 +313,7 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
                         {t('প্রতি মাসে আরও ক্রেডিট পান', 'Get more credits every month')}
                       </p>
 
-                      {/* Currency toggle */}
-                      <div className="flex justify-center">
-                        <div className="inline-flex bg-muted rounded-full p-1">
-                          <button
-                            onClick={() => setCurrencyMode('intl')}
-                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${currencyMode === 'intl' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
-                          >🌍 International</button>
-                          <button
-                            onClick={() => setCurrencyMode('bd')}
-                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${currencyMode === 'bd' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
-                          >🇧🇩 Bangladesh</button>
-                        </div>
-                      </div>
+                      <CurrencyToggle />
 
                       <div className="space-y-2.5">
                         {PLAN_CARDS.map(plan => {
@@ -394,7 +372,7 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
             ) : (
               /* ─── GENERAL UPGRADE MODAL (subscribed, non-credits trigger) ─── */
               <div>
-                <div className="bg-gradient-brand px-6 py-4 text-center">
+                <div className="px-6 py-4 text-center" style={{ background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--brand-yellow)))' }}>
                   <h2 className="text-lg font-bold text-primary-foreground flex items-center justify-center gap-2">
                     <Zap size={18} />
                     {t('আপগ্রেড করুন', 'Upgrade')}
