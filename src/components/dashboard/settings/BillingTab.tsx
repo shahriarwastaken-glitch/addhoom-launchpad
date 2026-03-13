@@ -164,6 +164,7 @@ const BillingTab = () => {
         body: { reason: cancelReason },
       });
       if (error) throw error;
+      trackEvent('subscription_cancelled', { plan: planKey, reason: cancelReason });
       toast({ title: t('সাবস্ক্রিপশন বাতিল হয়েছে', 'Subscription Cancelled'), description: t(`অ্যাক্সেস চলবে ${data.access_until ? format(new Date(data.access_until), 'MMM d, yyyy') : ''} পর্যন্ত`, `Access continues until ${data.access_until ? format(new Date(data.access_until), 'MMM d, yyyy') : ''}`) });
       setShowCancelModal(false);
       const { data: sub } = await supabase.from('subscriptions').select('*').eq('user_id', user!.id).eq('status', 'active').maybeSingle();
