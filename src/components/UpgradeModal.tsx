@@ -90,6 +90,11 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
 
   const initiateCheckout = async (planKey: string) => {
     setCheckoutLoading(planKey);
+    trackEvent('subscription_checkout_started', {
+      plan: planKey,
+      currency,
+      amount: PLAN_CARDS.find(p => p.key === planKey)?.[currency === 'BDT' ? 'priceBDT' : 'priceUSD'] || '',
+    });
     try {
       const isUpgrade = profile?.plan_key && profile.plan_key !== 'free' && profile.plan_key !== planKey;
       const { data, error } = await supabase.functions.invoke('initiate-payment', {
@@ -98,6 +103,8 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
       if (error) throw error;
       if (data.dev_mode) {
         toast({ title: '✅ ' + t('প্ল্যান সক্রিয়!', 'Plan Activated!'), description: data.message_en });
+        trackEvent('subscription_payment_success', { plan: planKey, currency, amount: 0, is_upgrade: !!isUpgrade });
+        trackEvent('paywall_converted', { type: showSubscriptionModal ? 'unsubscribed' : 'out_of_credits', action: isUpgrade ? 'upgraded' : 'subscribed' });
         await refreshProfile();
         onClose();
       } else if (data.gateway_url) {
@@ -106,6 +113,7 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
       }
     } catch (e) {
       console.error('Checkout error:', e);
+      trackEvent('subscription_payment_failed', { plan: planKey, currency });
       toast({ title: t('ত্রুটি', 'Error'), description: t('পেমেন্ট শুরু করতে ব্যর্থ।', 'Failed to initiate payment.'), variant: 'destructive' });
     }
     setCheckoutLoading(null);
