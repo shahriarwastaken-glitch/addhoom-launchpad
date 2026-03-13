@@ -1,0 +1,139 @@
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+
+const TermsOfService = () => {
+  useEffect(() => {
+    document.title = 'Terms of Service — AdDhoom Studio';
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+        <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8">
+          <ArrowLeft size={14} /> Back to Home
+        </Link>
+
+        <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>Terms of Service</h1>
+        <p className="text-sm text-muted-foreground mb-10">Last updated: March 13, 2026</p>
+
+        <div className="prose prose-neutral dark:prose-invert max-w-none space-y-6 text-[15px] leading-relaxed text-foreground/90">
+          <section>
+            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">1. Acceptance of Terms</h2>
+            <p>By accessing or using AdDhoom Studio ("Service"), operated by AdDhoom ("Company", "we", "us"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">2. Description of Service</h2>
+            <p>AdDhoom Studio is an AI-powered advertising platform that enables users to generate ad creatives, images, videos, ad copy, virtual try-ons, and related marketing content for e-commerce businesses, primarily targeting the Bangladesh market. The Service includes dashboard tools, content calendars, competitor analysis, and AI chat assistance.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">3. Account Registration</h2>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li>You must provide accurate and complete information when creating an account.</li>
+              <li>You must be at least 18 years old to use the Service.</li>
+              <li>You are responsible for maintaining the confidentiality of your account credentials.</li>
+              <li>You are responsible for all activities that occur under your account.</li>
+              <li>One person or entity may not maintain more than one free account.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">4. Subscription Plans & Payments</h2>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li>The Service offers Free, Starter, Pro, and Agency plans with varying credit allowances and features.</li>
+              <li>Paid subscriptions are billed on a 30-day cycle from the date of purchase.</li>
+              <li>Payments are processed via SSLCommerz (Bangladesh/BDT) and supported international gateways (USD).</li>
+              <li>Subscription credits reset every 30 days and do not roll over to the next cycle.</li>
+              <li>Credit packs purchased separately never expire and stack on top of subscription credits.</li>
+              <li>All prices are listed in BDT (৳) and USD ($) and are subject to change with 30 days' notice.</li>
+              <li>Refunds are handled on a case-by-case basis. Contact support within 7 days of purchase.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">5. Acceptable Use</h2>
+            <p>You agree not to:</p>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li>Use the Service for any unlawful purpose or in violation of any applicable laws.</li>
+              <li>Generate content that is defamatory, obscene, hateful, discriminatory, or promotes violence.</li>
+              <li>Infringe upon the intellectual property rights of others.</li>
+              <li>Attempt to reverse-engineer, decompile, or extract source code from the Service.</li>
+              <li>Use automated scripts, bots, or scrapers to access the Service.</li>
+              <li>Resell, redistribute, or sublicense access to the Service without written permission.</li>
+              <li>Circumvent credit limits, usage restrictions, or security measures.</li>
+              <li>Upload malicious content, viruses, or harmful code.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">6. Intellectual Property</h2>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li><strong>Your Content:</strong> You retain ownership of the product images, brand assets, and text you upload to the Service.</li>
+              <li><strong>Generated Content:</strong> Content generated by the Service using your inputs (ad creatives, images, videos, copy) is licensed to you for commercial use. You may use generated content for your business advertising.</li>
+              <li><strong>Our Property:</strong> The Service, including its design, code, AI models, algorithms, branding (including the AdDhoom mascot), and documentation, remains the exclusive property of AdDhoom.</li>
+              <li>We reserve the right to use anonymized, aggregated data to improve the Service.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">7. AI-Generated Content Disclaimer</h2>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li>AI-generated content is provided "as is" and may not always be accurate, appropriate, or suitable for your intended use.</li>
+              <li>You are solely responsible for reviewing and approving all generated content before publishing.</li>
+              <li>We do not guarantee that AI-generated content will not inadvertently resemble existing copyrighted works.</li>
+              <li>We are not liable for any consequences arising from your use of AI-generated content.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">8. Service Availability</h2>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li>We strive for high availability but do not guarantee uninterrupted access to the Service.</li>
+              <li>We may perform scheduled maintenance with advance notice when possible.</li>
+              <li>We reserve the right to modify, suspend, or discontinue features with reasonable notice.</li>
+              <li>Credits are not refunded for service downtime unless exceeding 72 consecutive hours.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">9. Termination</h2>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li>You may cancel your account at any time through the Settings page.</li>
+              <li>We may suspend or terminate your account for violation of these Terms.</li>
+              <li>Upon termination, your right to use the Service ceases immediately.</li>
+              <li>We will retain your data for 30 days after termination, after which it may be permanently deleted.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">10. Limitation of Liability</h2>
+            <p>To the maximum extent permitted by law, AdDhoom shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, or business opportunities, arising from your use of the Service. Our total liability shall not exceed the amount you paid to us in the 12 months preceding the claim.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">11. Governing Law</h2>
+            <p>These Terms are governed by the laws of the People's Republic of Bangladesh. Any disputes shall be resolved in the courts of Dhaka, Bangladesh.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">12. Changes to Terms</h2>
+            <p>We reserve the right to update these Terms at any time. Material changes will be communicated via email or in-app notification at least 14 days before taking effect. Continued use of the Service after changes constitutes acceptance.</p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">13. Contact</h2>
+            <p>For questions about these Terms, contact us at:</p>
+            <ul className="list-disc pl-5 space-y-1.5">
+              <li>Email: <a href="mailto:hello@addhoom.com" className="text-primary hover:underline">hello@addhoom.com</a></li>
+              <li>WhatsApp: Available via our website</li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TermsOfService;
