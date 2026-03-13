@@ -8,7 +8,7 @@ const LandingFooter = () => {
     { label: 'Pricing', href: '#pricing' },
     { label: 'Privacy Policy', href: '/privacy', isRoute: true },
     { label: 'Terms of Service', href: '/terms', isRoute: true },
-    { label: 'Contact', href: 'mailto:hello@addhoom.com' },
+    { label: 'Contact', href: 'mailto:contact@addhoomstudio.com' },
   ];
 
   return (
