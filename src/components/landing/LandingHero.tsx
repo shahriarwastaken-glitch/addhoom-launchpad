@@ -43,7 +43,7 @@ const HeroPreviewCard = () => {
         <div className={`absolute inset-0 transition-opacity duration-300 ${activeTab === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
           <div className="flex h-full">
             <div className="flex-1 relative p-2 sm:p-3">
-              <Placeholder label="Raw product photo" />
+              <LandingImg src="/landing/hero-before.webp" alt="Raw product photo" />
               <span className="absolute bottom-3 sm:bottom-5 left-3 sm:left-5 bg-foreground/70 text-primary-foreground text-[10px] font-mono px-2 py-0.5 rounded">Before</span>
             </div>
             <div className="w-[2px] bg-card" />
