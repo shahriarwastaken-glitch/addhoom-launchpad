@@ -591,6 +591,7 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
               >
                 <Download size={12} /> {t('ডাউনলোড', 'Download')}
               </button>
+              <AnimateButton imageUrl={ad.image_url} />
               <button onClick={onRemix} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1">
                 <RefreshCw size={12} /> {t('রিমিক্স', 'Remix')}
               </button>
