@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Users can insert own usage_logs" ON usage_logs;
