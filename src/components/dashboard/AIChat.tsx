@@ -217,6 +217,7 @@ const AIChat = () => {
   const handleSend = useCallback(async (text?: string) => {
     const msg = text || input;
     if (!msg.trim() || streaming) return;
+    if (!requireCredits(5, 'ai_chat')) return;
     if (!activeWorkspace) {
       toast.error(t('প্রথমে একটি শপ তৈরি করুন', 'Please create a shop first'));
       return;

@@ -217,6 +217,7 @@ const CompetitorIntel = () => {
   const handleAnalyze = async (name?: string, url?: string) => {
     const cName = name || competitorName;
     if (!cName.trim()) return;
+    if (!requireCredits(20, 'competitor_intel')) return;
     if (!activeWorkspace) {
       toast.error(t('প্রথমে একটি শপ তৈরি করুন', 'Please create a shop first'));
       return;

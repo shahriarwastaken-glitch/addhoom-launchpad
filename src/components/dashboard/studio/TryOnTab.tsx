@@ -202,6 +202,7 @@ const TryOnTab = () => {
 
   const handleGenerate = async () => {
     if (!garmentFile || !garmentCategory || !activeWorkspace) return;
+    if (!requireCredits(75, 'try_on')) return;
     setGenerating(true);
     setLoadingMsgIdx(0);
     setResults([]);

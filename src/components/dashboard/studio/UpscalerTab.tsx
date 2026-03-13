@@ -123,6 +123,7 @@ const UpscalerTab = () => {
 
   const handleUpscale = async () => {
     if (!file || !activeWorkspace) return;
+    if (!requireCredits(50, 'upscale')) return;
     setUpscaling(true);
     setResultUrl(null);
     setProgress(0);

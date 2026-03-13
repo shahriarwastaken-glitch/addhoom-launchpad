@@ -211,6 +211,7 @@ const ProductPhotoTab = () => {
 
   const handleGenerate = async () => {
     if (!productFile || !scene || !activeWorkspace) return;
+    if (!requireCredits(75, 'product_photo')) return;
     setGenerating(true);
     setLoadingMsgIdx(0);
     setResultUrl(null);

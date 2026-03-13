@@ -315,6 +315,7 @@ function GenerateModal({ t, lang, activeWorkspace, hasExisting, onClose, onCompl
 
   const handleGenerate = async () => {
     if (!activeWorkspace) return;
+    if (!requireCredits(30, 'content_calendar')) return;
     setStep('loading');
     try {
       const res = await api.generateContentCalendar({

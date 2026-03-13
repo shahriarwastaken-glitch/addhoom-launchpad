@@ -73,6 +73,7 @@ const DhoomScoreChecker = () => {
       toast.error(t('হেডলাইন বা বডি দিন', 'Provide headline or body'));
       return;
     }
+    if (!requireCredits(5, 'dhoom_score')) return;
     setLoading(true);
     setResult(null);
     try {
