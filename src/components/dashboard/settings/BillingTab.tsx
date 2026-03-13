@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { Mascot } from '@/components/Mascot';
+import { trackEvent } from '@/lib/posthog';
 
 type CreditPack = {
   id: string;
