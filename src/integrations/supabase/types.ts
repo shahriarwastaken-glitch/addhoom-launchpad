@@ -2125,6 +2125,7 @@ export type Database = {
           extraction_quality: string | null
           icon_name: string | null
           id: string
+          image_generation_prompt_modifier: string | null
           industry: string | null
           is_default: boolean | null
           key_products: string | null
@@ -2160,6 +2161,7 @@ export type Database = {
           extraction_quality?: string | null
           icon_name?: string | null
           id?: string
+          image_generation_prompt_modifier?: string | null
           industry?: string | null
           is_default?: boolean | null
           key_products?: string | null
@@ -2195,6 +2197,7 @@ export type Database = {
           extraction_quality?: string | null
           icon_name?: string | null
           id?: string
+          image_generation_prompt_modifier?: string | null
           industry?: string | null
           is_default?: boolean | null
           key_products?: string | null

@@ -1,0 +1,1 @@
+ALTER TABLE public.workspaces ADD COLUMN IF NOT EXISTS image_generation_prompt_modifier text DEFAULT '';
