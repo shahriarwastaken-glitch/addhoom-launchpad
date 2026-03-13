@@ -152,8 +152,17 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
   // ── GATE LOGIC ──
   const showSubscriptionModal = !isPaidSubscriber;
   const showCreditsModal = isPaidSubscriber && type === 'credits';
+  // Track paywall_shown when modal opens
+  useEffect(() => {
+    if (!open) return;
+    trackEvent('paywall_shown', {
+      type: !isPaidSubscriber ? 'unsubscribed' : 'out_of_credits',
+      feature: creditInfo?.action || 'unknown',
+      credits_required: creditInfo?.required || 0,
+    });
+  }, [open]);
 
-  const CurrencyToggle = () => (
+
     <div className="flex justify-center">
       <div className="inline-flex bg-muted rounded-full p-1">
         <button
