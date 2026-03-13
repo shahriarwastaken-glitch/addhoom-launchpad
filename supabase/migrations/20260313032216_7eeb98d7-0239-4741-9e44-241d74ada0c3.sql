@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "transactions_user_insert" ON credit_transactions;
