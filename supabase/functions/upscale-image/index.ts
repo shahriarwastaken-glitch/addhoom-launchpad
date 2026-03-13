@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { wavespeedCreate, wavespeedPoll, downloadFile } from "../_shared/wavespeed.ts";
+import { vidgoSubmit, vidgoPoll, downloadFile } from "../_shared/vidgo.ts";
 import { deductCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 
 const corsHeaders = {
