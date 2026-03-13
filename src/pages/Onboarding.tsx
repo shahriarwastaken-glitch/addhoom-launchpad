@@ -142,8 +142,11 @@ const Onboarding = () => {
   useEffect(() => {
     if (profile && !hasResumed[0]) {
       const saved = (profile as any).onboarding_step;
-      if (saved && saved > 1 && saved <= TOTAL_STEPS) {
-        setStep(saved);
+      // Resume at the NEXT step after the last completed one
+      if (typeof saved === 'number' && saved >= 1 && saved < TOTAL_STEPS) {
+        setStep(saved + 1);
+      } else if (saved === TOTAL_STEPS) {
+        // All steps done, redirect handled by onboarding_complete check
       }
       hasResumed[1](true);
     }
@@ -158,9 +161,11 @@ const Onboarding = () => {
 
   const goTo = async (s: number) => {
     setDirection(s > step ? 1 : -1);
+    // Save the COMPLETED step (the one we're leaving), not the target
+    const completedStep = step;
     setStep(s);
     if (user) {
-      await supabase.from('profiles').update({ onboarding_step: s } as any).eq('id', user.id);
+      await supabase.from('profiles').update({ onboarding_step: completedStep } as any).eq('id', user.id);
     }
   };
 

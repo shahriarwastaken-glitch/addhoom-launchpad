@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
     // Update profile
     await supabase
       .from("profiles")
-      .update({ onboarding_complete: true })
+      .update({ onboarding_complete: true, onboarding_step: 5 })
       .eq("id", userId);
 
     // Track in usage_logs
