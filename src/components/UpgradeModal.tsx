@@ -162,7 +162,7 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
     });
   }, [open]);
 
-
+  const CurrencyToggle = () => (
     <div className="flex justify-center">
       <div className="inline-flex bg-muted rounded-full p-1">
         <button
