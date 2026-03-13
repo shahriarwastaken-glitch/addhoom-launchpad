@@ -1,7 +1,29 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { vidgoSubmit, vidgoPoll, downloadFile } from '../_shared/vidgo.ts';
 import { deductCredits, insufficientCreditsResponse } from '../_shared/credits.ts';
+
+async function cleanOldVideos(supabase: SupabaseClient, workspaceId: string) {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const { data: oldVideos } = await supabase
+    .from('video_ads')
+    .select('id, storage_path')
+    .eq('workspace_id', workspaceId)
+    .lt('created_at', thirtyDaysAgo.toISOString());
+
+  if (!oldVideos || oldVideos.length === 0) return;
+
+  const paths = oldVideos.map((v: any) => v.storage_path).filter(Boolean);
+  if (paths.length > 0) {
+    await supabase.storage.from('video-assets').remove(paths);
+  }
+
+  const ids = oldVideos.map((v: any) => v.id);
+  await supabase.from('video_ads').delete().in('id', ids);
+  console.log(`Cleaned ${ids.length} old videos for workspace ${workspaceId}`);
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
