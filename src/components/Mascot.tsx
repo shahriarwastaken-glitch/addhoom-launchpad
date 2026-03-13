@@ -13,13 +13,13 @@ export type MascotVariant =
 
 const MASCOT_PATHS: Record<MascotVariant, string> = {
   happy: '/mascot/mascot-happy.png',
-  sad: '/mascot/mascot-sad.png',
-  sheepish: '/mascot/mascot-sheepish.png',
-  celebrating: '/mascot/mascot-celebrating.png',
-  energetic: '/mascot/mascot-energetic.png',
-  worried: '/mascot/mascot-worried.png',
-  detective: '/mascot/mascot-detective.png',
-  ai: '/mascot/mascot-ai.png',
+  sad: '/mascot/mascot-sad.webp',
+  sheepish: '/mascot/mascot-sheepish.webp',
+  celebrating: '/mascot/mascot-celebrating.webp',
+  energetic: '/mascot/mascot-energetic.webp',
+  worried: '/mascot/mascot-worried.webp',
+  detective: '/mascot/mascot-detective.webp',
+  ai: '/mascot/mascot-ai.webp',
 };
 
 // Preload all mascot variants once on first mount
