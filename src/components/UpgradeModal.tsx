@@ -242,7 +242,7 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
                 </div>
 
                 <div className="p-6 pt-3">
-                  <button onClick={onClose} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <button onClick={() => { trackEvent('paywall_dismissed', { type: 'unsubscribed', action: 'later' }); onClose(); }} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                     {t('পরে করব', 'Maybe later')}
                   </button>
                 </div>

@@ -240,8 +240,11 @@ const AdGeneratorPage = () => {
         }
       } else {
         // Image mode — scene-based generation
-        let product_image_base64: string | undefined;
-        let product_image_mime_type = "image/jpeg";
+        trackEvent('image_generation_started', {
+          scene_type: form.selectedScenes?.[0] || 'studio',
+          prompt_enhanced: false,
+          workspace_industry: activeWorkspace.industry || 'unknown',
+        });
         if (form.productImagePreview) {
           product_image_base64 = form.productImagePreview;
           const mimeMatch = form.productImagePreview.match(/^data:(image\/\w+);base64,/);
