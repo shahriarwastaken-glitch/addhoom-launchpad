@@ -82,13 +82,15 @@ serve(async (req) => {
     }
 
     const { data: workspace } = await supabase
-      .from("workspaces").select("id").eq("id", workspace_id).eq("owner_id", user.id).single();
+      .from("workspaces").select("id, image_generation_prompt_modifier").eq("id", workspace_id).eq("owner_id", user.id).single();
     if (!workspace) {
       return new Response(
         JSON.stringify({ success: false, code: 404, message: "Workspace পাওয়া যায়নি" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const promptModifier = workspace.image_generation_prompt_modifier || "";
 
     // Upload source product image to storage
     const base64Match = product_image_base64.match(/^data:image\/(\w+);base64,(.+)$/);
@@ -102,11 +104,14 @@ serve(async (req) => {
     const { data: srcPublicUrl } = supabase.storage.from("ad-images").getPublicUrl(srcPath);
     const sourceImageUrl = srcPublicUrl.publicUrl;
 
-    // Generate all selected scenes in parallel
-    const generationTasks = selected_scenes.map((sceneKey: string) => ({
-      sceneKey,
-      prompt: final_prompts[sceneKey] || `${product_name}, professional product photography, ${sceneKey} scene, ultra realistic, 8K`,
-    }));
+    // Prepend IMG_3984.CR2 and prompt modifier to every prompt
+    const generationTasks = selected_scenes.map((sceneKey: string) => {
+      const rawPrompt = final_prompts[sceneKey] || `${product_name}, professional product photography, ${sceneKey} scene, ultra realistic, 8K`;
+      const parts = ["IMG_3984.CR2"];
+      if (promptModifier) parts.push(promptModifier);
+      parts.push(rawPrompt);
+      return { sceneKey, prompt: parts.join(" ") };
+    });
 
     const requestIds = await Promise.allSettled(
       generationTasks.map(({ prompt }: { prompt: string }) =>
