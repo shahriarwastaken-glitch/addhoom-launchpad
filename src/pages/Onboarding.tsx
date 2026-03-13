@@ -331,7 +331,10 @@ const Onboarding = () => {
     navigate('/dashboard', { replace: true });
   };
 
-  const handleSkip = () => goTo(step + 1);
+  const handleSkip = () => {
+    if (step === 2) trackEvent('onboarding_shop_dna_method', { method: 'skipped' });
+    goTo(step + 1);
+  };
 
   const renderUrlInput = () => {
     const placeholders: Record<string, string> = {
