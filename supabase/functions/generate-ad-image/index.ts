@@ -82,13 +82,15 @@ serve(async (req) => {
     }
 
     const { data: workspace } = await supabase
-      .from("workspaces").select("id").eq("id", workspace_id).eq("owner_id", user.id).single();
+      .from("workspaces").select("id, image_generation_prompt_modifier").eq("id", workspace_id).eq("owner_id", user.id).single();
     if (!workspace) {
       return new Response(
         JSON.stringify({ success: false, code: 404, message: "Workspace পাওয়া যায়নি" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const promptModifier = workspace.image_generation_prompt_modifier || "";
 
     // Upload source product image to storage
     const base64Match = product_image_base64.match(/^data:image\/(\w+);base64,(.+)$/);

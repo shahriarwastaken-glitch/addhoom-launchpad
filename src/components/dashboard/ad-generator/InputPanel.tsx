@@ -611,50 +611,86 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
           </div>
         )}
 
-        {/* IMAGE MODE — Step 2: Prompt Editor (per scene) */}
+        {/* IMAGE MODE — Step 2: Write/Templates Toggle + Content */}
         {mode === 'image' && imageStep === 2 && (
           <div className="space-y-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold font-heading-bn text-foreground">{t('আপনার ইমেজ প্রম্পট', 'Your Image Prompt')}</h3>
-                <p className="text-[11px] text-muted-foreground font-heading-bn mt-0.5">
-                  {t('এগুলো AI-তে যাবে। ইচ্ছামতো এডিট করুন।', 'These are exactly what gets sent to the AI. Edit freely for more control.')}
-                </p>
-              </div>
-              <button
-                onClick={handleResetPrompts}
-                className="text-xs text-muted-foreground hover:text-primary font-heading-bn transition-colors"
-              >
-                {t('রিসেট ↺', 'Reset to defaults ↺')}
-              </button>
+            {/* Write / Templates sub-tab toggle */}
+            <div className="bg-secondary rounded-xl p-1 flex">
+              {(['write', 'templates'] as const).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setImageSubTab(tab)}
+                  className={`flex-1 py-2 rounded-[10px] text-[13px] font-semibold font-heading-bn transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                    imageSubTab === tab
+                      ? 'bg-card text-primary shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {tab === 'write'
+                    ? <><PenLine size={14} /> {t('লিখুন', 'Write')}</>
+                    : <><LayoutTemplate size={14} /> {t('টেমপ্লেট', 'Templates')}</>}
+                </button>
+              ))}
             </div>
 
-            {form.selectedScenes.map(sceneKey => {
-              const sceneInfo = SCENE_OPTIONS.find(s => s.value === sceneKey);
-              const sceneBadgeStyles: Record<SceneKey, { bg: string; text: string }> = {
-                studio: { bg: 'hsl(var(--muted))', text: 'hsl(var(--muted-foreground))' },
-                lifestyle: { bg: 'hsl(var(--primary) / 0.1)', text: 'hsl(var(--primary))' },
-                luxury: { bg: 'hsl(var(--foreground))', text: 'hsl(var(--background))' },
-              };
-              const badge = sceneBadgeStyles[sceneKey];
-              return (
-                <div key={sceneKey}>
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span
-                      className="px-2.5 py-0.5 rounded-full text-[11px] font-bold font-heading-bn inline-flex items-center gap-1"
-                      style={{ backgroundColor: badge.bg, color: badge.text }}
-                    >
-                      {SCENE_ICONS[sceneInfo?.icon || 'target']} {t(sceneInfo?.labelBn || '', sceneInfo?.label || '')}
-                    </span>
+            {/* Templates sub-tab */}
+            {imageSubTab === 'templates' && (
+              <TemplatesBrowser
+                onSelectTemplate={(filledPrompt, aspectRatio) => {
+                  // Set the prompt into the first scene's prompt area
+                  const firstScene = form.selectedScenes[0] || 'studio';
+                  setScenePrompts(prev => ({ ...prev, [firstScene]: filledPrompt }));
+                  setImageSubTab('write');
+                }}
+              />
+            )}
+
+            {/* Write sub-tab (existing prompt editor) */}
+            {imageSubTab === 'write' && (
+              <>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base font-bold font-heading-bn text-foreground">{t('আপনার ইমেজ প্রম্পট', 'Your Image Prompt')}</h3>
+                    <p className="text-[11px] text-muted-foreground font-heading-bn mt-0.5">
+                      {t('এগুলো AI-তে যাবে। ইচ্ছামতো এডিট করুন।', 'These are exactly what gets sent to the AI. Edit freely for more control.')}
+                    </p>
                   </div>
-                  <textarea
-                    value={scenePrompts[sceneKey] || ''}
-                    onChange={e => setScenePrompts(prev => ({ ...prev, [sceneKey]: e.target.value }))}
-                    className="w-full rounded-xl border-[1.5px] border-input bg-card px-4 py-3 text-[13px] font-mono text-foreground outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)] resize-y min-h-[160px]"
-                  />
+                  <button
+                    onClick={handleResetPrompts}
+                    className="text-xs text-muted-foreground hover:text-primary font-heading-bn transition-colors"
+                  >
+                    {t('রিসেট ↺', 'Reset to defaults ↺')}
+                  </button>
                 </div>
-              );
-            })}
+
+                {form.selectedScenes.map(sceneKey => {
+                  const sceneInfo = SCENE_OPTIONS.find(s => s.value === sceneKey);
+                  const sceneBadgeStyles: Record<SceneKey, { bg: string; text: string }> = {
+                    studio: { bg: 'hsl(var(--muted))', text: 'hsl(var(--muted-foreground))' },
+                    lifestyle: { bg: 'hsl(var(--primary) / 0.1)', text: 'hsl(var(--primary))' },
+                    luxury: { bg: 'hsl(var(--foreground))', text: 'hsl(var(--background))' },
+                  };
+                  const badge = sceneBadgeStyles[sceneKey];
+                  return (
+                    <div key={sceneKey}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span
+                          className="px-2.5 py-0.5 rounded-full text-[11px] font-bold font-heading-bn inline-flex items-center gap-1"
+                          style={{ backgroundColor: badge.bg, color: badge.text }}
+                        >
+                          {SCENE_ICONS[sceneInfo?.icon || 'target']} {t(sceneInfo?.labelBn || '', sceneInfo?.label || '')}
+                        </span>
+                      </div>
+                      <textarea
+                        value={scenePrompts[sceneKey] || ''}
+                        onChange={e => setScenePrompts(prev => ({ ...prev, [sceneKey]: e.target.value }))}
+                        className="w-full rounded-xl border-[1.5px] border-input bg-card px-4 py-3 text-[13px] font-mono text-foreground outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)] resize-y min-h-[160px]"
+                      />
+                    </div>
+                  );
+                })}
+              </>
+            )}
           </div>
         )}
 
