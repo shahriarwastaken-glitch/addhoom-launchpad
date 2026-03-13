@@ -32,6 +32,7 @@ const UpscalerTab = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { activeWorkspace } = useAuth();
+  const { requireCredits } = useCreditGate();
 
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
