@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Film, Sparkles } from 'lucide-react';
 import { trackEvent } from '@/lib/posthog';
+import { useCreditGate } from '@/hooks/useCreditGate';
 import StageIndicator from './video/StageIndicator';
 import VideoSetup from './video/VideoSetup';
 import VideoProcessing from './video/VideoProcessing';
@@ -81,10 +82,13 @@ const VideoAd = () => {
     setStage(s);
   };
 
+  const { requireCredits } = useCreditGate();
+
   const generateScript = useCallback(async () => {
     if (!activeWorkspace) { toast.error(t('প্রথমে শপ তৈরি করুন', 'Create a shop first')); return; }
     if (!form.productName.trim()) { toast.error(t('পণ্যের নাম দিন', 'Enter product name')); return; }
     if (form.images.length === 0) { toast.error(t('ছবি আপলোড করুন', 'Upload images')); return; }
+    if (!requireCredits(150, 'video_ad')) return;
 
     setGenerating(true);
     try {
@@ -312,6 +316,7 @@ const VideoAd = () => {
                 setForm={setForm}
                 onPreviewScript={generateScript}
                 onGenerate={async () => {
+                  if (!requireCredits(150, 'video_ad')) return;
                   if (!activeWorkspace) { toast.error(t('প্রথমে শপ তৈরি করুন', 'Create a shop first')); return; }
                   if (!form.productName.trim()) { toast.error(t('পণ্যের নাম দিন', 'Enter product name')); return; }
                   if (form.images.length === 0) { toast.error(t('ছবি আপলোড করুন', 'Upload images')); return; }

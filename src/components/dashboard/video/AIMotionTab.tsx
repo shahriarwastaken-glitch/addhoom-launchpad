@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUpgrade } from '@/contexts/UpgradeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useCreditGate } from '@/hooks/useCreditGate';
 
 type AspectRatio = '9:16' | '1:1' | '16:9';
 
@@ -115,11 +116,14 @@ const AIMotionTab = () => {
     }
   };
 
+  const { requireCredits } = useCreditGate();
+
   // ── Generate ──
   const handleGenerate = async () => {
     if (!activeWorkspace || !user) { toast.error(t('শপ তৈরি করুন', 'Create a shop first')); return; }
     if (!image) { toast.error(t('ছবি আপলোড করুন', 'Upload an image')); return; }
     if (!prompt.trim()) { toast.error(t('ভিডিওর বর্ণনা দিন', 'Describe your video')); return; }
+    if (!requireCredits(200, 'ai_motion')) return;
 
     setGenerating(true);
     setProcessingMsgIdx(0);

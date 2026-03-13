@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
+import { useCreditGate } from '@/hooks/useCreditGate';
 
 // ── Helpers ──
 const toBn = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
@@ -265,6 +266,7 @@ function EmptyState({ t, onGenerate }: { t: any; onGenerate: () => void }) {
 
 // ── GENERATE MODAL ──
 function GenerateModal({ t, lang, activeWorkspace, hasExisting, onClose, onComplete }: any) {
+  const { requireCredits } = useCreditGate();
   const [step, setStep] = useState<'config' | 'loading' | 'success'>('config');
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [postsPerWeek, setPostsPerWeek] = useState(4);
@@ -314,6 +316,7 @@ function GenerateModal({ t, lang, activeWorkspace, hasExisting, onClose, onCompl
 
   const handleGenerate = async () => {
     if (!activeWorkspace) return;
+    if (!requireCredits(30, 'content_calendar')) return;
     setStep('loading');
     try {
       const res = await api.generateContentCalendar({

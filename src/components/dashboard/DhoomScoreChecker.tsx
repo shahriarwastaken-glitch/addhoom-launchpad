@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Check, AlertTriangle, Copy, Sparkles, ChevronDown } from 'lucide-react';
+import { useCreditGate } from '@/hooks/useCreditGate';
 
 interface Evaluation {
   dhoom_score: number;
@@ -58,6 +59,7 @@ function scoreColor(score: number) {
 const DhoomScoreChecker = () => {
   const { t } = useLanguage();
   const { activeWorkspace } = useAuth();
+  const { requireCredits } = useCreditGate();
   const [headline, setHeadline] = useState('');
   const [body, setBody] = useState('');
   const [cta, setCta] = useState('');
@@ -71,6 +73,7 @@ const DhoomScoreChecker = () => {
       toast.error(t('হেডলাইন বা বডি দিন', 'Provide headline or body'));
       return;
     }
+    if (!requireCredits(5, 'dhoom_score')) return;
     setLoading(true);
     setResult(null);
     try {

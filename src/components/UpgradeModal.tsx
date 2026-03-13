@@ -39,6 +39,13 @@ const ACTION_LABELS: Record<string, { bn: string; en: string }> = {
   'generate-product-photo': { bn: 'প্রোডাক্ট ফটো তৈরি করতে', en: 'generate a product photo' },
   'remix-image-fresh': { bn: 'ইমেজ রিমিক্স করতে', en: 'remix this image' },
   'ad_image': { bn: 'ছবি তৈরি করতে', en: 'generate an image' },
+  'product_photo': { bn: 'প্রোডাক্ট ফটো তৈরি করতে', en: 'generate a product photo' },
+  'try_on': { bn: 'ট্রাই-অন তৈরি করতে', en: 'generate a try-on' },
+  'ai_motion': { bn: 'AI মোশন ভিডিও তৈরি করতে', en: 'generate an AI motion video' },
+  'video_ad': { bn: 'ভিডিও বিজ্ঞাপন তৈরি করতে', en: 'generate a video ad' },
+  'ai_chat': { bn: 'AI চ্যাট ব্যবহার করতে', en: 'use AI chat' },
+  'competitor_intel': { bn: 'প্রতিযোগী বিশ্লেষণ করতে', en: 'analyze a competitor' },
+  'dhoom_score': { bn: 'ধুম স্কোর চেক করতে', en: 'check Dhoom Score' },
 };
 
 const PLAN_CARDS = [

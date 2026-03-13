@@ -13,6 +13,7 @@ import { Mascot } from '@/components/Mascot';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useCreditGate } from '@/hooks/useCreditGate';
 
 
 // ─── Types ───
@@ -117,6 +118,7 @@ const AdCopyCardView = ({ ad, t }: { ad: AdCopyCard; t: (bn: string, en: string)
 const AIChat = () => {
   const { t, lang } = useLanguage();
   const { activeWorkspace, session, workspaces, setActiveWorkspaceId } = useAuth();
+  const { requireCredits } = useCreditGate();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
@@ -215,6 +217,7 @@ const AIChat = () => {
   const handleSend = useCallback(async (text?: string) => {
     const msg = text || input;
     if (!msg.trim() || streaming) return;
+    if (!requireCredits(5, 'ai_chat')) return;
     if (!activeWorkspace) {
       toast.error(t('প্রথমে একটি শপ তৈরি করুন', 'Please create a shop first'));
       return;

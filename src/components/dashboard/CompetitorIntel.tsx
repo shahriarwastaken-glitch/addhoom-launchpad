@@ -12,6 +12,7 @@ import {
   Loader2, ArrowLeft, RefreshCw, ArrowRight, Clock, FileText
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useCreditGate } from '@/hooks/useCreditGate';
 
 // ─── Types ───
 type Ad = { page_name: string; headline: string; body: string; caption: string; running_since: string };
@@ -115,6 +116,7 @@ const CompetitorIntel = () => {
   const { t, lang } = useLanguage();
   const { activeWorkspace } = useAuth();
   const navigate = useNavigate();
+  const { requireCredits } = useCreditGate();
 
   // Tab state
   const [activeTab, setActiveTab] = useState<'new' | 'history'>('new');
@@ -215,6 +217,7 @@ const CompetitorIntel = () => {
   const handleAnalyze = async (name?: string, url?: string) => {
     const cName = name || competitorName;
     if (!cName.trim()) return;
+    if (!requireCredits(20, 'competitor_intel')) return;
     if (!activeWorkspace) {
       toast.error(t('প্রথমে একটি শপ তৈরি করুন', 'Please create a shop first'));
       return;

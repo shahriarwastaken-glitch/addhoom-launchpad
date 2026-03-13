@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import type { SceneType, SceneConfig, ImageFormat, ExportFormat } from './types';
 import StepIndicator from './StepIndicator';
 import PromptEditor from './PromptEditor';
+import { useCreditGate } from '@/hooks/useCreditGate';
 import { buildProductPhotoPrompt } from './promptBuilders';
 import type { LightingMood, ColorMood, CameraAngle, BackgroundComplexity, TimeOfDay, ProductFocus } from '@/components/dashboard/ad-generator/types';
 import {
@@ -84,6 +85,7 @@ const ProductPhotoTab = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { activeWorkspace } = useAuth();
+  const { requireCredits } = useCreditGate();
 
   const [productFile, setProductFile] = useState<File | null>(null);
   const [productPreview, setProductPreview] = useState<string | null>(null);
@@ -209,6 +211,7 @@ const ProductPhotoTab = () => {
 
   const handleGenerate = async () => {
     if (!productFile || !scene || !activeWorkspace) return;
+    if (!requireCredits(75, 'product_photo')) return;
     setGenerating(true);
     setLoadingMsgIdx(0);
     setResultUrl(null);

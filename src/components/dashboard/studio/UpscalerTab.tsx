@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { EnhancementMode, ExportFormat } from './types';
+import { useCreditGate } from '@/hooks/useCreditGate';
 
 type QualityMode = 'standard' | 'ultimate';
 type TargetResolution = '2k' | '4k' | '8k';
@@ -31,6 +32,7 @@ const UpscalerTab = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { activeWorkspace } = useAuth();
+  const { requireCredits } = useCreditGate();
 
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -121,6 +123,7 @@ const UpscalerTab = () => {
 
   const handleUpscale = async () => {
     if (!file || !activeWorkspace) return;
+    if (!requireCredits(50, 'upscale')) return;
     setUpscaling(true);
     setResultUrl(null);
     setProgress(0);

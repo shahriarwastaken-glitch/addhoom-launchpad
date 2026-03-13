@@ -14,6 +14,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import StepIndicator from './StepIndicator';
 import PromptEditor from './PromptEditor';
 import { buildTryOnPrompt } from './promptBuilders';
+import { useCreditGate } from '@/hooks/useCreditGate';
 
 type GarmentCategory = 'Top' | 'Bottom' | 'Full Body / Dress' | 'Outerwear' | 'Footwear' | 'Accessory';
 type ModelGender = 'female' | 'male';
@@ -64,6 +65,7 @@ const TryOnTab = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { activeWorkspace } = useAuth();
+  const { requireCredits } = useCreditGate();
 
   // Garment state
   const [garmentFile, setGarmentFile] = useState<File | null>(null);
@@ -200,6 +202,7 @@ const TryOnTab = () => {
 
   const handleGenerate = async () => {
     if (!garmentFile || !garmentCategory || !activeWorkspace) return;
+    if (!requireCredits(75, 'try_on')) return;
     setGenerating(true);
     setLoadingMsgIdx(0);
     setResults([]);
