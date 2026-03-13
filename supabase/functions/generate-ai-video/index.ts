@@ -127,6 +127,7 @@ serve(async (req) => {
     const { data: row, error: insertErr } = await supabase.from('video_ads').insert({
       workspace_id,
       video_url: storedVideoUrl,
+      storage_path: videoPath,
       format: aspect_ratio || '9:16',
       motion_prompt,
       status: 'completed',
