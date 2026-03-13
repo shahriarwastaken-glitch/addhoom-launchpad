@@ -95,7 +95,7 @@ const HeroPreviewCard = () => {
             </div>
             <div className="w-[2px] bg-card" />
             <div className="flex-1 relative p-2 sm:p-3">
-              <Placeholder label="Model wearing it" />
+              <LandingImg src="/landing/hero-tryon-model.webp" alt="Model wearing garment" />
               <span className="absolute bottom-3 sm:bottom-5 right-3 sm:right-5 bg-primary text-primary-foreground text-[10px] font-mono px-2 py-0.5 rounded">Try-On</span>
             </div>
           </div>

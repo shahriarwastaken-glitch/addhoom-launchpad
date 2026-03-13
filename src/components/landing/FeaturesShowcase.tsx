@@ -74,9 +74,9 @@ const tabs = [
     cta: 'Try on your product',
     right: (
       <div className="flex rounded-2xl overflow-hidden max-w-[400px] w-full border border-border">
-        <div className="flex-1 relative"><Placeholder label="Flat lay garment" /><span className="absolute bottom-3 left-3 bg-foreground/70 text-primary-foreground text-[10px] font-mono px-2 py-0.5 rounded">Product</span></div>
+        <div className="flex-1 relative"><LandingImg src="/landing/feature-tryon-garment.webp" alt="Flat lay garment" /><span className="absolute bottom-3 left-3 bg-foreground/70 text-primary-foreground text-[10px] font-mono px-2 py-0.5 rounded">Product</span></div>
         <div className="w-[2px] bg-card" />
-        <div className="flex-1 relative"><Placeholder label="Model wearing it" /><span className="absolute bottom-3 right-3 bg-primary text-primary-foreground text-[10px] font-mono px-2 py-0.5 rounded">Try-On</span></div>
+        <div className="flex-1 relative"><LandingImg src="/landing/feature-tryon-model.webp" alt="Model wearing garment" /><span className="absolute bottom-3 right-3 bg-primary text-primary-foreground text-[10px] font-mono px-2 py-0.5 rounded">Try-On</span></div>
       </div>
     ),
   },
