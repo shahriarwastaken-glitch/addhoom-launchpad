@@ -101,7 +101,7 @@ const SERVICE_COLORS: Record<string, string> = {
   gemini: '#6C3FE8',
   wavespeed: '#FF8C00',
   sslcommerz: '#E2136E',
-  shotstack: '#00B96B',
+  
   meta_ad_library: '#1877F2',
   resend: '#FF5100',
   fashn: '#E91E63',
