@@ -67,42 +67,7 @@ serve(async (req) => {
     const ssl = getSSLCommerzConfig();
 
     if (!ssl.configured) {
-      // Dev mode — activate plan directly
-      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-      const nowIso = new Date().toISOString();
-      const monthlyCredits = plan.monthly_credits || 5000;
-
-      await supabase.from("profiles").update({
-        plan: plan_key,
-        plan_key,
-        subscription_status: "active",
-        subscription_expires_at: expiresAt,
-        credit_balance: monthlyCredits,
-        credits_reset_at: nowIso,
-      }).eq("id", user.id);
-
-      await supabase.from("credit_transactions").insert({
-        user_id: user.id,
-        credits_delta: monthlyCredits,
-        balance_after: monthlyCredits,
-        description: `Plan activated: ${plan.name}`,
-        transaction_type: "subscription_payment",
-      });
-
-      await supabase.from("pending_transactions").update({
-        status: "success",
-      }).eq("tran_id", tranId);
-
-      return jsonResponse({
-        tran_id: tranId,
-        amount,
-        plan_key,
-        currency: cur,
-        gateway_url: null,
-        dev_mode: true,
-        message_bn: "ডেভ মোড: প্ল্যান সক্রিয় হয়েছে।",
-        message_en: "Dev mode: Plan activated.",
-      });
+      return errorResponse(503, "পেমেন্ট গেটওয়ে সেটআপ করা হয়নি।", "Payment gateway not configured.");
     }
 
     // Build SSLCommerz payload
