@@ -102,10 +102,28 @@ const FieldTooltip = ({ text }: { text: string }) => (
 
 const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onToggleImageHistory, generateBtnRef }: InputPanelProps) => {
   const { t, lang } = useLanguage();
+  const { profile } = useAuth();
+  const { showUpgrade } = useUpgrade();
   const [loadingTextIdx, setLoadingTextIdx] = useState(0);
   const [dragOver, setDragOver] = useState(false);
   const historyCount = useMemo(() => getImageHistory().length, []);
   const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
+
+  const creditBalance = profile?.credit_balance ?? 0;
+  const hasPlan = profile?.plan_key && profile.plan_key !== 'free';
+
+  // Proactive credit gate — fires upgrade modal before user wastes time filling forms
+  const checkCreditsBeforeAction = (): boolean => {
+    if (creditBalance <= 0) {
+      showUpgrade(hasPlan ? 'credits' : 'general', {
+        balance: creditBalance,
+        required: mode === 'copy' ? 10 : 125,
+        action: mode === 'copy' ? 'ad_copy' : 'ad_image',
+      });
+      return false;
+    }
+    return true;
+  };
 
   // Two-step prompt flow for image mode
   const [imageStep, setImageStep] = useState<1 | 2>(1);
