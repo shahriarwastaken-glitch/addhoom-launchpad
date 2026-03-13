@@ -42,14 +42,6 @@ const SERVICES = [
     is_critical: true,
   },
   {
-    service_name: 'shotstack',
-    display_name: 'Shotstack Video API',
-    description: 'Slideshow video ad rendering',
-    docs_url: 'https://shotstack.io/docs',
-    icon: '🎬',
-    is_critical: false,
-  },
-  {
     service_name: 'meta_ad_library',
     display_name: 'Meta Ad Library API',
     description: 'Competitor ad intelligence',
@@ -168,7 +160,7 @@ async function getApiKeys(supabase: any) {
     sslcommerz: 'SSLCOMMERZ_STORE_ID',
     resend: 'RESEND_API_KEY',
     meta_ad_library: 'META_ACCESS_TOKEN',
-    shotstack: 'SHOTSTACK_API_KEY',
+    
   };
 
   if (missingServices.length > 0) {
@@ -346,10 +338,6 @@ async function performKeyTest(supabase: any, keyId: string, serviceName: string,
         testResult = 'success';
         break;
 
-      case 'shotstack':
-        await testShotstackKey(keyValue);
-        testResult = 'success';
-        break;
 
       case 'meta_ad_library':
         await testMetaKey(keyValue);
@@ -448,16 +436,6 @@ async function testResendKey(apiKey: string) {
   }
 }
 
-async function testShotstackKey(apiKey: string) {
-  const response = await fetch('https://api.shotstack.io/edit/stage/render', {
-    headers: { 'x-api-key': apiKey },
-  });
-
-  if (response.status === 401) {
-    throw new Error('Invalid API key');
-  }
-  // 200 or empty list is valid
-}
 
 async function testMetaKey(accessToken: string) {
   const response = await fetch(

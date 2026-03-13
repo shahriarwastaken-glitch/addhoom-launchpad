@@ -325,7 +325,7 @@ const VideoHistory = () => {
                         <div className="text-center">
                           <span className="text-4xl block mb-2">🎬</span>
                           <p className="text-sm text-white/50 font-heading-bn">
-                            {t('মক ভিডিও — Shotstack সংযোগের পর দেখা যাবে', 'Mock video — visible after Shotstack integration')}
+                            {t('ভিডিও প্রিভিউ পাওয়া যায়নি', 'Video preview unavailable')}
                           </p>
                         </div>
                       </div>

@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Copy, RefreshCw, Star, ChevronDown, Image as ImageIcon, Check, Rocket, Zap, BarChart3, RotateCcw, Lightbulb, Flame, TrendingUp, Download, Clock, Trash2, FolderPlus, FolderOpen, CheckCircle2, Calendar, X, AlertTriangle } from 'lucide-react';
+import { Copy, RefreshCw, Star, ChevronDown, Image as ImageIcon, Check, Rocket, Zap, BarChart3, RotateCcw, Lightbulb, Flame, TrendingUp, Download, Clock, Trash2, FolderPlus, FolderOpen, CheckCircle2, Calendar, X, AlertTriangle, Play } from 'lucide-react';
 import FeatureTooltip from '@/components/ui/FeatureTooltip';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '@/lib/posthog';
 import type { AdResult, GeneratorMode } from './types';
 import { LOADING_TIPS, LOADING_TIPS_EN } from './types';
 import { getImageHistory, type ImageHistoryEntry } from './AdGeneratorPage';
@@ -589,6 +591,7 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
               >
                 <Download size={12} /> {t('ডাউনলোড', 'Download')}
               </button>
+              <AnimateButton imageUrl={ad.image_url} />
               <button onClick={onRemix} className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1">
                 <RefreshCw size={12} /> {t('রিমিক্স', 'Remix')}
               </button>
@@ -710,6 +713,26 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
         )}
       </div>
     </motion.div>
+  );
+};
+
+// Animate This button for image cards
+const AnimateButton = ({ imageUrl }: { imageUrl: string }) => {
+  const { t } = useLanguage();
+  const navigate = useNavigate();
+
+  const handleAnimate = () => {
+    trackEvent('animate_this_clicked', { source: 'results_panel' });
+    navigate(`/dashboard/video?mode=animate&image_url=${encodeURIComponent(imageUrl)}`);
+  };
+
+  return (
+    <button
+      onClick={handleAnimate}
+      className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
+    >
+      <Play size={12} /> {t('অ্যানিমেট', 'Animate')}
+    </button>
   );
 };
 

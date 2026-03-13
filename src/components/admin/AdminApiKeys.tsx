@@ -101,7 +101,7 @@ const SERVICE_COLORS: Record<string, string> = {
   gemini: '#6C3FE8',
   wavespeed: '#FF8C00',
   sslcommerz: '#E2136E',
-  shotstack: '#00B96B',
+  
   meta_ad_library: '#1877F2',
   resend: '#FF5100',
   fashn: '#E91E63',
@@ -124,11 +124,6 @@ const SETUP_GUIDES: Record<string, string[]> = {
     '২. Merchant Account তৈরি করুন',
     '৩. Credentials থেকে Store ID এবং Store Password কপি করুন',
     '৪. উভয় মান এখানে পেস্ট করুন',
-  ],
-  shotstack: [
-    '১. shotstack.io তে অ্যাকাউন্ট তৈরি করুন',
-    '২. Dashboard থেকে API Key কপি করুন',
-    '৩. Stage key দিয়ে শুরু করুন (বিনামূল্যে)',
   ],
   meta_ad_library: [
     '১. developers.facebook.com এ যান',
