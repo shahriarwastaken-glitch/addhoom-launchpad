@@ -4,7 +4,7 @@ let initialized = false;
 
 export function initPostHog() {
   if (typeof window === 'undefined') return;
-  const key = import.meta.env.VITE_POSTHOG_KEY;
+  const key = import.meta.env.VITE_POSTHOG_KEY || 'phc_9PQfgGjczVYnUEc53LUHtIpUUi7y3lRiN8JzJrRcSnO';
   if (!key) return;
 
   posthog.init(key, {
