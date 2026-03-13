@@ -664,16 +664,16 @@ const Onboarding = () => {
                 ))}
               </div>
 
-              <div className="text-center space-y-2 pt-2">
-                <p className="text-xs text-muted-foreground">
-                  7-day money back guarantee. Cancel anytime.
-                </p>
+              <div className="space-y-2 pt-3">
                 <button
                   onClick={handleSubscribeLater}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="w-full h-12 rounded-[14px] border-[1.5px] border-border bg-transparent font-body-en text-[15px] text-foreground hover:border-brand-orange hover:text-brand-orange transition-colors"
                 >
-                  I'll subscribe later →
+                  I'll explore first →
                 </button>
+                <p className="text-xs text-muted-foreground text-center">
+                  You can subscribe anytime from Settings → Billing
+                </p>
               </div>
             </motion.div>
           )}
