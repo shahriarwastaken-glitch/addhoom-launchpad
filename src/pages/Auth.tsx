@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { Mascot } from '@/components/Mascot';
 import { z } from 'zod';
+import { trackEvent } from '@/lib/posthog';
 
 const loginSchema = z.object({
   email: z.string().trim().email('Invalid email').max(255),
