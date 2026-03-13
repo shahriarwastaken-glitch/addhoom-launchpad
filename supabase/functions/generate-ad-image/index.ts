@@ -115,11 +115,11 @@ serve(async (req) => {
 
     const requestIds = await Promise.allSettled(
       generationTasks.map(({ prompt }: { prompt: string }) =>
-        wavespeedCreate('google/nano-banana-pro', {
+        vidgoSubmit('nano-banana-2', {
           prompt,
-          image: sourceImageUrl,
-          aspect_ratio: '1:1',
-          resolution: '1k',
+          image_url: sourceImageUrl,
+          size: '1:1',
+          resolution: '2K',
         })
       )
     );
@@ -128,7 +128,7 @@ serve(async (req) => {
     const results = await Promise.allSettled(
       requestIds.map((r: any) =>
         r.status === 'fulfilled'
-          ? wavespeedPoll(r.value)
+          ? vidgoPoll(r.value)
           : Promise.reject('Create failed')
       )
     );
