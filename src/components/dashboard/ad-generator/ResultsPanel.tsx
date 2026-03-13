@@ -6,6 +6,8 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '@/lib/posthog';
 import type { AdResult, GeneratorMode } from './types';
 import { LOADING_TIPS, LOADING_TIPS_EN } from './types';
 import { getImageHistory, type ImageHistoryEntry } from './AdGeneratorPage';
