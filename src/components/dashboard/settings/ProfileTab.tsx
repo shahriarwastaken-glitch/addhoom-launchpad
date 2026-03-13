@@ -89,7 +89,7 @@ const ProfileTab = () => {
     setUploadingAvatar(true);
     try {
       const ext = file.name.split('.').pop();
-      const path = `avatars/${user.id}.${ext}`;
+      const path = `${user.id}/avatars/${user.id}.${ext}`;
       const { error: uploadErr } = await supabase.storage.from('ad-images').upload(path, file, { upsert: true });
       if (uploadErr) throw uploadErr;
       const { data: { publicUrl } } = supabase.storage.from('ad-images').getPublicUrl(path);
