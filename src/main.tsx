@@ -1,6 +1,10 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { initPostHog } from "@/lib/posthog";
+
+// Initialize PostHog analytics
+initPostHog();
 
 // Apply theme on initial load (default: dark)
 const storedTheme = localStorage.getItem('addhoom-theme');

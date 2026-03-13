@@ -149,7 +149,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         profile,
         activeWorkspace,
         workspaces,
-        signOut: async () => { await supabase.auth.signOut(); },
+        signOut: async () => { resetUser(); await supabase.auth.signOut(); },
         refreshProfile,
         setActiveWorkspaceId,
       }}
