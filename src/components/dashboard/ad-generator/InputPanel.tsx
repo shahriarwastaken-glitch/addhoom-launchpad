@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import TemplatesBrowser from './TemplatesBrowser';
 import { buildAdImagePrompts } from './imagePromptClient';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUpgrade } from '@/contexts/UpgradeContext';
 import OnceTooltip from '@/components/ui/OnceTooltip';
 import CreditCostLabel from '@/components/ui/CreditCostLabel';
 import {
@@ -100,10 +102,28 @@ const FieldTooltip = ({ text }: { text: string }) => (
 
 const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onToggleImageHistory, generateBtnRef }: InputPanelProps) => {
   const { t, lang } = useLanguage();
+  const { profile } = useAuth();
+  const { showUpgrade } = useUpgrade();
   const [loadingTextIdx, setLoadingTextIdx] = useState(0);
   const [dragOver, setDragOver] = useState(false);
   const historyCount = useMemo(() => getImageHistory().length, []);
   const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
+
+  const creditBalance = profile?.credit_balance ?? 0;
+  const hasPlan = profile?.plan_key && profile.plan_key !== 'free';
+
+  // Proactive credit gate — fires upgrade modal before user wastes time filling forms
+  const checkCreditsBeforeAction = (): boolean => {
+    if (creditBalance <= 0) {
+      showUpgrade(hasPlan ? 'credits' : 'general', {
+        balance: creditBalance,
+        required: mode === 'copy' ? 10 : 125,
+        action: mode === 'copy' ? 'ad_copy' : 'ad_image',
+      });
+      return false;
+    }
+    return true;
+  };
 
   // Two-step prompt flow for image mode
   const [imageStep, setImageStep] = useState<1 | 2>(1);
@@ -180,6 +200,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
   };
 
   const handleContinueToPrompt = () => {
+    if (!checkCreditsBeforeAction()) return;
     const prompts = buildPrompts();
     setDefaultScenePrompts(prompts);
     setScenePrompts(prompts);
@@ -727,7 +748,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
         ) : mode === 'image' && imageStep === 2 ? (
           <div className="space-y-2">
             <button
-              onClick={() => onGenerate(scenePrompts)}
+              onClick={() => { if (checkCreditsBeforeAction()) onGenerate(scenePrompts); }}
               disabled={generating}
               className={`w-full h-[52px] rounded-[14px] font-bold text-[17px] font-heading-bn text-primary-foreground transition-all duration-200 ${
                 generating
@@ -759,7 +780,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
         ) : (
           <button
             ref={generateBtnRef as any}
-            onClick={() => onGenerate()}
+            onClick={() => { if (checkCreditsBeforeAction()) onGenerate(); }}
             disabled={generating || !form.productDesc.trim()}
             className={`w-full h-[52px] rounded-[14px] font-bold text-[17px] font-heading-bn text-primary-foreground transition-all duration-200 ${
               generating || !form.productDesc.trim()
