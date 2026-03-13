@@ -116,6 +116,7 @@ const CompetitorIntel = () => {
   const { t, lang } = useLanguage();
   const { activeWorkspace } = useAuth();
   const navigate = useNavigate();
+  const { requireCredits } = useCreditGate();
 
   // Tab state
   const [activeTab, setActiveTab] = useState<'new' | 'history'>('new');
