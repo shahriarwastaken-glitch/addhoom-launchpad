@@ -51,6 +51,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .eq('id', userId)
       .single();
     setProfile(data);
+    if (data) {
+      identifyUser(userId, {
+        email: data.email || undefined,
+        plan: data.plan_key || data.plan || undefined,
+        subscribed: data.subscription_status === 'active',
+        created_at: data.created_at,
+      });
+    }
   };
 
   const fetchWorkspaces = async (userId: string) => {
