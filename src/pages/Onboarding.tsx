@@ -162,9 +162,13 @@ const Onboarding = () => {
 
   const goTo = async (s: number) => {
     setDirection(s > step ? 1 : -1);
-    // Save the COMPLETED step (the one we're leaving), not the target
     const completedStep = step;
     setStep(s);
+
+    // Track step completion
+    const stepNames = ['', 'welcome', 'shop_dna', 'preferences', 'credits_explainer', 'choose_plan'];
+    trackEvent('onboarding_step_completed', { step: completedStep, step_name: stepNames[completedStep] });
+
     if (user) {
       await supabase.from('profiles').update({ onboarding_step: completedStep } as any).eq('id', user.id);
     }
