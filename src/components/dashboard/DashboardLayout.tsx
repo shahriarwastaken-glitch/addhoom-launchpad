@@ -15,6 +15,7 @@ import WorkspaceSelector from './workspace/WorkspaceSelector';
 import CreateWorkspaceModal from './workspace/CreateWorkspaceModal';
 import ScrollToTopButton from '@/components/ScrollToTopButton';
 import { toast } from '@/hooks/use-toast';
+import { trackEvent } from '@/lib/posthog';
 
 const mobileItems = [
   { icon: Target, bn: 'হোম', en: 'Home', url: '/dashboard' },
