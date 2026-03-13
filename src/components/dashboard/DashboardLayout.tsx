@@ -7,7 +7,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/contexts/AuthContext';
 import { Bell, Moon, Sun, Target, Video, LogOut, X, Settings, Wand2, Sparkles, Zap, AlertTriangle, CheckCircle2, RotateCcw } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Progress } from '@/components/ui/progress';
