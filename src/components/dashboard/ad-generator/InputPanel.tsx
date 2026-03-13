@@ -748,7 +748,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
         ) : mode === 'image' && imageStep === 2 ? (
           <div className="space-y-2">
             <button
-              onClick={() => onGenerate(scenePrompts)}
+              onClick={() => { if (checkCreditsBeforeAction()) onGenerate(scenePrompts); }}
               disabled={generating}
               className={`w-full h-[52px] rounded-[14px] font-bold text-[17px] font-heading-bn text-primary-foreground transition-all duration-200 ${
                 generating
