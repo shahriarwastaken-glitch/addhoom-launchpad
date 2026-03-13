@@ -7,34 +7,40 @@ const AuthCallback = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleCallback = async () => {
-      try {
-        const { data, error } = await supabase.auth.getSession();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          const user = session.user;
 
-        if (error || !data.session) {
-          navigate('/auth?error=verification_failed', { replace: true });
-          return;
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('onboarding_complete')
+            .eq('id', user.id)
+            .single();
+
+          if (!profile?.onboarding_complete) {
+            navigate('/onboarding', { replace: true });
+          } else {
+            navigate('/dashboard', { replace: true });
+          }
+        } else if (event === 'TOKEN_REFRESHED') {
+          // ignore, wait for SIGNED_IN
         }
-
-        const user = data.session.user;
-
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('onboarding_complete')
-          .eq('id', user.id)
-          .single();
-
-        if (!profile?.onboarding_complete) {
-          navigate('/onboarding', { replace: true });
-        } else {
-          navigate('/dashboard', { replace: true });
-        }
-      } catch {
-        navigate('/auth', { replace: true });
       }
-    };
+    );
 
-    handleCallback();
+    // Fallback: if session already exists (e.g. implicit flow)
+    const timeout = setTimeout(async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        navigate('/auth?error=verification_failed', { replace: true });
+      }
+    }, 5000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, [navigate]);
 
   return (
