@@ -118,6 +118,7 @@ const AdCopyCardView = ({ ad, t }: { ad: AdCopyCard; t: (bn: string, en: string)
 const AIChat = () => {
   const { t, lang } = useLanguage();
   const { activeWorkspace, session, workspaces, setActiveWorkspaceId } = useAuth();
+  const { requireCredits } = useCreditGate();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
