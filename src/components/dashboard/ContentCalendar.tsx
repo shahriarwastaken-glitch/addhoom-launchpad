@@ -266,6 +266,7 @@ function EmptyState({ t, onGenerate }: { t: any; onGenerate: () => void }) {
 
 // ── GENERATE MODAL ──
 function GenerateModal({ t, lang, activeWorkspace, hasExisting, onClose, onComplete }: any) {
+  const { requireCredits } = useCreditGate();
   const [step, setStep] = useState<'config' | 'loading' | 'success'>('config');
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [postsPerWeek, setPostsPerWeek] = useState(4);
