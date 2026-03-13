@@ -152,8 +152,32 @@ serve(async (req) => {
     const body = await req.json();
     const { workspace_id, conversation_id, message, language, action } = body;
 
+    // ──── Helper: verify workspace ownership ────
+    async function verifyWorkspaceOwnership(wsId: string): Promise<boolean> {
+      const { data: ws } = await supabase
+        .from("workspaces")
+        .select("id")
+        .eq("id", wsId)
+        .eq("owner_id", userId)
+        .single();
+      return !!ws;
+    }
+
+    async function verifyConversationOwnership(convId: string): Promise<boolean> {
+      const { data: conv } = await supabase
+        .from("ai_conversations")
+        .select("workspace_id")
+        .eq("id", convId)
+        .single();
+      if (!conv) return false;
+      return verifyWorkspaceOwnership(conv.workspace_id);
+    }
+
     // ──── ACTION: list conversations ────
     if (action === "list_conversations") {
+      if (!workspace_id || !(await verifyWorkspaceOwnership(workspace_id))) {
+        return errorResponse(403, "এই ওয়ার্কস্পেসে আপনার অ্যাক্সেস নেই।", "You do not have access to this workspace.");
+      }
       const { data: convs } = await supabase
         .from("ai_conversations")
         .select("id, title, messages, updated_at")
@@ -176,6 +200,9 @@ serve(async (req) => {
 
     // ──── ACTION: load conversation ────
     if (action === "load_conversation" && conversation_id) {
+      if (!(await verifyConversationOwnership(conversation_id))) {
+        return errorResponse(403, "এই কথোপকথনে আপনার অ্যাক্সেস নেই।", "You do not have access to this conversation.");
+      }
       const { data: conv } = await supabase
         .from("ai_conversations")
         .select("id, title, messages, language, summary")
@@ -186,12 +213,18 @@ serve(async (req) => {
 
     // ──── ACTION: delete conversation ────
     if (action === "delete_conversation" && conversation_id) {
+      if (!(await verifyConversationOwnership(conversation_id))) {
+        return errorResponse(403, "এই কথোপকথনে আপনার অ্যাক্সেস নেই।", "You do not have access to this conversation.");
+      }
       await supabase.from("ai_conversations").delete().eq("id", conversation_id);
       return jsonResponse({ success: true });
     }
 
     // ──── ACTION: rename conversation ────
     if (action === "rename_conversation" && conversation_id) {
+      if (!(await verifyConversationOwnership(conversation_id))) {
+        return errorResponse(403, "এই কথোপকথনে আপনার অ্যাক্সেস নেই।", "You do not have access to this conversation.");
+      }
       await supabase.from("ai_conversations").update({ title: body.title }).eq("id", conversation_id);
       return jsonResponse({ success: true });
     }
@@ -201,9 +234,12 @@ serve(async (req) => {
       return errorResponse(400, "মেসেজ দিন।", "Message is required.");
     }
 
-    // STEP 1 — Fetch workspace DNA
+    // STEP 1 — Fetch workspace DNA (with ownership check)
     const { data: workspace } = await supabase
-      .from("workspaces").select("*").eq("id", workspace_id).single();
+      .from("workspaces").select("*").eq("id", workspace_id).eq("owner_id", userId).single();
+    if (!workspace) {
+      return errorResponse(403, "এই ওয়ার্কস্পেসে আপনার অ্যাক্সেস নেই।", "You do not have access to this workspace.");
+    }
 
     // STEP 2 — Load or create conversation
     let convId = conversation_id;
