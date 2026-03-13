@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUpgrade } from '@/contexts/UpgradeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useCreditGate } from '@/hooks/useCreditGate';
 
 type AspectRatio = '9:16' | '1:1' | '16:9';
 

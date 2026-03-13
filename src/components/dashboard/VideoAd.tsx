@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Film, Sparkles } from 'lucide-react';
 import { trackEvent } from '@/lib/posthog';
+import { useCreditGate } from '@/hooks/useCreditGate';
 import StageIndicator from './video/StageIndicator';
 import VideoSetup from './video/VideoSetup';
 import VideoProcessing from './video/VideoProcessing';
