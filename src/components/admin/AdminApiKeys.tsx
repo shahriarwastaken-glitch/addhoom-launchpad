@@ -125,11 +125,6 @@ const SETUP_GUIDES: Record<string, string[]> = {
     '৩. Credentials থেকে Store ID এবং Store Password কপি করুন',
     '৪. উভয় মান এখানে পেস্ট করুন',
   ],
-  shotstack: [
-    '১. shotstack.io তে অ্যাকাউন্ট তৈরি করুন',
-    '২. Dashboard থেকে API Key কপি করুন',
-    '৩. Stage key দিয়ে শুরু করুন (বিনামূল্যে)',
-  ],
   meta_ad_library: [
     '১. developers.facebook.com এ যান',
     '২. নতুন App তৈরি করুন',

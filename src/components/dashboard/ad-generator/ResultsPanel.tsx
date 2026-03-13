@@ -716,6 +716,26 @@ const AdCopyCard = ({ ad, rank, copiedId, onCopy, onWinner, onRemix, onSwitchToI
   );
 };
 
+// Animate This button for image cards
+const AnimateButton = ({ imageUrl }: { imageUrl: string }) => {
+  const { t } = useLanguage();
+  const navigate = useNavigate();
+
+  const handleAnimate = () => {
+    trackEvent('animate_this_clicked', { source: 'results_panel' });
+    navigate(`/dashboard/video?mode=animate&image_url=${encodeURIComponent(imageUrl)}`);
+  };
+
+  return (
+    <button
+      onClick={handleAnimate}
+      className="px-3 py-1.5 rounded-lg border border-input text-xs font-heading-bn hover:bg-secondary transition-all active:scale-95 flex items-center gap-1"
+    >
+      <Play size={12} /> {t('অ্যানিমেট', 'Animate')}
+    </button>
+  );
+};
+
 // CONNECTION 5: Inline project assignment prompt
 const ProjectPromptInline = ({ t, workspaceId, onAssign, onDismiss }: {
   t: any;

@@ -436,16 +436,6 @@ async function testResendKey(apiKey: string) {
   }
 }
 
-async function testShotstackKey(apiKey: string) {
-  const response = await fetch('https://api.shotstack.io/edit/stage/render', {
-    headers: { 'x-api-key': apiKey },
-  });
-
-  if (response.status === 401) {
-    throw new Error('Invalid API key');
-  }
-  // 200 or empty list is valid
-}
 
 async function testMetaKey(accessToken: string) {
   const response = await fetch(
