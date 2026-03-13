@@ -55,7 +55,7 @@ const tabs = [
     icon: Video, label: 'Video Ads',
     title: 'Cinematic product videos from a single photo',
     body: 'Describe the motion you want. AdDhoom Studio turns your product image into a 5-second video ad — ready for Reels, Feed, or Stories.',
-    checks: ['Powered by Seedance V1.5 Pro Fast', '9:16 Reels / 1:1 Feed / 16:9 Landscape', 'Professional motion prompts included', 'Download in HD', 'No video editing skills needed'],
+    checks: ['9:16 Reels / 1:1 Feed / 16:9 Landscape', 'Professional motion prompts included', 'Download in HD', 'No video editing skills needed'],
     cta: 'Create your first video',
     right: (
       <div className="grid grid-cols-3 gap-3 max-w-[400px] w-full">
