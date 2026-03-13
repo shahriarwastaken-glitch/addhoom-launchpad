@@ -1,11 +1,11 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Coins, MessageSquare, CreditCard, Loader2 } from 'lucide-react';
+import { Zap, Coins, MessageSquare, CreditCard, Loader2, ArrowRight, Package } from 'lucide-react';
 import { Mascot } from '@/components/Mascot';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { format, addDays } from 'date-fns';
 
@@ -40,37 +40,52 @@ const ACTION_LABELS: Record<string, { bn: string; en: string }> = {
 };
 
 const PLAN_CARDS = [
-  { key: 'starter', name: 'Starter', priceBDT: '৳799', priceUSD: '$19', credits: '5K' },
-  { key: 'pro', name: 'Pro', priceBDT: '৳1,999', priceUSD: '$49', credits: '15K' },
-  { key: 'agency', name: 'Agency', priceBDT: '৳4,999', priceUSD: '$99', credits: '35K' },
+  { key: 'starter', name: 'Starter', priceBDT: '৳799', priceUSD: '$19', credits: '5,000', creditNum: 5000 },
+  { key: 'pro', name: 'Pro', priceBDT: '৳1,999', priceUSD: '$49', credits: '15,000', creditNum: 15000 },
+  { key: 'agency', name: 'Agency', priceBDT: '৳4,999', priceUSD: '$99', credits: '35,000', creditNum: 35000 },
 ];
+
+type CreditPack = {
+  id: string;
+  name: string;
+  credits: number;
+  price_usd: number;
+  price_bdt: number;
+  sort_order: number;
+};
+
+const PACK_ICONS: Record<string, string> = { Small: '⚡', Medium: '🔥', Large: '💥' };
 
 const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeModalProps) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { profile, refreshProfile } = useAuth();
-  const isAgency = profile?.plan_key === 'agency';
   const actionLabel = creditInfo?.action ? ACTION_LABELS[creditInfo.action] : null;
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'buy' | 'upgrade'>('buy');
+  const [packs, setPacks] = useState<CreditPack[]>([]);
 
   const isBD = useMemo(() => {
     try { return Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Dhaka'; } catch { return false; }
   }, []);
-  const currency = isBD ? 'BDT' : 'USD';
+  const [currencyMode, setCurrencyMode] = useState<'intl' | 'bd'>(() => isBD ? 'bd' : 'intl');
+  const currency = currencyMode === 'bd' ? 'BDT' : 'USD';
 
-  // Compute reset date for paid subscribers
   const isPaidSubscriber = profile?.plan_key && profile.plan_key !== 'free' && profile.subscription_status === 'active';
+  const isAgency = profile?.plan_key === 'agency';
+
   const resetDateStr = useMemo(() => {
     if (!isPaidSubscriber || !profile?.credits_reset_at) return null;
     const resetDate = addDays(new Date(profile.credits_reset_at), 30);
     return format(resetDate, 'MMM d, yyyy');
   }, [isPaidSubscriber, profile?.credits_reset_at]);
 
-  const dismissLabel = useMemo(() => {
-    if (type !== 'credits') return t('পরে করব', 'Maybe later');
-    if (isPaidSubscriber && resetDateStr) return t(`রিসেট হবে ${resetDateStr}`, `Resets on ${resetDateStr}`);
-    return t('পরে করব', 'Maybe later');
-  }, [type, isPaidSubscriber, resetDateStr, t]);
+  // Fetch credit packs
+  useEffect(() => {
+    if (!open) return;
+    supabase.from('credit_packs').select('*').eq('is_active', true).order('sort_order')
+      .then(({ data }) => { if (data) setPacks(data as any); });
+  }, [open]);
 
   const initiateCheckout = async (planKey: string) => {
     setCheckoutLoading(planKey);
@@ -79,9 +94,7 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
       const { data, error } = await supabase.functions.invoke('initiate-payment', {
         body: { plan_key: planKey, currency, is_upgrade: isUpgrade },
       });
-
       if (error) throw error;
-
       if (data.dev_mode) {
         toast({ title: '✅ ' + t('প্ল্যান সক্রিয়!', 'Plan Activated!'), description: data.message_en });
         await refreshProfile();
@@ -96,6 +109,35 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
     }
     setCheckoutLoading(null);
   };
+
+  const initiatePackPurchase = async (packId: string) => {
+    setCheckoutLoading(packId);
+    try {
+      const { data, error } = await supabase.functions.invoke('initiate-credit-pack-payment', {
+        body: { pack_id: packId, currency },
+      });
+      if (error) throw error;
+      if (data.gateway_url) {
+        window.location.href = data.gateway_url;
+        return;
+      }
+    } catch (e: any) {
+      console.error('Pack purchase error:', e);
+      const msg = e?.message || '';
+      if (msg.includes('subscription')) {
+        toast({ title: t('ত্রুটি', 'Error'), description: t('ক্রেডিট প্যাক কিনতে সাবস্ক্রিপশন প্রয়োজন।', 'Active subscription required.'), variant: 'destructive' });
+      } else {
+        toast({ title: t('ত্রুটি', 'Error'), description: t('পেমেন্ট শুরু করতে ব্যর্থ।', 'Failed to initiate payment.'), variant: 'destructive' });
+      }
+    }
+    setCheckoutLoading(null);
+  };
+
+  // ── GATE LOGIC ──
+  // Not subscribed → show subscription modal
+  // Subscribed with 0 credits → show tabbed buy/upgrade modal
+  const showSubscriptionModal = !isPaidSubscriber;
+  const showCreditsModal = isPaidSubscriber && type === 'credits';
 
   return (
     <AnimatePresence>
@@ -115,121 +157,304 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-md bg-card rounded-3xl shadow-warm-lg overflow-hidden border border-border"
+            className="relative w-full max-w-[480px] bg-card rounded-3xl shadow-warm-lg overflow-hidden border border-border"
           >
-            <div className="bg-gradient-brand px-6 py-4 text-center">
-              <h2 className="text-lg font-bold text-primary-foreground flex items-center justify-center gap-2">
-                {type === 'credits' ? <Coins size={18} /> : <Zap size={18} />}
-                {type === 'credits' ? t('ক্রেডিট শেষ', 'Out of Credits') : t('আপগ্রেড করুন', 'Upgrade')}
-              </h2>
-            </div>
-
-            <div className="p-6 space-y-5">
-              <div className="text-center space-y-2">
-                <Mascot variant={type === 'credits' ? 'sheepish' : 'worried'} size={80} className="mx-auto" />
-                <h3 className="text-lg font-bold text-foreground">
-                  {type === 'credits'
-                    ? t('ক্রেডিট শেষ হয়ে গেছে', "You're out of credits")
-                    : t('ফিচার লিমিট শেষ হয়েছে', 'Feature Limit Reached')
-                  }
-                </h3>
-                {type === 'credits' && actionLabel ? (
+            {showSubscriptionModal ? (
+              /* ─── SUBSCRIPTION MODAL (unsubscribed users) ─── */
+              <div>
+                <div className="p-6 text-center space-y-4">
+                  <Mascot variant="sheepish" size={80} className="mx-auto" />
+                  <h2 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>
+                    {t('সাবস্ক্রাইব করে শুরু করুন', 'Subscribe to start creating')}
+                  </h2>
                   <p className="text-sm text-muted-foreground">
-                    {t(
-                      `${actionLabel.bn} ${creditInfo?.required?.toLocaleString() || ''} ক্রেডিট প্রয়োজন`,
-                      `You need ${creditInfo?.required?.toLocaleString() || ''} credits to ${actionLabel.en}`
-                    )}
+                    {t('একটি প্ল্যান বেছে নিন এবং আপনার মাসিক ক্রেডিট পান।', 'Choose a plan to get your monthly credits and start generating.')}
                   </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    {t('আরও ব্যবহারের জন্য আপগ্রেড করুন।', 'Upgrade your plan to keep creating.')}
-                  </p>
-                )}
-              </div>
-
-              {type === 'credits' && creditInfo && (
-                <div className="bg-muted/50 rounded-xl p-4 space-y-2 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    {t('আপনার ব্যালেন্স:', 'Your balance:')} <span className="font-bold text-foreground">{(creditInfo.balance ?? 0).toLocaleString()} {t('ক্রেডিট', 'credits')}</span>
-                  </p>
-                  {creditInfo.required && (
-                    <p className="text-xs text-muted-foreground">
-                      {t('প্রয়োজন:', 'Required:')} <span className="font-medium">{creditInfo.required.toLocaleString()} {t('ক্রেডিট', 'credits')}</span>
-                    </p>
-                  )}
                 </div>
-              )}
 
-              {isAgency ? (
-                <div className="text-center space-y-3">
-                  {resetDateStr ? (
-                    <p className="text-sm text-muted-foreground">
-                      {t(`ক্রেডিট রিসেট হবে ${resetDateStr}`, `Credits reset on ${resetDateStr}`)}
-                    </p>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      {t('সাবস্ক্রিপশন সক্রিয় করুন', 'Subscribe to get credits')}
-                    </p>
-                  )}
-                  <a
-                    href="https://wa.me/8801234567890"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-                  >
-                    <MessageSquare size={14} />
-                    {t('আরও চাই? WhatsApp এ যোগাযোগ করুন →', 'Need more? Contact us on WhatsApp →')}
-                  </a>
-                </div>
-              ) : (
-                <>
-                  {/* Plan comparison with checkout */}
-                  <div className="grid grid-cols-3 gap-2">
-                    {PLAN_CARDS.map(plan => {
-                      const isCurrent = profile?.plan_key === plan.key;
-                      const isRecommended = (profile?.plan_key === 'starter' || profile?.plan_key === 'free') && plan.key === 'pro'
-                        || profile?.plan_key === 'pro' && plan.key === 'agency';
-                      const price = currency === 'BDT' ? plan.priceBDT : plan.priceUSD;
-
-                      return (
-                        <div key={plan.key} className={`rounded-2xl border-2 p-3 space-y-1 relative ${
-                          isRecommended ? 'border-primary bg-primary/5' : 'border-border bg-secondary/50'
-                        }`}>
-                          {isRecommended && (
-                            <span className="absolute -top-2 right-2 bg-primary text-primary-foreground text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase">
-                              {t('সুপারিশ', 'Best')}
-                            </span>
-                          )}
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{plan.name}</p>
-                          <p className="text-sm font-bold text-foreground">{price}</p>
-                          <p className="text-[10px] text-muted-foreground">{plan.credits} {t('ক্রেডিট', 'credits')}</p>
-                          {!isCurrent && (
-                            <button
-                              onClick={() => initiateCheckout(plan.key)}
-                              disabled={!!checkoutLoading}
-                              className="!mt-2 w-full bg-primary text-primary-foreground rounded-lg py-1 text-[10px] font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
-                            >
-                              {checkoutLoading === plan.key ? <Loader2 size={10} className="animate-spin" /> : <CreditCard size={10} />}
-                              {t('নিন', 'Get')}
-                            </button>
-                          )}
-                          {isCurrent && (
-                            <p className="!mt-2 text-[10px] text-center text-primary font-medium">{t('বর্তমান', 'Current')}</p>
-                          )}
-                        </div>
-                      );
-                    })}
+                {/* Currency toggle */}
+                <div className="flex justify-center mb-4">
+                  <div className="inline-flex bg-muted rounded-full p-1">
+                    <button
+                      onClick={() => setCurrencyMode('intl')}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${currencyMode === 'intl' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+                    >🌍 International</button>
+                    <button
+                      onClick={() => setCurrencyMode('bd')}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${currencyMode === 'bd' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+                    >🇧🇩 Bangladesh</button>
                   </div>
-                </>
-              )}
+                </div>
 
-              <button
-                onClick={onClose}
-                className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {dismissLabel}
-              </button>
-            </div>
+                <div className="px-6 pb-2 space-y-2.5">
+                  {PLAN_CARDS.map(plan => {
+                    const isRecommended = plan.key === 'pro';
+                    const price = currency === 'BDT' ? plan.priceBDT : plan.priceUSD;
+                    return (
+                      <div key={plan.key} className={`rounded-2xl border-2 p-4 flex items-center justify-between ${isRecommended ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>{plan.name}</p>
+                            {isRecommended && <span className="bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">{t('জনপ্রিয়', 'Popular')}</span>}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5">{plan.credits} {t('ক্রেডিট/মাস', 'credits/mo')}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>{price}</p>
+                          <button
+                            onClick={() => initiateCheckout(plan.key)}
+                            disabled={!!checkoutLoading}
+                            className="mt-1 bg-primary text-primary-foreground rounded-lg px-4 py-1.5 text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-1"
+                          >
+                            {checkoutLoading === plan.key ? <Loader2 size={12} className="animate-spin" /> : <CreditCard size={12} />}
+                            {t('সাবস্ক্রাইব', 'Subscribe')} <ArrowRight size={10} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="p-6 pt-3">
+                  <button onClick={onClose} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    {t('পরে করব', 'Maybe later')}
+                  </button>
+                </div>
+              </div>
+            ) : showCreditsModal ? (
+              /* ─── OUT OF CREDITS MODAL (subscribed users) ─── */
+              <div>
+                {/* Header strip */}
+                <div className="bg-gradient-brand px-6 py-5 text-center" style={{ background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--brand-yellow)))' }}>
+                  <Mascot variant="sheepish" size={56} className="mx-auto mb-2" />
+                  <h2 className="text-lg font-bold text-primary-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>
+                    {t('ক্রেডিট শেষ হয়ে গেছে', "You're out of credits")}
+                  </h2>
+                  <p className="text-xs text-primary-foreground/80 mt-1">
+                    {t('আপনার ব্যালেন্স:', 'Your balance:')} {(creditInfo?.balance ?? 0).toLocaleString()} {t('ক্রেডিট', 'credits')}
+                  </p>
+                </div>
+
+                {/* Tab bar */}
+                <div className="bg-muted/50 px-2 py-2">
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setActiveTab('buy')}
+                      className={`flex-1 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all ${activeTab === 'buy' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+                    >
+                      <Zap size={14} /> {t('ক্রেডিট কিনুন', 'Buy Credits')}
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('upgrade')}
+                      className={`flex-1 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all ${activeTab === 'upgrade' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+                    >
+                      <ArrowRight size={14} /> {t('আপগ্রেড', 'Upgrade Plan')}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  {activeTab === 'buy' ? (
+                    /* ── BUY CREDITS TAB ── */
+                    <div className="space-y-4">
+                      {/* Currency toggle */}
+                      <div className="flex justify-center">
+                        <div className="inline-flex bg-muted rounded-full p-1">
+                          <button
+                            onClick={() => setCurrencyMode('intl')}
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${currencyMode === 'intl' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+                          >🌍 International</button>
+                          <button
+                            onClick={() => setCurrencyMode('bd')}
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${currencyMode === 'bd' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+                          >🇧🇩 Bangladesh</button>
+                        </div>
+                      </div>
+
+                      {/* Pack cards */}
+                      <div className="space-y-2.5">
+                        {packs.map(pack => {
+                          const isPopular = pack.name === 'Medium';
+                          const price = currency === 'BDT' ? `৳${pack.price_bdt.toLocaleString()}` : `$${pack.price_usd}`;
+                          const imgCount = Math.floor(pack.credits / 125);
+                          const vidCount = Math.floor(pack.credits / 330);
+                          return (
+                            <div key={pack.id} className={`rounded-2xl border-2 p-4 flex items-center justify-between transition-colors ${isPopular ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-[15px] font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>
+                                    {PACK_ICONS[pack.name] || '⚡'} {pack.name}
+                                  </p>
+                                  {isPopular && <span className="bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">{t('জনপ্রিয়', 'Most Popular')}</span>}
+                                </div>
+                                <p className="text-[13px] text-muted-foreground mt-0.5">{pack.credits.toLocaleString()} {t('ক্রেডিট', 'credits')}</p>
+                                <p className="text-xs text-muted-foreground">~{imgCount} {t('ছবি', 'images')} · ~{vidCount} {t('ভিডিও', 'videos')}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-lg font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>{price}</p>
+                                <button
+                                  onClick={() => initiatePackPurchase(pack.id)}
+                                  disabled={!!checkoutLoading}
+                                  className="mt-1 bg-primary text-primary-foreground rounded-lg px-4 py-1.5 text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-1"
+                                >
+                                  {checkoutLoading === pack.id ? <Loader2 size={12} className="animate-spin" /> : <Package size={12} />}
+                                  {t('কিনুন', 'Buy')} <ArrowRight size={10} />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <p className="text-xs text-muted-foreground text-center">
+                        {t('ক্রেডিট কখনো মেয়াদোত্তীর্ণ হয় না এবং আপনার সাবস্ক্রিপশনের উপরে যোগ হয়।', 'Credits never expire and stack on top of your subscription.')}
+                      </p>
+
+                      {resetDateStr && (
+                        <p className="text-xs text-muted-foreground text-center">
+                          {t(`অথবা অপেক্ষা করুন — রিসেট হবে ${resetDateStr}`, `Or wait — resets on ${resetDateStr}`)}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    /* ── UPGRADE PLAN TAB ── */
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground text-center mb-4">
+                        {t('প্রতি মাসে আরও ক্রেডিট পান', 'Get more credits every month')}
+                      </p>
+
+                      {/* Currency toggle */}
+                      <div className="flex justify-center">
+                        <div className="inline-flex bg-muted rounded-full p-1">
+                          <button
+                            onClick={() => setCurrencyMode('intl')}
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${currencyMode === 'intl' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+                          >🌍 International</button>
+                          <button
+                            onClick={() => setCurrencyMode('bd')}
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${currencyMode === 'bd' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}
+                          >🇧🇩 Bangladesh</button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2.5">
+                        {PLAN_CARDS.map(plan => {
+                          const isCurrent = profile?.plan_key === plan.key;
+                          const isRecommended = !isCurrent && (
+                            (profile?.plan_key === 'starter' && plan.key === 'pro') ||
+                            (profile?.plan_key === 'pro' && plan.key === 'agency')
+                          );
+                          const price = currency === 'BDT' ? plan.priceBDT : plan.priceUSD;
+                          return (
+                            <div key={plan.key} className={`rounded-2xl border-2 p-4 flex items-center justify-between ${isCurrent ? 'border-border bg-muted/30 opacity-60' : isRecommended ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>{plan.name}</p>
+                                  {isRecommended && <span className="bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">{t('জনপ্রিয়', 'Popular')}</span>}
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-0.5">{plan.credits} {t('ক্রেডিট/মাস', 'credits/mo')}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-lg font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>{price}</p>
+                                {isCurrent ? (
+                                  <span className="text-xs text-primary font-medium">{t('বর্তমান প্ল্যান', 'Current Plan')}</span>
+                                ) : (
+                                  <button
+                                    onClick={() => initiateCheckout(plan.key)}
+                                    disabled={!!checkoutLoading}
+                                    className="mt-1 bg-primary text-primary-foreground rounded-lg px-4 py-1.5 text-xs font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-1"
+                                  >
+                                    {checkoutLoading === plan.key ? <Loader2 size={12} className="animate-spin" /> : <CreditCard size={12} />}
+                                    {t('আপগ্রেড', 'Upgrade')} <ArrowRight size={10} />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <p className="text-xs text-muted-foreground text-center">
+                        {t('ক্রেডিট পেমেন্টের ৩০ দিন পর রিসেট হয়।', 'Credits reset 30 days after payment.')}
+                      </p>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={onClose}
+                    className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors mt-4"
+                  >
+                    {isPaidSubscriber && resetDateStr
+                      ? t(`রিসেট হবে ${resetDateStr}`, `Resets on ${resetDateStr}`)
+                      : t('পরে করব', 'Maybe later')
+                    }
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* ─── GENERAL UPGRADE MODAL (subscribed, non-credits trigger) ─── */
+              <div>
+                <div className="bg-gradient-brand px-6 py-4 text-center">
+                  <h2 className="text-lg font-bold text-primary-foreground flex items-center justify-center gap-2">
+                    <Zap size={18} />
+                    {t('আপগ্রেড করুন', 'Upgrade')}
+                  </h2>
+                </div>
+                <div className="p-6 space-y-5">
+                  <div className="text-center space-y-2">
+                    <Mascot variant="worried" size={80} className="mx-auto" />
+                    <h3 className="text-lg font-bold text-foreground">
+                      {t('ফিচার লিমিট শেষ হয়েছে', 'Feature Limit Reached')}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {t('আরও ব্যবহারের জন্য আপগ্রেড করুন।', 'Upgrade your plan to keep creating.')}
+                    </p>
+                  </div>
+
+                  {isAgency ? (
+                    <div className="text-center space-y-3">
+                      {resetDateStr && (
+                        <p className="text-sm text-muted-foreground">
+                          {t(`ক্রেডিট রিসেট হবে ${resetDateStr}`, `Credits reset on ${resetDateStr}`)}
+                        </p>
+                      )}
+                      <a href="https://wa.me/8801234567890" target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
+                        <MessageSquare size={14} />
+                        {t('আরও চাই? WhatsApp এ যোগাযোগ করুন →', 'Need more? Contact us on WhatsApp →')}
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2">
+                      {PLAN_CARDS.map(plan => {
+                        const isCurrent = profile?.plan_key === plan.key;
+                        const price = currency === 'BDT' ? plan.priceBDT : plan.priceUSD;
+                        return (
+                          <div key={plan.key} className={`rounded-2xl border-2 p-3 space-y-1 relative ${isCurrent ? 'border-primary bg-primary/5' : 'border-border bg-secondary/50'}`}>
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{plan.name}</p>
+                            <p className="text-sm font-bold text-foreground">{price}</p>
+                            <p className="text-[10px] text-muted-foreground">{plan.credits} {t('ক্রেডিট', 'credits')}</p>
+                            {!isCurrent ? (
+                              <button onClick={() => initiateCheckout(plan.key)} disabled={!!checkoutLoading}
+                                className="!mt-2 w-full bg-primary text-primary-foreground rounded-lg py-1 text-[10px] font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-1">
+                                {checkoutLoading === plan.key ? <Loader2 size={10} className="animate-spin" /> : <CreditCard size={10} />}
+                                {t('নিন', 'Get')}
+                              </button>
+                            ) : (
+                              <p className="!mt-2 text-[10px] text-center text-primary font-medium">{t('বর্তমান', 'Current')}</p>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <button onClick={onClose} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    {isPaidSubscriber && resetDateStr ? t(`রিসেট হবে ${resetDateStr}`, `Resets on ${resetDateStr}`) : t('পরে করব', 'Maybe later')}
+                  </button>
+                </div>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}
