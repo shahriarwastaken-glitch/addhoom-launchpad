@@ -103,14 +103,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          setTimeout(() => {
-            fetchProfile(session.user.id);
+          setTimeout(async () => {
+            await fetchProfile(session.user.id);
             fetchWorkspaces(session.user.id);
           }, 0);
         } else {
           setProfile(null);
           setWorkspaces([]);
           setActiveWorkspaceId(null);
+          resetUser();
         }
         setLoading(false);
       }
