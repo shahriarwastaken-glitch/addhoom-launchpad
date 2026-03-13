@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { wavespeedCreate, wavespeedPoll, downloadFile } from '../_shared/wavespeed.ts';
+import { vidgoSubmit, vidgoPoll, downloadFile } from '../_shared/vidgo.ts';
 import { deductCredits, insufficientCreditsResponse } from '../_shared/credits.ts';
 
 const corsHeaders = {
@@ -75,21 +75,18 @@ serve(async (req) => {
 
     const videoDuration = duration === 3 ? 3 : 5;
 
-    // Call WaveSpeed Seedance V1.5 Pro Fast (img2video)
-    const requestId = await wavespeedCreate(
-      'bytedance/seedance-v1.5-pro/image-to-video-fast',
-      {
-        image: sourceImageUrl,
-        prompt: motion_prompt,
-        duration: videoDuration,
-        resolution: '720p',
-        generate_audio: false,
-        seed: -1,
-      }
-    );
+    // Call Vidgo.ai Seedance V1.5 Pro
+    const videoInput: Record<string, unknown> = {
+      prompt: motion_prompt,
+      duration: videoDuration,
+      aspect_ratio: aspect_ratio || '9:16',
+    };
+    if (sourceImageUrl) {
+      videoInput.image_url = sourceImageUrl;
+    }
 
-    const result = await wavespeedPoll(requestId);
-    const videoUrl = result?.outputs?.[0];
+    const taskId = await vidgoSubmit('seedance-1-5-pro', videoInput);
+    const videoUrl = await vidgoPoll(taskId);
     if (!videoUrl) throw new Error('No video URL in result');
 
     // Download and store video

@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { serverError, unauthorizedError } from "../_shared/errors.ts";
-import { wavespeedCreate, wavespeedPoll, downloadFile } from "../_shared/wavespeed.ts";
+import { vidgoSubmit, vidgoPoll, downloadFile } from "../_shared/vidgo.ts";
 import { deductCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 
 const corsHeaders = {
@@ -115,11 +115,11 @@ serve(async (req) => {
 
     const requestIds = await Promise.allSettled(
       generationTasks.map(({ prompt }: { prompt: string }) =>
-        wavespeedCreate('google/nano-banana-pro', {
+        vidgoSubmit('nano-banana-2', {
           prompt,
-          image: sourceImageUrl,
-          aspect_ratio: '1:1',
-          resolution: '1k',
+          image_url: sourceImageUrl,
+          size: '1:1',
+          resolution: '2K',
         })
       )
     );
@@ -128,7 +128,7 @@ serve(async (req) => {
     const results = await Promise.allSettled(
       requestIds.map((r: any) =>
         r.status === 'fulfilled'
-          ? wavespeedPoll(r.value)
+          ? vidgoPoll(r.value)
           : Promise.reject('Create failed')
       )
     );
@@ -140,7 +140,7 @@ serve(async (req) => {
 
       if (results[i].status === 'fulfilled') {
         try {
-          const imageUrl = (results[i] as PromiseFulfilledResult<any>).value?.outputs?.[0];
+          const imageUrl = (results[i] as PromiseFulfilledResult<any>).value;
           if (!imageUrl) continue;
 
           const imageBytes = await downloadFile(imageUrl);
@@ -203,7 +203,7 @@ serve(async (req) => {
 
     try {
       await supabase.rpc("upsert_api_usage_stats", {
-        p_service_name: "wavespeed",
+        p_service_name: "vidgo",
         p_stat_date: new Date().toISOString().split("T")[0],
         p_calls_made: selected_scenes.length,
       });

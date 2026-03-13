@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { wavespeedCreate, wavespeedPoll, downloadFile } from "../_shared/wavespeed.ts";
+import { vidgoSubmit, vidgoPoll, downloadFile } from "../_shared/vidgo.ts";
 import { deductCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 
 const corsHeaders = {
@@ -74,22 +74,19 @@ serve(async (req) => {
     const effectiveResolution = target_resolution || (scale ? (scale >= 6 ? '8k' : scale >= 4 ? '4k' : '2k') : '4k');
     const effectiveCreativity = creativity ?? (mode === 'sharp_details' ? 25 : mode === 'smooth_skin' ? -10 : 0);
 
-    // Choose endpoint based on quality mode
-    const endpoint = effectiveMode === 'ultimate'
-      ? 'wavespeed-ai/ultimate-image-upscaler'
-      : 'wavespeed-ai/image-upscaler';
+    // Choose model based on quality mode
+    const model = effectiveMode === 'ultimate'
+      ? 'ultimate-image-upscaler'
+      : 'image-upscaler';
 
-    const requestId = await wavespeedCreate(endpoint, {
+    const taskId = await vidgoSubmit(model, {
       image: sourceImageUrl,
       creativity: effectiveCreativity,
       target_resolution: effectiveResolution,
       output_format: export_format === 'jpg' ? 'jpeg' : export_format,
-      enable_base64_output: false,
-      enable_sync_mode: false,
     });
 
-    const result = await wavespeedPoll(requestId);
-    const upscaledUrl = result?.outputs?.[0];
+    const upscaledUrl = await vidgoPoll(taskId);
     if (!upscaledUrl) throw new Error('No upscaled image in result');
 
     // Download and store
