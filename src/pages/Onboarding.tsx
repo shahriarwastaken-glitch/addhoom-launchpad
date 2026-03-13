@@ -142,8 +142,11 @@ const Onboarding = () => {
   useEffect(() => {
     if (profile && !hasResumed[0]) {
       const saved = (profile as any).onboarding_step;
-      if (saved && saved > 1 && saved <= TOTAL_STEPS) {
-        setStep(saved);
+      // Resume at the NEXT step after the last completed one
+      if (typeof saved === 'number' && saved >= 1 && saved < TOTAL_STEPS) {
+        setStep(saved + 1);
+      } else if (saved === TOTAL_STEPS) {
+        // All steps done, redirect handled by onboarding_complete check
       }
       hasResumed[1](true);
     }
