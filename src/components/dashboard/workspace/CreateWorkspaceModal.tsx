@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import WorkspaceAvatar from './WorkspaceAvatar';
 import { PRESET_COLORS, PRESET_ICONS, INDUSTRIES, PLATFORMS, LANGUAGES, WORKSPACE_LIMITS } from './constants';
 import { useUpgrade } from '@/contexts/UpgradeContext';
+import { trackEvent } from '@/lib/posthog';
 
 interface CreateWorkspaceModalProps {
   open: boolean;
