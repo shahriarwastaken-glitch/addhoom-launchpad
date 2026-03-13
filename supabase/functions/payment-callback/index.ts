@@ -36,7 +36,16 @@ serve(async (req) => {
 
       // Verify with SSLCommerz
       const ssl = getSSLCommerzConfig();
-      if (ssl.configured && valId) {
+      if (ssl.configured) {
+        // val_id is mandatory when SSLCommerz is configured — reject forged callbacks
+        if (!valId) {
+          console.error("payment-callback: val_id missing with SSLCommerz configured. Possible forged callback for tran_id:", tranId);
+          return new Response(null, {
+            status: 302,
+            headers: { Location: `${appUrl}/dashboard/settings?tab=billing&payment=failed` },
+          });
+        }
+
         const verifyRes = await fetch(
           `${ssl.baseUrl}/validator/api/validationserverAPI.php` +
           `?val_id=${valId}&store_id=${ssl.storeId}&store_passwd=${ssl.storePass}&v=1&format=json`
