@@ -1,55 +1,26 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUpgrade } from '@/contexts/UpgradeContext';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { Film, Sparkles } from 'lucide-react';
-import { trackEvent } from '@/lib/posthog';
-import { useCreditGate } from '@/hooks/useCreditGate';
-import StageIndicator from './video/StageIndicator';
-import VideoSetup from './video/VideoSetup';
-import VideoProcessing from './video/VideoProcessing';
-import VideoResultView from './video/VideoResult';
-import ScriptPreviewModal from './video/ScriptPreviewModal';
+import { useSearchParams } from 'react-router-dom';
+import { Film, Sparkles, ImageIcon } from 'lucide-react';
 import AIMotionTab from './video/AIMotionTab';
-import type { VideoStage, VideoFormData, VideoScript, VideoResult, ProcessingStep } from './video/types';
-import { DEFAULT_FORM } from './video/types';
+import VideoHistory from './video/VideoHistory';
 
-type VideoTab = 'slideshow' | 'ai_motion';
-
-const SLIDE_VARIANTS = {
-  enter: (direction: number) => ({ x: direction > 0 ? 300 : -300, opacity: 0 }),
-  center: { x: 0, opacity: 1 },
-  exit: (direction: number) => ({ x: direction > 0 ? -300 : 300, opacity: 0 }),
-};
+type VideoMode = 'text_to_video' | 'animate_image';
 
 const VideoAd = () => {
-  const { user, profile, activeWorkspace } = useAuth();
-  const { t, lang } = useLanguage();
+  const { profile } = useAuth();
+  const { t } = useLanguage();
   const { showUpgrade } = useUpgrade();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState<VideoTab>('slideshow');
-  const [stage, setStage] = useState<VideoStage>(1);
-  const [direction, setDirection] = useState(1);
-  const [form, setForm] = useState<VideoFormData>(DEFAULT_FORM);
-  const [generating, setGenerating] = useState(false);
-  const [script, setScript] = useState<VideoScript | null>(null);
-  const [showScriptModal, setShowScriptModal] = useState(false);
-  const [result, setResult] = useState<VideoResult | null>(null);
-  const [usageUsed, setUsageUsed] = useState(0);
-  const [usageLimit] = useState(2);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const elapsedRef = useRef<ReturnType<typeof setInterval>>();
-  const cancelledRef = useRef(false);
-  const [processingSteps, setProcessingSteps] = useState<ProcessingStep[]>([
-    { label: 'স্ক্রিপ্ট তৈরি হচ্ছে...', labelEn: 'Creating script...', status: 'waiting' },
-    { label: 'ছবি প্রসেস করা হচ্ছে...', labelEn: 'Processing images...', status: 'waiting' },
-    { label: 'টেক্সট ওভারলে যোগ করা হচ্ছে...', labelEn: 'Adding text overlays...', status: 'waiting' },
-    { label: 'মিউজিক মিশ্রণ করা হচ্ছে...', labelEn: 'Mixing music...', status: 'waiting' },
-    { label: 'ফাইনাল রেন্ডার হচ্ছে...', labelEn: 'Final rendering...', status: 'waiting' },
-  ]);
+  const modeParam = searchParams.get('mode');
+  const preloadImage = searchParams.get('image_url');
+
+  const [activeMode, setActiveMode] = useState<VideoMode>(
+    modeParam === 'animate' ? 'animate_image' : 'text_to_video'
+  );
 
   const plan = profile?.plan || 'pro';
 
@@ -60,189 +31,12 @@ const VideoAd = () => {
     }
   }, [plan, showUpgrade]);
 
-  // Fetch usage
+  // Sync mode from URL params
   useEffect(() => {
-    if (!user) return;
-    const fetchUsage = async () => {
-      const now = new Date();
-      const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      const { count } = await supabase
-        .from('usage_logs')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('feature', 'video_ad')
-        .gte('created_at', firstOfMonth);
-      setUsageUsed(count || 0);
-    };
-    fetchUsage();
-  }, [user]);
-
-  const goToStage = (s: VideoStage) => {
-    setDirection(s > stage ? 1 : -1);
-    setStage(s);
-  };
-
-  const { requireCredits } = useCreditGate();
-
-  const generateScript = useCallback(async () => {
-    if (!activeWorkspace) { toast.error(t('প্রথমে শপ তৈরি করুন', 'Create a shop first')); return; }
-    if (!form.productName.trim()) { toast.error(t('পণ্যের নাম দিন', 'Enter product name')); return; }
-    if (form.images.length === 0) { toast.error(t('ছবি আপলোড করুন', 'Upload images')); return; }
-    if (!requireCredits(150, 'video_ad')) return;
-
-    setGenerating(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-video-script', {
-        body: {
-          workspace_id: activeWorkspace.id,
-          product_name: form.productName,
-          key_message: form.keyMessage,
-          original_price_bdt: form.originalPrice ? parseInt(form.originalPrice) : undefined,
-          offer_price_bdt: form.offerPrice ? parseInt(form.offerPrice) : undefined,
-          cta_text: form.ctaText,
-          style: form.style,
-          language: form.textLanguage,
-          num_images: form.images.length,
-        },
-      });
-
-      if (error) {
-        const { handleCreditError } = await import('@/utils/creditErrorHandler');
-        if (handleCreditError(error, data)) { setGenerating(false); return; }
-        throw error;
-      }
-      if (data?.success && data.script) {
-        setScript(data.script);
-        setShowScriptModal(true);
-      } else {
-        toast.error(data?.error || t('স্ক্রিপ্ট তৈরি ব্যর্থ', 'Script generation failed'));
-      }
-    } catch (e: any) {
-      console.error(e);
-      toast.error(t('সমস্যা হয়েছে', 'Something went wrong'));
-    } finally {
-      setGenerating(false);
+    if (modeParam === 'animate') {
+      setActiveMode('animate_image');
     }
-  }, [activeWorkspace, form, t]);
-
-  const startVideoGeneration = useCallback(async (overrideScript?: VideoScript) => {
-    const activeScript = overrideScript || script;
-    if (plan === 'pro' && usageUsed >= usageLimit) {
-      showUpgrade('video');
-      return;
-    }
-
-    setShowScriptModal(false);
-    cancelledRef.current = false;
-    goToStage(2);
-    setElapsedSeconds(0);
-
-    trackEvent('video_generation_started', {
-      type: 'slideshow',
-      aspect_ratio: form.format === 'reels' ? '9:16' : form.format === 'story' ? '9:16' : '16:9',
-      prompt_enhanced: false,
-    });
-
-    // Start elapsed timer
-    elapsedRef.current = setInterval(() => setElapsedSeconds(s => s + 1), 1000);
-
-    // Simulate processing steps
-    const stepTimings = [2000, 5000, 9000, 13000, 18000];
-    const updateStep = (idx: number, status: 'active' | 'done') => {
-      setProcessingSteps(prev => prev.map((s, i) => {
-        if (i === idx) return { ...s, status };
-        if (i === idx - 1 && status === 'active') return { ...s, status: 'done' };
-        return s;
-      }));
-    };
-
-    // Reset steps
-    setProcessingSteps(prev => prev.map(s => ({ ...s, status: 'waiting' as const })));
-
-    // Simulate step progression with cancel support
-    for (let i = 0; i < stepTimings.length; i++) {
-      await new Promise(r => setTimeout(r, i === 0 ? stepTimings[0] : stepTimings[i] - stepTimings[i - 1]));
-      if (cancelledRef.current) return;
-      updateStep(i, 'active');
-    }
-
-    await new Promise(r => setTimeout(r, 4000));
-    if (cancelledRef.current) return;
-    updateStep(4, 'done');
-
-    // Clear timer
-    if (elapsedRef.current) clearInterval(elapsedRef.current);
-
-    // Log usage
-    if (user) {
-      await supabase.from('usage_logs').insert({
-        user_id: user.id,
-        workspace_id: activeWorkspace?.id,
-        feature: 'video_ad',
-      });
-      setUsageUsed(u => u + 1);
-    }
-
-    // Calculate dhoom score using the active script
-    const calculateScore = () => {
-      let score = activeScript?.dhoom_score_prediction || 70;
-      if (form.format === 'reels') score += 5;
-      if (form.musicTrack !== 'none') score += 3;
-      if (form.ctaText) score += 5;
-      if (form.images.length >= 3) score += 4;
-      return Math.min(100, score);
-    };
-
-    const dhoomScore = calculateScore();
-    if (activeWorkspace) {
-      const { data: videoRow } = await supabase.from('video_ads').insert({
-        workspace_id: activeWorkspace.id,
-        product_name: form.productName,
-        status: 'completed',
-        script: activeScript as any,
-        format: form.format,
-        style: form.style,
-        music_track: form.musicTrack,
-        font_style: form.fontStyle,
-        voiceover_enabled: form.voiceoverEnabled,
-        dhoom_score: dhoomScore,
-        completed_at: new Date().toISOString(),
-      }).select('id').single();
-
-      setResult({
-        id: videoRow?.id || crypto.randomUUID(),
-        videoUrl: '',
-        dhoomScore,
-        productName: form.productName,
-        format: form.format,
-        style: form.style,
-        musicTrack: form.musicTrack,
-        script: activeScript!,
-        createdAt: new Date().toISOString(),
-      });
-    }
-
-    trackEvent('video_generation_completed', {
-      type: 'slideshow',
-      duration_seconds: elapsedSeconds,
-    });
-
-    goToStage(3);
-  }, [script, form, plan, usageUsed, usageLimit, user, activeWorkspace, showUpgrade]);
-
-  const handleCancel = () => {
-    cancelledRef.current = true;
-    if (elapsedRef.current) clearInterval(elapsedRef.current);
-    goToStage(1);
-    setProcessingSteps(prev => prev.map(s => ({ ...s, status: 'waiting' as const })));
-  };
-
-  const handleReset = () => {
-    setForm(DEFAULT_FORM);
-    setScript(null);
-    setResult(null);
-    goToStage(1);
-  };
+  }, [modeParam]);
 
   // Free users see upgrade gate
   if (plan === 'free') {
@@ -250,7 +44,7 @@ const VideoAd = () => {
       <div className="h-full flex items-center justify-center text-center px-8">
         <div>
           <span className="text-5xl mb-4 block">🎬</span>
-          <h2 className="text-2xl font-bold font-heading-bn text-foreground mb-2">{t('ভিডিও বিজ্ঞাপন', 'Video Ads')}</h2>
+          <h2 className="text-2xl font-bold font-heading-bn text-foreground mb-2">{t('ভিডিও জেনারেটর', 'Video Generator')}</h2>
           <p className="text-muted-foreground font-heading-bn mb-6">{t('Pro বা Agency প্ল্যানে আপগ্রেড করুন', 'Upgrade to Pro or Agency plan')}</p>
           <button onClick={() => showUpgrade('video')} className="px-8 py-3 rounded-xl bg-gradient-cta text-primary-foreground font-bold font-heading-bn shadow-orange-glow">
             {t('আপগ্রেড করুন', 'Upgrade')}
@@ -262,146 +56,46 @@ const VideoAd = () => {
 
   return (
     <div className="h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden -m-3 sm:-m-6 md:-m-8">
-      {/* Tab Switcher */}
-      <div className="flex items-center gap-1 px-4 sm:px-6 pt-4 pb-2">
-        <button
-          onClick={() => setActiveTab('slideshow')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-            activeTab === 'slideshow'
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-          }`}
-        >
-          <Film size={14} />
-          {t('স্লাইডশো', 'Slideshow')}
-        </button>
-        <button
-          onClick={() => setActiveTab('ai_motion')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all relative ${
-            activeTab === 'ai_motion'
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-          }`}
-        >
-          <Sparkles size={14} />
-          {t('AI মোশন', 'AI Motion')}
-        </button>
-      </div>
-
-      {activeTab === 'ai_motion' ? (
-        <div className="flex-1 overflow-hidden">
-          <AIMotionTab />
+      {/* Mode Toggle */}
+      <div className="shrink-0 px-4 sm:px-6 pt-4 pb-2">
+        <div className="mb-1">
+          <h1 className="text-lg font-bold font-heading-bn text-foreground">{t('ভিডিও জেনারেটর', 'Video Generator')}</h1>
+          <p className="text-xs text-muted-foreground font-heading-bn">
+            {t('আপনার ইমেজকে ভিডিও অ্যাডে পরিণত করুন, অথবা টেক্সট প্রম্পট থেকে তৈরি করুন।', 'Turn your images into video ads, or generate from a text prompt.')}
+          </p>
         </div>
-      ) : (
-      <>
-      {/* Stage indicator */}
-      <StageIndicator currentStage={stage} />
-
-      {/* Stage content */}
-      <div className="flex-1 overflow-hidden relative">
-        <AnimatePresence custom={direction} mode="wait">
-          <motion.div
-            key={stage}
-            custom={direction}
-            variants={SLIDE_VARIANTS}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="absolute inset-0"
+        <div className="flex items-center gap-1 mt-2">
+          <button
+            onClick={() => { setActiveMode('text_to_video'); setSearchParams({}); }}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              activeMode === 'text_to_video'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+            }`}
           >
-            {stage === 1 && (
-              <VideoSetup
-                form={form}
-                setForm={setForm}
-                onPreviewScript={generateScript}
-                onGenerate={async () => {
-                  if (!requireCredits(150, 'video_ad')) return;
-                  if (!activeWorkspace) { toast.error(t('প্রথমে শপ তৈরি করুন', 'Create a shop first')); return; }
-                  if (!form.productName.trim()) { toast.error(t('পণ্যের নাম দিন', 'Enter product name')); return; }
-                  if (form.images.length === 0) { toast.error(t('ছবি আপলোড করুন', 'Upload images')); return; }
-
-                  // Auto-generate script if not already generated, then start video
-                  if (!script) {
-                    setGenerating(true);
-                    try {
-                      const { data, error } = await supabase.functions.invoke('generate-video-script', {
-                        body: {
-                          workspace_id: activeWorkspace.id,
-                          product_name: form.productName,
-                          key_message: form.keyMessage,
-                          original_price_bdt: form.originalPrice ? parseInt(form.originalPrice) : undefined,
-                          offer_price_bdt: form.offerPrice ? parseInt(form.offerPrice) : undefined,
-                          cta_text: form.ctaText,
-                          style: form.style,
-                          language: form.textLanguage,
-                          num_images: form.images.length,
-                        },
-                      });
-                      if (error) throw error;
-                      if (data?.success && data.script) {
-                        setScript(data.script);
-                        setGenerating(false);
-                        startVideoGeneration(data.script);
-                        return;
-                      } else {
-                        toast.error(data?.error || t('স্ক্রিপ্ট তৈরি ব্যর্থ', 'Script generation failed'));
-                      }
-                    } catch (e: any) {
-                      console.error(e);
-                      toast.error(t('সমস্যা হয়েছে', 'Something went wrong'));
-                    } finally {
-                      setGenerating(false);
-                    }
-                  } else {
-                    startVideoGeneration();
-                  }
-                }}
-                generating={generating}
-                usageUsed={usageUsed}
-                usageLimit={usageLimit}
-                plan={plan}
-              />
-            )}
-            {stage === 2 && (
-              <VideoProcessing
-                onCancel={handleCancel}
-                steps={processingSteps}
-                elapsedSeconds={elapsedSeconds}
-              />
-            )}
-            {stage === 3 && result && (
-              <VideoResultView
-                result={result}
-                plan={plan}
-                usageUsed={usageUsed}
-                usageLimit={usageLimit}
-                onReset={handleReset}
-                onRegenerate={() => {
-                  goToStage(1);
-                }}
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
+            <Film size={14} />
+            {t('টেক্সট টু ভিডিও', 'Text to Video')}
+          </button>
+          <button
+            onClick={() => { setActiveMode('animate_image'); setSearchParams({}); }}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              activeMode === 'animate_image'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+            }`}
+          >
+            <ImageIcon size={14} />
+            {t('ইমেজ অ্যানিমেট', 'Animate Image')}
+          </button>
+        </div>
       </div>
 
-      {/* Script preview modal */}
-      <AnimatePresence>
-        {showScriptModal && script && (
-          <ScriptPreviewModal
-            script={script}
-            form={form}
-            onClose={() => setShowScriptModal(false)}
-            onConfirm={startVideoGeneration}
-            onRegenerate={generateScript}
-            regenerating={generating}
-            generating={false}
-          />
-        )}
-      </AnimatePresence>
-      </>
-      )}
+      <div className="flex-1 overflow-hidden">
+        <AIMotionTab
+          mode={activeMode}
+          preloadImageUrl={activeMode === 'animate_image' ? preloadImage || undefined : undefined}
+        />
+      </div>
     </div>
   );
 };

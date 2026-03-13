@@ -31,6 +31,7 @@ serve(async (req) => {
       motion_prompt,
       aspect_ratio,
       product_name,
+      duration,
     } = await req.json();
 
     if (!workspace_id || !motion_prompt) {
@@ -57,7 +58,7 @@ serve(async (req) => {
 
       const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
       const raw = Uint8Array.from(atob(matches[2]), c => c.charCodeAt(0));
-      const filePath = `ai-video/${workspace_id}/${Date.now()}_src.${ext}`;
+      const filePath = `ai-video/${user.id}/${Date.now()}_src.${ext}`;
 
       const { error: uploadErr } = await supabase.storage
         .from('video-assets')
@@ -72,13 +73,15 @@ serve(async (req) => {
 
     if (!sourceImageUrl) throw new Error('No source image provided');
 
-    // Call WaveSpeed Seedance V1.5 Pro Fast
+    const videoDuration = duration === 3 ? 3 : 5;
+
+    // Call WaveSpeed Seedance V1.5 Pro Fast (img2video)
     const requestId = await wavespeedCreate(
       'bytedance/seedance-v1.5-pro/image-to-video-fast',
       {
         image: sourceImageUrl,
         prompt: motion_prompt,
-        duration: 5,
+        duration: videoDuration,
         resolution: '720p',
         generate_audio: false,
         seed: -1,
@@ -91,7 +94,7 @@ serve(async (req) => {
 
     // Download and store video
     const videoBuffer = await downloadFile(videoUrl);
-    const videoPath = `ai-video/${workspace_id}/${Date.now()}.mp4`;
+    const videoPath = `ai-video/${user.id}/${Date.now()}.mp4`;
     const { error: videoUploadErr } = await supabase.storage
       .from('video-assets')
       .upload(videoPath, videoBuffer, { contentType: 'video/mp4', upsert: true });
@@ -110,7 +113,7 @@ serve(async (req) => {
       status: 'completed',
       video_type: 'ai_motion',
       product_name,
-      duration_seconds: 5,
+      duration_seconds: videoDuration,
       completed_at: new Date().toISOString(),
     }).select('id').single();
 
