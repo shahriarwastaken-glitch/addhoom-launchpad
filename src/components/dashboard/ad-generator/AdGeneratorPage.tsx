@@ -245,6 +245,9 @@ const AdGeneratorPage = () => {
           prompt_enhanced: false,
           workspace_industry: activeWorkspace.industry || 'unknown',
         });
+
+        let product_image_base64: string | undefined;
+        let product_image_mime_type = "image/jpeg";
         if (form.productImagePreview) {
           product_image_base64 = form.productImagePreview;
           const mimeMatch = form.productImagePreview.match(/^data:(image\/\w+);base64,/);
