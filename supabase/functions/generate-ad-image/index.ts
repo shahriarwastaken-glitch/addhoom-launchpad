@@ -104,11 +104,14 @@ serve(async (req) => {
     const { data: srcPublicUrl } = supabase.storage.from("ad-images").getPublicUrl(srcPath);
     const sourceImageUrl = srcPublicUrl.publicUrl;
 
-    // Generate all selected scenes in parallel
-    const generationTasks = selected_scenes.map((sceneKey: string) => ({
-      sceneKey,
-      prompt: final_prompts[sceneKey] || `${product_name}, professional product photography, ${sceneKey} scene, ultra realistic, 8K`,
-    }));
+    // Prepend IMG_3984.CR2 and prompt modifier to every prompt
+    const generationTasks = selected_scenes.map((sceneKey: string) => {
+      const rawPrompt = final_prompts[sceneKey] || `${product_name}, professional product photography, ${sceneKey} scene, ultra realistic, 8K`;
+      const parts = ["IMG_3984.CR2"];
+      if (promptModifier) parts.push(promptModifier);
+      parts.push(rawPrompt);
+      return { sceneKey, prompt: parts.join(" ") };
+    });
 
     const requestIds = await Promise.allSettled(
       generationTasks.map(({ prompt }: { prompt: string }) =>
