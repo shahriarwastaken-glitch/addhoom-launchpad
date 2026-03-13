@@ -561,7 +561,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
                 >
                   <Upload size={28} className="mx-auto text-muted-foreground mb-2" />
                   <p className="text-sm font-heading-bn text-foreground">{t('ক্লিক করুন বা ড্র্যাগ করুন', 'Click or drag to upload')}</p>
-                  <p className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP · Max 5MB</p>
+                  <p className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP, HEIC · Max 20MB</p>
                   <input type="file" accept="image/*" className="hidden" onChange={e => { if (e.target.files?.[0]) { handleFileSelect(e.target.files[0]); } e.target.value = ''; }} />
                 </label>
               )}
