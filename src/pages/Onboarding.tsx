@@ -284,6 +284,11 @@ const Onboarding = () => {
   // --- Screen 5: Plan selection ---
   const handleSelectPlan = async (planId: string) => {
     setPlanLoading(planId);
+    trackEvent('subscription_checkout_started', {
+      plan: planId,
+      currency: currency === 'bdt' ? 'BDT' : 'USD',
+      amount: PLAN_CARDS.find(p => p.id === planId)?.[currency === 'bdt' ? 'priceBdt' : 'priceUsd'] || 0,
+    });
     try {
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: { plan: planId, billing_cycle: 'monthly' },
@@ -294,11 +299,19 @@ const Onboarding = () => {
       } else if (data?.dev_mode) {
         const planCredits = PLAN_CARDS.find(p => p.id === planId)?.credits || 5000;
         toast.success(`🎉 Welcome! Your ${planCredits.toLocaleString()} credits are ready.`);
+        trackEvent('subscription_payment_success', { plan: planId, currency: currency === 'bdt' ? 'BDT' : 'USD', amount: 0, is_upgrade: false });
+        trackEvent('onboarding_completed', {
+          industry: selectedIndustry || 'unknown',
+          platform: selectedPlatform || 'unknown',
+          language: selectedLanguage,
+          subscribed_during_onboarding: true,
+        });
         await supabase.from('profiles').update({ onboarding_complete: true, onboarding_step: 5 } as any).eq('id', user!.id);
         await refreshProfile();
         navigate('/dashboard', { replace: true });
       }
     } catch (e: any) {
+      trackEvent('subscription_payment_failed', { plan: planId, currency: currency === 'bdt' ? 'BDT' : 'USD' });
       toast.error(e.message || 'Payment failed. Please try again.');
     } finally {
       setPlanLoading(null);
