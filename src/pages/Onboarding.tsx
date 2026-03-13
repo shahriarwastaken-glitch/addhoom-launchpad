@@ -179,6 +179,7 @@ const Onboarding = () => {
     if (!shopUrl.trim() || !activeWorkspace) return;
     setAnalyzing(true);
     setAnalyzeStep(0);
+    trackEvent('onboarding_shop_dna_method', { method: platform === 'facebook' ? 'facebook' : platform === 'daraz' ? 'daraz' : 'website' });
     const interval = setInterval(() => {
       setAnalyzeStep(prev => prev >= ANALYZING_STEPS.length - 1 ? prev : prev + 1);
     }, 2000);
