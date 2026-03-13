@@ -17,10 +17,8 @@ const HeroPreviewCard = () => {
     { icon: Shirt, label: 'Try-On' },
   ];
 
-  const Placeholder = ({ label }: { label: string }) => (
-    <div className="w-full h-full rounded-lg flex items-center justify-center" style={{ background: '#F0EDE8', border: '1.5px dashed #D4CFC8' }}>
-      <span className="font-mono text-[11px] text-muted-foreground">{label}</span>
-    </div>
+  const LandingImg = ({ src, alt }: { src: string; alt: string }) => (
+    <img src={src} alt={alt} className="w-full h-full object-cover rounded-lg" loading="lazy" />
   );
 
   return (
