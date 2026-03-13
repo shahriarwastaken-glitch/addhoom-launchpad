@@ -42,14 +42,6 @@ const SERVICES = [
     is_critical: true,
   },
   {
-    service_name: 'shotstack',
-    display_name: 'Shotstack Video API',
-    description: 'Slideshow video ad rendering',
-    docs_url: 'https://shotstack.io/docs',
-    icon: '🎬',
-    is_critical: false,
-  },
-  {
     service_name: 'meta_ad_library',
     display_name: 'Meta Ad Library API',
     description: 'Competitor ad intelligence',
