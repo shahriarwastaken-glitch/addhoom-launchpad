@@ -27,7 +27,8 @@ import {
   Wrench,
   FileText,
   LogOut,
-  Coins
+  Coins,
+  Package
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
