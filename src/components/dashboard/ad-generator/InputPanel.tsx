@@ -6,7 +6,7 @@ import OnceTooltip from '@/components/ui/OnceTooltip';
 import CreditCostLabel from '@/components/ui/CreditCostLabel';
 import {
   PenLine, ImageIcon, Facebook, Instagram, ShoppingBag, Search,
-  Target, Sparkles, Upload, Rocket, History,
+  Target, Sparkles, Upload, Rocket, History, LayoutTemplate,
   ArrowRight, ChevronDown, HelpCircle, Sprout, Frown,
   Eye, CheckCircle, Mail, FileText, Phone, Home,
   ArrowLeft,
