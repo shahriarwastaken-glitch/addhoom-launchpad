@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
+import { useCreditGate } from '@/hooks/useCreditGate';
 
 // ── Helpers ──
 const toBn = (n: number) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);

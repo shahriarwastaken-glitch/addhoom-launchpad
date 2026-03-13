@@ -13,6 +13,7 @@ import { Mascot } from '@/components/Mascot';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useCreditGate } from '@/hooks/useCreditGate';
 
 
 // ─── Types ───

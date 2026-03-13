@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import type { SceneType, SceneConfig, ImageFormat, ExportFormat } from './types';
 import StepIndicator from './StepIndicator';
 import PromptEditor from './PromptEditor';
+import { useCreditGate } from '@/hooks/useCreditGate';
 import { buildProductPhotoPrompt } from './promptBuilders';
 import type { LightingMood, ColorMood, CameraAngle, BackgroundComplexity, TimeOfDay, ProductFocus } from '@/components/dashboard/ad-generator/types';
 import {

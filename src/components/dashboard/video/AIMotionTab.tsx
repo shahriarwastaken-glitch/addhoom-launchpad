@@ -115,11 +115,14 @@ const AIMotionTab = () => {
     }
   };
 
+  const { requireCredits } = useCreditGate();
+
   // ── Generate ──
   const handleGenerate = async () => {
     if (!activeWorkspace || !user) { toast.error(t('শপ তৈরি করুন', 'Create a shop first')); return; }
     if (!image) { toast.error(t('ছবি আপলোড করুন', 'Upload an image')); return; }
     if (!prompt.trim()) { toast.error(t('ভিডিওর বর্ণনা দিন', 'Describe your video')); return; }
+    if (!requireCredits(200, 'ai_motion')) return;
 
     setGenerating(true);
     setProcessingMsgIdx(0);

@@ -81,10 +81,13 @@ const VideoAd = () => {
     setStage(s);
   };
 
+  const { requireCredits } = useCreditGate();
+
   const generateScript = useCallback(async () => {
     if (!activeWorkspace) { toast.error(t('প্রথমে শপ তৈরি করুন', 'Create a shop first')); return; }
     if (!form.productName.trim()) { toast.error(t('পণ্যের নাম দিন', 'Enter product name')); return; }
     if (form.images.length === 0) { toast.error(t('ছবি আপলোড করুন', 'Upload images')); return; }
+    if (!requireCredits(150, 'video_ad')) return;
 
     setGenerating(true);
     try {

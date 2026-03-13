@@ -12,6 +12,7 @@ import {
   Loader2, ArrowLeft, RefreshCw, ArrowRight, Clock, FileText
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useCreditGate } from '@/hooks/useCreditGate';
 
 // ─── Types ───
 type Ad = { page_name: string; headline: string; body: string; caption: string; running_since: string };

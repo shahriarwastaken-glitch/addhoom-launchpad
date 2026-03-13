@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { EnhancementMode, ExportFormat } from './types';
+import { useCreditGate } from '@/hooks/useCreditGate';
 
 type QualityMode = 'standard' | 'ultimate';
 type TargetResolution = '2k' | '4k' | '8k';

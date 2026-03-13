@@ -14,6 +14,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import StepIndicator from './StepIndicator';
 import PromptEditor from './PromptEditor';
 import { buildTryOnPrompt } from './promptBuilders';
+import { useCreditGate } from '@/hooks/useCreditGate';
 
 type GarmentCategory = 'Top' | 'Bottom' | 'Full Body / Dress' | 'Outerwear' | 'Footwear' | 'Accessory';
 type ModelGender = 'female' | 'male';
