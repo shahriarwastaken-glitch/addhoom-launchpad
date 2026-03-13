@@ -160,7 +160,7 @@ async function getApiKeys(supabase: any) {
     sslcommerz: 'SSLCOMMERZ_STORE_ID',
     resend: 'RESEND_API_KEY',
     meta_ad_library: 'META_ACCESS_TOKEN',
-    shotstack: 'SHOTSTACK_API_KEY',
+    
   };
 
   if (missingServices.length > 0) {
