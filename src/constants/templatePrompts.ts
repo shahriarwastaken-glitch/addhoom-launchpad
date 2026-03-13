@@ -462,7 +462,7 @@ export function fillTemplatePrompt(prompt: string, workspace: any): string {
 
   let filled = prompt
   for (const [key, value] of Object.entries(replacements)) {
-    filled = filled.replaceAll(key, value)
+    filled = filled.split(key).join(value)
   }
   return filled
 }
