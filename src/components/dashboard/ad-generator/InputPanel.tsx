@@ -780,7 +780,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
         ) : (
           <button
             ref={generateBtnRef as any}
-            onClick={() => onGenerate()}
+            onClick={() => { if (checkCreditsBeforeAction()) onGenerate(); }}
             disabled={generating || !form.productDesc.trim()}
             className={`w-full h-[52px] rounded-[14px] font-bold text-[17px] font-heading-bn text-primary-foreground transition-all duration-200 ${
               generating || !form.productDesc.trim()
