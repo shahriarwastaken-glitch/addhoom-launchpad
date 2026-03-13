@@ -84,14 +84,17 @@ export async function wavespeedGenerateImage(opts: {
 }): Promise<string> {
   const body: Record<string, unknown> = {
     prompt: opts.prompt,
-    aspect_ratio: opts.aspectRatio || '1:1',
+    enable_base64_output: false,
+    enable_sync_mode: false,
+    enable_web_search: false,
+    output_format: 'png',
     resolution: opts.resolution || '1k',
   };
   if (opts.sourceImageUrl) {
     body.image = opts.sourceImageUrl;
   }
 
-  const requestId = await wavespeedCreate('google/nano-banana-pro', body);
+  const requestId = await wavespeedCreate('google/nano-banana-2/text-to-image', body);
   const result = await wavespeedPoll(requestId);
   const imageUrl = result?.outputs?.[0];
   if (!imageUrl) throw new Error('No image URL in completed result');

@@ -74,7 +74,7 @@ serve(async (req) => {
 
     // Call WaveSpeed Seedance V1.5 Pro Fast
     const requestId = await wavespeedCreate(
-      'bytedance/seedance-2.0/image-to-video-fast',
+      'bytedance/seedance-v1.5-pro/image-to-video-fast',
       {
         image: sourceImageUrl,
         prompt: motion_prompt,
