@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { FolderOpen, ArrowLeft } from 'lucide-react';
+import { trackEvent } from '@/lib/posthog';
 import InputPanel from './InputPanel';
 import ResultsPanel from './ResultsPanel';
 import CopyRemixPanel from './CopyRemixPanel';
