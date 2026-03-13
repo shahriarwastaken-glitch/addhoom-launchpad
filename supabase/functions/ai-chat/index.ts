@@ -234,9 +234,12 @@ serve(async (req) => {
       return errorResponse(400, "মেসেজ দিন।", "Message is required.");
     }
 
-    // STEP 1 — Fetch workspace DNA
+    // STEP 1 — Fetch workspace DNA (with ownership check)
     const { data: workspace } = await supabase
-      .from("workspaces").select("*").eq("id", workspace_id).single();
+      .from("workspaces").select("*").eq("id", workspace_id).eq("owner_id", userId).single();
+    if (!workspace) {
+      return errorResponse(403, "এই ওয়ার্কস্পেসে আপনার অ্যাক্সেস নেই।", "You do not have access to this workspace.");
+    }
 
     // STEP 2 — Load or create conversation
     let convId = conversation_id;
