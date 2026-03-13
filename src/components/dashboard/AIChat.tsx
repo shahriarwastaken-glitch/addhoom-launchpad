@@ -9,6 +9,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import ThinkingLoader from '@/components/loaders/ThinkingLoader';
+import { Mascot } from '@/components/Mascot';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import { AnimatePresence, motion } from 'framer-motion';
