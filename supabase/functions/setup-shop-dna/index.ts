@@ -403,8 +403,8 @@ Return ONLY valid JSON.`;
       await supabaseAdmin.from("workspace_products").insert(productRows);
     }
 
-    // Mark onboarding complete
-    await supabaseAdmin.from("profiles").update({ onboarding_complete: true }).eq("id", user.id);
+    // Update onboarding step (do NOT mark complete here — that happens on step 5)
+    await supabaseAdmin.from("profiles").update({ onboarding_step: 2 }).eq("id", user.id);
 
     const { data: savedProducts } = await supabaseAdmin.from("workspace_products").select("*").eq("workspace_id", workspace_id).order("display_order");
 
