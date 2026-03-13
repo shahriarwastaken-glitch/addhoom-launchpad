@@ -108,6 +108,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
   const [imageStep, setImageStep] = useState<1 | 2>(1);
   const [scenePrompts, setScenePrompts] = useState<Record<string, string>>({});
   const [defaultScenePrompts, setDefaultScenePrompts] = useState<Record<string, string>>({});
+  const [imageSubTab, setImageSubTab] = useState<'write' | 'templates'>('write');
 
   // Copy mode: advanced section toggle
   const [showAdvanced, setShowAdvanced] = useState(false);
