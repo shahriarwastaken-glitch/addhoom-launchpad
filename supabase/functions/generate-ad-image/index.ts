@@ -213,6 +213,7 @@ serve(async (req) => {
               format: '1:1',
               style: sceneKey,
               image_url: storedUrl,
+              storage_path: fileName,
               generation_prompt: prompt,
               sd_prompt: prompt,
               dhoom_score: 70,
