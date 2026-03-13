@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import TemplatesBrowser from './TemplatesBrowser';
 import { buildAdImagePrompts } from './imagePromptClient';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUpgrade } from '@/contexts/UpgradeContext';
 import OnceTooltip from '@/components/ui/OnceTooltip';
 import CreditCostLabel from '@/components/ui/CreditCostLabel';
 import {
