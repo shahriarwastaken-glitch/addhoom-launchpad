@@ -65,6 +65,7 @@ const TryOnTab = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { activeWorkspace } = useAuth();
+  const { requireCredits } = useCreditGate();
 
   // Garment state
   const [garmentFile, setGarmentFile] = useState<File | null>(null);
