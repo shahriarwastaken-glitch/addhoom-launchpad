@@ -7,6 +7,7 @@ import {
   Check, Globe, Search, ShoppingBag, Sparkles, Store, X,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { trackEvent } from '@/lib/posthog';
 import EntryPointCards, { type EntryPointType } from '@/components/onboarding/EntryPointCards';
 import ManualEntryForm from '@/components/onboarding/ManualEntryForm';
 import TemplateSelector from '@/components/onboarding/TemplateSelector';
