@@ -135,7 +135,7 @@ const VideoAd = () => {
 
     trackEvent('video_generation_started', {
       type: 'slideshow',
-      aspect_ratio: form.format === 'reels' ? '9:16' : form.format === 'square' ? '1:1' : '16:9',
+      aspect_ratio: form.format === 'reels' ? '9:16' : form.format === 'story' ? '9:16' : '16:9',
       prompt_enhanced: false,
     });
 
