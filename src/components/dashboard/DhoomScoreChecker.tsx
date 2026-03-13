@@ -59,6 +59,7 @@ function scoreColor(score: number) {
 const DhoomScoreChecker = () => {
   const { t } = useLanguage();
   const { activeWorkspace } = useAuth();
+  const { requireCredits } = useCreditGate();
   const [headline, setHeadline] = useState('');
   const [body, setBody] = useState('');
   const [cta, setCta] = useState('');
