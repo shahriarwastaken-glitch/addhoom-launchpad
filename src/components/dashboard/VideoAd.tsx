@@ -316,6 +316,7 @@ const VideoAd = () => {
                 setForm={setForm}
                 onPreviewScript={generateScript}
                 onGenerate={async () => {
+                  if (!requireCredits(150, 'video_ad')) return;
                   if (!activeWorkspace) { toast.error(t('প্রথমে শপ তৈরি করুন', 'Create a shop first')); return; }
                   if (!form.productName.trim()) { toast.error(t('পণ্যের নাম দিন', 'Enter product name')); return; }
                   if (form.images.length === 0) { toast.error(t('ছবি আপলোড করুন', 'Upload images')); return; }
