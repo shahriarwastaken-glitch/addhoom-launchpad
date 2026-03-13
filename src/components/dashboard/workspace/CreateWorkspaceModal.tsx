@@ -70,6 +70,7 @@ const CreateWorkspaceModal = ({ open, onClose, editWorkspace }: CreateWorkspaceM
         if (error) throw error;
         if (data) {
           setActiveWorkspaceId(data.id);
+          trackEvent('workspace_created', { industry: industry || 'unknown', platform: platform || 'unknown' });
           toast.success(t(`"${name}" ওয়ার্কস্পেস তৈরি হয়েছে`, `"${name}" workspace created`));
         }
       }

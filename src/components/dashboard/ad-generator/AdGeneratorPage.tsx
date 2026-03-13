@@ -302,8 +302,13 @@ const AdGeneratorPage = () => {
           setResults(imageAds);
           setHasImageResult(true);
           saveImageHistory(form.productName, imageAds);
+          trackEvent('image_generation_completed', {
+            scene_type: form.selectedScenes?.[0] || 'studio',
+            duration_seconds: Math.round((Date.now() - genStartTime) / 1000),
+          });
           toast.success(t(`${data.images.length}টি ইমেজ তৈরি হয়েছে`, `${data.images.length} images generated`));
         } else {
+          trackEvent('image_generation_failed', { scene_type: form.selectedScenes?.[0] || 'studio', error: data?.message || 'unknown' });
           toast.error(data?.message || t('ইমেজ তৈরিতে সমস্যা হয়েছে', 'Image generation failed'));
         }
       }

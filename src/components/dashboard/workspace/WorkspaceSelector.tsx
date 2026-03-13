@@ -29,6 +29,7 @@ const WorkspaceSelector = ({ onCreateClick }: WorkspaceSelectorProps) => {
     }
     setActiveWorkspaceId(ws.id);
     setOpen(false);
+    trackEvent('workspace_switched');
     toast.success(t(`"${ws.shop_name}"-এ স্যুইচ করা হয়েছে`, `Switched to "${ws.shop_name}"`));
   };
 

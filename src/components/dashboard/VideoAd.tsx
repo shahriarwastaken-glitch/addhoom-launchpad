@@ -218,6 +218,11 @@ const VideoAd = () => {
       });
     }
 
+    trackEvent('video_generation_completed', {
+      type: 'slideshow',
+      duration_seconds: elapsedSeconds,
+    });
+
     goToStage(3);
   }, [script, form, plan, usageUsed, usageLimit, user, activeWorkspace, showUpgrade]);
 
