@@ -9,6 +9,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import ThinkingLoader from '@/components/loaders/ThinkingLoader';
+import { Mascot } from '@/components/Mascot';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -633,9 +634,7 @@ const AIChat = () => {
             /* ─── Empty State ─── */
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
               <div className="relative mb-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-[hsl(var(--brand-yellow))] flex items-center justify-center text-primary-foreground text-lg font-bold font-heading-bn shadow-lg">
-                  ধু
-                </div>
+                <Mascot variant="ai" size={64} animate className="rounded-full shadow-lg" />
                 <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[hsl(var(--brand-green))] border-2 border-card animate-pulse" />
               </div>
               <h2 className="text-[22px] font-bold font-heading-bn text-foreground mb-1">
