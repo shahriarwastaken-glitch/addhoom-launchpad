@@ -39,7 +39,13 @@ const LandingFooter = () => {
             <h4 className="font-body-en text-[13px] font-semibold text-white tracking-[0.08em] uppercase mb-4">Company</h4>
             <ul className="space-y-2.5">
               {companyLinks.map(l => (
-                <li key={l.label}><a href={l.href} className="font-body-en text-sm transition-colors hover:text-white" style={{ color: 'rgba(255,255,255,0.5)' }}>{l.label}</a></li>
+                <li key={l.label}>
+                  {(l as any).isRoute ? (
+                    <Link to={l.href} className="font-body-en text-sm transition-colors hover:text-white" style={{ color: 'rgba(255,255,255,0.5)' }}>{l.label}</Link>
+                  ) : (
+                    <a href={l.href} className="font-body-en text-sm transition-colors hover:text-white" style={{ color: 'rgba(255,255,255,0.5)' }}>{l.label}</a>
+                  )}
+                </li>
               ))}
             </ul>
           </div>
