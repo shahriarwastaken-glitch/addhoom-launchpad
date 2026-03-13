@@ -38,6 +38,8 @@ const ACTION_LABELS: Record<string, { bn: string; en: string }> = {
   'account-doctor': { bn: 'অ্যাকাউন্ট ডাক্তার চালাতে', en: 'run Account Doctor' },
   'generate-product-photo': { bn: 'প্রোডাক্ট ফটো তৈরি করতে', en: 'generate a product photo' },
   'remix-image-fresh': { bn: 'ইমেজ রিমিক্স করতে', en: 'remix this image' },
+  'ad_image': { bn: 'ছবি তৈরি করতে', en: 'generate an image' },
+  'ad_copy': { bn: 'বিজ্ঞাপন কপি তৈরি করতে', en: 'generate ad copy' },
 };
 
 const PLAN_CARDS = [
