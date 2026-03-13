@@ -200,6 +200,7 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
   };
 
   const handleContinueToPrompt = () => {
+    if (!checkCreditsBeforeAction()) return;
     const prompts = buildPrompts();
     setDefaultScenePrompts(prompts);
     setScenePrompts(prompts);
