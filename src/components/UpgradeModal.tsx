@@ -121,6 +121,13 @@ const UpgradeModal = ({ open, onClose, type = 'general', creditInfo }: UpgradeMo
 
   const initiatePackPurchase = async (packId: string) => {
     setCheckoutLoading(packId);
+    const pack = packs.find(p => p.id === packId);
+    trackEvent('credit_pack_checkout_started', {
+      pack: pack?.name?.toLowerCase() || 'unknown',
+      currency,
+      amount: pack ? (currency === 'BDT' ? pack.price_bdt : pack.price_usd) : 0,
+      credits: pack?.credits || 0,
+    });
     try {
       const { data, error } = await supabase.functions.invoke('initiate-credit-pack-payment', {
         body: { pack_id: packId, currency },
