@@ -540,21 +540,20 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
                   >×</button>
                 </div>
               ) : (
-                <div
-                  onClick={() => fileInputRef.current?.click()}
+                <label
                   onDrop={handleDrop}
                   onDragOver={e => { e.preventDefault(); setDragOver(true); }}
                   onDragLeave={() => setDragOver(false)}
-                  className={`cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-all duration-200 ${
+                  className={`cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-all duration-200 block ${
                     dragOver ? 'border-primary bg-primary/5' : 'border-input hover:border-primary/40'
                   }`}
                 >
                   <Upload size={28} className="mx-auto text-muted-foreground mb-2" />
                   <p className="text-sm font-heading-bn text-foreground">{t('ক্লিক করুন বা ড্র্যাগ করুন', 'Click or drag to upload')}</p>
                   <p className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP · Max 5MB</p>
-                </div>
+                  <input type="file" accept="image/*" className="hidden" onChange={e => { if (e.target.files?.[0]) { handleFileSelect(e.target.files[0]); } e.target.value = ''; }} />
+                </label>
               )}
-              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && handleFileSelect(e.target.files[0])} />
             </FieldGroup>
 
             {/* Lighting */}
