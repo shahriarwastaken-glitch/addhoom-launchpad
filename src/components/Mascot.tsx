@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 export type MascotVariant =
@@ -21,6 +22,18 @@ const MASCOT_PATHS: Record<MascotVariant, string> = {
   ai: '/mascot/mascot-ai.png',
 };
 
+// Preload all mascot variants once on first mount
+let preloaded = false;
+
+function preloadMascots() {
+  if (preloaded) return;
+  preloaded = true;
+  Object.values(MASCOT_PATHS).forEach(src => {
+    const img = new Image();
+    img.src = src;
+  });
+}
+
 interface MascotProps {
   variant: MascotVariant;
   size?: number;
@@ -30,6 +43,10 @@ interface MascotProps {
 }
 
 export function Mascot({ variant, size = 80, animate = false, priority = false, className }: MascotProps) {
+  useEffect(() => {
+    preloadMascots();
+  }, []);
+
   return (
     <img
       src={MASCOT_PATHS[variant]}
