@@ -60,7 +60,7 @@ const LandingFooter = () => {
                 </a>
               </li>
               <li>
-                <a href="mailto:hello@addhoom.com" className="flex items-center gap-2 font-body-en text-sm transition-colors hover:text-white" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                <a href="mailto:contact@addhoomstudio.com" className="flex items-center gap-2 font-body-en text-sm transition-colors hover:text-white" style={{ color: 'rgba(255,255,255,0.5)' }}>
                   <Mail size={14} /> Email
                 </a>
               </li>

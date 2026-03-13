@@ -289,6 +289,13 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
         ))}
       </nav>
 
+      {/* Dashboard Footer */}
+      <div className="hidden md:flex items-center justify-center gap-3 py-3 text-[11px] text-muted-foreground border-t border-border bg-card">
+        <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+        <span>·</span>
+        <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+      </div>
+
       <CreateWorkspaceModal open={showCreateWs} onClose={() => setShowCreateWs(false)} />
       <ScrollToTopButton />
     </SidebarProvider>
