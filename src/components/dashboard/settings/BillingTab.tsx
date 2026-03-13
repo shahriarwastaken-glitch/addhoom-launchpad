@@ -181,6 +181,7 @@ const BillingTab = () => {
     try {
       const { error } = await supabase.functions.invoke('reactivate-subscription', { body: {} });
       if (error) throw error;
+      trackEvent('subscription_reactivated', { plan: planKey });
       toast({ title: '✅ ' + t('পুনরায় সক্রিয়!', 'Reactivated!'), description: t('আপনার সাবস্ক্রিপশন আবার সক্রিয়।', 'Your subscription is active again.') });
       const { data: sub } = await supabase.from('subscriptions').select('*').eq('user_id', user!.id).eq('status', 'active').maybeSingle();
       setSubscription(sub);
