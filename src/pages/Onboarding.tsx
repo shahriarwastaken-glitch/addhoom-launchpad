@@ -307,6 +307,12 @@ const Onboarding = () => {
 
   const handleSubscribeLater = async () => {
     if (!user) return;
+    trackEvent('onboarding_completed', {
+      industry: selectedIndustry || 'unknown',
+      platform: selectedPlatform || 'unknown',
+      language: selectedLanguage,
+      subscribed_during_onboarding: false,
+    });
     await supabase.from('profiles').update({ onboarding_complete: true, onboarding_step: 5 } as any).eq('id', user.id);
     await refreshProfile();
     navigate('/dashboard', { replace: true });
