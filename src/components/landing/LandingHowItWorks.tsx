@@ -1,16 +1,10 @@
 import { Upload, Zap, Rocket } from 'lucide-react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
-const Placeholder = ({ label }: { label: string }) => (
-  <div className="w-full h-[100px] sm:h-[120px] rounded-xl flex items-center justify-center mt-4 sm:mt-6" style={{ background: '#F0EDE8', border: '1.5px dashed #D4CFC8' }}>
-    <span className="font-mono text-[11px] text-muted-foreground">{label}</span>
-  </div>
-);
-
 const steps = [
-  { num: '01', icon: Upload, title: 'Upload your product', body: 'Take a photo or use an existing image. Background removed automatically.', placeholder: 'Upload zone illustration' },
-  { num: '02', icon: Zap, title: 'Choose what to create', body: 'Images, copy, video, or try-on — all from one studio.', placeholder: 'Creation options illustration' },
-  { num: '03', icon: Rocket, title: 'Publish your ad', body: 'Download, schedule in content calendar, or use directly in your next campaign.', placeholder: 'Publishing illustration' },
+  { num: '01', icon: Upload, title: 'Upload your product', body: 'Take a photo or use an existing image. Background removed automatically.', img: '/landing/step-upload.webp' },
+  { num: '02', icon: Zap, title: 'Choose what to create', body: 'Images, copy, video, or try-on — all from one studio.', img: '/landing/step-create.webp' },
+  { num: '03', icon: Rocket, title: 'Publish your ad', body: 'Download, schedule in content calendar, or use directly in your next campaign.', img: '/landing/step-publish.webp' },
 ];
 
 const LandingHowItWorks = () => {
