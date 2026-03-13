@@ -1,8 +1,56 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { serverError, unauthorizedError } from "../_shared/errors.ts";
 import { vidgoSubmit, vidgoPoll, downloadFile } from "../_shared/vidgo.ts";
 import { deductCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
+
+/* ── Storage retention helpers ── */
+
+async function cleanOldImages(supabase: SupabaseClient, workspaceId: string) {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const { data: oldImages } = await supabase
+    .from("ad_images")
+    .select("id, storage_path")
+    .eq("workspace_id", workspaceId)
+    .lt("created_at", thirtyDaysAgo.toISOString());
+
+  if (!oldImages || oldImages.length === 0) return;
+
+  const paths = oldImages.map((img: any) => img.storage_path).filter(Boolean);
+  if (paths.length > 0) {
+    await supabase.storage.from("ad-images").remove(paths);
+  }
+
+  const ids = oldImages.map((img: any) => img.id);
+  await supabase.from("ad_images").delete().in("id", ids);
+  console.log(`Cleaned ${ids.length} old images for workspace ${workspaceId}`);
+}
+
+async function enforceWorkspaceCap(
+  supabase: SupabaseClient,
+  workspaceId: string,
+  cap = 50,
+) {
+  const { data: images } = await supabase
+    .from("ad_images")
+    .select("id, storage_path, created_at")
+    .eq("workspace_id", workspaceId)
+    .order("created_at", { ascending: false });
+
+  if (!images || images.length <= cap) return;
+
+  const toDelete = images.slice(cap);
+  const paths = toDelete.map((img: any) => img.storage_path).filter(Boolean);
+  if (paths.length > 0) {
+    await supabase.storage.from("ad-images").remove(paths);
+  }
+
+  const ids = toDelete.map((img: any) => img.id);
+  await supabase.from("ad_images").delete().in("id", ids);
+  console.log(`Capped workspace ${workspaceId}: deleted ${ids.length} excess images`);
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -165,6 +213,7 @@ serve(async (req) => {
               format: '1:1',
               style: sceneKey,
               image_url: storedUrl,
+              storage_path: fileName,
               generation_prompt: prompt,
               sd_prompt: prompt,
               dhoom_score: 70,
@@ -210,6 +259,12 @@ serve(async (req) => {
     } catch (e) {
       console.error("Failed to track API usage:", e);
     }
+
+    // Storage retention — fire and forget
+    Promise.all([
+      cleanOldImages(supabase, workspace_id),
+      enforceWorkspaceCap(supabase, workspace_id),
+    ]).catch(console.error);
 
     return new Response(
       JSON.stringify({

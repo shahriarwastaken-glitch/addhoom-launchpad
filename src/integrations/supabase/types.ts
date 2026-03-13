@@ -189,6 +189,7 @@ export type Database = {
           remix_type: string | null
           remixed_from_id: string | null
           sd_prompt: string | null
+          storage_path: string | null
           studio_config: Json | null
           studio_source: string | null
           style: string
@@ -213,6 +214,7 @@ export type Database = {
           remix_type?: string | null
           remixed_from_id?: string | null
           sd_prompt?: string | null
+          storage_path?: string | null
           studio_config?: Json | null
           studio_source?: string | null
           style?: string
@@ -237,6 +239,7 @@ export type Database = {
           remix_type?: string | null
           remixed_from_id?: string | null
           sd_prompt?: string | null
+          storage_path?: string | null
           studio_config?: Json | null
           studio_source?: string | null
           style?: string
@@ -1975,6 +1978,7 @@ export type Database = {
           script: Json | null
           source_images: string[] | null
           status: string
+          storage_path: string | null
           style: string
           video_type: string | null
           video_url: string | null
@@ -1999,6 +2003,7 @@ export type Database = {
           script?: Json | null
           source_images?: string[] | null
           status?: string
+          storage_path?: string | null
           style?: string
           video_type?: string | null
           video_url?: string | null
@@ -2023,6 +2028,7 @@ export type Database = {
           script?: Json | null
           source_images?: string[] | null
           status?: string
+          storage_path?: string | null
           style?: string
           video_type?: string | null
           video_url?: string | null
