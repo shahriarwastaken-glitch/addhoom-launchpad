@@ -45,6 +45,7 @@ export default function AdminDashboardNew() {
           <Route path="emails" element={<AdminEmails />} />
           <Route path="audit-log" element={<AdminAuditLog />} />
           <Route path="credits" element={<AdminCredits />} />
+          <Route path="credit-packs" element={<AdminCreditPacks />} />
           {isSuperAdmin && (
             <Route path="admins" element={<AdminManageAdmins />} />
           )}

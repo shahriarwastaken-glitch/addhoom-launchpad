@@ -55,6 +55,7 @@ const controlNavItems = [
 const systemNavItems = [
   { icon: Key, label: 'API কী', path: '/admin/api-keys' },
   { icon: Coins, label: 'ক্রেডিট', path: '/admin/credits' },
+  { icon: Package, label: 'ক্রেডিট প্যাক', path: '/admin/credit-packs' },
   { icon: Mail, label: 'ইমেইল টেমপ্লেট', path: '/admin/emails' },
   { icon: Wrench, label: 'সিস্টেম সেটিংস', path: '/admin/settings' },
   { icon: FileText, label: 'অডিট লগ', path: '/admin/audit-log' },
