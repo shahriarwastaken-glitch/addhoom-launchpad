@@ -21,6 +21,8 @@ import ImpersonationBanner from "./components/admin/ImpersonationBanner";
 import ScrollToTop from "./components/ScrollToTop";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AuthCallback from "./pages/AuthCallback";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
