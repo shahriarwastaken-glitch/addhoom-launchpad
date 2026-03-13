@@ -7,7 +7,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/contexts/AuthContext';
 import { Bell, Moon, Sun, Target, Video, LogOut, X, Settings, Wand2, Sparkles, Zap, AlertTriangle, CheckCircle2, RotateCcw } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Progress } from '@/components/ui/progress';
@@ -288,6 +288,13 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           </NavLink>
         ))}
       </nav>
+
+      {/* Dashboard Footer */}
+      <div className="hidden md:flex items-center justify-center gap-3 py-3 text-[11px] text-muted-foreground border-t border-border bg-card">
+        <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+        <span>·</span>
+        <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+      </div>
 
       <CreateWorkspaceModal open={showCreateWs} onClose={() => setShowCreateWs(false)} />
       <ScrollToTopButton />

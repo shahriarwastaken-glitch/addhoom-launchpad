@@ -1,137 +1,140 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import LandingNavbar from '@/components/landing/LandingNavbar';
+import LandingFooter from '@/components/landing/LandingFooter';
+
+const Section = ({ number, title, children }: { number: number; title: string; children: React.ReactNode }) => (
+  <section>
+    <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 22, color: '#1C1B1A', marginTop: 48, marginBottom: 16, paddingBottom: 8, borderBottom: '1px solid hsl(var(--border))' }}>
+      {number}. {title}
+    </h2>
+    {children}
+  </section>
+);
+
+const P = ({ children }: { children: React.ReactNode }) => (
+  <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 16, lineHeight: 1.8, color: '#1C1B1A', marginBottom: 12 }}>{children}</p>
+);
+
+const Item = ({ children }: { children: React.ReactNode }) => (
+  <p style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 16, lineHeight: 1.8, color: '#1C1B1A', marginBottom: 4 }}>— {children}</p>
+);
 
 const TermsOfService = () => {
   useEffect(() => {
     document.title = 'Terms of Service — AdDhoom Studio';
+    window.scrollTo(0, 0);
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8">
-          <ArrowLeft size={14} /> Back to Home
+    <div style={{ background: '#FFFBF5' }} className="min-h-screen">
+      <LandingNavbar />
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: '80px 24px' }}>
+        <Link to="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:opacity-80 transition-opacity mb-6">
+          <ArrowLeft size={14} /> Back to AdDhoom Studio
         </Link>
 
-        <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>Terms of Service</h1>
-        <p className="text-sm text-muted-foreground mb-10">Last updated: March 13, 2026</p>
+        <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: 40, fontWeight: 700, color: '#1C1B1A', marginBottom: 8 }}>Terms of Service</h1>
+        <p style={{ fontSize: 13, color: '#6B6560', marginBottom: 48 }}>Last updated: March 2026</p>
 
-        <div className="prose prose-neutral dark:prose-invert max-w-none space-y-6 text-[15px] leading-relaxed text-foreground/90">
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">1. Acceptance of Terms</h2>
-            <p>By accessing or using AdDhoom Studio ("Service"), operated by AdDhoom ("Company", "we", "us"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
-          </section>
+        <Section number={1} title="Acceptance of Terms">
+          <P>By creating an account and using AdDhoom Studio you agree to these Terms of Service. If you do not agree, do not use AdDhoom Studio.</P>
+          <P>These terms apply to all users of AdDhoom Studio including free and paid subscribers.</P>
+        </Section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">2. Description of Service</h2>
-            <p>AdDhoom Studio is an AI-powered advertising platform that enables users to generate ad creatives, images, videos, ad copy, virtual try-ons, and related marketing content for e-commerce businesses, primarily targeting the Bangladesh market. The Service includes dashboard tools, content calendars, competitor analysis, and AI chat assistance.</p>
-          </section>
+        <Section number={2} title="Description of Service">
+          <P>AdDhoom Studio is an AI-powered marketing platform that helps sellers create product images, ad copy, video ads, and other marketing content.</P>
+          <P>We reserve the right to modify, suspend, or discontinue any feature at any time with reasonable notice.</P>
+        </Section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">3. Account Registration</h2>
-            <ul className="list-disc pl-5 space-y-1.5">
-              <li>You must provide accurate and complete information when creating an account.</li>
-              <li>You must be at least 18 years old to use the Service.</li>
-              <li>You are responsible for maintaining the confidentiality of your account credentials.</li>
-              <li>You are responsible for all activities that occur under your account.</li>
-              <li>One person or entity may not maintain more than one free account.</li>
-            </ul>
-          </section>
+        <Section number={3} title="Account Responsibilities">
+          <P>You are responsible for:</P>
+          <Item>Maintaining the confidentiality of your account credentials</Item>
+          <Item>All activity that occurs under your account</Item>
+          <Item>Providing accurate information when creating your account</Item>
+          <Item>Notifying us immediately of any unauthorized access</Item>
+          <P>&nbsp;</P>
+          <P>You must be at least 16 years old to create an account.</P>
+          <P>One person or business may not maintain more than one free account.</P>
+        </Section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">4. Subscription Plans & Payments</h2>
-            <ul className="list-disc pl-5 space-y-1.5">
-              <li>The Service offers Free, Starter, Pro, and Agency plans with varying credit allowances and features.</li>
-              <li>Paid subscriptions are billed on a 30-day cycle from the date of purchase.</li>
-              <li>Payments are processed via SSLCommerz (Bangladesh/BDT) and supported international gateways (USD).</li>
-              <li>Subscription credits reset every 30 days and do not roll over to the next cycle.</li>
-              <li>Credit packs purchased separately never expire and stack on top of subscription credits.</li>
-              <li>All prices are listed in BDT (৳) and USD ($) and are subject to change with 30 days' notice.</li>
-              <li>Refunds are handled on a case-by-case basis. Contact support within 7 days of purchase.</li>
-            </ul>
-          </section>
+        <Section number={4} title="Subscriptions and Payments">
+          <P><strong>Subscription Plans:</strong><br />AdDhoom Studio offers paid subscription plans (Starter, Pro, Agency) with monthly credit allocations.</P>
+          <P><strong>Billing:</strong><br />Subscriptions are billed monthly. Payment is processed via SSLCommerz. You authorize us to charge your selected payment method.</P>
+          <P>SSLCommerz does not support automatic recurring billing. You will receive a renewal reminder before your subscription expires. It is your responsibility to renew your subscription to maintain uninterrupted access.</P>
+          <P><strong>Credits:</strong><br />Credits are allocated monthly with your subscription. Credits reset 30 days after each successful payment, not on a fixed calendar date. Unused credits do not roll over.</P>
+          <P><strong>Credit Packs:</strong><br />Additional credits can be purchased as one-time credit packs. Credit pack credits never expire and stack on top of subscription credits.</P>
+          <P><strong>Pricing:</strong><br />Prices are listed in USD and BDT. We reserve the right to change prices with 30 days notice to existing subscribers.</P>
+        </Section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">5. Acceptable Use</h2>
-            <p>You agree not to:</p>
-            <ul className="list-disc pl-5 space-y-1.5">
-              <li>Use the Service for any unlawful purpose or in violation of any applicable laws.</li>
-              <li>Generate content that is defamatory, obscene, hateful, discriminatory, or promotes violence.</li>
-              <li>Infringe upon the intellectual property rights of others.</li>
-              <li>Attempt to reverse-engineer, decompile, or extract source code from the Service.</li>
-              <li>Use automated scripts, bots, or scrapers to access the Service.</li>
-              <li>Resell, redistribute, or sublicense access to the Service without written permission.</li>
-              <li>Circumvent credit limits, usage restrictions, or security measures.</li>
-              <li>Upload malicious content, viruses, or harmful code.</li>
-            </ul>
-          </section>
+        <Section number={5} title="Refund Policy">
+          <P>All payments are final and non-refundable.</P>
+          <P>We do not offer refunds on subscription payments or credit pack purchases.</P>
+          <P>If you believe you have been charged in error, contact us at <a href="mailto:contact@addhoomstudio.com" className="text-primary hover:underline">contact@addhoomstudio.com</a> and we will review your case.</P>
+        </Section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">6. Intellectual Property</h2>
-            <ul className="list-disc pl-5 space-y-1.5">
-              <li><strong>Your Content:</strong> You retain ownership of the product images, brand assets, and text you upload to the Service.</li>
-              <li><strong>Generated Content:</strong> Content generated by the Service using your inputs (ad creatives, images, videos, copy) is licensed to you for commercial use. You may use generated content for your business advertising.</li>
-              <li><strong>Our Property:</strong> The Service, including its design, code, AI models, algorithms, branding (including the AdDhoom mascot), and documentation, remains the exclusive property of AdDhoom.</li>
-              <li>We reserve the right to use anonymized, aggregated data to improve the Service.</li>
-            </ul>
-          </section>
+        <Section number={6} title="Acceptable Use">
+          <P>You agree NOT to use AdDhoom Studio to:</P>
+          <Item>Create content that is illegal, harmful, threatening, or harassing</Item>
+          <Item>Infringe on the intellectual property rights of others</Item>
+          <Item>Generate misleading or deceptive advertising content</Item>
+          <Item>Upload content you do not own or have rights to use</Item>
+          <Item>Attempt to reverse engineer, hack, or disrupt the service</Item>
+          <Item>Create multiple accounts to circumvent credit limits</Item>
+          <Item>Resell access to AdDhoom Studio without written permission</Item>
+          <P>&nbsp;</P>
+          <P>We reserve the right to suspend or terminate accounts that violate these terms without refund.</P>
+        </Section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">7. AI-Generated Content Disclaimer</h2>
-            <ul className="list-disc pl-5 space-y-1.5">
-              <li>AI-generated content is provided "as is" and may not always be accurate, appropriate, or suitable for your intended use.</li>
-              <li>You are solely responsible for reviewing and approving all generated content before publishing.</li>
-              <li>We do not guarantee that AI-generated content will not inadvertently resemble existing copyrighted works.</li>
-              <li>We are not liable for any consequences arising from your use of AI-generated content.</li>
-            </ul>
-          </section>
+        <Section number={7} title="AI-Generated Content">
+          <P><strong>Ownership:</strong><br />Content you generate using AdDhoom Studio is owned by you.</P>
+          <P><strong>Responsibility:</strong><br />You are solely responsible for the content you generate and how you use it. AdDhoom Studio is a tool — we are not responsible for how generated content is used in advertising campaigns.</P>
+          <P><strong>Accuracy:</strong><br />AI-generated content may contain errors, inaccuracies, or unintended outputs. Always review generated content before publishing or using in paid advertising.</P>
+          <P><strong>No Guarantee of Results:</strong><br />AdDhoom Studio does not guarantee that AI-generated content will produce specific advertising results, sales, or business outcomes.</P>
+        </Section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">8. Service Availability</h2>
-            <ul className="list-disc pl-5 space-y-1.5">
-              <li>We strive for high availability but do not guarantee uninterrupted access to the Service.</li>
-              <li>We may perform scheduled maintenance with advance notice when possible.</li>
-              <li>We reserve the right to modify, suspend, or discontinue features with reasonable notice.</li>
-              <li>Credits are not refunded for service downtime unless exceeding 72 consecutive hours.</li>
-            </ul>
-          </section>
+        <Section number={8} title="Intellectual Property">
+          <P>AdDhoom Studio, its logo, mascot, features, and underlying technology are owned by AdDhoom Studio and protected by intellectual property laws.</P>
+          <P>You may not copy, reproduce, or distribute any part of AdDhoom Studio without written permission.</P>
+        </Section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">9. Termination</h2>
-            <ul className="list-disc pl-5 space-y-1.5">
-              <li>You may cancel your account at any time through the Settings page.</li>
-              <li>We may suspend or terminate your account for violation of these Terms.</li>
-              <li>Upon termination, your right to use the Service ceases immediately.</li>
-              <li>We will retain your data for 30 days after termination, after which it may be permanently deleted.</li>
-            </ul>
-          </section>
+        <Section number={9} title="Limitation of Liability">
+          <P>AdDhoom Studio is not liable for indirect, incidental, or consequential damages resulting from your use of the platform. The service is provided "as-is" without warranties of any kind.</P>
+          <P>Our total liability to you shall not exceed the amount you paid us in the 30 days preceding the claim.</P>
+        </Section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">10. Limitation of Liability</h2>
-            <p>To the maximum extent permitted by law, AdDhoom shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, or business opportunities, arising from your use of the Service. Our total liability shall not exceed the amount you paid to us in the 12 months preceding the claim.</p>
-          </section>
+        <Section number={10} title="Service Availability">
+          <P>We aim for high availability but do not guarantee uninterrupted service. Scheduled maintenance will be announced in advance where possible.</P>
+          <P>We are not liable for downtime caused by third-party service providers or payment processors.</P>
+        </Section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">11. Governing Law</h2>
-            <p>These Terms are governed by the laws of the People's Republic of Bangladesh. Any disputes shall be resolved in the courts of Dhaka, Bangladesh.</p>
-          </section>
+        <Section number={11} title="Termination">
+          <P>You may cancel your account at any time from Settings → Billing.</P>
+          <P>We may suspend or terminate your account if you violate these terms, engage in fraudulent activity, or abuse the service.</P>
+          <P>Upon termination:</P>
+          <Item>Your access to AdDhoom Studio ends</Item>
+          <Item>Unused credits are forfeited</Item>
+          <Item>Your data is handled per our Privacy Policy</Item>
+        </Section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">12. Changes to Terms</h2>
-            <p>We reserve the right to update these Terms at any time. Material changes will be communicated via email or in-app notification at least 14 days before taking effect. Continued use of the Service after changes constitutes acceptance.</p>
-          </section>
+        <Section number={12} title="Changes to Terms">
+          <P>We may update these Terms of Service. Significant changes will be communicated by email with 14 days notice.</P>
+          <P>Continued use after the effective date constitutes acceptance of updated terms.</P>
+        </Section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mt-8 mb-3">13. Contact</h2>
-            <p>For questions about these Terms, contact us at:</p>
-            <ul className="list-disc pl-5 space-y-1.5">
-              <li>Email: <a href="mailto:hello@addhoom.com" className="text-primary hover:underline">hello@addhoom.com</a></li>
-              <li>WhatsApp: Available via our website</li>
-            </ul>
-          </section>
-        </div>
+        <Section number={13} title="Governing Law">
+          <P>These terms are governed by the laws of Bangladesh. Any disputes shall be resolved in the courts of Dhaka, Bangladesh.</P>
+        </Section>
+
+        <Section number={14} title="Contact">
+          <P>For questions about these terms, billing, refunds, or general support:</P>
+          <P><a href="mailto:contact@addhoomstudio.com" className="text-primary hover:underline">contact@addhoomstudio.com</a></P>
+          <P>&nbsp;</P>
+          <P>AdDhoom Studio<br />addhoomstudio.com</P>
+        </Section>
       </div>
+      <LandingFooter />
     </div>
   );
 };
