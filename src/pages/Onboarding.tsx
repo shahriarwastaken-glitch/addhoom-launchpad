@@ -206,6 +206,7 @@ const Onboarding = () => {
   const handleManualSubmit = async (formData: any) => {
     if (!activeWorkspace) return;
     setAnalyzing(true);
+    trackEvent('onboarding_shop_dna_method', { method: 'manual' });
     try {
       await supabase.functions.invoke('setup-shop-dna', {
         body: { workspace_id: activeWorkspace.id, platform: 'manual', payload: { form_data: formData } },
