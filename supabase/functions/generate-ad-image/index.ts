@@ -260,6 +260,12 @@ serve(async (req) => {
       console.error("Failed to track API usage:", e);
     }
 
+    // Storage retention — fire and forget
+    Promise.all([
+      cleanOldImages(supabase, workspace_id),
+      enforceWorkspaceCap(supabase, workspace_id),
+    ]).catch(console.error);
+
     return new Response(
       JSON.stringify({
         success: true,

@@ -146,6 +146,9 @@ serve(async (req) => {
       feature: 'ai_motion_video',
     });
 
+    // Storage retention — fire and forget
+    cleanOldVideos(supabase, workspace_id).catch(console.error);
+
     return new Response(JSON.stringify({
       video_url: storedVideoUrl,
       id: row?.id,
