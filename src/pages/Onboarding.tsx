@@ -223,6 +223,7 @@ const Onboarding = () => {
   const handleTemplateSelect = async (industry: string, templateData: any) => {
     if (!activeWorkspace) return;
     setAnalyzing(true);
+    trackEvent('onboarding_shop_dna_method', { method: 'template' });
     try {
       await supabase.functions.invoke('setup-shop-dna', {
         body: { workspace_id: activeWorkspace.id, platform: 'template', payload: { industry, template_data: templateData } },
