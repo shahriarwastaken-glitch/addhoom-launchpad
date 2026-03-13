@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import WorkspaceAvatar from './WorkspaceAvatar';
 import { WORKSPACE_LIMITS } from './constants';
+import { trackEvent } from '@/lib/posthog';
 
 interface WorkspaceSelectorProps {
   onCreateClick: () => void;
