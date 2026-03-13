@@ -338,10 +338,6 @@ async function performKeyTest(supabase: any, keyId: string, serviceName: string,
         testResult = 'success';
         break;
 
-      case 'shotstack':
-        await testShotstackKey(keyValue);
-        testResult = 'success';
-        break;
 
       case 'meta_ad_library':
         await testMetaKey(keyValue);
