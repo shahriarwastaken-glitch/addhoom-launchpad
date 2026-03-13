@@ -119,10 +119,10 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
   const loadingTexts = mode === 'copy' ? copyLoadingTexts : imageLoadingTexts;
 
   // Cycle loading text
-  useState(() => {
+  useEffect(() => {
     const interval = setInterval(() => setLoadingTextIdx(i => (i + 1) % loadingTexts.length), 2000);
     return () => clearInterval(interval);
-  });
+  }, [loadingTexts.length]);
 
   const updateField = <K extends keyof GeneratorFormData>(key: K, value: GeneratorFormData[K]) => {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -139,12 +139,26 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
     });
   };
 
+  const isSupportedImage = (file: File) => {
+    if (file.type.startsWith('image/')) return true;
+    return /\.(png|jpe?g|webp|gif|bmp|heic|heif|avif)$/i.test(file.name);
+  };
+
   const handleFileSelect = (file: File) => {
-    if (!file.type.startsWith('image/')) return;
-    if (file.size > 5 * 1024 * 1024) return;
+    if (!isSupportedImage(file)) {
+      toast.error(t('শুধু ইমেজ ফাইল আপলোড করুন', 'Please upload an image file only'));
+      return;
+    }
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      toast.error(t('ইমেজ সাইজ ২০MB এর কম হতে হবে', 'Image must be smaller than 20MB'));
+      return;
+    }
+
     updateField('productImage', file);
     const reader = new FileReader();
     reader.onload = () => updateField('productImagePreview', reader.result as string);
+    reader.onerror = () => toast.error(t('ইমেজ পড়া যায়নি, আবার চেষ্টা করুন', 'Could not read image, please try again'));
     reader.readAsDataURL(file);
   };
 
@@ -152,14 +166,10 @@ const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onTo
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      handleFileSelect(file);
-    }
+    if (file) handleFileSelect(file);
   };
 
   const buildPrompts = () => {
-    // Import dynamically to avoid circular deps
-    const { buildAdImagePrompts } = require('./imagePromptClient');
     return buildAdImagePrompts({
       productName: form.productName || 'the product',
       lightingMood: form.lightingMood,
