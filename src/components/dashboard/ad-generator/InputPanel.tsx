@@ -1,6 +1,7 @@
 import { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import TemplatesBrowser from './TemplatesBrowser';
 import OnceTooltip from '@/components/ui/OnceTooltip';
 import CreditCostLabel from '@/components/ui/CreditCostLabel';
 import {
