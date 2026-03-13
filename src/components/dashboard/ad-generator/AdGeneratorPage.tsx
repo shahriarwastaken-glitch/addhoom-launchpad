@@ -182,6 +182,8 @@ const AdGeneratorPage = () => {
     setResults([]);
     if (isMobile) setMobileTab('results');
 
+    const genStartTime = Date.now();
+
     try {
       if (mode === 'copy') {
         const { data, error } = await supabase.functions.invoke('generate-ads', {
