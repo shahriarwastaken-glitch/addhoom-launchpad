@@ -101,9 +101,9 @@ const FieldTooltip = ({ text }: { text: string }) => (
 const InputPanel = ({ mode, setMode, form, setForm, onGenerate, generating, onToggleImageHistory, generateBtnRef }: InputPanelProps) => {
   const { t, lang } = useLanguage();
   const [loadingTextIdx, setLoadingTextIdx] = useState(0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const historyCount = useMemo(() => getImageHistory().length, []);
+  const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
 
   // Two-step prompt flow for image mode
   const [imageStep, setImageStep] = useState<1 | 2>(1);
