@@ -29,7 +29,7 @@ const LandingHowItWorks = () => {
               <s.icon size={36} className="text-primary mb-3 sm:mb-4" strokeWidth={1.5} />
               <h3 className="font-heading-en text-lg sm:text-xl font-bold text-foreground">{s.title}</h3>
               <p className="mt-2 font-body-en text-sm sm:text-[15px] text-muted-foreground leading-relaxed">{s.body}</p>
-              <Placeholder label={s.placeholder} />
+              <img src={s.img} alt={s.title} className="w-full h-[100px] sm:h-[120px] rounded-xl object-cover mt-4 sm:mt-6" loading="lazy" />
             </div>
           ))}
         </div>
